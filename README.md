@@ -69,3 +69,8 @@
 ◦ Major module: Replacing Basic Pong with Server-Side Pong and Implementing an API.
 
 ~~◦ Major module: Enabling Pong Gameplay via CLI against Web Users with API Integration.~~
+
+## Proccessus
+
+Caddy a la place de nginx.
+  Source :Xcharra
