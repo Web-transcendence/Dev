@@ -71,6 +71,11 @@
 ~~◦ Major module: Enabling Pong Gameplay via CLI against Web Users with API Integration.~~
 
 ## Proccessus
+  First Steps
+Mise en place de la structure des dossiers et des docker puis du docker compose.
+  Proxy
+Connexion par un proxy du site web, format html. 
 
+## Tips
 Caddy a la place de nginx.
   Source :Xcharra
