@@ -1,0 +1,23 @@
+version: "2"
+
+services:
+  node:
+    build: ./requirements/node/Dockerfile
+    environment:
+      - NODE_ENV=production
+    ports: # use if it is necessary to expose the container to the host machine
+      - "8001:8001"
+    command: "npm start"
+
+networks:
+  inception:
+    name: inception
+    driver: bridge
+
+secrets:
+  nx_ssl_cer:
+    file: ../secrets/ssl_certificate
+  nx_ssl_key:
+    file: ../secrets/ssl_certificate_key
+
+#volumes:
