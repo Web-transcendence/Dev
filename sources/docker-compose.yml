@@ -3,11 +3,14 @@ version: "2"
 services:
   node:
     build: ./requirements/node/Dockerfile
+    container_name: trns_node_1
     environment:
       - NODE_ENV=production
     ports: # use if it is necessary to expose the container to the host machine
-      - "8001:8001"
+      - "8081:8081"
     command: "npm start"
+    networks:
+      - inception
 
 networks:
   inception:

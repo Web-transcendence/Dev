@@ -76,6 +76,6 @@ Mise en place de la structure des dossiers et des docker puis du docker compose.
   Proxy
 Connexion par un proxy du site web, format html. 
 
-## Tips
-Caddy a la place de nginx.
-  Source :Xcharra
+## Creation de Node.js
+Faire une base en ECMAScript Modules (ESM)
+

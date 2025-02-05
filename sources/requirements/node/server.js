@@ -1,19 +1,21 @@
-// Import the framework and instantiate it
 import Fastify from 'fastify'
+
+import dbConnector from './our-db-connector.js'
+import firstRoute from './our-first-route.js'
+
+/**
+ * @type {import('fastify').FastifyInstance} Instance of Fastify
+ */
 const fastify = Fastify({
     logger: true
 })
+fastify.register(dbConnector)
+fastify.register(firstRoute)
 
-const { ADDRESS = '0.0.0.0', PORT = '8081' } = process.env;
-
-fastify.get('/', async (request, reply) => {
-    return { message: 'Hello world!' }
-})
-
-fastify.listen({ host: ADDRESS, port: parseInt(PORT, 10) }, (err, address) => {
+fastify.listen({ port: 8081 }, function (err, address) {
     if (err) {
-        console.error(err)
+        fastify.log.error(err)
         process.exit(1)
     }
-    console.log(`Server listening at ${address}`)
+    console.log(`Server is now listening on ${address}`);
 })
