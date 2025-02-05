@@ -1,22 +1,24 @@
+import {type FastifyInstance, type FastifyServerOptions} from "fastify";
+
 /**
  * A plugin that provide encapsulated routes
  * @param {FastifyInstance} fastify encapsulated fastify instance
  * @param {Object} options plugin options, refer to https://fastify.dev/docs/latest/Reference/Plugins/#plugin-options
  */
-async function routes (fastify, options) {
+async function routes (fastify: FastifyInstance, options: FastifyServerOptions) {
     // const collection = fastify.mongo.db.collection('test_collection')
 
-    fastify.get('/', async (request, reply) => {
-        return { hello: 'world' }
-    })
+    // fastify.get('/', async (request, reply) => {
+    //     return { hello: 'world' }
+    // })
 
-    fastify.get('/animals', async (request, reply) => {
-        const result = await collection.find().toArray()
-        if (result.length === 0) {
-            throw new Error('No documents found')
-        }
-        return result
-    })
+    // fastify.get('/animals', async (request, reply) => {
+    //     const result = await collection.find().toArray()
+    //     if (result.length === 0) {
+    //         throw new Error('No documents found')
+    //     }
+    //     return result
+    // })
 
     // fastify.get('/animals/:animal', async (request, reply) => {
     //     const result = await collection.findOne({ animal: request.params.animal })
