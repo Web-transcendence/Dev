@@ -1,0 +1,25 @@
+{
+  "name": "trans_node_back",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon -e 'ts,html,json' -w ../.. -x \"npm run build-and-serve\"",
+    "build-and-serve": "run-s build serve",
+    "serve": "node ./dist/index.js",
+    "build:front": "npm run --prefix=../front build:front",
+    "build:back": "tsc",
+    "build": "run-p build:front build:back"
+  },
+  "dependencies": {
+    "fastify": "^5.2.1",
+    "sqlite3": "^5.1.7",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@types/sqlite3": "^3.1.11",
+    "nodemon": "^3.1.9",
+    "npm-run-all": "^4.1.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

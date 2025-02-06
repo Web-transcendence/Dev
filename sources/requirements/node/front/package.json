@@ -1,0 +1,11 @@
+{
+  "name": "trans_node_front",
+  "type": "module",
+  "scripts": {
+    "build:front": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "typescript": "^5.7.3"
+  }
+}
