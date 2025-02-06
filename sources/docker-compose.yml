@@ -1,26 +1,15 @@
-version: "2"
-
 services:
-  node:
-    build: ./requirements/node/Dockerfile
-    container_name: trns_node_1
+  back:
+    build:
+      context: requirements/node
+    container_name: trns_back_1
     environment:
       - NODE_ENV=production
-    ports: # use if it is necessary to expose the container to the host machine
+    ports:
       - "8081:8081"
-    command: "npm start"
     networks:
-      - inception
+      - comm
 
 networks:
-  inception:
-    name: inception
+  comm:
     driver: bridge
-
-secrets:
-  nx_ssl_cer:
-    file: ../secrets/ssl_certificate
-  nx_ssl_key:
-    file: ../secrets/ssl_certificate_key
-
-#volumes:

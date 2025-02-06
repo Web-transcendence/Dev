@@ -75,6 +75,15 @@
 Mise en place de la structure des dossiers et des docker puis du docker compose.
   Proxy
 Connexion par un proxy du site web, format html. 
+  
+  - Command pour rentrer dans un container
+```angular2html
+docker exec -it <name> sh
+```
+RUN server without docker 
+```angular2html
+npm run dev
+```
 
 ## Creation de Node.js
 Faire une base en ECMAScript Modules (ESM)
