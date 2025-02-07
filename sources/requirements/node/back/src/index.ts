@@ -9,9 +9,18 @@ import {env} from "./env.js";
 /**
  * @type {import('fastify').FastifyInstance} Instance of Fastify
  */
-const fastify = Fastify({
+
+// Load SSL certificates
+const httpsOptions = {
+    https: {
+        key: readFileSync('./key.pem'),      // Private key
+        cert: readFileSync('./cert.pem')     // Certificate
+    },
     logger: true
-})
+};
+
+const fastify = Fastify(httpsOptions);
+
 fastify.register(dbConnector)
 fastify.register(firstRoute)
 
@@ -31,7 +40,7 @@ fastify.get("/front.js", (req, res) => {
     res.raw.end();
 });
 
-fastify.listen({ host: '0.0.0.0', port: 8081 }, function (err, address) {
+fastify.listen({ host: '0.0.0.0', port: 8443 }, function (err, address) {
     if (err) {
         fastify.log.error(err)
         process.exit(1)
