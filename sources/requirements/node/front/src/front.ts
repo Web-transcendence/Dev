@@ -4,10 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Récupérer les boutons
     const aboutBtn = document.getElementById("about") as HTMLButtonElement;
     const contactBtn = document.getElementById("contact") as HTMLButtonElement;
+    const registerBtn = document.getElementById("register") as HTMLButtonElement;
 
     // Ajouter les écouteurs d'événements sur les boutons
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
+    registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
 
     // Vous pouvez ajouter plus de boutons ici si nécessaire
 
@@ -46,6 +48,6 @@ async function loadPage(page: string): Promise<void> {
         content.innerHTML = html;  // Injecter le contenu dans le div #content
     } catch (error) {
         console.error(error);
-        content.innerHTML = "<h2>404 - Page KKK non trouvée</h2>";
+        content.innerHTML = "<h2>404 - Page non trouvée</h2>";
     }
 }
