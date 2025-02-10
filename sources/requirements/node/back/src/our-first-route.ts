@@ -8,9 +8,26 @@ import {type FastifyInstance, type FastifyServerOptions} from "fastify";
 async function routes (fastify: FastifyInstance, options: FastifyServerOptions) {
     // const collection = fastify.mongo.db.collection('test_collection')
 
-    // fastify.get('/', async (request, reply) => {
-    //     return { hello: 'world' }
-    // })
+    // fastify.get('/about', async (request, reply) => {
+    //     const htmlResponse = `
+    //   <h2 class="text-3xl mb-4">About Us</h2>
+    //   <p>This is a sample Single Page Application (SPA) built to demonstrate dynamic content loading.
+    //   Here, you can find various sections, like About and Contact, which are loaded when you click the respective buttons.</p>
+    // `;
+    //     // Retourner la réponse HTML
+    //     return reply.type('text/html').send(htmlResponse);
+    // });
+    //
+    // fastify.get('/contact', async (request, reply) => {
+    //     const htmlResponse = `
+    //   <h2 class="text-3xl mb-4">Contact Us</h2>
+    //   <p>If you want to reach out to us, you can contact us through email or phone. We'd love to hear from you!</p>
+    //   <p>Email: example@example.com</p>
+    //   <p>Phone: (123) 456-7890</p>
+    // `;
+    //     // Retourner la réponse HTML
+    //     return reply.type('text/html').send(htmlResponse);
+    // });
 
     // fastify.get('/animals', async (request, reply) => {
     //     const result = await collection.find().toArray()
