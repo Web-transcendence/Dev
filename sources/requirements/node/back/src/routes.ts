@@ -1,4 +1,7 @@
 // routes.ts
+// !!
+// Separer en plusieurs fichier les types de route
+// !!
 import { FastifyInstance } from 'fastify';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -13,7 +16,7 @@ export async function routes(fastify: FastifyInstance) {
     // Route pour la page d'accueil
     fastify.get("/", (req, res) => {
         const file = readFileSync(pagePath, 'utf8');
-        res.raw.writeHead(200, { 'Content-Type': 'text/html' });
+        res.raw.writeHead(200, {'Content-Type': 'text/html'});
         res.raw.write(file);
         res.raw.end();
     });
@@ -25,7 +28,7 @@ export async function routes(fastify: FastifyInstance) {
             email: z.string().email(),
             password: z.string().min(6), // Minimum 6 caractères pour le mot de passe
         });
-        const { success, error, data } = zParams.safeParse(req.body);
+        const {success, error, data} = zParams.safeParse(req.body);
 
         if (!success) {
             res.raw.writeHead(400);
@@ -34,30 +37,40 @@ export async function routes(fastify: FastifyInstance) {
             return;
         }
 
-        const { name, email, password } = data;
+        const {name, email, password} = data;
 
         try {
-            await createClient(db, { name, email, password }); // Enregistrement dans la DB
-            res.redirect(303, '/register'); // Redirige vers la page d'inscription ou une autre page après inscription
+            await createClient(db, {name, email, password}); // Enregistrement dans la DB
+            res.redirect('/register', 303); // Redirige vers la page d'inscription ou une autre page après inscription
         } catch (err) {
             res.raw.writeHead(500);
             res.raw.write('Erreur lors de l\'enregistrement');
             res.raw.end();
         }
 
+    })
+
     // Route dynamique pour d'autres pages
     fastify.get("/:file", (req, res) => {
         const zParams = z.object({
             file: z.string(),
         });
-        const { success, error, data } = zParams.safeParse(req.params);
+        const {success, error, data} = zParams.safeParse(req.params);
         if (!success) {
             res.raw.writeHead(400);
             res.raw.write(error);
             res.raw.end();
             return;
         }
-        let { file } = data;
+        let {file} = data;
+        if (file === "front.js") {
+            const frontPath = join(import.meta.dirname, env.TRANS_FRONT_PATH, "front.js");
+            const file = readFileSync(frontPath, 'utf8');
+            res.raw.writeHead(200, {'Content-Type': 'text/javascript'});
+            res.raw.write(file);
+            res.raw.end();
+            return;
+        }
         if (file.split('.').length === 1) {
             file = `${file}.html`;
         }
@@ -68,17 +81,8 @@ export async function routes(fastify: FastifyInstance) {
             return;
         }
         const readFile = readFileSync(pagePath, 'utf8');
-        res.raw.writeHead(200, { 'Content-Type': 'text/html' });
+        res.raw.writeHead(200, {'Content-Type': 'text/html'});
         res.raw.write(readFile);
-        res.raw.end();
-    });
-
-    // Route pour le fichier front.js
-    const frontPath = join(import.meta.dirname, env.TRANS_FRONT_PATH, "front.js");
-    fastify.get("/front.js", (req, res) => {
-        const file = readFileSync(frontPath, 'utf8');
-        res.raw.writeHead(200, { 'Content-Type': 'text/javascript' });
-        res.raw.write(file);
         res.raw.end();
     });
 }

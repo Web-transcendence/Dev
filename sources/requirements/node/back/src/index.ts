@@ -8,20 +8,20 @@ import {z} from "zod";
 import { routes } from './routes.js';
 
 // Load SSL certificates
-// const httpsOptions = {
-//     https: {
-//         key: readFileSync('./key.pem'),      // Private key
-//         cert: readFileSync('./cert.pem')     // Certificate
-//     },
-//     logger: true
-// };
-
-// const fastify = Fastify(httpsOptions);
-const fastify = Fastify({
+const httpsOptions = {
+    https: {
+        key: readFileSync('./key.pem'),      // Private key
+        cert: readFileSync('./cert.pem')     // Certificate
+    },
     logger: true
-})
+};
 
-fastify.register(dbConnector)
+const fastify = Fastify(httpsOptions);
+// const fastify = Fastify({
+//     logger: true
+// })
+
+// fastify.register(dbConnector)
 fastify.register(routes)
 
 fastify.listen({ host: '0.0.0.0', port: 8443 }, function (err, address) {

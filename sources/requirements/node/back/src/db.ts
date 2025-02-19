@@ -22,6 +22,12 @@ export interface Client {
     password: string;
 }
 
+export interface message {
+    email: string;
+    password: string;
+    msg: string;
+}
+
 // Fonction pour initialiser la base de données
 export async function initDb(): Promise<Database> {
     const db = await open({

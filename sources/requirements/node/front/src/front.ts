@@ -2,9 +2,9 @@
 // Gérer la navigation lors de l'utilisation des boutons
 document.addEventListener("DOMContentLoaded", () => {
     // Récupérer les boutons
-    const aboutBtn = document.getElementById("about") as HTMLButtonElement;
-    const contactBtn = document.getElementById("contact") as HTMLButtonElement;
-    const registerBtn = document.getElementById("register") as HTMLButtonElement;
+    const aboutBtn = document.getElementById("about")!;
+    const contactBtn = document.getElementById("contact")!;
+    const registerBtn = document.getElementById("register")!;
 
     // Ajouter les écouteurs d'événements sur les boutons
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
 
     // Vous pouvez ajouter plus de boutons ici si nécessaire
-
     // Charger la page initiale en fonction de l'URL actuelle
     loadPage(window.location.pathname);
 });
@@ -20,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // Gérer la navigation via l'historique du navigateur (back/forward)
 window.onpopstate = () => {
     loadPage(window.location.pathname)
+
 };
 
 // Fonction pour gérer la navigation sans recharger la page
