@@ -1,15 +1,32 @@
 services:
-  back:
+  node:
     build:
       context: requirements/node
-    container_name: trns_back_1
+    container_name: node_1
     environment:
       - NODE_ENV=production
     ports:
       - "8443:8443"
-    networks:
-      - comm
+#    networks:
+#      - comm
+#    volumes:
+#      - .:/app
+#      - /app/node_modules  # Ignore node_modules to prevent syncing back
+    develop:
+      watch:
+        - action: rebuild
+          path: ./requirements/node/
+          target: ./
+          ignore:
+            - node_modules/
+#        - action: sync
+#          path: ./requirements/node/front/src/
+#          target: ./app/front/
+#          ignore:
+#            - node_modules/
+#        - action: rebuild
+#          path: ./requirements/node/back/package.json
 
-networks:
-  comm:
-    driver: bridge
+#networks:
+#  comm:
+#    driver: bridge

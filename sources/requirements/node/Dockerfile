@@ -22,6 +22,7 @@ RUN npm ci
 # Build project with TS
 RUN npm run build:front
 
+
 RUN apk add --no-cache openssl
 RUN openssl req -x509 -newkey rsa:4096 -nodes  \
     -out cert.pem \
@@ -35,6 +36,8 @@ FROM node:23-alpine3.20 AS runner
 COPY --from=builder-back /app/dist /app
 # Copy frontend
 COPY --from=builder-front /app/dist /app/front
+COPY --from=builder-front /app/key.pem /app
+COPY --from=builder-front /app/cert.pem /app
 # Copy package infos
 COPY ./back/package.json /app/
 COPY ./back/package-lock.json /app/
@@ -43,7 +46,6 @@ COPY ./back/src/views /app/views
 
 # Set the working directory inside the container
 WORKDIR /app
-COPY key.pem cert.pem ./
 
 
 ENV TRANS_FRONT_PATH="./front"
@@ -57,3 +59,4 @@ EXPOSE 8443
 
 # Start the Fastify server
 CMD ["node", "index.js"]
+#CMD ["ls"]

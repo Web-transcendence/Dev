@@ -1,39 +1,41 @@
 all: up
 
-up: secrets
-	docker-compose -f srcs/docker-compose.yml up --build --detach
+up:
+	docker-compose -f sources/docker-compose.yml up --build
+
+detach:
+	docker-compose -f sources/docker-compose.yml build
+
+watch: detach
+	docker-compose -f sources/docker-compose.yml up --watch
 
 build:
-	docker-compose -f srcs/docker-compose.yml build --no-cache
+	docker-compose -f sources/docker-compose.yml build
 
 down:
-	docker-compose -f srcs/docker-compose.yml down
+	docker-compose -f sources/docker-compose.yml down
 
 start:
-	docker-compose -f srcs/docker-compose.yml start
+	docker-compose -f sources/docker-compose.yml start
 
 stop:
-	docker-compose -f srcs/docker-compose.yml stop
+	docker-compose -f sources/docker-compose.yml stop
 
 logs:
-	docker-compose -f srcs/docker-compose.yml logs --follow
+	docker-compose -f sources/docker-compose.yml logs --follow
 
 prune:
 	docker system prune --all --volumes --force
 
 mysql:
-	docker-compose -f srcs/docker-compose.yml exec mariadb mysql
+	docker-compose -f sources/docker-compose.yml exec mariadb mysql
 
 clean:
-	docker-compose -f srcs/docker-compose.yml down --volumes --rmi all
+	docker-compose -f sources/docker-compose.yml down --volumes --rmi all
 
 fclean: clean
 #	Use docker run to remove data because of permissions
-#	docker run -it --rm -v $(HOME)/data:/data busybox sh -c "rm -rf /data/*"
-	rm -rf ./secrets/
-
-secrets:
-	openssl req -x509 -newkey rsa:2048 -keyout $@/ssl_certificate_key -out $@/ssl_certificate -days 365 -nodes -subj "/CN=grebrune.42.fr" 2> /dev/null
+	docker run -it --rm -v $(HOME)/data:/data busybox sh -c "rm -rf /data/*"
 
 help:
 	@echo "Makefile for Docker Compose"
