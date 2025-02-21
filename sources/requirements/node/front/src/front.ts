@@ -5,11 +5,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const aboutBtn = document.getElementById("about")!;
     const contactBtn = document.getElementById("contact")!;
     const registerBtn = document.getElementById("register")!;
+    const loginBtn = document.getElementById("login")!;
 
     // Ajouter les écouteurs d'événements sur les boutons
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
+    registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
 
     // Vous pouvez ajouter plus de boutons ici si nécessaire
     // Charger la page initiale en fonction de l'URL actuelle

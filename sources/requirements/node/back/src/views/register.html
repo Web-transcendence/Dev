@@ -1,16 +1,13 @@
-<h1>Créer un compte</h1>
-<form action="/register" method="POST">
-    <div>
-        <label for="name">Nom</label>
-        <input type="text" id="name" name="name" required />
+<body class="content-center bg-gray-100 h-screen flex items-center justify-center">
+<div id="app" class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg text-center">
+    <!-- Interface avant connexion -->
+    <div id="login-screen">
+        <h2 class="text-2xl font-semibold mb-4">Connexion</h2>
+        <input id="email" type="email" placeholder="Email" class="w-full p-2 border rounded-md mb-2">
+        <input id="password" type="password" placeholder="Mot de passe" class="w-full p-2 border rounded-md mb-4">
+        <button id="login" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"> Create </button>
     </div>
-    <div>
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required />
-    </div>
-    <div>
-        <label for="password">Mot de passe</label>
-        <input type="password" id="password" name="password" required />
-    </div>
-    <button type="submit">S'inscrire</button>
-</form>
+</div>
+</body>
+
+<script src="front.js"></script>

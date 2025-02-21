@@ -7,10 +7,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { env } from './env.js';
-import { initDb, createClient } from './db.js'; // Import des fonctions pour la DB
+import { CreateClient } from './database.js'; // Import des fonctions pour la DB
 
 export async function routes(fastify: FastifyInstance) {
-    const db = await initDb(); // Initialisation de la base de données SQLite
+    // const db = await initDb(); // Initialisation de la base de données SQLite
     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
 
     // Route pour la page d'accueil
@@ -20,35 +20,6 @@ export async function routes(fastify: FastifyInstance) {
         res.raw.write(file);
         res.raw.end();
     });
-
-    // Route pour enregistrer un client
-    fastify.post('/register', async (req, res) => {
-        const zParams = z.object({
-            name: z.string().min(1),
-            email: z.string().email(),
-            password: z.string().min(6), // Minimum 6 caractères pour le mot de passe
-        });
-        const {success, error, data} = zParams.safeParse(req.body);
-
-        if (!success) {
-            res.raw.writeHead(400);
-            res.raw.write(error);
-            res.raw.end();
-            return;
-        }
-
-        const {name, email, password} = data;
-
-        try {
-            await createClient(db, {name, email, password}); // Enregistrement dans la DB
-            res.redirect('/register', 303); // Redirige vers la page d'inscription ou une autre page après inscription
-        } catch (err) {
-            res.raw.writeHead(500);
-            res.raw.write('Erreur lors de l\'enregistrement');
-            res.raw.end();
-        }
-
-    })
 
     // Route dynamique pour d'autres pages
     fastify.get("/:file", (req, res) => {
@@ -85,4 +56,7 @@ export async function routes(fastify: FastifyInstance) {
         res.raw.write(readFile);
         res.raw.end();
     });
+
+    // Route pour enregistrer un client
+    fastify.post('/register', CreateClient);
 }
