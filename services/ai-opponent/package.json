@@ -1,0 +1,15 @@
+{
+  "name": "ai-opponent",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "",
+    "dev": ""
+  },
+  "dependencies": {
+
+  },
+  "devDependencies": {
+
+  }
+}
