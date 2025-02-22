@@ -40,30 +40,3 @@ export const CreateClient = async (req: FastifyRequest, res: FastifyReply) => {
 };
 
 console.log(Client_db.prepare('SELECT * FROM Client').all());
-
-
-// async (req, res) => {
-//     const zParams = z.object({
-//         name: z.string().min(1),
-//         email: z.string().email(),
-//         password: z.string().min(6), // Minimum 6 caractères pour le mot de passe
-//     });
-//     const {success, error, data} = zParams.safeParse(req.body);
-//
-//     if (!success) {
-//         res.raw.writeHead(400);
-//         res.raw.write(error);
-//         res.raw.end();
-//         return;
-//     }
-//
-//     const {name, email, password} = data;
-//
-//     try {
-//         await CreateClient(Client_db, {name, email, password}); // Enregistrement dans la DB
-//         res.redirect('/register', 303); // Redirige vers la page d'inscription ou une autre page après inscription
-//     } catch (err) {
-//         res.raw.writeHead(500);
-//         res.raw.write('Erreur lors de l\'enregistrement');
-//         res.raw.end();
-//     }

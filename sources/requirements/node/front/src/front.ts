@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
-    registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
+    loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
 
     // Vous pouvez ajouter plus de boutons ici si nécessaire
     // Charger la page initiale en fonction de l'URL actuelle
@@ -34,7 +34,6 @@ function navigate(event: MouseEvent, path: string): void {
 // Fonction pour charger les pages dynamiquement
 async function loadPage(page: string): Promise<void> {
     const content = document.getElementById("content") as HTMLElement;
-
     // Si aucune page n'est spécifiée, afficher un message par défaut
     if (!page || page === "/") {
         content.innerHTML = "<p>Veuillez choisir une option pour charger du contenu.</p>";
@@ -43,7 +42,7 @@ async function loadPage(page: string): Promise<void> {
 
     // Tentative de récupération de la page dynamique
     try {
-        const res = await fetch(page);
+            const res = await fetch(page);
         if (!res.ok) throw new Error("Page non trouvée");
 
         const html = await res.text();  // Récupérer le contenu HTML de la page
