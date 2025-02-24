@@ -6,22 +6,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const contactBtn = document.getElementById("contact")!;
     const registerBtn = document.getElementById("register")!;
     const loginBtn = document.getElementById("login")!;
-
     // Ajouter les écouteurs d'événements sur les boutons
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
     loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
-
-    // Vous pouvez ajouter plus de boutons ici si nécessaire
     // Charger la page initiale en fonction de l'URL actuelle
     loadPage(window.location.pathname);
+    const navigationEntry = performance.getEntriesByType('navigation')[0];
+    if (navigationEntry instanceof PerformanceNavigationTiming) {
+        // Now TypeScript knows that navigationEntry is a PerformanceNavigationTiming object
+        const navigationType = navigationEntry.type;
+        if (navigationType === 'reload') {
+            console.log('Page refreshed');
+            window.location.href = "/"; // Navigate to the home page
+        } else {
+            console.log('Page loaded');
+        }
+    }
 });
 
 // Gérer la navigation via l'historique du navigateur (back/forward)
 window.onpopstate = () => {
     loadPage(window.location.pathname)
-
 };
 
 // Fonction pour gérer la navigation sans recharger la page
@@ -39,13 +46,15 @@ async function loadPage(page: string): Promise<void> {
         content.innerHTML = "<p>Veuillez choisir une option pour charger du contenu.</p>";
         return;
     }
-
     // Tentative de récupération de la page dynamique
     try {
+        if (!document.body) console.log("===========body is null");
+        console.log(page);
             const res = await fetch(page);
         if (!res.ok) throw new Error("Page non trouvée");
 
         const html = await res.text();  // Récupérer le contenu HTML de la page
+        console.log(html);
         content.innerHTML = html;  // Injecter le contenu dans le div #content
     } catch (error) {
         console.error(error);

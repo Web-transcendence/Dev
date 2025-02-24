@@ -42,7 +42,7 @@ COPY --from=builder-front /app/cert.pem /app
 COPY ./back/package.json /app/
 COPY ./back/package-lock.json /app/
 # Copy html views
-COPY ./back/src/views /app/views
+COPY back/src/static/views /app/views
 
 # Set the working directory inside the container
 WORKDIR /app
