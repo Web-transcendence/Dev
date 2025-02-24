@@ -1,0 +1,13 @@
+{
+  "name": "transcendance",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "api-gateway": "npm run start --prefix services/api-gateway",
+    "user-management": "npm run start --prefix services/user-management",
+    "all": "concurrently \"npm run api-gateway\" \"npm run user-management\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
