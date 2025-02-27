@@ -6,7 +6,7 @@ const app = fastify();
 
 app.register(cors, {
     origin: "*",
-    method: ["GET", "POST", "PUT", "DELETE"]
+    methods: ["GET", "POST", "PUT", "DELETE"]
 })
 
 app.register(httpProxy, {
