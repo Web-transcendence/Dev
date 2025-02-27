@@ -3,8 +3,8 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "start": "",
-    "dev": ""
+    "start": "tsx ./src/api.ts",
+    "dev": "tsx watch ./src/api.ts"
   },
   "dependencies": {
 

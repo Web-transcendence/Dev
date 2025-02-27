@@ -2,7 +2,8 @@
   "name": "trans_node_front",
   "type": "module",
   "scripts": {
-    "build:front": "tsc --watch"
+    "start": "tsc ./src/client.ts",
+    "dev": "tsx --watch ./src/client.ts"
   },
   "devDependencies": {
     "@types/node": "^22.13.5",

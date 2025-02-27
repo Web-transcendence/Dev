@@ -1,3 +1,4 @@
+export {};
 document.addEventListener("DOMContentLoaded", () => {
     const button = document.getElementById("myButton");
     if (button) {

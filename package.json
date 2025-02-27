@@ -5,7 +5,18 @@
   "scripts": {
     "api-gateway": "npm run start --prefix services/api-gateway",
     "user-management": "npm run start --prefix services/user-management",
-    "all": "concurrently \"npm run api-gateway\" \"npm run user-management\""
+    "ai-opponent": "npm run start --prefix services/ai-opponent",
+    "live-chat": "npm run start --prefix services/live-chat",
+    "match-server": "npm run start --prefix services/match-server",
+    "front": "npm run start --prefix frontend",
+
+    "api-gateway:dev": "npm run start --prefix services/api-gateway",
+    "user-management:dev": "npm run start --prefix services/user-management",
+    "ai-opponent:dev": "npm run start --prefix services/ai-opponent",
+    "live-chat:dev": "npm run start --prefix services/live-chat",
+    "match-server:dev": "npm run start --prefix services/match-server",
+
+    "all": "concurrently \"npm run api-gateway\" \"npm run user-management\" \"npm run ai-opponent\" \"npm run live-chat\" \"npm run match-server\" \"npm run front\""
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
