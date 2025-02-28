@@ -17,28 +17,28 @@ export async function routes(fastify: FastifyInstance) {
         return;
     })
     // ROAD OF BALISE
-    fastify.get('/about', function (req, reply) {
+    fastify.get('/part/about', function (req, reply) {
         console.log("=======about.html===========")
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "about.html");
         const balise = readFileSync(frontPath, 'utf8');
         console.log(balise)
-        reply.type('text/html').send(balise)
+        reply.type('text/html').send(balise);
     })
-    fastify.get('/login', function (req, reply) {
+    fastify.get('/part/login', function (req, reply) {
         console.log("=======login.html===========")
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "login.html");
         const balise = readFileSync(frontPath, 'utf8');
         console.log(balise)
         reply.type('text/html').send(balise)
     })
-    fastify.get('/register', function (req, reply) {
+    fastify.get('/part/register', function (req, reply) {
         console.log("=======register.html===========")
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "register.html");
         const balise = readFileSync(frontPath, 'utf8');
         console.log(balise)
         reply.type('text/html').send(balise)
     })
-    fastify.get('/contact', function (req, reply) {
+    fastify.get('/part/contact', function (req, reply) {
         console.log("=======contact.html===========")
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "contact.html");
         const balise = readFileSync(frontPath, 'utf8');

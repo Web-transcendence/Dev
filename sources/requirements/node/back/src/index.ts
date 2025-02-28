@@ -29,7 +29,15 @@ fastify.get("/*", (req, res) => { // Route pour la page d'accueil
     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
     const readFile = readFileSync(pagePath, 'utf8');
     res.type('text/html').send(readFile);
+    // fastify.get('/about', function (req, reply) {
+    //     console.log("=======about.html===========")
+    //     const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "about.html");
+    //     const balise = readFileSync(frontPath, 'utf8');
+    //     console.log(balise)
+    //     reply.type('text/html').send(balise)
+    // })
 });
+
 
 fastify.setNotFoundHandler((request, reply) => {
     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
