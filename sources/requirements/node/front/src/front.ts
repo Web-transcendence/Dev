@@ -1,23 +1,6 @@
 
 // Gérer la navigation lors de l'utilisation des boutons
 document.addEventListener("DOMContentLoaded", () => {
-
-    // const navigationEntry = performance.getEntriesByType('navigation')[0];
-    // if (navigationEntry instanceof PerformanceNavigationTiming) {
-    //     // Now TypeScript knows that navigationEntry is a PerformanceNavigationTiming object
-    //     const navigationType = navigationEntry.type;
-    //     if (navigationType === 'reload') {
-    //         const page = window.location.pathname;
-    //         loadPage("/");
-    //         console.log('Page refreshed');
-    //         // window.location.href = "/"; // Navigate to the home page
-    //         reloadPage(page);
-    //         return;
-    //     } else {
-    //         // console.log('Page loaded');
-    //     }
-    // }
-    console.log("========22222222============");
     // Récupérer les boutons
     const aboutBtn = document.getElementById("about")!;
     const contactBtn = document.getElementById("contact")!;
@@ -49,7 +32,6 @@ async function reloadPage(part_name: string): Promise<void> {
     const content = await document.getElementById("content") as HTMLElement;
     try {
         if (part_name === "/") {
-            console.log("====1======page is /");
             return;
         }
         if (!document.body) console.log("====2======body is null");
