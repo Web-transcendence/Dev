@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { env } from './env.js';
+import {Client_db, CreateClient} from "./database.js";
 
 export async function routes(fastify: FastifyInstance) {
     fastify.get("/front.js", (req, res) => {
@@ -19,7 +20,8 @@ export async function routes(fastify: FastifyInstance) {
     })
     fastify.get('/part/login', function (req, reply) {
         console.log("=======login.html===========")
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "login.html");
+        // fastify.post("/register", CreateClient);
+        const frontPath = join(import.meta.dirname,  env.TRANS_VIEWS_PATH, "login.html");
         const balise = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(balise)
     })
