@@ -1,37 +1,28 @@
 all: up
 
 up:
-	docker-compose -f sources/docker-compose.yml up --build
+	docker-compose -f docker-compose.yml up --build
 
-detach:
-	docker-compose -f sources/docker-compose.yml build
-
-watch: detach
-	docker-compose -f sources/docker-compose.yml up --watch
+watch:
+	docker-compose -f docker-compose.yml up --watch
 
 build:
-	docker-compose -f sources/docker-compose.yml build
+	docker-compose -f docker-compose.yml build
 
 down:
-	docker-compose -f sources/docker-compose.yml down
-
-start:
-	docker-compose -f sources/docker-compose.yml start
-
-stop:
-	docker-compose -f sources/docker-compose.yml stop
+	docker-compose -f docker-compose.yml down
 
 logs:
-	docker-compose -f sources/docker-compose.yml logs --follow
+	docker-compose -f docker-compose.yml logs --follow
 
 prune:
 	docker system prune --all --volumes --force
 
 mysql:
-	docker-compose -f sources/docker-compose.yml exec mariadb mysql
+	docker-compose -f docker-compose.yml exec mariadb mysql
 
 clean:
-	docker-compose -f sources/docker-compose.yml down --volumes --rmi all
+	docker-compose -f docker-compose.yml down --volumes --rmi all
 
 fclean: clean
 #	Use docker run to remove data because of permissions

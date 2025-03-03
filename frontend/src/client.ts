@@ -8,7 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function getTest() {
     try {
-        const response = await fetch("http://localhost:8001/user-management/5");
+        console.log("user test");
+        const response = await fetch("http://api-gateway:8001/user-management/5");
         if (!response.ok) {
             throw new Error(`Request failed with status code ${response.status}`);
         }

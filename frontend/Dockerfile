@@ -1,4 +1,13 @@
-FROM ubuntu:latest
-LABEL authors="avaldin"
+FROM node:lts-alpine3.20
 
-ENTRYPOINT ["top", "-b"]
+
+WORKDIR /app
+
+COPY *.json .
+COPY postcss.config.mjs .
+COPY src/*.ts src/
+
+
+RUN npm install
+
+CMD ["npm", "run", "dev"]

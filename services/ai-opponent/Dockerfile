@@ -1,4 +1,14 @@
-FROM ubuntu:latest
-LABEL authors="avaldin"
+FROM node:lts-alpine3.20
 
-ENTRYPOINT ["top", "-b"]
+RUN useradd -ms /bin/sh -u 1001 app
+USER app
+
+WORKDIR /app
+
+COPY --chown=app:app *.json .
+COPY --chown=app:app src/*.ts src/
+
+
+RUN npm install
+
+CMD ["npm", "run", "start"]

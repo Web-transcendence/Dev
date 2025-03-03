@@ -10,12 +10,12 @@ app.register(cors, {
 })
 
 app.register(httpProxy, {
-    upstream: 'http://localhost:8000',
+    upstream: 'http://user-management:8000',
     prefix: '/user-management',
     rewritePrefix: '/user-management'
 });
 
-app.listen({port: 8001}, (err, adrr) => {
+app.listen({port: 8001, host: '0.0.0.0'}, (err, adrr) => {
     if (err) {
         console.error(err);
         process.exit(1);

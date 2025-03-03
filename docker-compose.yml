@@ -1,32 +1,109 @@
 services:
-  node:
+
+  api-gateway:
+    container_name: api-gateway
     build:
-      context: requirements/node
-    container_name: node_1
-    environment:
-      - NODE_ENV=production
+      context: api-gateway/
+    networks:
+      - transcendence
     ports:
-      - "8443:8443"
-#    networks:
-#      - comm
-#    volumes:
-#      - .:/app
-#      - /app/node_modules  # Ignore node_modules to prevent syncing back
+      - "8001:8001"         #DEV
+    restart: unless-stopped
     develop:
       watch:
+        - action: sync
+          path: ./api-gateway/src/
+          target: /app/src/
         - action: rebuild
-          path: ./requirements/node/
-          target: ./
-          ignore:
-            - node_modules/
-#        - action: sync
-#          path: ./requirements/node/front/src/
-#          target: ./app/front/
-#          ignore:
-#            - node_modules/
-#        - action: rebuild
-#          path: ./requirements/node/back/package.json
+          path: ./api-gateway/package.json
+          target: app/
 
-#networks:
-#  comm:
-#    driver: bridge
+
+  frontend:
+    container_name: frontend
+    build:
+      context: frontend/
+    networks:
+      - transcendence
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./frontend/package.json
+          target: app/
+
+  user-management:
+    container_name: user-management
+    build:
+      context: services/user-management/
+    networks:
+      - transcendence
+    ports:
+      - "8000:8000"         #DEV
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/user-management/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/user-management/package.json
+          target: app/
+
+#
+#  ai-opponent:
+#    container_name: ai-opponent
+#    build:
+#      context: services/ai-opponent/
+#    networks:
+#      - transcendence
+#    restart: unless-stopped
+#    develop:
+#      watch:
+#        - action: sync
+#          path: ./services/ai-opponent/src/
+#          target: /app/src/
+#        - action: rebuild
+#          path: ./services/ai-opponent/package.json
+#          target: app/
+#
+#  live-chat:
+#    container_name: live-chat
+#    build:
+#      context: services/live-chat/
+#    networks:
+#      - transcendence
+#    restart: unless-stopped
+#    develop:
+#      watch:
+#        - action: sync
+#          path: ./services/live-chat/src/
+#          target: /app/src/
+#        - action: rebuild
+#          path: ./services/live-chat/package.json
+#          target: app/
+#
+#  match-server:
+#    container_name: match-server
+#    build:
+#      context: services/match-server/
+#    networks:
+#      - transcendence
+#    restart: unless-stopped
+#    develop:
+#      watch:
+#        - action: sync
+#          path: ./services/match-server/src/
+#          target: /app/src/
+#        - action: rebuild
+#          path: ./services/match-server/package.json
+#          target: app/
+
+
+networks:
+  transcendence:
+    name: transcendence
+    driver: bridge
