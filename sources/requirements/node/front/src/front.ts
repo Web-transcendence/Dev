@@ -47,7 +47,12 @@ async function loadPart(page: string): Promise<void> {
             const button = document.getElementById("login") as HTMLButtonElement;
             if (button) { // Enable the button
                 button.disabled = false;
-                button.addEventListener("click", (event) => navigate(event, "/login"));
+                button.addEventListener("click", async (event) => {
+                    await fetch('post/login', {
+                        method: 'POST',
+                    });
+                    navigate(event, "/login")
+                });
             }
         }
     } catch (error) {
