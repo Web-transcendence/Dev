@@ -24,6 +24,7 @@ const clientSchema = z.object({
 
 // Fonction pour créer un client dans la base de données
 export const CreateClient = async (req: FastifyRequest, res: FastifyReply) => {
+    console.log('Creating client...');
     try {
         const data = clientSchema.parse(req.body); // Valide les données
         const hashedPassword = hashSync(data.password, 10); //Hachage du mot de passe
@@ -37,6 +38,7 @@ export const CreateClient = async (req: FastifyRequest, res: FastifyReply) => {
         console.error('Erreur lors de l’insertion :', error);
         res.status(400).send({ error: 'Données invalides ou erreur serveur' });
     }
+    console.log('Created Client !!!!!!!!!!!!!');
 };
 
 console.log(Client_db.prepare('SELECT * FROM Client').all());
