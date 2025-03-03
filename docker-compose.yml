@@ -1,0 +1,109 @@
+services:
+
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: api-gateway/
+    networks:
+      - transcendence
+    ports:
+      - "8001:8001"         #DEV
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./api-gateway/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./api-gateway/package.json
+          target: app/
+
+
+  frontend:
+    container_name: frontend
+    build:
+      context: frontend/
+    networks:
+      - transcendence
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./frontend/package.json
+          target: app/
+
+  user-management:
+    container_name: user-management
+    build:
+      context: services/user-management/
+    networks:
+      - transcendence
+    ports:
+      - "8000:8000"         #DEV
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/user-management/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/user-management/package.json
+          target: app/
+
+#
+#  ai-opponent:
+#    container_name: ai-opponent
+#    build:
+#      context: services/ai-opponent/
+#    networks:
+#      - transcendence
+#    restart: unless-stopped
+#    develop:
+#      watch:
+#        - action: sync
+#          path: ./services/ai-opponent/src/
+#          target: /app/src/
+#        - action: rebuild
+#          path: ./services/ai-opponent/package.json
+#          target: app/
+#
+#  live-chat:
+#    container_name: live-chat
+#    build:
+#      context: services/live-chat/
+#    networks:
+#      - transcendence
+#    restart: unless-stopped
+#    develop:
+#      watch:
+#        - action: sync
+#          path: ./services/live-chat/src/
+#          target: /app/src/
+#        - action: rebuild
+#          path: ./services/live-chat/package.json
+#          target: app/
+#
+#  match-server:
+#    container_name: match-server
+#    build:
+#      context: services/match-server/
+#    networks:
+#      - transcendence
+#    restart: unless-stopped
+#    develop:
+#      watch:
+#        - action: sync
+#          path: ./services/match-server/src/
+#          target: /app/src/
+#        - action: rebuild
+#          path: ./services/match-server/package.json
+#          target: app/
+
+
+networks:
+  transcendence:
+    name: transcendence
+    driver: bridge
