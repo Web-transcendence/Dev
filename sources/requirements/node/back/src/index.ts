@@ -4,6 +4,7 @@ import fastifyStatic from '@fastify/static';
 import {join} from "node:path";
 import {env} from "./env.js";
 import {readFileSync} from "node:fs";
+import {CreateClient} from "./database.js";
 
 // Load SSL certificates
 // const httpsOptions = {
@@ -37,6 +38,8 @@ fastify.setNotFoundHandler((request, reply) => {
     const readFile = readFileSync(pagePath, 'utf8');
     reply.type('text/html').send(readFile);
 });
+
+fastify.post("/post/login", CreateClient);
 
 fastify.register(routes)
 
