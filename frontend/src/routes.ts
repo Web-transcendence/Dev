@@ -2,7 +2,6 @@ import { FastifyInstance } from 'fastify';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { env } from './env.js';
-import {CreateClient} from "./database.js";
 
 export async function routes(fastify: FastifyInstance) {
     fastify.get("/front.js", (req, res) => {

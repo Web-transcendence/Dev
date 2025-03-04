@@ -4,7 +4,7 @@ import fastifyStatic from '@fastify/static';
 import {join} from "node:path";
 import {env} from "./env.js";
 import {readFileSync} from "node:fs";
-import {CreateClient} from "./database.js";
+import {CreateClient} from "../../services/database/src/database.js";
 
 // Load SSL certificates
 // const httpsOptions = {

@@ -3,20 +3,7 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "api-gateway": "npm run start --prefix api-gateway",
-    "user-management": "npm run start --prefix services/user-management",
-    "ai-opponent": "npm run start --prefix services/ai-opponent",
-    "live-chat": "npm run start --prefix services/live-chat",
-    "match-server": "npm run start --prefix services/match-server",
-    "front": "npm run start --prefix frontend",
-
-    "api-gateway:dev": "npm run start --prefix api-gateway",
-    "user-management:dev": "npm run start --prefix user-management",
-    "ai-opponent:dev": "npm run start --prefix services/ai-opponent",
-    "live-chat:dev": "npm run start --prefix services/live-chat",
-    "match-server:dev": "npm run start --prefix services/match-server",
-
-    "all": "concurrently \"npm run api-gateway\" \"npm run user-management\" \"npm run front\""
+    "install": "npm i frontend && npm i api-gateway && npm i services/ai-opponent && npm i services/live-chat && npm i services/match-server && npm i services/database && npm i services/user-management"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
