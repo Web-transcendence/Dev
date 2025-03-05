@@ -1,10 +1,27 @@
-<div id="app" class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg text-center">
-    <!-- Interface avant connexion -->
-    <div id="login-screen">
-        <h2 class="text-2xl font-semibold mb-4">Connexion</h2>
-        <input id="name" type="text" placeholder="Name" class="w-full p-2 border rounded-md mb-2">
-        <input id="email" type="email" placeholder="Email" class="w-full p-2 border rounded-md mb-2">
-        <input id="password" type="password" placeholder="Mot de passe" class="w-full p-2 border rounded-md mb-4">
-        <button id="login" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"> Create </button>
+<form id="myForm" class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg text-center" onsubmit="event.preventDefault();">
+    <div class="form-example">
+        <label for="name">Enter your name: </label>
+        <input type="text" name="name" id="name" required />
     </div>
-</div>
+    <div class="form-example">
+        <label for="email">Enter your email: </label>
+        <input type="email" name="email" id="email" required />
+    </div>
+    <div class="form-example">
+        <label for="password">Enter your password: </label>
+        <input type="password" name="password" id="password" required />
+    </div>
+    <div class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">
+        <input id="registerButton" type="submit" value="Subscribe!" />
+    </div>
+</form>
+<!--<div id="app" class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg text-center">-->
+<!--    &lt;!&ndash; Interface avant connexion &ndash;&gt;-->
+<!--    <div id="login-screen">-->
+<!--        <h2 class="text-2xl font-semibold mb-4">Connexion</h2>-->
+<!--        <label for="name"></label><input type="text" id="name" placeholder="Name" class="w-full p-2 border rounded-md mb-2">-->
+<!--        <label for="email"></label><input id="email" type="text" placeholder="Email" class="w-full p-2 border rounded-md mb-2">-->
+<!--        <label for="password"></label><input id="password" type="text" placeholder="Mot de passe" class="w-full p-2 border rounded-md mb-4">-->
+<!--        <button id="login" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"> Create </button>-->
+<!--    </div>-->
+<!--</div>-->

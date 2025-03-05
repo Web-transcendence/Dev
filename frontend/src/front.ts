@@ -44,14 +44,21 @@ async function loadPart(page: string): Promise<void> {
         newElement.innerHTML = html;  // Injecter le contenu dans le div #content
         container.appendChild(newElement);
         if (page === "/register") {
-            const button = document.getElementById("login") as HTMLButtonElement;
+            const button = document.getElementById("registerButton")!;
             if (button) { // Enable the button
-                button.disabled = false;
+                // button.disabled = false;
                 button.addEventListener("click", async (event) => {
-                    await fetch('post/login', {
+                    const myForm = document.getElementById("myForm") as HTMLFormElement;
+                    const formData = new FormData(myForm);
+                    const data: Record<string, unknown> = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
+
+                    await fetch('post/create', {
                         method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
                     });
-                    navigate(event, "/login")
                 });
             }
         }
@@ -60,3 +67,4 @@ async function loadPart(page: string): Promise<void> {
         container.innerHTML = "<h2>404 - Page non trouvée</h2>";
     }
 }
+

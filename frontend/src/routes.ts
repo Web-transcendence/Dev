@@ -17,11 +17,18 @@ export async function routes(fastify: FastifyInstance) {
         const balise = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(balise);
     })
-    fastify.get('/part/login', function (req, reply) {
+    fastify.get('/part/login*', function (req, reply) {
         console.log("=======login.html===========")
-        const frontPath = join(import.meta.dirname,  env.TRANS_VIEWS_PATH, "login.html");
-        const balise = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(balise)
+        // Get the name from query params
+        const userName = (req.query as { name?: string }).name || "Utilisateur";
+
+        // Load the HTML file
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH || "", "login.html");
+        let htmlContent = readFileSync(frontPath, 'utf8');
+
+        // Replace the placeholder in the HTML with the actual user name
+        htmlContent = htmlContent.replace('{{user-name}}', userName);
+        reply.type('text/html').send(htmlContent);
     })
     fastify.get('/part/register', function (req, reply) {
         console.log("=======register.html===========")
