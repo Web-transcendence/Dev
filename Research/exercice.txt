@@ -1,0 +1,27 @@
+Ex1:
+Montrons que le comportement du network ne change pas si nous multiplions les weights ainsi que les biais d'un perceptron:
+
+output =    | 0 si w.x + b <= 0 
+            | 1 si w.x + b > 0
+
+si nous multiplions le tout:
+
+output =    | 0 si cw.x + cb <= 0
+            | 1 si cw.x + cb > 0 
+Sachant que w.x + b = (cw.x + cb) / c et que 0 / c = 0 alors le comportement du network reste inchange.
+
+Ex2:
+meme chose mais pour un sigmoid:
+
+output = sig(z) = 1 / (1 + e^-z) soit 1 / (1 + e^-(w.x + b)) pour sig(w.x + b)
+
+Sachant que w.x + b != 0
+Si w.x + b > 0 alors output de sig(w.x + b) = 1
+Si w.x + b < 0 alors output sig(w.x + b) = 0
+Alors si on a sig(cw.x + cb) sachant que c->inf alors meme regle que precedement,
+Si cw.x + cb > 0 alors output de sig(cw.x + cb) -> 1
+Si cw.x + cb < 0 alors output sig(cw.x + cb) -> 0
+Puisque tous les sigmoids d un reseau appliquent cette regle alors le comportement du network reste inchange
+mnt dans le cas ou w.x + b = 0 alors cw.x + cb = 0 aussi et peu importe si c->inf sig(cw.x + cb) = 0.5 donc le comportement d un perceptron ne sera jamais atteint peu importe la valeur de c.
+
+Ex3:
