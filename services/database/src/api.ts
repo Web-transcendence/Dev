@@ -1,28 +1,22 @@
-import Database from 'better-sqlite3';  // Assurez-vous que le module sqlite3 est installé
-export const Client_db = new Database('client.db')  // Importation correcte de sqlite
-// import { z } from 'zod';
-// import fastify from "fastify";
-// import bcrypt from "bcrypt";
+import Fastify, {FastifyReply, FastifyRequest} from "fastify";
+import {createClient, emailExist} from "./clientBase.js";
 
-// Activation du parsing JSON
+const fastify = Fastify({
+    logger: true
+})
+
+fastify.get('/email-existing', (req: FastifyRequest, res: FastifyReply)=> {
+    const email = req.query as string;
+
+    if (emailExist(email))
+        return res.status(400).send();
+    return res.status(200).send();
+})
+
+fastify.post('/addUser', createClient)
 
 // Fonction pour initialiser la base de données
-// Client_db.exec(`
-//     CREATE TABLE IF NOT EXISTS Client (
-//         id INTEGER PRIMARY KEY AUTOINCREMENT,
-//         name TEXT NOT NULL,
-//         email UNIQUE NOT NULL COLLATE NOCASE,
-//         password TEXT NOT NULL
-//     )
-// `);
-//
-// console.log('Base de données initialisée avec succès.');
-//
-// const clientSchema = z.object({
-//     name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-//     email: z.string().email("Email invalide"),
-//     password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-// });
+
 
 // async function CreateClient(name: string, email: string, password: string): Promise<void> {
 //     if (!name || !email || !password) {
@@ -125,3 +119,11 @@ export const Client_db = new Database('client.db')  // Importation correcte de s
 //
 //     console.log("All tables have been cleared!");
 // }
+
+fastify.listen({ host: '127.0.0.1', port: 8003 }, function (err, address) {
+    if (err) {
+        fastify.log.error(err)
+        process.exit(1)
+    }
+    console.log(`Server is now listening on ${address}`)
+})

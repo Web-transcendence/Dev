@@ -52,7 +52,7 @@ async function loadPart(page: string): Promise<void> {
                     const formData = new FormData(myForm);
                     const data: Record<string, unknown> = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
 
-                    await fetch('post/create', {
+                    await fetch('http://api-gateway:8000/user-management/sign-up', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

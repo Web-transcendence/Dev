@@ -1,4 +1,5 @@
 import fastify, { FastifyRequest} from 'fastify'
+import {addUser} from "./addUser.js";
 
 interface IParam {
     id: string;
@@ -6,16 +7,9 @@ interface IParam {
 
 const app = fastify();
 
-app.get('/user-management/:id', async (req: FastifyRequest<{ Params: IParam }>) => {
-    console.log("user test");
+app.post('/sign-up', addUser);
 
-    return {
-        id: req.params.id,
-        name: "tes tname"
-    };
-});
-
-app.listen({port: 8000, host: '0.0.0.0'}, (err, adrr) => {
+app.listen({port: 8001, host: '0.0.0.0'}, (err, adrr) => {
     if (err) {
         console.error(err);
         process.exit(1);

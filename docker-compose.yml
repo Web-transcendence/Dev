@@ -7,7 +7,7 @@ services:
     networks:
       - transcendence
     ports:
-      - "8001:8001"         #DEV
+      - "8000:8000"         #DEV
     restart: unless-stopped
     develop:
       watch:
@@ -25,6 +25,8 @@ services:
       context: frontend/
     networks:
       - transcendence
+    ports:
+      - "3001:3001"
     restart: unless-stopped
     develop:
       watch:
@@ -42,7 +44,7 @@ services:
     networks:
       - transcendence
     ports:
-      - "8000:8000"         #DEV
+      - "8001:8001"         #DEV
     restart: unless-stopped
     develop:
       watch:
@@ -51,6 +53,22 @@ services:
           target: /app/src/
         - action: rebuild
           path: ./services/user-management/package.json
+          target: app/
+
+  database:
+    container_name: database
+    build:
+      context: services/database/
+    networks:
+      - transcendence
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/database/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/database/package.json
           target: app/
 
 #

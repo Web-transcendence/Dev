@@ -1,12 +1,10 @@
 FROM node:lts-alpine3.20
 
-RUN useradd -ms /bin/sh -u 1001 app
-USER app
-
 WORKDIR /app
 
-COPY --chown=app:app *.json .
-COPY --chown=app:app src/*.ts src/
+COPY *.json .
+COPY src/*.ts src/
+
 
 
 RUN npm install

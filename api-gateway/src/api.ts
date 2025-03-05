@@ -1,41 +1,23 @@
-export {};
-document.addEventListener("DOMContentLoaded", () => {
-    const button = document.getElementById("myButton");
-    if (button) {
-        button.addEventListener("click", getTest);
-    }
+import fastify from "fastify";
+import httpProxy from '@fastify/http-proxy';
+import cors from "@fastify/cors";
+
+const app = fastify();
+
+app.register(cors, {
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"]
+})
+
+app.register(httpProxy, {
+    upstream: 'http://user-management:8001',
+    prefix: '/user-management',
 });
 
-async function getTest() {
-    try {
-        console.log("user test");
-        const response = await fetch("http://api-gateway:8001/user-management/5");
-        if (!response.ok) {
-            throw new Error(`Request failed with status code ${response.status}`);
-        }
-        else {
-            const test = await response.json();
-            console.log(test);
-
-            const resultDiv = document.getElementById("result");
-
-            if (resultDiv) {
-                resultDiv.innerHTML = `
-                    <h3>Détails de l'utilisateur :</h3>
-                    <p>ID: ${test.id}</p>
-                    <p>Nom: ${test.name}</p>
-               `;
-            }
-            else {
-                console.log("nuul");
-            }
-        }
-
-    } catch (err) {
-        console.log(err);
-        const resultDiv = document.getElementById("result");
-        if (resultDiv) {
-            resultDiv.innerHTML = '<p>Une erreur est survenue lors de la récupération des données.</p>';
-        }
+app.listen({port: 8000, host: '0.0.0.0'}, (err, adrr) => {
+    if (err) {
+        console.error(err);
+        process.exit(1);
     }
-}
+    console.log(`server running on ${adrr}`);
+});
