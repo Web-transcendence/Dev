@@ -1,0 +1,7 @@
+https://nbviewer.org/github/nndl-solutions/NNDL-solutions/blob/master/notebooks/chap-1-using-neural-nets-to-recognize-handwritten-digits.ipynb
+https://www.ibm.com/fr-fr/topics/linear-regression
+https://www.ibm.com/fr-fr/topics/neural-networks
+https://introtodeeplearning.com/2020/index.html
+http://neuralnetworksanddeeplearning.com/
+http://neuralnetworksanddeeplearning.com/chap1.html
+https://github.com/mnielsen/neural-networks-and-deep-learning
