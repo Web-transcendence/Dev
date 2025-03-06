@@ -29,36 +29,48 @@ function navigate(event: MouseEvent, path: string): void {
 // Fonction pour charger les pages dynamiquement
 async function loadPart(page: string): Promise<void> {
     const container = document.getElementById('content') as HTMLElement;
-    container.innerHTML = '';
     if (!page || page === "/") { // Si aucune page n'est spécifiée, afficher un message par défaut
         container.innerHTML = "<p>Choisissez une option pour charger le contenu.</p>";
         return;
     }
     try { // Tentative de récupération de la page dynamique
-        if (!document.body) console.log("===========body is null");
-            const res = await fetch(`part${page}`);
+        // insert_tag(container, `part${page}`);
+        const res = await fetch(`part${page}`);
         const newElement = document.createElement('div');
-        newElement.className = 'balise';
+        newElement.className = 'tag';
         if (!res.ok) throw new Error("Page non trouvée");
         const html = await res.text();  // Récupérer le contenu HTML de la page
+        container.innerHTML = '';  // Injecter le contenu dans le div #content
         newElement.innerHTML = html;  // Injecter le contenu dans le div #content
         container.appendChild(newElement);
         if (page === "/register") {
             const button = document.getElementById("registerButton")!;
             if (button) { // Enable the button
-                // button.disabled = false;
                 button.addEventListener("click", async (event) => {
                     const myForm = document.getElementById("myForm") as HTMLFormElement;
                     const formData = new FormData(myForm);
                     const data: Record<string, unknown> = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
-
-                    await fetch('post/create', {
+                    const response = await fetch('post/create', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(data)
                     });
+                    const result = await response.json();
+                    console.log(result.redirect);
+                    if (result.redirect) {
+                        const res = await fetch(`${result.redirect}`, {});
+                        const newElement = document.createElement('div');
+                        newElement.className = 'balise';
+                        if (!res.ok) throw new Error("Page non trouvée");
+                        const html = await res.text();  // Récupérer le contenu HTML de la page
+                        container.innerHTML = '';
+                        newElement.innerHTML = html;  // Injecter le contenu dans le div #content
+                        container.appendChild(newElement);
+                    } else {
+                        console.log("Erreur:", result.error);
+                    }
                 });
             }
         }
@@ -68,3 +80,16 @@ async function loadPart(page: string): Promise<void> {
     }
 }
 
+
+// async function insert_tag(container: HTMLElement , url: string): Promise<void>{
+//     console.log("URRRRLL :", url);
+//     const res = await fetch(`part${url}`);
+//     const newElement = document.createElement('div');
+//     newElement.className = 'tag';
+//     if (!res.ok) throw new Error("Page non trouvée");
+//     const html = await res.text();  // Récupérer le contenu HTML de la page
+//     container.innerHTML = '';  // Injecter le contenu dans le div #content
+//     newElement.innerHTML = html;  // Injecter le contenu dans le div #content
+//     container.appendChild(newElement);
+//
+// }
