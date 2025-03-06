@@ -8,21 +8,16 @@ import {Client_db} from "./database.js";
 import bcrypt from "bcrypt";
 import {z} from "zod";
 import sanitizeHtml from 'sanitize-html';
+
 // Load SSL certificates
-// const httpsOptions = {
-//     https: {
-//         key: readFileSync('./key.pem'),      // Private key
-//         cert: readFileSync('./cert.pem')     // Certificate
-//     },
-//     logger: true
-// };
-// const fastify = Fastify(httpsOptions);
-// End of HTTPS setup
-
-const fastify = Fastify({
+const httpsOptions = {
+    https: {
+        key: readFileSync(join(import.meta.dirname, '../src/static/secure/key.pem')),      // Private key
+        cert: readFileSync(join(import.meta.dirname, '../src/static/secure/cert.pem'))     // Certificate
+    },
     logger: true
-})
-
+};
+const fastify = Fastify(httpsOptions);
 
 // Reset database and id to 1
 // DELETE FROM clients;
@@ -111,11 +106,11 @@ fastify.get("/*", (req, res) => { // Route pour la page d'accueil
 });
 
 
-fastify.setNotFoundHandler((request, reply) => {
-    const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
-    const readFile = readFileSync(pagePath, 'utf8');
-    reply.type('text/html').send(readFile);
-});
+// fastify.setNotFoundHandler((request, reply) => {
+//     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
+//     const readFile = readFileSync(pagePath, 'utf8');
+//     reply.type('text/html').send(readFile);
+// });
 
 fastify.register(routes)
 
