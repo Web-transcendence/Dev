@@ -40,6 +40,8 @@ async function loadPart(page: string): Promise<void> {
         newElement.className = 'tag';
         if (!res.ok) throw new Error("Page non trouvée");
         const html = await res.text();  // Récupérer le contenu HTML de la page
+        if (html.includes(container.innerHTML))
+            return;
         container.innerHTML = '';  // Injecter le contenu dans le div #content
         newElement.innerHTML = html;  // Injecter le contenu dans le div #content
         container.appendChild(newElement);
