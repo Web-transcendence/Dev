@@ -7,7 +7,7 @@ import {readFileSync} from "node:fs";
 import {Client_db} from "./database.js";
 import bcrypt from "bcrypt";
 import {z} from "zod";
-
+import sanitizeHtml from 'sanitize-html';
 // Load SSL certificates
 // const httpsOptions = {
 //     https: {
@@ -50,36 +50,44 @@ const clientSchema = z.object({
 fastify.post("/post/create", async (request, reply) => {
     // Client_db.prepare(`DELETE FROM sqlite_sequence WHERE name = ?`).run("clients");
     try {
-        const { name, email, password } = request.body as { name: string; email: string; password: string };
-
+        const mystuff = request.body;
+        const {success, data} =  clientSchema.safeParse(mystuff);
+        if (!success) {
+            return reply.status(400).send({ error: "Zod failed safeParse()" });
+        }
+        let {name, email, password} = data;
         // Vérifier que toutes les informations sont présentes
+        console.log("============++++++++++++===============")
+        console.log(name, email, password);
+        name = sanitizeHtml(name); // Protection from XSS attacks
+        email = sanitizeHtml(email);
+        password = sanitizeHtml(password);
+        console.log(name, email, password);
+        console.log("============++++++++++++===============")
         if (!name || !email || !password) {
             return reply.status(400).send({ error: "Toutes les informations sont requises !" });
         }
-
         // Vérifier si l'email est déjà utilisé
         const existingClient = Client_db.prepare("SELECT * FROM clients WHERE email = ?").get(email);
         if (existingClient) {
             return reply.status(400).send({ error: "Email déjà utilisé" });
         }
-
         // Hasher le mot de passe
         const hashedPassword = await bcrypt.hash(password, 10);
-
         // Insérer le client dans la base de données
         const insert = Client_db.prepare("INSERT INTO clients (name, email, password) VALUES (?, ?, ?)");
         const result = insert.run(name, email, hashedPassword);
-        const rows = Client_db.prepare(`SELECT * FROM clients`).all();
-        console.table(rows);
+        // const rows = Client_db.prepare(`SELECT * FROM clients`).all();
+        // console.table(rows);
         if (result.changes === 1) {
             const table = Client_db.prepare("SELECT * FROM clients");
-            console.log(table);
+            // console.log(table);
             const newClientId = result.lastInsertRowid;
             const newClient = Client_db.prepare("SELECT name FROM clients WHERE id = ?").get(newClientId) as { name: string } | undefined;
             if (newClient) {
                 console.log("Nouveau client enregistré:", newClient.name);
+                return reply.status(201).send({ redirect: `/part/login?name=${encodeURIComponent(newClient?.name || "Utilisateur")}` });
             }
-            return reply.redirect(`/part/login?name=${encodeURIComponent(newClient?.name || "Utilisateur")}`);
             // return reply.redirect(`/part/login`);
             // return reply.status(201).send({ message: "Compte client créé avec succès", id: result.lastInsertRowid });
         } else {
