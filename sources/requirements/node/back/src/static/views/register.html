@@ -2,14 +2,17 @@
     <div class="insert-name">
         <label for="name">Enter your name: </label>
         <input class="w-full bg-cyan text-black py-2 rounded-md" type="text" name="name" id="name" required />
+        <span class="error-message text-red-400 text-sm hidden" id="nameError">Name is required</span>
     </div>
     <div class="insert-email">
         <label for="email">Enter your email: </label>
         <input class="w-full bg-cyan text-black py-2 rounded-md" type="email" name="email" id="email" required />
+        <span class="error-message text-red-500 text-sm hidden" id="emailError">Invalid email : example@example.com</span>
     </div>
     <div class="insert-password">
         <label for="password">Enter your password: </label>
         <input class="w-full bg-cyan text-black py-2 rounded-md" type="password" name="password" id="password" required />
+        <span class="error-message text-red-600 text-sm hidden" id="passwordError">Password is required, minimum 6 caracters</span>
     </div>
     <div class="login-button-tag">
         <input id="registerButton" type="submit" value="Subscribe!" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"/>

@@ -67,7 +67,6 @@ function register(container: HTMLElement, button: HTMLElement): void {
             body: JSON.stringify(data)
         });
         const result = await response.json();
-        console.log(result.redirect);
         if (result.redirect) {
             const res = await fetch(`${result.redirect}`, {});
             const newElement = document.createElement('div');
@@ -79,6 +78,33 @@ function register(container: HTMLElement, button: HTMLElement): void {
             newElement.innerHTML = html;
             container.appendChild(newElement);
         } else
-            console.log("Incomplet field or bad request");
+            validateForm(result);
     });
+}
+
+function validateForm(result: { name: string; email: string; password: string}): void {
+    const nameError = document.getElementById("nameError") as HTMLSpanElement;
+    const emailError = document.getElementById("emailError") as HTMLSpanElement;
+    const passwordError = document.getElementById("passwordError") as HTMLSpanElement;
+    if (result.name)
+        nameError.classList.remove("hidden");
+    else {
+        if (!nameError.classList.contains("hidden")) {
+            nameError.classList.add("hidden");
+        }
+    }
+    if (result.email)
+        emailError.classList.remove("hidden");
+    else {
+        if (!emailError.classList.contains("hidden")) {
+            emailError.classList.add("hidden");
+        }
+    }
+    if (result.password)
+        passwordError.classList.remove("hidden");
+    else {
+        if (!passwordError.classList.contains("hidden")) {
+            passwordError.classList.add("hidden");
+        }
+    }
 }
