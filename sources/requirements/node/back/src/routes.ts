@@ -49,7 +49,6 @@ export async function routes(fastify: FastifyInstance) {
     });
     //CSS output
     fastify.get("/tail/output.css", (req, res) => {
-        console.log("out-------------------------------------------------------------");
         const frontPath = join(import.meta.dirname, env.TRANS_TAIL_PATH, "output.css");
         console.log(frontPath);
         const file = readFileSync(frontPath, 'utf8');
