@@ -19,5 +19,5 @@ app.listen({port: 8000, host: '0.0.0.0'}, (err, adrr) => {
         console.error(err);
         process.exit(1);
     }
-    console.log(`server running on ${adrr}`);
+    console.log(`serve  r running on ${adrr}`);
 });
