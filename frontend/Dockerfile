@@ -11,6 +11,5 @@ COPY --chown=app:app public/ public/
 
 
 RUN npm install
-RUN npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css
 
 CMD ["npm", "run", "dev"]

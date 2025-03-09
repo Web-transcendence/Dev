@@ -8,6 +8,8 @@ services:
       - transcendence
     ports:
       - "8000:8000"         #DEV
+    depends_on:
+      - database
     restart: unless-stopped
     develop:
       watch:
@@ -27,12 +29,17 @@ services:
       - transcendence
     ports:
       - "3001:3001"
+    depends_on:
+      - api-gateway
     restart: unless-stopped
     develop:
       watch:
         - action: sync
           path: ./frontend/src/
           target: /app/src/
+        - action: sync
+          path: ./frontend/public/
+          target: /app/public/
         - action: rebuild
           path: ./frontend/package.json
           target: app/
@@ -45,6 +52,8 @@ services:
       - transcendence
     ports:
       - "8001:8001"         #DEV
+    depends_on:
+      - api-gateway
     restart: unless-stopped
     develop:
       watch:

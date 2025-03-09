@@ -1,7 +1,8 @@
 FROM node:lts-alpine3.20
 
-RUN useradd -ms /bin/sh -u 1001 app
+RUN adduser -D -s /bin/sh -u 1001 app
 USER app
+
 
 WORKDIR /app
 

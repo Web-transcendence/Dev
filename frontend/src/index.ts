@@ -4,7 +4,6 @@ import fastifyStatic from '@fastify/static';
 import {join} from "node:path";
 import {env} from "./env.js";
 import {readFileSync} from "node:fs";
-import {z} from "zod";
 
 // Load SSL certificates
 // const httpsOptions = {
@@ -61,10 +60,11 @@ fastify.setNotFoundHandler((request, reply) => {
 
 fastify.register(routes)
 
-fastify.listen({ host: '127.0.0.1', port: 3001 }, function (err, address) {
+fastify.listen({ host: '0.0.0.0', port: 3001 }, function (err, address) {
     if (err) {
         fastify.log.error(err)
         process.exit(1)
     }
+    console.log(import.meta.dirname);
     console.log(`Server is now  listening on ${address}`)
 })

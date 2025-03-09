@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "test": "tsc && npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css && tsx watch src/index.ts",
-    "dev": "concurrently --kill-others \"tsc --watch\" \"tsx watch src/index.ts\" \"npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css --watch\" "
+    "dev": "concurrently --kill-others \"tsc --watch\" \"tsx watch --include './src/*' src/index.ts\" \"npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css --watch\" "
   },
   "devDependencies": {
     "@types/node": "^22.13.5",

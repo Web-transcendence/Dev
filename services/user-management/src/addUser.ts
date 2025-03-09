@@ -12,7 +12,7 @@ export async function addUser(req: FastifyRequest, res: FastifyReply) {
         const response = await fetch(`http://database:8003/email-existing?email=${encodeURIComponent(email)}`, {
             method: 'GET',
             headers: {
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             }
         });
         if (!response.ok) {
@@ -22,7 +22,7 @@ export async function addUser(req: FastifyRequest, res: FastifyReply) {
         const addUserRes = await fetch('http://database:8003/addUser', {
             method: 'POST',
             headers: {
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 name: name,

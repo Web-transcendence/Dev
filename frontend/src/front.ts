@@ -40,19 +40,18 @@ async function loadPart(page: string): Promise<void> {
         const newElement = document.createElement('div');
         newElement.className = 'balise';
         if (!res.ok) throw new Error("Page non trouvée");
-        const html = await res.text();  // Récupérer le contenu HTML de la page
-        newElement.innerHTML = html;  // Injecter le contenu dans le div #content
+        newElement.innerHTML = await res.text();  // Récupérer le contenu HTML de la page
         container.appendChild(newElement);
         if (page === "/register") {
             const button = document.getElementById("registerButton")!;
             if (button) { // Enable the button
                 // button.disabled = false;
-                button.addEventListener("click", async (event) => {
+                button.addEventListener("click", async (/* event */) => {
                     const myForm = document.getElementById("myForm") as HTMLFormElement;
                     const formData = new FormData(myForm);
                     const data: Record<string, unknown> = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
 
-                    await fetch('http://api-gateway:8000/user-management/sign-up', {
+                    await fetch('http://localhost:8000/user-management/sign-up', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

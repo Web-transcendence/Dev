@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
-export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 import {FastifyReply, FastifyRequest} from "fastify";
 
+export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
@@ -13,7 +13,7 @@ Client_db.exec(`
 `);
 
 export function emailExist(email: string) {
-    const existingClient = Client_db.prepare("SELECT * FROM clients WHERE email = ?").get(email);
+    const existingClient = Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(email);
     return !!existingClient;
 }
 
@@ -21,15 +21,19 @@ export function emailExist(email: string) {
 export async function createClient(req: FastifyRequest, res: FastifyReply) {
     const { name, email, password } = req.body as { name: string; email: string; password: string };
 
-    const insert = Client_db.prepare("INSERT INTO clients (name, email, password) VALUES (?, ?, ?)");
+
+    if (!name || !email || !password) {
+        return res.status(400).send({error: "Toutes les informations sont requises !"});
+    }
+
+    const insert = Client_db.prepare("INSERT INTO Client (name, email, password) VALUES (?, ?, ?)");
     const result = insert.run(name, email, password);
-    const rows = Client_db.prepare(`SELECT * FROM clients`).all();
-    console.table(rows);
+    // language=SQL format=false
+    Client_db.prepare(`SELECT * FROM Client`).all();
     if (result.changes === 1) {
-        const table = Client_db.prepare("SELECT * FROM clients");
-        console.log(table);
+        Client_db.prepare("SELECT * FROM Client");
         const newClientId = result.lastInsertRowid;
-        const newClient = Client_db.prepare("SELECT name FROM clients WHERE id = ?").get(newClientId) as { name: string } | undefined;
+        const newClient = Client_db.prepare("SELECT name FROM Client WHERE id = ?").get(newClientId) as { name: string } | undefined;
         if (newClient) {
             console.log("Nouveau client enregistré:", newClient.name);
         }

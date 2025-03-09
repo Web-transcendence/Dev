@@ -1,9 +1,6 @@
-import fastify, { FastifyRequest} from 'fastify'
+import fastify from 'fastify'
 import {addUser} from "./addUser.js";
 
-interface IParam {
-    id: string;
-}
 
 const app = fastify();
 
