@@ -12,9 +12,9 @@
 ### • User Management
 
 ◦ Major module: Standard user management, authentication, users across tournaments.
-
+??? 
 ~~◦ Major module: Implementing a remote authentication.~~
-
+??? 
 ### • Gameplay and user experience
 
 ◦ Major module: Remote players
