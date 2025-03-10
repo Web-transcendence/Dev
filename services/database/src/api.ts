@@ -86,6 +86,16 @@ fastify.post('/addUser', createClient)
 //     }
 // };
 
+Trans_Database.exec(`
+    DELETE FROM clients; -- remove olds clients and reset database, remove for production
+    DELETE FROM sqlite_sequence; -- same
+    CREATE TABLE IF NOT EXISTS clients (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email UNIQUE NOT NULL COLLATE NOCASE,
+        password TEXT NOT NULL
+    )
+`);
 
 
 // Fonction pour créer un client dans la base de données
@@ -124,11 +134,3 @@ fastify.post('/addUser', createClient)
 //
 //     console.log("All tables have been cleared!");
 // }
-
-fastify.listen({ host: '0.0.0.0', port: 8003 }, function (err, address) {
-    if (err) {
-        fastify.log.error(err)
-        process.exit(1)
-    }
-    console.log(`Server is now listening on ${address}`)
-})

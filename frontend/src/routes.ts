@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { env } from './env.js';
+import sanitizeHtml from 'sanitize-html';
 
 export async function routes(fastify: FastifyInstance) {
     fastify.get("/front.js", (req, res) => {
@@ -10,46 +11,48 @@ export async function routes(fastify: FastifyInstance) {
         res.type('text/js').send(file);
         return;
     })
-    // ROAD OF BALISE
+    // ROAD OF TAG
     fastify.get('/part/about', function (req, reply) {
-        console.log("=======about.html===========")
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "about.html");
-        const balise = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(balise);
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag);
     })
     fastify.get('/part/login*', function (req, reply) {
-        console.log("=======login.html===========")
-        // Get the name from query params
-        const userName = (req.query as { name?: string }).name || "Utilisateur";
-
-        // Load the HTML file
+        let userName = (req.query as { name?: string }).name || "Utilisateur"; // Get the name from query params
+        userName = sanitizeHtml(userName); // Protection XSS Attacks
+        if (!userName)
+            userName = "Utilisateur";
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH || "", "login.html");
         let htmlContent = readFileSync(frontPath, 'utf8');
-
-        // Replace the placeholder in the HTML with the actual user name
-        htmlContent = htmlContent.replace('{{user-name}}', userName);
+        htmlContent = htmlContent.replace('<span id="user-name"></span>', userName); // Insert Username
         reply.type('text/html').send(htmlContent);
     })
     fastify.get('/part/register', function (req, reply) {
-        console.log("=======register.html===========")
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "register.html");
-        const balise = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(balise)
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag)
     })
     fastify.get('/part/contact', function (req, reply) {
-        console.log("=======contact.html===========")
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "contact.html");
-        const balise = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(balise)
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag)
     })
     // FAV ICON
     fastify.get('/favicon.ico', function (req, reply) {
         try {
             const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "favicon.ico");
-            const balise = readFileSync(frontPath);
-            reply.type('img/ico').send(balise)
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
         } catch (error) {
             reply.code(404).send("Fichier non trouvé");
         }
     });
+    //CSS output
+    fastify.get("/tail/output.css", (req, res) => {
+        const frontPath = join(import.meta.dirname, env.TRANS_TAIL_PATH, "output.css");
+        console.log(frontPath);
+        const file = readFileSync(frontPath, 'utf8');
+        res.type('text/css').send(file);
+        return;
+    })
 }
