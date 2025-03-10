@@ -47,12 +47,12 @@ export async function routes(fastify: FastifyInstance) {
             reply.code(404).send("Fichier non trouvé");
         }
     });
-    //CSS output
-    fastify.get("/tail/output.css", (req, res) => {
-        const frontPath = join(import.meta.dirname, env.TRANS_TAIL_PATH, "output.css");
-        console.log(frontPath);
-        const file = readFileSync(frontPath, 'utf8');
-        res.type('text/css').send(file);
-        return;
-    })
+    // //CSS output
+    // fastify.get("/tail/output.css", (req, res) => {
+    //     const frontPath = join(import.meta.dirname, env.TRANS_TAIL_PATH, "output.css");
+    //     console.log(frontPath);
+    //     const file = readFileSync(frontPath, 'utf8');
+    //     res.type('text/css').send(file);
+    //     return;
+    // })
 }

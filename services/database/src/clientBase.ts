@@ -3,6 +3,9 @@ import {FastifyReply, FastifyRequest} from "fastify";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
+
+
+
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -11,6 +14,8 @@ Client_db.exec(`
         password TEXT NOT NULL
     )
 `);
+
+
 
 export function emailExist(email: string) {
     const existingClient = Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(email);

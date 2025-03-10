@@ -7,8 +7,8 @@ import {readFileSync} from "node:fs";
 
 const httpsOptions = {
     https: {
-        key: readFileSync(join(import.meta.dirname, '../src/static/secure/key.pem')),      // Private key
-        cert: readFileSync(join(import.meta.dirname, '../src/static/secure/cert.pem'))     // Certificate
+        key: readFileSync(join(import.meta.dirname, '../secure/key.pem')),      // Private key
+        cert: readFileSync(join(import.meta.dirname, '../secure/cert.pem'))     // Certificate
     },
     logger: true
 };
