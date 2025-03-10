@@ -25,7 +25,10 @@
 
 ◦ Minor module: Game Customization Options.
 
+??? 
+
 ◦ Major module: Live chat.
+??? 
 
 ### • AI-Algo
 
