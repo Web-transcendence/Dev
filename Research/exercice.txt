@@ -1,3 +1,14 @@
+Il a deux types de "neuronnes" pour le moment, les perceptrons et les sigmoids. Pour
+comprendre la difference il faut s'interesser a ce que contiennent les dit neuronnes.
+Un neuronne contient un calcul, une somme plus exactement. Le but de cette somme est d'appliquer
+un calcul a different input et de ressortir un output simple. Les inputs vont avoir un poids (w) et 
+a cette somme d input ponderee on va venir y ajouter un biais qui est l inverse d'un seuil.
+Et c'est donc ici que la difference entre nos neuronnes se fait. Le perceptron peut etre definit par
+output =    | 0 si sum(wj.xj) + b <= 0 
+            | 1 si sum(wj.x) + b > 0
+alors que le sigmoid:
+output = 1 / (1 + e^-z) sachant que z = sum(wj.xj) + b
+
 Ex1:
 Montrons que le comportement du network ne change pas si nous multiplions les weights ainsi que les biais d'un perceptron:
 
@@ -24,4 +35,15 @@ Si cw.x + cb < 0 alors output sig(cw.x + cb) -> 0
 Puisque tous les sigmoids d un reseau appliquent cette regle alors le comportement du network reste inchange
 mnt dans le cas ou w.x + b = 0 alors cw.x + cb = 0 aussi et peu importe si c->inf sig(cw.x + cb) = 0.5 donc le comportement d un perceptron ne sera jamais atteint peu importe la valeur de c.
 
-Ex3:
+Quadratic Cost Function ->
+C(w,b)≡(1/2n)∑x(∥y(x)−a∥2).
+w = all weights
+b = all biaises
+n = number of inputs
+a = vector of outputs
+x = all inputs
+y(x) = vector of expected output for an input x
+
+La Quadratic Cost Function ou MSE(Mean Squerred Error) est une fonction qui calcule l'erreur
+de notre algo en comparant ses outputs par rapport a ceux attendus. Donc plus a sera proche
+de y(x) plus C(w,b) tendra vers 0 la ou a l'inverse il tendra vers 1.
