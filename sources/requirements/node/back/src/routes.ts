@@ -18,10 +18,11 @@ export async function routes(fastify: FastifyInstance) {
         reply.type('text/html').send(tag);
     })
     fastify.get('/part/login*', function (req, reply) {
-        let userName = (req.query as { name?: string }).name || "Utilisateur"; // Get the name from query params
+        let userName = (req.query as { name?: string }).name || "User"; // Get the name from query params
         userName = sanitizeHtml(userName); // Protection XSS Attacks
         if (!userName)
-            userName = "Utilisateur";
+            userName = "User";
+        // const token = jwt.sign({ userName }, env.SECRET_KEY, { expiresIn: '1h' }); // Définir le cookie avec le token
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH || "", "login.html");
         let htmlContent = readFileSync(frontPath, 'utf8');
         htmlContent = htmlContent.replace('<span id="user-name"></span>', userName); // Insert Username
@@ -38,9 +39,29 @@ export async function routes(fastify: FastifyInstance) {
         reply.type('text/html').send(tag)
     })
     // FAV ICON
-    fastify.get('/favicon.ico', function (req, reply) {
+    fastify.get('/favicon/favicon.ico', function (req, reply) {
         try {
             const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "favicon.ico");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier non trouvé");
+        }
+    });
+    fastify.get('/favicon/login.png', function (req, reply) {
+        console.log("\n\nLOGIN\n\n");
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "login.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier non trouvé");
+        }
+    });
+    fastify.get('/favicon/logout.png', function (req, reply) {
+        console.log("\n\nLOGOUT\n\n");
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "logout.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {

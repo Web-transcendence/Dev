@@ -58,28 +58,37 @@ function register(container: HTMLElement, button: HTMLElement): void {
     button.addEventListener("click", async (event) => {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
-        const data: Record<string, unknown> = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
+        const anyData = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
         const response = await fetch('post/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(anyData)
         });
         const result = await response.json();
         if (result.redirect) {
-            const res = await fetch(`${result.redirect}`, {});
-            const newElement = document.createElement('div');
-            newElement.className = 'tag';
-            if (!res.ok)
-                throw new Error("Page not found: redirect missing.");
-            const html = await res.text();
-            container.innerHTML = '';
-            newElement.innerHTML = html;
-            container.appendChild(newElement);
+            await login(container, result);
         } else
             validateForm(result);
     });
+}
+
+async function login(container: HTMLElement, result: { redirect: any; token: any;}): Promise<void> {
+    const res = await fetch(`${result.redirect}`, {});
+    const newElement = document.createElement('div');
+    newElement.className = 'tag';
+    if (!res.ok)
+        throw new Error("Page not found: redirect missing.");
+    const html = await res.text();
+    container.innerHTML = '';
+    newElement.innerHTML = html;
+    // mod avatar and name
+    const name = document.getElementById("username") as HTMLSpanElement;
+    name.innerHTML = 'Greg';
+    const img_avatar = document.getElementById("avatar") as HTMLImageElement;
+    img_avatar.src = img_avatar.src.replace("logout", "login");
+    container.appendChild(newElement);
 }
 
 function validateForm(result: { name: string; email: string; password: string}): void {
