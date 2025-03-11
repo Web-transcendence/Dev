@@ -20,8 +20,7 @@ fastify.get('/email-existing', (req: FastifyRequest, res: FastifyReply)=> {
 
 fastify.post('/addUser', createClient)
 
-
-fastify.listen({ host: '0.0.0.0', port: 8003 }, function (err, address) {
+fastify.listen({ host: '0.0.0.0', port: 4001 }, function (err, address) {
     if (err) {
         fastify.log.error(err)
         process.exit(1)

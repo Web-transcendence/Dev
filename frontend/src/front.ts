@@ -5,11 +5,11 @@ document.addEventListener("DOMContentLoaded", () => {
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
-    loadPart(window.location.pathname);
+    // loadPart(window.location.pathname);
 });
 
 window.onpopstate = () => {
-    loadPart(window.location.pathname);
+    // loadPart(window.location.pathname);
 };
 
 function navigate(event: MouseEvent, path: string): void {
@@ -59,13 +59,14 @@ function register(container: HTMLElement, button: HTMLElement): void {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
         const data: Record<string, unknown> = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
-        const response = await fetch('http://localhost:8000/user-management/sign-up', {
+        const response = await fetch('http://localhost:3000/user-management/sign-up', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
         });
+        console.log("PASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
         const result = await response.json();
         if (result.redirect) {
             const res = await fetch(`${result.redirect}`, {});

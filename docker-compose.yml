@@ -7,7 +7,7 @@ services:
     networks:
       - transcendence
     ports:
-      - "8000:8000"         #DEV
+      - "3000:3000"         #DEV
     depends_on:
       - database
     restart: unless-stopped
@@ -28,7 +28,7 @@ services:
     networks:
       - transcendence
     ports:
-      - "3001:3001"
+      - "4000:4000"
     depends_on:
       - api-gateway
     restart: unless-stopped
@@ -51,7 +51,7 @@ services:
     networks:
       - transcendence
     ports:
-      - "8001:8001"         #DEV
+      - "5000:5000"         #DEV
     depends_on:
       - api-gateway
     restart: unless-stopped
@@ -70,6 +70,9 @@ services:
       context: services/database/
     networks:
       - transcendence
+    ports:
+      - "6000:6000"         #DEV
+      - "4001:4001"         #DEV
     restart: unless-stopped
     develop:
       watch:

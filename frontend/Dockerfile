@@ -7,8 +7,6 @@ USER app
 
 WORKDIR /app
 
-
-
 RUN mkdir secure -p
 
 RUN openssl req -x509 -newkey rsa:4096 -nodes  \

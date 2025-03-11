@@ -29,7 +29,7 @@ fastify.get("/*", (req, res) => { // Route pour la page d'accueil
 
 fastify.register(routes)
 
-fastify.listen({ host: '0.0.0.0', port: 3001 }, function (err, address) {
+fastify.listen({ host: '0.0.0.0', port: 4000 }, function (err, address) {
     if (err) {
         fastify.log.error(err)
         process.exit(1)

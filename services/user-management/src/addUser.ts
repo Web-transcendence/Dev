@@ -4,12 +4,14 @@ import bcrypt from "bcrypt";
 
 export async function addUser(req: FastifyRequest, res: FastifyReply) {
     const { name, email, password } = req.body as { name: string; email: string; password: string };
-
-    if (!name || !email || !password) {
-        return res.status(400).send({ error: "Toutes les informations sont requises !" });
-    }
+    console.log("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUSER");
+    console.log(req.body);
+    console.log("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUSER");
+    // if (!name || !email || !password) {
+    //     return res.status(400).send({ error: "Toutes les informations sont requises !" });
+    // }
     try {
-        const response = await fetch(`http://database:8003/email-existing?email=${encodeURIComponent(email)}`, {
+        const response = await fetch(`http://database:4001/email-existing?email=${encodeURIComponent(email)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -19,7 +21,7 @@ export async function addUser(req: FastifyRequest, res: FastifyReply) {
             return res.status(400).send({ error: "Email déjà utilisé" });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const addUserRes = await fetch('http://database:8003/addUser', {
+        const addUserRes = await fetch('http://database:4001/addUser', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -33,7 +35,7 @@ export async function addUser(req: FastifyRequest, res: FastifyReply) {
         if (!addUserRes.ok) {
             return res.status(500).send({ error: "something come wrong" });
         }
-        return res.status(201).send();
+        res.status(201).send();
     } catch (err) {
         console.error(err);
         return false;
