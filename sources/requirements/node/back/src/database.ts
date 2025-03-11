@@ -2,8 +2,9 @@ import { FastifyInstance } from 'fastify';
 import Database from 'better-sqlite3';
 import sanitizeHtml from "sanitize-html";
 import bcrypt from "bcrypt";
-export const Trans_Database = new Database('database.db')  // Importation de sqlite
 import {z} from "zod";
+
+export const Trans_Database = new Database('database.db')  // Importation de sqlite
 
 Trans_Database.exec(`
     DELETE FROM clients; -- remove olds clients and reset database, remove for production
@@ -26,20 +27,21 @@ export async function CreateClient(fastify: FastifyInstance) {
     fastify.post("/post/create", async (request, reply) => {
         try {
             const mystuff = request.body;
-            const {success, data} = clientSchema.safeParse(mystuff);
-            if (!success) {
-                return reply.status(400).send({error: "Zod failed safeParse()"});
+            const zod_result = clientSchema.safeParse(mystuff);
+            if (!zod_result.success) {
+                return zod_result.error.format();
             }
+            const { data } = zod_result;
             let {name, email, password} = data;
             name = sanitizeHtml(name); // Protection from XSS attacks
             email = sanitizeHtml(email);
             password = sanitizeHtml(password);
             if (!name || !email || !password) {
-                return reply.status(400).send({error: "Toutes les informations sont requises !"});
+                return reply.status(454).send({error: "All information are required !"});
             }
             const existingClient = Trans_Database.prepare("SELECT * FROM clients WHERE email = ?").get(email);
             if (existingClient) {
-                return reply.status(400).send({error: "Email déjà utilisé"});
+                return reply.status(431).send({error: "Email already in use"});
             }
             const hashedPassword = await bcrypt.hash(password, 10);
             const insert = Trans_Database.prepare("INSERT INTO clients (name, email, password) VALUES (?, ?, ?)");
@@ -54,14 +56,14 @@ export async function CreateClient(fastify: FastifyInstance) {
                     name: string
                 } | undefined;
                 if (newClient) {
-                    console.log("Nouveau client enregistré:", newClient.name);
-                    return reply.status(201).send({redirect: `/part/login?name=${encodeURIComponent(newClient?.name || "Utilisateur")}`});
+                    console.log("New client registered:", newClient.name);
+                    return reply.status(201).send({redirect: `/part/login?name=${encodeURIComponent(newClient?.name || "User")}`});
                 }
             } else
-                return reply.status(500).send({error: "Erreur lors de la création du compte"});
+                return reply.status(500).send({error: "Error when creating client acount"});
         } catch (error) {
-            console.error("Erreur lors de l'inscription:", error);
-            return reply.status(500).send({error: "Erreur serveur"});
+            console.error("Error when register:", error);
+            return reply.status(500).send({error: "Error from server"});
         }
     });
 }
