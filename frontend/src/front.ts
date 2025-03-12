@@ -78,8 +78,10 @@ function register(container: HTMLElement, button: HTMLElement): void {
             container.innerHTML = '';
             newElement.innerHTML = html;
             container.appendChild(newElement);
-        } else
-            validateForm(result);
+        } else {
+            const errors = result.json;
+            validateForm(errors.json);
+        }
     });
 }
 
