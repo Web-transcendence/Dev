@@ -47,3 +47,56 @@ y(x) = vector of expected output for an input x
 La Quadratic Cost Function ou MSE(Mean Squerred Error) est une fonction qui calcule l'erreur
 de notre algo en comparant ses outputs par rapport a ceux attendus. Donc plus a sera proche
 de y(x) plus C(w,b) tendra vers 0 la ou a l'inverse il tendra vers 1.
+
+Ex3: Ici le but de l'exercice va etre de calculer les weights et biaises pour que notre
+le output layer ne comporte plus que 4 output neurons. 
+D'apres l'ecriture binaire des chiffres on sait que le premier output neuron (on ecrit ici de droite a gauche 1 = 0001)
+va output 1 lorsque l input est 8 ou 9 et le reste du temps ca sera 0. Donc on sait que le weight pour l input de 8 et 9
+est de 1 et 0 pour les autres chiffres. Tel que w(0,0,0,0,0,0,0,0,1,1).x avec x vecteur des outputs de la layer precedente.
+Sachant que la precision des outputs de la layer d avant est de >= 0.99 lors de l activation et <= 0.01 le reste du temps.
+Donc on sait que :  0.99 <= σ(w.x + b) pour 8 et 9, et σ(w.x + b) <= 0.01 pour les autres.
+Plus simplement on cherche b afin que σ(b) ~ 0 et σ(1 + b) ~ 1;
+Donc on peut set b = -0.5 puisqu il remplit les deux conditions,
+On se rappelle que on cherche w tel que:
+    0.99 <= σ(w(0.99 + b)) et σ(w(0.02 + b)) <= 0.01
+
+Plus globalement on peut dire qu on a une precision α = 0.01 donc 
+    | 1 - α <= σ(w(1 - α + b))
+    | σ(w(2α + b)) <= α
+
+Donc d apres la definition au dessus d un sigmoid σ cela nous donne:
+    | w >= (ln((1-α)/α))/(1-α+b)
+    | w >= -(ln((1-α)/α))/(2α+b)
+
+    | w >= 9.38
+    | w >= 9.58
+
+Maintenant on va generaliser tout ca pour, pas besoin de conclure pour cet unique neuron.
+Un neuron prendra l output de n <= 10 neurons de la layer precedente donc on a :
+    1 - α <= w.x <= 1 + (n - 1)α s'il doit s activer et 0 <= w.x <= nα pour les autres
+
+Donc nos conditions deviennent:
+    | 1 - α <=  σ(w(1-α+b))
+    | σ(w(nα+b)) <= α
+
+avec nα < 0.5 et donc nα + b < 0
+    | w >= (ln((1-α)/α))/(1-α+b)
+    | w >= -(ln((1-α)/α))/(nα+b)
+
+donc pour chaque neuron avec n <= 10
+    | w >= 9.38
+    | w >= 11.49
+
+donc globalement w >= 12
+
+On aura donc un vecteur final remplit de 0 et de 12, on peut dont en deduire que maintenant b = -6
+pusque pour passer de 1 a 12 on a applique un facteur 12 au weight alors on fait pareil pour le biais.
+
+Neuron 1: w=12(0,0,0,0,0,0,0,0,1,1); b=−6
+Neuron 2: w=12(0,0,0,0,1,1,1,1,0,0); b=−6
+Neuron 3: w=12(0,0,1,1,0,0,1,1,0,0); b=−6
+Neuron 4: w=12(0,1,0,1,0,1,0,1,0,1); b=−6
+
+Ex4:
+Ex5:
+
