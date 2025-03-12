@@ -1,5 +1,5 @@
 import {FastifyReply, FastifyRequest} from "fastify";
-
+import jwt from 'jsonwebtoken';
 
 export async function addUser(req: FastifyRequest, res: FastifyReply):Promise<void> {
     const { name, email, password } = req.body as { name: string; email: string; password: string };
@@ -33,7 +33,9 @@ export async function addUser(req: FastifyRequest, res: FastifyReply):Promise<vo
             const errorData = await addUserRes.json();
             return res.status(500).send({ json: errorData});
         }
-        res.status(201).send({redirect: `/part/login?name=${encodeURIComponent("User")}`});
+        const user = { id: 1, name: name }; // Exemple d'utilisateur
+        const token = jwt.sign(user, 'secret_key', { expiresIn: '1h' }); // Génération du token
+        res.status(201).send({token, username: name, redirect: 'post/login'});
     } catch (err) {
         console.error(err);
     }
