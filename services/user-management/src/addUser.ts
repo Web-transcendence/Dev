@@ -1,15 +1,8 @@
 import {FastifyReply, FastifyRequest} from "fastify";
-import bcrypt from "bcrypt";
 
 
-export async function addUser(req: FastifyRequest, res: FastifyReply) {
+export async function addUser(req: FastifyRequest, res: FastifyReply):Promise<void> {
     const { name, email, password } = req.body as { name: string; email: string; password: string };
-    console.log("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUSER");
-    console.log(req.body);
-    console.log("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUSER");
-    // if (!name || !email || !password) {
-    //     return res.status(400).send({ error: "Toutes les informations sont requises !" });
-    // }
     try {
         const response = await fetch(`http://database:4001/email-existing?email=${encodeURIComponent(email)}`, {
             method: 'GET',
@@ -20,7 +13,10 @@ export async function addUser(req: FastifyRequest, res: FastifyReply) {
         if (!response.ok) {
             return res.status(400).send({ error: "Email déjà utilisé" });
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // let hashedPassword = '';
+        // if (password) {
+        //     hashedPassword = await bcrypt.hash(password, 10);
+        // }
         const addUserRes = await fetch('http://database:4001/addUser', {
             method: 'POST',
             headers: {
@@ -29,16 +25,16 @@ export async function addUser(req: FastifyRequest, res: FastifyReply) {
             body: JSON.stringify({
                 name: name,
                 email: email,
-                password: hashedPassword
+                password: password
+                // password: hashedPassword
             })
         });
         if (!addUserRes.ok) {
-            return res.status(500).send({ error: "something come wrong" });
+            const errorData = await addUserRes.json();
+            return res.status(500).send({ json: errorData});
         }
-        res.status(201).send();
+        res.status(201).send({redirect: `/part/login?name=${encodeURIComponent("User")}`});
     } catch (err) {
         console.error(err);
-        return false;
     }
-
 }
