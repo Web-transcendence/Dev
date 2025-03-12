@@ -18,10 +18,10 @@ export async function routes(fastify: FastifyInstance) {
         reply.type('text/html').send(tag);
     })
     fastify.get('/part/login*', function (req, reply) {
-        let userName = (req.query as { name?: string }).name || "Utilisateur"; // Get the name from query params
+        let userName = (req.query as { name?: string }).name || "User"; // Get the name from query params
         userName = sanitizeHtml(userName); // Protection XSS Attacks
         if (!userName)
-            userName = "Utilisateur";
+            userName = "User";
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH || "", "login.html");
         let htmlContent = readFileSync(frontPath, 'utf8');
         htmlContent = htmlContent.replace('<span id="user-name"></span>', userName); // Insert Username
