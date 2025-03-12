@@ -58,7 +58,7 @@ function register(container: HTMLElement, button: HTMLElement): void {
     button.addEventListener("click", async (event) => {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
-        const data: Record<string, unknown> = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
+        const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
         const response = await fetch('http://localhost:3000/user-management/sign-up', {
             method: 'POST',
             headers: {
@@ -66,24 +66,83 @@ function register(container: HTMLElement, button: HTMLElement): void {
             },
             body: JSON.stringify(data)
         });
-        console.log("PASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
         const result = await response.json();
-        if (result.redirect) {
-            const res = await fetch(`${result.redirect}`, {});
-            const newElement = document.createElement('div');
-            newElement.className = 'tag';
-            if (!res.ok)
-                throw new Error("Page not found: redirect missing.");
-            const html = await res.text();
-            container.innerHTML = '';
-            newElement.innerHTML = html;
-            container.appendChild(newElement);
-        } else {
-            const errors = result.json;
-            validateForm(errors.json);
+        console.log(result);
+        if (result.token) {
+            sessionStorage.setItem('token', result.token);
+            const token = localStorage.getItem('token');
         }
+        if (result.username) {
+            localStorage.setItem('username', result.username); // Stockage
+
+            const username = localStorage.getItem('username'); // Récupération
+            const nameSpan = document.getElementById('username') as HTMLSpanElement;
+            nameSpan.textContent = username;
+            console.log("Bienvenue", username);
+            const avatarImg = document.getElementById('avatar') as HTMLImageElement;
+            avatarImg.src = '../login.png';
+        }
+        const container = document.getElementById('content') as HTMLElement;
+        const res = await fetch('/part/login');
+        const newElement = document.createElement('div');
+        newElement.className = 'tag';
+        if (!res.ok)
+            throw Error("Page not found: element missing.");
+        const html = await res.text();
+        if (html.includes(container.innerHTML))
+            return;
+        container.innerHTML = '';
+        newElement.innerHTML = html;
+        container.appendChild(newElement);
+        // if (result.redirect) {
+        //     const res = await fetch(`${result.redirect}`, {});
+        //     const newElement = document.createElement('div');
+        //     newElement.className = 'tag';
+        //     if (!res.ok)
+        //         throw new Error("Page not found: redirect missing.");
+        //     const html = await res.text();
+        //     container.innerHTML = '';
+        //     newElement.innerHTML = html;
+        //     container.appendChild(newElement);
+        // } else {
+        //     const errors = result.json;
+        //     validateForm(errors.json);
+        // }
     });
 }
+
+async function CheckForToken(): Promise<void> {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token)
+            return ;
+        const response = await fetch('http://localhost:3000/user-management/check-token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ token }),
+        });
+        const result = await response.json();
+        if (!result.valid) {
+            localStorage.removeItem("token");
+        }
+        if (result.username) {
+            localStorage.setItem('username', result.username); // Stockage
+
+            const username = localStorage.getItem('username'); // Récupération
+            const nameSpan = document.getElementById('username') as HTMLSpanElement;
+            nameSpan.textContent = username;
+            console.log("Welcome", username);
+            const avatarImg = document.getElementById('avatar') as HTMLImageElement;
+            avatarImg.src = '../login.png';
+        }
+    }
+    catch (error) {
+        console.error("Bad token :", error);
+    }
+}
+
 
 function validateForm(result: { name: string; email: string; password: string}): void {
     const nameError = document.getElementById("nameError") as HTMLSpanElement;
