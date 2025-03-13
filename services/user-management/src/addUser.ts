@@ -13,10 +13,6 @@ export async function addUser(req: FastifyRequest, res: FastifyReply):Promise<vo
         if (!response.ok) {
             return res.status(400).send({ error: "Email déjà utilisé" });
         }
-        // let hashedPassword = '';
-        // if (password) {
-        //     hashedPassword = await bcrypt.hash(password, 10);
-        // }
         const addUserRes = await fetch('http://database:4001/addUser', {
             method: 'POST',
             headers: {
@@ -33,8 +29,8 @@ export async function addUser(req: FastifyRequest, res: FastifyReply):Promise<vo
             const errorData = await addUserRes.json();
             return res.status(500).send({ json: errorData});
         }
-        const user = { id: 1, name: name }; // Exemple d'utilisateur
-        const token = jwt.sign(user, 'secret_key', { expiresIn: '1h' }); // Génération du token
+        const user = { id: 1, name: name };
+        const token = jwt.sign(user, 'secret_key', { expiresIn: '1h' });
         res.status(201).send({token, username: name, redirect: 'post/login'});
     } catch (err) {
         console.error(err);

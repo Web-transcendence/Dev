@@ -1,13 +1,28 @@
-<!-- Interface après connexion -->
-<div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md mx-auto">
-    <div class="flex items-center justify-center mb-4">
-        <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center text-gray-800 font-bold text-xl">
-            N
+<div class="w-7xl max-w-lg bg-gray-900 shadow-lg rounded-lg p-8">
+    <h1 class="text-xl font-bold text-yellow-400 mb-4 text-center"> Connect to your account </h1>
+
+    <div class="border-t border-gray-300 my-4"></div>
+
+    <form id="myForm" class="space-y-4" onsubmit="event.preventDefault();">
+        <div class="insert-name">
+            <label for="name" class="block text-gray-700 font-medium"></label>
+            <input class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none" placeholder="Name" type="text" name="name" id="name" />
         </div>
-    </div>
-    <h2 class="text-3xl text-yellow-400 text-center mb-4">Welcome, <span id="user-name" class="text-white font-semibold"></span></h2>
-    <p class="text-gray-300 text-lg text-center">"We are happy to see you with us! Enjoy your experience on our platform."</p>
-    <div class="mt-6 text-center">
-        <button class="bg-yellow-400 text-gray-800 font-semibold py-2 px-6 rounded-full hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-400">Play Pong !</button>
+        <div class="insert-password">
+            <label for="password" class="block text-gray-700 font-medium"></label>
+            <input class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none" placeholder="Password" type="password" name="password" id="password" />
+        </div>
+            <span class="error-message text-red-500 text-xs hidden" id="LoginError">Name or Password does not match account</span>
+        <div class="login-button-tag">
+            <input id="login" type="submit" value="Connect" class="w-full border-b-yellow-400 bg-yellow-400 text-white px-5 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition transform hover:scale-105" />
+        </div>
+    </form>
+
+    <div class="border-t border-gray-300 my-6"></div>
+
+    <div class="text-center">
+        <a href="/" class="bg-gray-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-gray-600 transition transform hover:scale-105">
+            Home
+        </a>
     </div>
 </div>

@@ -31,19 +31,16 @@ const clientSchema = z.object({
 export async function createClient(req: FastifyRequest, res: FastifyReply) {
     const mystuff = req.body;
     const zod_result = clientSchema.safeParse(mystuff);
-    if (!zod_result.success) {
-        console.error(zod_result);
+    if (!zod_result.success)
         return res.status(400).send({json: zod_result.error.format()});
-    }
     const { data } = zod_result;
     let {name, email, password} = data;
     name = sanitizeHtml(name); // Protection from XSS attacks
     email = sanitizeHtml(email);
     password = sanitizeHtml(password);
     console.log(name, email, password);
-    if (!name || !email || !password) {
+    if (!name || !email || !password)
         return res.status(454).send({error: "All information are required !"});
-    }
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const insert = Client_db.prepare("INSERT INTO Client (name, email, password) VALUES (?, ?, ?)");

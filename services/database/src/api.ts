@@ -1,5 +1,6 @@
 import Fastify, {FastifyReply, FastifyRequest} from "fastify";
 import {createClient, emailExist} from "./clientBase.js";
+import {finder, loginUser} from "./check_or_mod.js";
 
 
 const fastify = Fastify({
@@ -19,6 +20,8 @@ fastify.get('/email-existing', (req: FastifyRequest, res: FastifyReply)=> {
 })
 
 fastify.post('/addUser', createClient)
+fastify.post('/findUser', finder)
+fastify.post('/', loginUser)
 
 fastify.listen({ host: '0.0.0.0', port: 4001 }, function (err, address) {
     if (err) {

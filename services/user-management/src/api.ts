@@ -1,12 +1,14 @@
 import fastify from 'fastify'
 import {addUser} from "./addUser.js";
-import {checkToken} from "./CheckToken.js";
+import {checkToken, checkUser} from "./CheckToken.js";
 
 
 const app = fastify();
 
 app.post('/sign-up', addUser);
 app.post('/check-token', checkToken);
+app.post('/check-token', checkToken);
+app.post('/check-token', checkUser);
 
 app.listen({port: 5000, host: '0.0.0.0'}, (err, adrr) => {
     if (err) {

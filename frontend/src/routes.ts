@@ -16,6 +16,11 @@ export async function routes(fastify: FastifyInstance) {
         const tag = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(tag);
     })
+    fastify.get('/part/connected', function (req, reply) {
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH || "", "connected.html");
+        let htmlContent = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(htmlContent);
+    })
     fastify.get('/part/login', function (req, reply) {
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH || "", "login.html");
         let htmlContent = readFileSync(frontPath, 'utf8');
