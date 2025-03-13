@@ -21,7 +21,7 @@ fastify.get('/email-existing', (req: FastifyRequest, res: FastifyReply)=> {
 
 fastify.post('/addUser', createClient)
 fastify.post('/findUser', finder)
-fastify.post('/', loginUser)
+fastify.post('/loginUser', loginUser)
 
 fastify.listen({ host: '0.0.0.0', port: 4001 }, function (err, address) {
     if (err) {

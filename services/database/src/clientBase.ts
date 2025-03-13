@@ -45,8 +45,8 @@ export async function createClient(req: FastifyRequest, res: FastifyReply) {
 
     const insert = Client_db.prepare("INSERT INTO Client (name, email, password) VALUES (?, ?, ?)");
     const result = insert.run(name, email, hashedPassword);
-    // const rows = Client_db.prepare(`SELECT * FROM Client`).all(); // Print clients info
-    // console.table(rows);
+    const rows = Client_db.prepare(`SELECT * FROM Client`).all(); // Print clients info
+    console.table(rows);
     if (result.changes === 1) {
         Client_db.prepare("SELECT * FROM Client");
         const newClientId = result.lastInsertRowid;

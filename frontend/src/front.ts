@@ -58,7 +58,7 @@ async function insert_tag(url: string): Promise<void>{
         return;
     container.innerHTML = '';
     newElement.innerHTML = html;
-    CheckForToken();
+    // CheckForToken();
     container.appendChild(newElement);
 }
 
@@ -75,6 +75,8 @@ function register(container: HTMLElement, button: HTMLElement): void {
             body: JSON.stringify(data)
         });
         const result = await response.json();
+        console.log(result);
+        console.log(result.json);
         if (result.token) {
             localStorage.setItem('token', result.token);
             await CheckForToken();
@@ -101,7 +103,8 @@ function login(container: HTMLElement, button: HTMLElement): void {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
-        const response = await fetch('http://localhost:3000/user-management/log-in', {
+        console.log("DATA", data);
+        const response = await fetch('http://localhost:3000/user-management/user-login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -109,9 +112,10 @@ function login(container: HTMLElement, button: HTMLElement): void {
             body: JSON.stringify(data)
         });
         const result = await response.json();
-        if (result.token) {
+        if (result.valid) {
             localStorage.setItem('token', result.token);
-            await CheckForToken();
+            localStorage.setItem('name', result.name);
+            // localStorage.setItem('avatar', result.avatar);
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
             newElement.className = 'tag';
@@ -124,22 +128,14 @@ function login(container: HTMLElement, button: HTMLElement): void {
             newElement.innerHTML = html;
             container.appendChild(newElement);
         } else {
-            const errors = result.json;
-            validateLogin(errors.json);
+            console.log("CACA");
+            const loginError = document.getElementById("LoginError") as HTMLSpanElement;
+            if (!loginError.classList.contains("hidden"))
+                loginError.classList.remove("hidden");
         }
     });
 }
 
-function validateLogin(result: { error: string; }): void {
-    const loginError = document.getElementById("LoginError") as HTMLSpanElement;
-    if (result.error)
-        loginError.classList.remove("hidden");
-    else {
-        if (!loginError.classList.contains("hidden")) {
-            loginError.classList.add("hidden");
-        }
-    }
-}
 
 async function CheckForToken(): Promise<void> {
     try {
