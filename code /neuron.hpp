@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 10:25:23 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/12 15:33:08 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/13 16:23:27 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,23 +19,7 @@
 
 class Neuron {
 public:
-	Neuron( void ) {}
-	virtual ~Neuron( void ) {}
-
-};
-
-class InputNeuron : public Neuron {
-public:
-	InputNeuron( void ) {}
-	~InputNeuron( void ) {}
-	
-private:
-	int	_input;
-};
-
-class HidenNeuron : public Neuron {
-public:
-	HidenNeuron(unsigned int const prevLayer) : _size(prevLayer) {
+	Neuron(unsigned int const prevLayer) : _size(prevLayer) {
 		std::random_device					rd;
 		std::mt19937						gen(rd());
 		std::normal_distribution<double>	dist(0.0, 1.0);
@@ -46,33 +30,37 @@ public:
 		return ;
 	}
 
-	~HidenNeuron( void ) {}
+	~Neuron( void ) {}
 
-	double	feedForward(double const input) const {
+	double	feedForward(std::vector<double> const & input) const {
 		return sigmoid(sumWeighted(input));	
 	}
 
 private:
-	double	sumWeighted(double const input) const {
+	double	sumWeighted(std::vector<double> const & input) const {
 		double	res;
 
-		for (int i = 0; i < this->_size; i++) {
-			res += input * this->_weight[i];
+		for (auto it_w = this->_weight.begin(), it_i = input.begin(); it_w != this->_weight.end(), it_i != input.end(); it_w++, it_i++) {
+			res += *it_i * *it_w;
 		}
 		return res + this->_bias;
 	}
 
-	double	sigmoid(double const z) const {return 1.0/(1.0+std::exp(-z));}
-
+	static double	sigmoid(double const z) {return 1.0/(1.0+std::exp(-z));}
+	
+	static std::vector<double>*	sigmoid(std::vector<double> const & input) {
+		std::vector<double>*	res = new std::vector<double>(input.size());
+		
+		for (auto it = input.begin(); it != input.end(); it++)
+			res->push_back(sigmoid(*it));
+		return res;
+	}
+	
 	unsigned int const	_size;
 	std::vector<double>	_weight;
 	double				_bias;
-};
 
-class OutputNeuron : public Neuron {
-public:
-	OutputNeuron( void ) {}
-	~OutputNeuron( void ) {}
+friend class Network;
 };
 
 #endif
