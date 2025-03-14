@@ -66,6 +66,7 @@ function register(container: HTMLElement, button: HTMLElement): void {
             },
             body: JSON.stringify(data)
         });
+        console.log(response.redirected);
         const result = await response.json();
         if (result.redirect) {
             const res = await fetch(`${result.redirect}`, {});
@@ -108,4 +109,5 @@ function validateForm(result: { name: string; email: string; password: string}):
         }
     }
 }
+
 

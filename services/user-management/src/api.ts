@@ -18,7 +18,7 @@ app.post('/sign-up', async (req, res) => {
         return res.status(500).send({error: "Server error: ", err});
     }
 
-    return res.status(201).send();
+    return {succes: true, redirect: "/login"};
 });
 
 app.listen({port: 8001, host: '0.0.0.0'}, (err, adrr) => {

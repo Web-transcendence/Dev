@@ -1,7 +1,5 @@
 import Database from "better-sqlite3";
-import {FastifyRequest} from "fastify";
 import bcrypt from "bcrypt";
-import {Hash} from "node:crypto";
 
 type UserStatus = "Exists" | "NotExists";
 

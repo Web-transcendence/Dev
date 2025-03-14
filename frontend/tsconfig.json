@@ -2,14 +2,14 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "esnext",
-    "module": "nodenext",
+    "module": "ESNext",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
     "outDir": "public/dist",
     "rootDir": "src",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
     "lib": ["dom", "ESNext"]
   },
 }
