@@ -99,3 +99,11 @@ npm run dev
 ## Creation de Node.js
 Faire une base en ECMAScript Modules (ESM)
 
+## Information Google Sing-in
+
+Nom de votre client OAuth 2.0: ClientWebOauth
+
+ID Client: 562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com
+
+Code Secret Client :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
+
