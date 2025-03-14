@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 10:25:23 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/14 17:00:46 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/14 17:11:06 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ public:
 			*it_nw += *it_dnw;
 		}
 		this->_deltaNabla_w.clear();
+		return ;
 	}
 	
 	void	updateBias(double const eta, double const miniBatchSize) {

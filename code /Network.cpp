@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/14 16:35:18 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/14 17:21:52 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,19 +46,17 @@ void    Network::SDG(std::vector<t_tuple*> trainingData, int const epoch, int co
 }
 
 void	Network::updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta) {
-	auto	nabla_b = this->shapeBiases();
-	auto	nabla_w = this->shapeWeights();
-
 	for (auto it_mb = miniBatch.begin(); it_mb != miniBatch.end(); it_mb++) {
-		auto	temp = this->backprop((*it_mb)->input, (*it_mb)->expectedOutput);
-		auto	deltaNabla_b = temp[0];
-		auto	deltaNabla_w = temp[1];
+		this->backprop((*it_mb)->input, (*it_mb)->expectedOutput);
+		this->updateNabla_b();
+		this->updateNabla_w();
 	}
+	this->updateBias(eta, static_cast<double>(miniBatch.size()));
+	this->updateWeight(eta, static_cast<double>(miniBatch.size()));
 	return ;
 }
 
-std::vector<Layer*>*	Network::backprop(std::vector<double>& input, std::vector<double>& expectedOutput) {
-	
+void	Network::backprop(std::vector<double>& input, std::vector<double>& expectedOutput) {
 	std::vector<double>*					activation = &input;
 	std::vector<std::vector<double>*>		activations;
 	std::vector<double>*					z;
@@ -85,31 +83,29 @@ std::vector<Layer*>*	Network::backprop(std::vector<double>& input, std::vector<d
 	return ;
 }
 
-std::vector<std::vector<vecDouble*>*>*	Network::shapeBiases( void ) {
-	auto	shaped = new (std::vector<std::vector<vecDouble*>*>);
-
-	shaped->push_back(new std::vector<vecDouble*>);
-	for (auto it_layers = this->_layers.begin() + 1; it_layers != this->_layers.end(); it_layers++) {
-		shaped->back()->push_back(new vecDouble((*it_layers)->size()));
-		for (auto it_neurons = (*it_layers)->begin(); it_neurons != (*it_layers)->end(); it_neurons++)
-			shaped->back()->back()->push_back(0.0);
-	}
-	return shaped;
+void	Network::updateWeight(double const eta, double const miniBatchSize) {
+	for (auto l : this->_layers)
+		l->updateWeight(eta, miniBatchSize);
+	return ;
 }
 
-std::vector<std::vector<vecDouble*>*>*	Network::shapeWeights( void ) {
-	auto	shaped = new (std::vector<std::vector<vecDouble*>*>);
-
-	for (auto it_layers = this->_layers.begin() + 1; it_layers != this->_layers.end(); it_layers++) {
-		shaped->push_back(new std::vector<vecDouble*>);
-		for (auto it_neurons = (*it_layers)->begin(); it_neurons != (*it_layers)->end(); it_neurons++) {
-			shaped->back()->push_back(new vecDouble);
-			for (auto it_weights = (*it_neurons)->_weight.begin(); it_weights != (*it_neurons)->_weight.end(); it_weights++)
-				shaped->back()->back()->push_back(0.0);
-		}
-	}
-	return shaped;
+void	Network::updateNabla_w( void ) {
+	for (auto l : this->_layers)
+		l->updateNabla_w();
+	return ;
 }
+
+void	Network::updateBias(double const eta, double const miniBatchSize) {
+	for (auto l : this->_layers)
+		l->updateBias(eta, miniBatchSize);
+	return ;
+}
+
+void	Network::updateNabla_b( void ) {
+	for (auto l : this->_layers)
+		l->updateNabla_b();
+	return ;
+}	
 
 void    Network::myShuffle(std::vector<t_tuple*>& myVector) {
 	std::random_device  rd;
