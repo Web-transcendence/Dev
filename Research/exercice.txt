@@ -100,3 +100,9 @@ Neuron 4: w=12(0,1,0,1,0,1,0,1,0,1); b=−6
 Ex4:
 Ex5:
 
+CODE EXPLAINATION:
+
+backprop(x,y) -> x c'est les inputs et y les outputs attendus. Ca peut etre un vector ou un nombre.
+
+nabla_b = [np.zeros(b.shape) for b in self.biases] -> le but va etre de shape nabla_b comme le vector de biases.
+nabla_w = [np.zeros(w.shape) for w in self.weights] -> Pareil pour weights
