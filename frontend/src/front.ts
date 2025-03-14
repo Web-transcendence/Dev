@@ -200,3 +200,23 @@ function validateRegister(result: { name: string; email: string; password: strin
     }
 }
 
+
+
+// function handleCredentialResponse(response) {
+//     console.log("Token JWT reçu :", response.credential);
+//     // Envoyer ce token au serveur pour authentification
+// }
+//
+// window.onload = function () {
+//     google.accounts.id.initialize({
+//         client_id: "YOUR_CLIENT_ID",
+//         callback: handleCredentialResponse
+//     });
+//
+//     google.accounts.id.renderButton(
+//         document.getElementById("google-signin-btn"),
+//         { theme: "outline", size: "large" }
+//     );
+//
+//     google.accounts.id.prompt(); // Affiche la pop-up si nécessaire
+// };
