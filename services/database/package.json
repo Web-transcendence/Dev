@@ -7,12 +7,16 @@
     "dev": "tsx watch --include \"./src/*\" ./src/api.ts"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/better-sqlite3": "^7.6.12",
+    "@types/sanitize-html": "^2.13.0",
     "tsx": "^4.19.3"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "better-sqlite3": "^11.8.1",
     "fastify": "^5.2.1",
+    "sanitize-html": "^2.14.0",
     "zod": "^3.24.2"
   }
 }
