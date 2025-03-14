@@ -28,7 +28,7 @@ services:
     networks:
       - transcendence
     ports:
-      - "3001:3001"
+      - "4000:4000"
     depends_on:
       - api-gateway
     restart: unless-stopped
