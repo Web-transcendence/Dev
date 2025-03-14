@@ -1,13 +1,10 @@
 import Database from "better-sqlite3";
 import bcrypt from "bcrypt";
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 type UserStatus = "Exists" | "NotExists";
 
-
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
-
-
-
 
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
@@ -31,12 +28,12 @@ export class User {
         }
     }
 
-    async addClient(email: string, password: string) {
+    async addClient(email: string, password: string): Promise< {success: boolean, result: string} | {success: boolean, result: string}> {
         if (this.status === "Exists") {
-            return {success: false, errorType: 'name'};
+            return {success: false, result: 'name'};
         }
         if (Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(email)) {
-            return {success: false, errorType: 'email'};
+            return {success: false, result: 'email'};
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -46,10 +43,24 @@ export class User {
         if (res.changes === 0) {
             throw new Error(`User not inserted`);
         }
+        //
+        // const rows = Client_db.prepare(`SELECT * FROM Client`).all(); // Print clients info
+        // console.table(rows);
+
         this.status = "Exists";
-        console.log('user added to client');
-        return { success: true, id: res.lastInsertRowid };
+        console.log("new user added");
+        return {success: true, result: jwt.sign({id: 1, name: this.name}, 'secret_key', {expiresIn: '1h'})};
     }
 
+
+    static verifyToken(token: string) {
+        try {
+            return jwt.verify(token, 'secret_key') as JwtPayload;
+        }
+        catch (error) {
+            console.error("Token verification failed:", error);
+            return null;
+        }
+    }
 
 }

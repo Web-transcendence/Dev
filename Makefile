@@ -28,6 +28,10 @@ fclean: clean
 #	Use docker run to remove data because of permissions
 	docker run -it --rm -v $(HOME)/data:/data busybox sh -c "rm -rf /data/*"
 
+re: fclean up
+
+rewatch: fclean watch
+
 help:
 	@echo "Makefile for Docker Compose"
 	@echo "Available targets:"
