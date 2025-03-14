@@ -14,7 +14,6 @@ export async function addUser(req: FastifyRequest, res: FastifyReply):Promise<vo
             return res.status(400).send({ error: "Email déjà utilisé" });
         }
         console.log(response);
-        console.log("CACACACACACACACAC");
         const addUserRes = await fetch('http://database:4001/addUser', {
             method: 'POST',
             headers: {
@@ -27,17 +26,14 @@ export async function addUser(req: FastifyRequest, res: FastifyReply):Promise<vo
                 // password: hashedPassword
             })
         });
-        console.log("CACACACACA11111111111CACACAC");
         if (!addUserRes.ok) {
             const errorData = await addUserRes.json();
             return res.status(500).send({ json: errorData});
         }
-        console.log("CACACACA222222222CACACACAC");
         const user = { id: 1, name: name };
         const token = jwt.sign(user, 'secret_key', { expiresIn: '1h' });
         res.status(201).send({token, username: name, redirect: 'post/login'});
     } catch (err) {
-        console.log("CACACACACA33333333CAC");
         console.error(err);
     }
 }

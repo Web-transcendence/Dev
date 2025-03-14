@@ -130,7 +130,7 @@ function login(container: HTMLElement, button: HTMLElement): void {
         } else {
             console.log("CACA");
             const loginError = document.getElementById("LoginError") as HTMLSpanElement;
-            if (!loginError.classList.contains("hidden"))
+            // if (!loginError.classList.contains("hidden"))
                 loginError.classList.remove("hidden");
         }
     });

@@ -38,7 +38,6 @@ export async function checkToken(request: FastifyRequest, reply: FastifyReply):P
 export async function checkUser(request: FastifyRequest, reply: FastifyReply):Promise<void> {
     const { user } = request.body as { user: { name: string; password: string } };
     if (!user.name || !user.password) {
-            console.log("44444444444444444444444444444TTTTTTTTTTTTTTTTTTTTTTT4444OROROROROROR");
         return reply.status(401).send({valid: false, error: "Name or Password missing"});
     }
     try {
@@ -53,17 +52,14 @@ export async function checkUser(request: FastifyRequest, reply: FastifyReply):Pr
             })
         });
         if (result) {
-            console.log("ERRRORORORO4444444444444444444444444444444TTTTTTTTTTTTTTTTTTTTTTT4444OROROROROROR");
             const token = jwt.sign(user, 'secret_key', { expiresIn: '1h' });
             return reply.send({token, valid: true, name: user.name});
             // return reply.send({token, valid: true, name: user.name, avatar: result.avatar});
         }
         else {
-            console.log("ERRRORORORO44444444444444444444444444444444444OROROROROROR");
             return reply.send({valid: false, error: "Invalid name"});
         }
     } catch (error) {
-        console.log("ERRROROROROOROROROROROR", error);
         return reply.status(401).send({valid: false, error: "Token invalide ou expiré"});
     }
 }

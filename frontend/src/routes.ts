@@ -57,7 +57,6 @@ export async function routes(fastify: FastifyInstance) {
         }
     });
     fastify.get('/logout.png', function (req, reply) {
-        console.log("\n\nLOGOUT\n\n");
         try {
             const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "logout.png");
             const tag = readFileSync(frontPath);
