@@ -174,14 +174,14 @@ async function CheckForToken(): Promise<void> {
 
 
 function validateRegister(result: { name: string; email: string; password: string}): void {
-    const nameError = document.getElementById("nameError") as HTMLSpanElement;
+    const nameErrorMin = document.getElementById("nameErrorMin") as HTMLSpanElement;
     const emailError = document.getElementById("emailError") as HTMLSpanElement;
     const passwordError = document.getElementById("passwordError") as HTMLSpanElement;
     if (result.name)
-        nameError.classList.remove("hidden");
+        nameErrorMin.classList.remove("hidden");
     else {
-        if (!nameError.classList.contains("hidden")) {
-            nameError.classList.add("hidden");
+        if (!nameErrorMin.classList.contains("hidden")) {
+            nameErrorMin.classList.add("hidden");
         }
     }
     if (result.email)
