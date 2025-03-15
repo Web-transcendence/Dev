@@ -43,6 +43,10 @@ app.post('/sign-up', async (req, res) => {
     }
 });
 
+app.get('/getProfile', async (req, res) => {
+
+})
+
 app.post('/sign-in', async (req: FastifyRequest, res: FastifyReply) => {
     try {
         console.log("sign-in");

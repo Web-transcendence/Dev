@@ -3,10 +3,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const contactBtn = document.getElementById("contact")!;
     const registerBtn = document.getElementById("register")!;
     const loginBtn = document.getElementById("login")!;
+    const profileBtn = document.getElementById("profile")!;
+    const disconnectBtn = document.getElementById("disconnect")!;
+    isConnected();
+    profileBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"))
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
     loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
+    disconnectBtn.addEventListener("click", (event: MouseEvent) => {
+        localStorage.removeItem("token");
+        isConnected();
+        navigate(event, "/");
+
+    });
     // loadPart(window.location.pathname);
 });
 
@@ -39,6 +49,12 @@ async function loadPart(page: string): Promise<void> {
             if (button)
                 login(container, button);
         }
+        if (page === "/profile") {
+            const name = document.getElementById("profilename")!;
+            const email = document.getElementById("profileemail")!;
+            if (email && name)
+                profile(container, name, email);
+        }
     } catch (error) {
         console.error(error);
         container.innerHTML = '';
@@ -58,7 +74,6 @@ async function insert_tag(url: string): Promise<void>{
         return;
     container.innerHTML = '';
     newElement.innerHTML = html;
-    // CheckForToken();
     container.appendChild(newElement);
 }
 
@@ -77,6 +92,7 @@ function register(container: HTMLElement, button: HTMLElement): void {
         const result = await response.json();
         if (result.token) {
             localStorage.setItem('token', result.token);
+            isConnected();
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
             newElement.className = 'tag';
@@ -110,8 +126,8 @@ function login(container: HTMLElement, button: HTMLElement): void {
         });
         const result = await response.json();
         if (response.ok) {
-            console.log("result.token");
             localStorage.setItem('token', result.token);
+            isConnected()
             localStorage.setItem('name', result.name);
             // localStorage.setItem('avatar', result.avatar);
             const res = await fetch('/part/connected');
@@ -135,6 +151,32 @@ function login(container: HTMLElement, button: HTMLElement): void {
 }
 
 
+async function profile(container: HTMLElement, name: HTMLElement, email: HTMLElement) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('token missing');
+            return;
+        }
+        const response = await fetch('http://localhost:3000/user-management/getProfile', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        })
+        const data = await response.json();
+        console.log(data, response);
+        if (response.ok) {
+            name.textContent = data.name;
+            email.textContent = data.email;
+        }
+
+    }
+    catch (err) {
+
+    }
+}
 
 function validateRegister(result: { name: string; email: string; password: string}): void {
     const nameError = document.getElementById("nameError") as HTMLSpanElement;
@@ -163,4 +205,21 @@ function validateRegister(result: { name: string; email: string; password: strin
     }
 }
 
+
+
+function isConnected() {
+    if (localStorage.getItem("token")) {
+        document.getElementById("profile")!.classList.remove("hidden");
+        document.getElementById("register")!.classList.add("hidden");
+        document.getElementById("login")!.classList.add("hidden");
+        document.getElementById("disconnect")!.classList.remove("hidden");
+        console.log(localStorage.getItem("token"));
+    }
+    else {
+        document.getElementById("profile")!.classList.add("hidden");
+        document.getElementById("register")!.classList.remove("hidden");
+        document.getElementById("login")!.classList.remove("hidden");
+        document.getElementById("disconnect")!.classList.add("hidden");
+    }
+}
 
