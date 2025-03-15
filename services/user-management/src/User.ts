@@ -1,8 +1,9 @@
 import Database from "better-sqlite3";
 import bcrypt from "bcrypt";
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 type UserStatus = "Exists" | "NotExists";
+
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
@@ -28,7 +29,7 @@ export class User {
         }
     }
 
-    async addClient(email: string, password: string): Promise< {success: boolean, result: string} | {success: boolean, result: string}> {
+    async addClient(email: string, password: string): Promise<{success: boolean, result: string}> {
         if (this.status === "Exists") {
             return {success: false, result: 'name'};
         }
@@ -49,18 +50,25 @@ export class User {
 
         this.status = "Exists";
         console.log("new user added");
-        return {success: true, result: jwt.sign({id: 1, name: this.name}, 'secret_key', {expiresIn: '1h'})};
+        return {success: true, result: this.makeToken()};
     }
 
+    async isPasswordValid(password: string): Promise<boolean> {
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    static verifyToken(token: string) {
-        try {
-            return jwt.verify(token, 'secret_key') as JwtPayload;
+        const userData = Client_db.prepare("SELECT password FROM Client WHERE name = ?").get(this.name) as { password: string } | undefined;
+        if (!userData) {
+            throw new Error(`Database Error: cannot find password from ${this.name}`);
         }
-        catch (error) {
-            console.error("Token verification failed:", error);
-            return null;
-        }
+        return (await bcrypt.compare(userData.password, hashedPassword))
     }
 
+    makeToken(): string {
+        const token = jwt.sign({id: 1, name: this.name}, 'secret_key', {expiresIn: '1h'})
+        return (token);
+    }
+
+    getStatus() {
+        return this.status;
+    }
 }

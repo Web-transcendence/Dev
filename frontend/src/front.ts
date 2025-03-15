@@ -63,23 +63,20 @@ async function insert_tag(url: string): Promise<void>{
 }
 
 function register(container: HTMLElement, button: HTMLElement): void {
-    button.addEventListener("click", async (event) => {
+    button.addEventListener("click", async () => {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
         const response = await fetch('http://localhost:3000/user-management/sign-up', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(data)
         });
         const result = await response.json();
-        console.log("ssss", result);
         if (result.token) {
             localStorage.setItem('token', result.token);
-            console.log("testtttttt");
-            await CheckForToken();
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
             newElement.className = 'tag';
@@ -100,12 +97,11 @@ function register(container: HTMLElement, button: HTMLElement): void {
 }
 
 function login(container: HTMLElement, button: HTMLElement): void {
-    button.addEventListener("click", async (event) => {
+    button.addEventListener("click", async () => {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
-        console.log("DATA", data);
-        const response = await fetch('http://localhost:3000/user-management/user-login', {
+        const response = await fetch('http://localhost:3000/user-management/sign-in', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -114,6 +110,7 @@ function login(container: HTMLElement, button: HTMLElement): void {
         });
         const result = await response.json();
         if (result.valid) {
+            console.log("result.token");
             localStorage.setItem('token', result.token);
             localStorage.setItem('name', result.name);
             // localStorage.setItem('avatar', result.avatar);
@@ -129,50 +126,14 @@ function login(container: HTMLElement, button: HTMLElement): void {
             newElement.innerHTML = html;
             container.appendChild(newElement);
         } else {
-            console.log("CACA");
             const loginError = document.getElementById("LoginError") as HTMLSpanElement;
             // if (!loginError.classList.contains("hidden"))
-                loginError.classList.remove("hidden");
+            loginError.textContent = result?.error ?? "An error occurred";
+            loginError.classList.remove("hidden");
         }
     });
 }
 
-
-async function CheckForToken(): Promise<void> {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token)
-            return ;
-        console.log("token : ", token);
-        const response = await fetch('http://localhost:3000/user-management/check-token', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token }),
-        });
-        const result = await response.json();
-        console.log("resreslutsuet", result);
-        if (result.valid) {
-            if (result.username) {
-                console.log("Userreeerr:", result.username);
-                localStorage.setItem('username', result.username); // Stockage
-
-                const username = localStorage.getItem('username'); // Récupération
-                const nameSpan = document.getElementById('username') as HTMLSpanElement;
-                nameSpan.textContent = username;
-                console.log("Welcome", username);
-                const avatarImg = document.getElementById('avatar') as HTMLImageElement;
-                avatarImg.src = '../login.png';
-            }
-        }
-        else
-            localStorage.removeItem("token");
-    }
-    catch (error) {
-        console.error("Bad token :", error);
-    }
-}
 
 
 function validateRegister(result: { name: string; email: string; password: string}): void {
