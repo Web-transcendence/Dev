@@ -7,6 +7,7 @@ type UserStatus = "Exists" | "NotExists";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
+
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -15,7 +16,6 @@ Client_db.exec(`
         password TEXT NOT NULL
     )
 `);
-
 
 export class User {
     name: string;
@@ -44,9 +44,9 @@ export class User {
         if (res.changes === 0) {
             throw new Error(`User not inserted`);
         }
-        //
-        // const rows = Client_db.prepare(`SELECT * FROM Client`).all(); // Print clients info
-        // console.table(rows);
+
+        const rows = Client_db.prepare(`SELECT * FROM Client`).all(); // Print clients info
+        console.table(rows);
 
         this.status = "Exists";
         console.log("new user added");
@@ -54,13 +54,11 @@ export class User {
     }
 
     async isPasswordValid(password: string): Promise<boolean> {
-        const hashedPassword = await bcrypt.hash(password, 10);
-
         const userData = Client_db.prepare("SELECT password FROM Client WHERE name = ?").get(this.name) as { password: string } | undefined;
         if (!userData) {
             throw new Error(`Database Error: cannot find password from ${this.name}`);
         }
-        return (await bcrypt.compare(userData.password, hashedPassword))
+        return (await bcrypt.compare(password, userData.password))
     }
 
     makeToken(): string {

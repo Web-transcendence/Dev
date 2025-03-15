@@ -109,7 +109,7 @@ function login(container: HTMLElement, button: HTMLElement): void {
             body: JSON.stringify(data)
         });
         const result = await response.json();
-        if (result.valid) {
+        if (response.ok) {
             console.log("result.token");
             localStorage.setItem('token', result.token);
             localStorage.setItem('name', result.name);
