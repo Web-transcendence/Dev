@@ -200,3 +200,29 @@ function validateRegister(result: { name: string; email: string; password: strin
     }
 }
 
+interface CredentialResponse {
+    credential: string; // Le jeton JWT renvoyé par Google
+    select_by?: string; // Méthode de sélection (par exemple, "auto" ou "user")
+    clientId?: string;  // L'ID client Google
+}
+
+
+function handleCredentialResponse(response: CredentialResponse) {
+    console.log('Google response:', response); // Vérifiez si ce log apparaît
+
+    // Envoyer le jeton d'identification à votre serveur
+    fetch('http://localhost:3000/user-management/auth/google', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ credential: response.credential })
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}
