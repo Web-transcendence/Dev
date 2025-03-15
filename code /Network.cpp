@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/14 17:21:52 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/15 16:51:03 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,30 +57,64 @@ void	Network::updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta
 }
 
 void	Network::backprop(std::vector<double>& input, std::vector<double>& expectedOutput) {
-	std::vector<double>*					activation = &input;
-	std::vector<std::vector<double>*>		activations;
-	std::vector<double>*					z;
-	std::vector<std::vector<double>*>		zs;
-	
-	nablaBW[0]->push_back(new std::vector<vecDouble*>);
+	std::vector<double>*				activation = &input;
+	std::vector<std::vector<double>*>	activations;
+	std::vector<double>*				z;
+	std::vector<std::vector<double>*>	zs;
+	int									os = 1;
+
 	activations.push_back(activation);
-	for (auto it = this->_layers.begin(); it != this->_layers.end(); it++) {
-		for (auto it_n = (*it)->begin(); it_n != (*it)->end(); it_n++) {
-			z = new std::vector<double>((*it_n)->_size);
-			z->push_back(Math::sumWeighted(*activation, (*it_n)->_weight) + (*it_n)->_bias);
-		}
+	for (auto l : this->_layers) {
+		z = l->perceptron(*activation);
 		zs.push_back(z);
 		activation = Math::sigmoid(*z);
 		activations.push_back(activation);
 	}
-	auto delta = Math::multVec(*(Math::cost_derivative(*activations.back(), expectedOutput)), *(Math::sigmoidPrime(*zs.back())));
-	nablaBW[0]->back()->push_back(delta);
-	nablaBW[1]->push_back(Math::matricialMult(*delta, **(activations.end() - 2))); 
-	for (int i = 2; i < this->_num_layers; i++) {
-		z = zs.back() - i;
-		delta =  Math::matricialMult(*delta, **(activations.end() - 2));
+	auto	cd = Math::cost_derivative(*activations.back(), expectedOutput);
+	auto	sp = Math::sigmoidPrime(*zs.back());			
+	auto	delta = Math::hadamardProduct(*cd, *sp);
+	this->_layers.back()->setDeltaNabla_b(*delta);
+	this->_layers.back()->setDeltaNabla_w(*delta, **(activations.end()-2));
+	delete cd, sp;
+	for (auto it = this->_layers.rbegin() - os; it != this->_layers.rend(); it++, os++) {
+		z = *zs.rbegin() - os;
+		sp = Math::sigmoidPrime(*z);
+		auto nDelta = (*(it+1))->calcDelta(*delta, *sp);
+		delete delta;
+		delta = nDelta;
+		(*it)->setDeltaNabla_b(*delta);
+		(*it)->setDeltaNabla_w(*delta, **(activations.end()-os-1));
+		delete sp;
 	}
-	return ;
+}
+
+std::vector<double>*	Network::feedForward(std::vector<double> const & input) {
+	auto	res = new std::vector<double>;
+	auto	it = this->_layers.begin();
+	auto	activation = new std::vector<double>(input);
+	
+	for (; it != this->_layers.end(); it++) {
+		auto temp = activation;
+		activation = (*it)->feedForward(*activation);
+		delete temp;
+	}
+	return activation;
+}
+
+int     Network::evaluate(std::vector<t_tuple*>& test_data) {
+	auto	netResult = new std::vector<std::vector<double>*>;
+	auto 	it_td = test_data.begin();
+	int		res = 0;
+
+	for (; it_td != test_data.begin(); it_td++)
+		netResult->push_back(this->feedForward((*it_td)->input));
+	it_td = test_data.begin();
+	for (auto net : *netResult) {
+		if (*net == (*it_td)->expectedOutput)
+			++res;
+		++it_td;
+	}
+	return res;
 }
 
 void	Network::updateWeight(double const eta, double const miniBatchSize) {

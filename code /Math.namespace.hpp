@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 09:50:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/14 15:24:57 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/15 14:46:10 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,6 @@ namespace Math {
 		return res;
 	}
 	
-	double	sumWeighted(std::vector<double> const & input, std::vector<double> const & weight) {
-		double	res;
-
-		for (auto it_w = weight.begin(), it_i = input.begin(); it_w != weight.end() && it_i != input.end(); it_w++, it_i++)
-			res += (*it_i) * (*it_w);
-		return res;
-	}
-
 	std::vector<double>*	cost_derivative(std::vector<double> const & output, std::vector<double> const & expected) {
 		std::vector<double>*	res = new std::vector<double>(output.size());
 		
@@ -59,7 +51,15 @@ namespace Math {
 		return output - expected;
 	}
 
-	std::vector<double>*	multVec(std::vector<double> const & lhs, std::vector<double> const & rhs) {
+	double	dotProduct(std::vector<double> const & v1, std::vector<double> const & v2) {
+		double	res;
+
+		for (auto it_w = v2.begin(), it_i = v1.begin(); it_w != v2.end() && it_i != v1.end(); it_w++, it_i++)
+			res += (*it_i) * (*it_w);
+		return res;
+	}
+	
+	std::vector<double>*	hadamardProduct(std::vector<double> const & lhs, std::vector<double> const & rhs) {
 		std::vector<double>*	product;
 	
 		for (auto it_lhs = lhs.begin(), it_rhs = rhs.begin(); it_lhs != lhs.end() && it_rhs != rhs.end(); it_lhs++, it_rhs++)
@@ -67,7 +67,7 @@ namespace Math {
 		return product;
 	}
 
-	std::vector<std::vector<double>*>*	matricialMult(std::vector<double> const & in, std::vector<double> const & transposed) {
+	std::vector<std::vector<double>*>*	outerProduct(std::vector<double> const & in, std::vector<double> const & transposed) {
 		auto	res = new std::vector<std::vector<double>*>(in.size());
 
 		for (auto it_in = in.begin(); it_in != in.end(); it_in++) {
@@ -77,6 +77,7 @@ namespace Math {
 		}
 		return res;
 	}
+	
 };
 
 #endif

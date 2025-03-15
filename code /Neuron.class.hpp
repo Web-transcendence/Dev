@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 10:25:23 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/14 17:11:06 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/15 15:50:32 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,15 @@ public:
 	}
 
 	~Neuron( void ) {}
-
+	
 	double	feedForward(std::vector<double> const & input) const {
-		return Math::sigmoid(Math::sumWeighted(input, this->_weight) + this->_bias);	
+		return Math::sigmoid(Math::dotProduct(input, this->_weight) + this->_bias);	
 	}
 
+	double	perceptron(std::vector<double> const & input) const {
+		return Math::dotProduct(input, this->_weight) + this->_bias;	
+	}
+	
 	void	updateWeight(double const eta, double const miniBatchSize) {
 		for (auto it_w = this->_weight.begin(), it_nw = this->_nabla_w.begin(); it_w != this->_weight.end(); it_w++)
 			*it_w = *it_w - (eta / miniBatchSize) * *it_nw;
@@ -50,6 +54,12 @@ public:
 		return ;
 	}
 	
+	void	setDeltaNabla_w(std::vector<double> const & delta) {
+		for (auto d : delta)
+			this->_deltaNabla_w.push_back(d);
+		return ;
+	}
+
 	void	updateBias(double const eta, double const miniBatchSize) {
 		this->_bias -= (eta / miniBatchSize) * this->_nabla_b;
 		this->_nabla_b = 0.0;
@@ -62,6 +72,11 @@ public:
 		return ;
 	}
 
+	void	setDeltaNabla_b(double delta) {
+		this->_deltaNabla_b = delta;
+		return ;
+	}
+
 private:
 	std::vector<double>	_weight;
 	std::vector<double>	_nabla_w;
@@ -71,6 +86,7 @@ private:
 	double				_deltaNabla_b;
 
 friend class Network;
+friend class Layer;
 };
 
 #endif

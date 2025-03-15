@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/14 17:21:36 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/15 15:34:02 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ class Network {
         ~Network() {}
         
         void    SDG(std::vector<t_tuple*> trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data);
+        std::vector<double>*	Network::feedForward(std::vector<double> const & input);
         
     private:
         void    updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta);
