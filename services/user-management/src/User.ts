@@ -66,6 +66,14 @@ export class User {
         return (token);
     }
 
+    getProfile(): { name: string, email: string } {
+        const userData = Client_db.prepare("SELECT email FROM Client WHERE name = ?").get(this.name) as { email: string } | undefined;
+        if (!userData) {
+            throw new Error(`Database Error: cannot find password from ${this.name}`);
+        }
+        return {name: this.name, email: userData.email};
+    }
+
     getStatus() {
         return this.status;
     }

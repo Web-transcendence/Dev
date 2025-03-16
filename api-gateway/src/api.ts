@@ -30,7 +30,7 @@ async function authentificate (req: FastifyRequest, reply: FastifyReply) {
         }
 
         const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;
-        console.log(decoded);
+        req.headers.name = decoded.name;
     }
     catch (error) {
         return reply.status(401).send({ error: "Unauthorized - invalid token" });

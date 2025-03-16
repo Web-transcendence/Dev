@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const profileBtn = document.getElementById("profile")!;
     const disconnectBtn = document.getElementById("disconnect")!;
     isConnected();
+
     profileBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"))
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
@@ -50,8 +51,9 @@ async function loadPart(page: string): Promise<void> {
                 login(container, button);
         }
         if (page === "/profile") {
-            const name = document.getElementById("profilename")!;
-            const email = document.getElementById("profileemail")!;
+
+            const name = document.getElementById("profileName")!;
+            const email = document.getElementById("profileEmail")!;
             if (email && name)
                 profile(container, name, email);
         }
@@ -166,10 +168,11 @@ async function profile(container: HTMLElement, name: HTMLElement, email: HTMLEle
             }
         })
         const data = await response.json();
-        console.log(data, response);
+        console.log(data);
         if (response.ok) {
-            name.textContent = data.name;
-            email.textContent = data.email;
+            name.innerText = data.name;
+            email.innerText = data.email;
+            console.log(data.email);
         }
 
     }

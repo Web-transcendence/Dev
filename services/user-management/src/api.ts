@@ -4,6 +4,9 @@ import {z} from "zod";
 import sanitizeHtml from "sanitize-html";
 
 
+const profileSchema = z.object({
+    name: z.string().min(3, "Minimum 3 caracteres")
+});
 
 
 const signUpSchema = z.object({
@@ -44,6 +47,23 @@ app.post('/sign-up', async (req, res) => {
 });
 
 app.get('/getProfile', async (req, res) => {
+
+    try {
+        console.log(req);
+        const zod_result = profileSchema.safeParse(req.headers);
+        if (!zod_result.success)
+            return res.status(400).send({json: zod_result.error.format()});
+        let name = sanitizeHtml(zod_result.data.name);
+        if (!name)
+            return res.status(454).send({error: "All information are required !"});
+
+        const user = new User(name);
+        const profileData = user.getProfile();
+        return res.status(200).send(profileData);
+    } catch (err) {
+        return res.status(500).send({error: "Server error: ", err});
+    }
+
 
 })
 
