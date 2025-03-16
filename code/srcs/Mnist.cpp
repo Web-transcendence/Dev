@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 13:00:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 17:00:15 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 17:06:28 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@ Mnist::Mnist(std::string const & trI, \
             std::string const & teI, \
             std::string const & teL) {
     std::cout << "Loading training images..." << std::endl;
-    this->loadImages(trI);
-    this->loadLabels(trL);
+    this->trainImages = this->loadImages(trI);
+    this->trainLabels = this->loadLabels(trL);
     std::cout << "Loaded " << trainImages->size() << " training images." << std::endl;
     std::cout << "Loading testing images..." << std::endl;
     this->testImages = this->loadImages(teI);
@@ -55,9 +55,8 @@ Mnist::~Mnist( void ) {
 }
 
 std::vector<std::vector<uint8_t>*>* Mnist::loadImages(std::string const & filename) const {
-    std::ifstream file;
-    
-    file.open(filename.c_str(), std::ios::binary);
+    std::ifstream file(filename.c_str(), std::ios::binary);
+
     if (!file.is_open()) {
         std::cerr << "Error opening file: " << filename << std::endl;
         exit(1);
@@ -78,9 +77,8 @@ std::vector<std::vector<uint8_t>*>* Mnist::loadImages(std::string const & filena
 }
 
 std::vector<uint8_t>* Mnist::loadLabels(std::string const & filename) const {
-    std::ifstream file;
-    
-    file.open(filename.c_str(), std::ios::binary);
+    std::ifstream file(filename.c_str(), std::ios::binary);
+
     if (!file.is_open()) {
         std::cerr << "Error opening file: " << filename << std::endl;
         exit(1);
