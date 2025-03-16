@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 13:00:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 17:06:28 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 19:08:53 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ Mnist::Mnist(std::string const & trI, \
     this->testLabels = this->loadLabels(teL);
     std::cout << "Loaded " << testImages->size() << " testing images." << std::endl;
     this->convert();
+    std::cout << "Images and Labels converted, ready to train" << std::endl;
 	return ;
 }
 
@@ -119,17 +120,16 @@ void    Mnist::convert( void ) {
         auto temp = new t_tuple;
         for (auto ti : **it_i)
             temp->input.push_back(static_cast<double>(ti));
-        temp->expectedOutput[*it_l] = 1.0;
+        temp->expectedOutput[static_cast<int>(*it_l)] = 1.0;
         this->training.push_back(temp);
     }
-
     it_i = this->testImages->begin();
     it_l = this->testLabels->begin();
-    for (;it_i != this->trainImages->end(); it_i++, it_l++) {
+    for (;it_i != this->testImages->end(); it_i++, it_l++) {
         auto temp = new t_tuple;
         for (auto ti : **it_i)
             temp->input.push_back(static_cast<double>(ti));
-        temp->expectedOutput[*it_l] = 1.0;
+        temp->expectedOutput[static_cast<int>(*it_l)] = 1.0;
         this->testing.push_back(temp);
     }
     return ;

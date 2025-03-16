@@ -6,13 +6,15 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 09:50:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 16:42:33 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 17:37:42 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MATH_NAMESPACE_HPP
 # define MATH_NAMESPACE_HPP
 # include <vector>
+
+#include <iostream>
 
 typedef struct  s_tuple {
     std::vector<double> input;

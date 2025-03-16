@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 17:01:48 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 19:17:52 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,21 +23,36 @@ Network::Network(std::vector<unsigned int>sizes) : _num_layers(sizes.size()), _s
 	return ;
 }
 
+void displayProgress(int current, int max) {
+    int width = 20; // Number of total bar characters
+    int progress = (current * width) / max; // Filled portion
+
+    std::cout << "\r" << (current * 100) / max << "% [";
+    for (int i = 0; i < width; i++) {
+        std::cout << (i < progress ? '#' : '.');
+    }
+    std::cout << "]" << std::flush;
+}
+
 void    Network::SDG(std::vector<t_tuple*> trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data) {
 	int	n_test;
 	
 	if (test_data)
 		n_test = test_data->size();
 	for (int i = 0; i < epoch; i++) {
+		std::cout<<"Starting Epoch "<<i<<std::endl;
 		myShuffle(trainingData);
 		std::vector<std::vector<t_tuple*>*>  mini_batches;
 		for (auto it_td = trainingData.begin(); it_td != trainingData.end();) {
-			mini_batches.push_back(new std::vector<t_tuple*>(miniBatchSize));
+			mini_batches.push_back(new std::vector<t_tuple*>);
 			for (int i_mb = 0; i_mb < miniBatchSize && it_td != trainingData.end(); i_mb++, it_td++)
 				mini_batches.back()->push_back(*it_td);
 		}
-		for (auto it_mb = mini_batches.begin(); it_mb != mini_batches.end(); it_mb++)
+		int	display = 0;
+		for (auto it_mb = mini_batches.begin(); it_mb != mini_batches.end(); it_mb++, display++) {
 			this->updateMiniBatch(**it_mb, eta);	
+			displayProgress(display, mini_batches.size());
+		}
 		if (test_data) {
 			std::cout<<"Epoch "<<i<<": "<<this->evaluate(*test_data)<<" / "<<n_test<<std::endl;
 		}
@@ -62,7 +77,6 @@ void	Network::backprop(std::vector<double>& input, std::vector<double>& expected
 	std::vector<std::vector<double>*>	activations;
 	std::vector<double>*				z;
 	std::vector<std::vector<double>*>	zs;
-	int									os = 1;
 
 	activations.push_back(activation);
 	for (auto l : this->_layers) {
@@ -72,20 +86,20 @@ void	Network::backprop(std::vector<double>& input, std::vector<double>& expected
 		activations.push_back(activation);
 	}
 	auto	cd = Math::cost_derivative(*activations.back(), expectedOutput);
-	auto	sp = Math::sigmoidPrime(*zs.back());			
+	auto	sp = Math::sigmoidPrime(*zs.back());
 	auto	delta = Math::hadamardProduct(*cd, *sp);
 	this->_layers.back()->setDeltaNabla_b(*delta);
 	this->_layers.back()->setDeltaNabla_w(*delta, **(activations.end()-2));
 	delete cd;
 	delete sp;
-	for (auto it = this->_layers.rbegin() - os; it != this->_layers.rend(); it++, os++) {
-		z = *zs.rbegin() - os;
+	for (int i_l = this->_layers.size()-2; i_l - 1 >= 0;i_l--) {
+		z = zs[i_l];
 		sp = Math::sigmoidPrime(*z);
-		auto nDelta = (*(it+1))->calcDelta(*delta, *sp);
+		auto nDelta = this->_layers[i_l-1]->calcDelta(*delta, *sp);
 		delete delta;
 		delta = nDelta;
-		(*it)->setDeltaNabla_b(*delta);
-		(*it)->setDeltaNabla_w(*delta, **(activations.end()-os-1));
+		this->_layers[i_l]->setDeltaNabla_b(*delta);
+		this->_layers[i_l]->setDeltaNabla_w(*delta, **(activations.end()-i_l));
 		delete sp;
 	}
 }

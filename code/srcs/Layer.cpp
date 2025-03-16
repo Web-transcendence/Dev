@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:04:30 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 14:24:06 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 18:58:17 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ Layer::~Layer( void ) {
 }
 
 std::vector<double>*	Layer::feedForward(std::vector<double> const & input) {
-	std::vector<double>*	res = new std::vector<double>(this->_neurons.size());
+	std::vector<double>*	res = new std::vector<double>;
 
 	for (auto n : this->_neurons)
 		res->push_back(n->feedForward(input));
@@ -34,10 +34,11 @@ std::vector<double>*	Layer::feedForward(std::vector<double> const & input) {
 }
 
 std::vector<double>*	Layer::perceptron(std::vector<double> const & input) {
-	std::vector<double>*	res = new std::vector<double>(this->_neurons.size());
+	std::vector<double>*	res = new std::vector<double>;
 
-	for (auto n : this->_neurons)
+	for (auto n : this->_neurons) {
 		res->push_back(n->perceptron(input));
+	}
 	return res;
 }
 

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 15:56:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 14:32:27 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 18:12:27 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,10 @@ public:
 	
 private:
 	Layer( void ) {}
-	
 
 	std::vector<Neuron*>	_neurons;
+
+friend class Network;
 };
 
 #endif
