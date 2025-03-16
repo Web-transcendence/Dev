@@ -6,18 +6,14 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 14:22:44 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 17:01:38 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef NETWORK_CLASS_HPP
 # define NETWORK_CLASS_HPP
+# include "Math.namespace.hpp"
 # include <vector>
-
-typedef struct  s_tuple {
-    std::vector<double> input;
-    std::vector<double> expectedOutput;
-}      t_tuple;
 
 class Layer;
 

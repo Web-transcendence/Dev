@@ -6,19 +6,24 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 13:39:48 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 14:24:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 16:57:33 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Network.class.hpp"
 #include "Mnist.class.hpp"
 
-int main(void) {
-	Mnist	dataset("../data/train-images.idx3-ubyte",\
-					"../data/train-labels.idx3-ubyte",\
-					"../data/t10k-images.idx3-ubyte",\
-					"../data/t10k-labels.idx3-ubyte");
 
-	dataset.printFirst();
+int main(void) {
+	Mnist	dataset("data/train-images.idx3-ubyte",\
+					"data/train-labels.idx1-ubyte",\
+					"data/t10k-images.idx3-ubyte",\
+					"data/t10k-labels.idx1-ubyte");
+	std::vector<unsigned int>	sizes(3);
+	sizes[0] = 784;
+	sizes[1] = 30;
+	sizes[2] = 10; 
+	Network	myNetwork(sizes);
+	myNetwork.SDG(dataset.training, 30, 10, 3.0, &dataset.testing);
 	return 0;
 }

@@ -6,14 +6,13 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 14:22:05 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 17:01:48 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Network.class.hpp"
 #include "Layer.class.hpp"
 #include "Neuron.class.hpp"
-#include "Math.namespace.hpp"
 #include <algorithm>
 #include <iostream>
 

@@ -6,13 +6,21 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 09:50:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 14:13:54 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 16:42:33 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MATH_NAMESPACE_HPP
 # define MATH_NAMESPACE_HPP
 # include <vector>
+
+typedef struct  s_tuple {
+    std::vector<double> input;
+    std::vector<double> expectedOutput;
+
+	s_tuple() : expectedOutput(10, 0.0) {}
+}      t_tuple;
+
 
 namespace Math {
 	double								sigmoid(double const z);
