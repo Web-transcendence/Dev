@@ -4,8 +4,8 @@ interface Window {
 
 window.CredentialResponse = async (credit: { credential: string }) => {
     console.log('Google response:', credit); // Vérifiez si ce log apparaît
-    // FETCH BASE
-    try {
+    console.log('Google credential:', credit.credential); // Vérifiez si ce log apparaît
+    try { // FETCH BASE
         const response = await fetch('http://localhost:3000/user-management/auth/google', {
             method: 'POST',
             headers: {
@@ -17,6 +17,40 @@ window.CredentialResponse = async (credit: { credential: string }) => {
             console.error('Error: From UserManager returned an error');
         else {
             const reply = await response.json();
+            if (reply.valid) {
+                const container = document.getElementById('content') as HTMLElement;
+                localStorage.setItem('token', reply.token);
+                const res = await fetch('/part/connected');
+                const newElement = document.createElement('div');
+                newElement.className = 'tag';
+                if (reply.name) {
+                    console.log("UserGoogle:", reply.name);
+                    localStorage.setItem('name', reply.name); // Stockage
+
+                    const username = localStorage.getItem('username'); // Récupération
+                    const nameSpan = document.getElementById('username') as HTMLSpanElement;
+                    nameSpan.textContent = username;
+                    console.log("Welcome", username);
+                    const avatarImg = document.getElementById('avatar') as HTMLImageElement;
+                    // Récupérer l'avatar en utilisant l'API Google (exemple avec le jeton)
+                    const profileResponse = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${credit.credential}`);
+                    const profileData = await profileResponse.json();
+
+                    if (profileData.picture) {
+                        avatarImg.src = profileData.picture;  // Mettre l'URL de l'avatar
+                    } else {
+                        avatarImg.src = '../login.png'; // Image par défaut si pas d'avatar
+                    }
+                }
+                if (!res.ok)
+                    throw Error("Page not found: element missing.");
+                const html = await res.text();
+                if (html.includes(container.innerHTML))
+                    return;
+                container.innerHTML = '';
+                newElement.innerHTML = html;
+                container.appendChild(newElement);
+            }
             console.log('Success:', reply);
         }
     }
