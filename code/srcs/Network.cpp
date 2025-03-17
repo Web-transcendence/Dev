@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 19:17:52 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/17 14:58:56 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,10 @@ void    Network::SDG(std::vector<t_tuple*> trainingData, int const epoch, int co
 			displayProgress(display, mini_batches.size());
 		}
 		if (test_data) {
-			std::cout<<"Epoch "<<i<<": "<<this->evaluate(*test_data)<<" / "<<n_test<<std::endl;
+			std::cout<<std::endl<<"Epoch "<<i<<": "<<this->evaluate(*test_data)<<" / "<<n_test<<std::endl;
 		}
 		else
-			std::cout<<"Epoch "<<i<<": complete"<<std::endl;
+			std::cout<<std::endl<<"Epoch "<<i<<": complete"<<std::endl;
 	}
 }
 
@@ -77,6 +77,8 @@ void	Network::backprop(std::vector<double>& input, std::vector<double>& expected
 	std::vector<std::vector<double>*>	activations;
 	std::vector<double>*				z;
 	std::vector<std::vector<double>*>	zs;
+	unsigned int const	lSize = this->_layers.size();
+
 
 	activations.push_back(activation);
 	for (auto l : this->_layers) {
@@ -89,18 +91,29 @@ void	Network::backprop(std::vector<double>& input, std::vector<double>& expected
 	auto	sp = Math::sigmoidPrime(*zs.back());
 	auto	delta = Math::hadamardProduct(*cd, *sp);
 	this->_layers.back()->setDeltaNabla_b(*delta);
-	this->_layers.back()->setDeltaNabla_w(*delta, **(activations.end()-2));
+	// Math::printdebug(*delta, "delta");
+	// Math::printdebug(*activations.at(activations.size()-2), "act");
+	this->_layers.back()->setDeltaNabla_w(*delta, *activations.at(activations.size()-2));
 	delete cd;
 	delete sp;
-	for (int i_l = this->_layers.size()-2; i_l - 1 >= 0;i_l--) {
-		z = zs[i_l];
+	for (unsigned int i_l = 2; i_l <= lSize; i_l++) {
+		z = zs.at(lSize - i_l);
 		sp = Math::sigmoidPrime(*z);
-		auto nDelta = this->_layers[i_l-1]->calcDelta(*delta, *sp);
+		auto nDelta = this->_layers.at(lSize - i_l + 1)->calcDelta(*delta, *sp);
 		delete delta;
 		delta = nDelta;
-		this->_layers[i_l]->setDeltaNabla_b(*delta);
-		this->_layers[i_l]->setDeltaNabla_w(*delta, **(activations.end()-i_l));
+		this->_layers.at(lSize - i_l)->setDeltaNabla_b(*delta);
+		// Math::printdebug(*delta, "in for delta");
+		// Math::printdebug(*activations.at(activations.size()-i_l-1), "in for act");
+		this->_layers.at(lSize - i_l)->setDeltaNabla_w(*delta, *activations.at(activations.size()-i_l-1));
 		delete sp;
+	}
+	for (auto i : zs)
+		delete i;
+	activations.front() = NULL;
+	for (auto i : activations) {
+		if (i)
+			delete i;
 	}
 }
 
@@ -116,19 +129,42 @@ std::vector<double>*	Network::feedForward(std::vector<double> const & input) {
 	return activation;
 }
 
+void	interpretor(std::vector<int>& real, std::vector<std::vector<double>*> const & net) {
+	for (auto n : net) {
+		int i_max = 0;
+		for (unsigned int i = 0; i < n->size(); i++) {
+			if (n->at(i) > n->at(i_max))
+				i_max = i;
+		}
+		real.push_back(i_max);
+	}
+	return ;
+}
+
 int     Network::evaluate(std::vector<t_tuple*>& test_data) {
 	auto	netResult = new std::vector<std::vector<double>*>;
 	auto 	it_td = test_data.begin();
 	int		res = 0;
+	std::vector<int>	realResult;
 
-	for (; it_td != test_data.begin(); it_td++)
-		netResult->push_back(this->feedForward((*it_td)->input));
-	it_td = test_data.begin();
-	for (auto net : *netResult) {
-		if (*net == (*it_td)->expectedOutput)
-			++res;
-		++it_td;
+	for (; it_td != test_data.end(); it_td++) {
+		std::vector<double>* result = this->feedForward((*it_td)->input);
+		netResult->push_back(result);
 	}
+	it_td = test_data.begin();
+	interpretor(realResult, *netResult);
+	for (unsigned int i = 0; i != realResult.size(); i++, it_td++) {
+		if (realResult[i] == (*it_td)->real)
+			++res;
+		delete netResult->at(i);
+	}
+	// for (auto net : *netResult) {
+	// 	if (*net == (*it_td)->real)
+	// 		++res;
+	// 	delete net;
+	// 	++it_td;
+	// }
+	delete netResult;
 	return res;
 }
 

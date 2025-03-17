@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:09:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 18:24:13 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/17 14:58:32 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,35 +16,35 @@
 double	Math::sigmoid(double const z) {return 1.0/(1.0+std::exp(-z));}
 	
 std::vector<double>*	Math::sigmoid(std::vector<double> const & zs) {
-	std::vector<double>*	res = new std::vector<double>;
+	auto	res = new std::vector<double>;
 	
 	for (auto it = zs.begin(); it != zs.end(); it++)
-		res->push_back(sigmoid(*it));
+		res->push_back(Math::sigmoid(*it));
 	return res;
 }
 
-double	Math::sigmoidPrime(double const z) {return sigmoid(z)*(1 - sigmoid(z));}
+double	Math::sigmoidPrime(double const z) {return Math::sigmoid(z)*(1 - Math::sigmoid(z));}
 
 std::vector<double>*	Math::sigmoidPrime(std::vector<double> const & zs) {
-	std::vector<double>*	res = new std::vector<double>;
+	auto	res = new std::vector<double>;
 	
 	for (auto it = zs.begin(); it != zs.end(); it++)
-		res->push_back(sigmoidPrime(*it));
+		res->push_back(Math::sigmoidPrime(*it));
 	return res;
 }
 	
 double	Math::cost_derivative(double& output, double& expected) {return output - expected;}
 
 std::vector<double>*	Math::cost_derivative(std::vector<double> const & output, std::vector<double> const & expected) {
-	std::vector<double>*	res = new std::vector<double>(output.size());
+	auto	res = new std::vector<double>;
 	
-	for (auto it_o = output.begin(), it_e = expected.begin(); it_o != output.begin() && it_e != expected.begin(); it_o++, it_e++)
+	for (auto it_o = output.begin(), it_e = expected.begin(); it_o != output.end() && it_e != expected.end(); it_o++, it_e++)
 		res->push_back((*it_o) - (*it_e));
 	return res;
 }
 
 double	Math::dotProduct(std::vector<double> const & v1, std::vector<double> const & v2) {
-	double	res;
+	double	res = 0.0;
 	
 	for (auto it_w = v2.begin(), it_i = v1.begin(); it_w != v2.end() && it_i != v1.end(); it_w++, it_i++)
 		res += ((*it_i) * (*it_w));

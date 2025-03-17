@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 09:50:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 17:37:42 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/17 14:11:23 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 typedef struct  s_tuple {
     std::vector<double> input;
     std::vector<double> expectedOutput;
+	int					real;
 
 	s_tuple() : expectedOutput(10, 0.0) {}
 }      t_tuple;
@@ -37,6 +38,14 @@ namespace Math {
 	double								dotProduct(std::vector<double> const & v1, std::vector<double> const & v2);
 	std::vector<double>*				hadamardProduct(std::vector<double> const & lhs, std::vector<double> const & rhs);
 	std::vector<std::vector<double>*>*	outerProduct(std::vector<double> const & in, std::vector<double> const & transposed);
+
+	template<typename T>
+	void	printdebug(T const & truc, std::string const & name) {
+		std::cout<<name<<":[";
+		for (auto t : truc)
+			std::cout<<t<<";";
+		std::cout<<"]"<<std::endl;
+	}
 };
 
 #endif

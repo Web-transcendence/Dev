@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 18:58:31 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/17 14:49:45 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,18 +36,17 @@ double	Neuron::perceptron(std::vector<double> const & input) const {
 }
 
 void	Neuron::updateWeight(double const eta, double const miniBatchSize) {
-	for (auto it_w = this->_weight.begin(), it_nw = this->_nabla_w.begin(); it_w != this->_weight.end(); it_w++)
-		*it_w = *it_w - (eta / miniBatchSize) * *it_nw;
-	for (auto it = this->_nabla_w.begin(); it != this->_nabla_w.end(); it++)
-		*it = 0.0;
+	for (auto it_w = this->_weight.begin(), it_nw = this->_nabla_w.begin(); it_w != this->_weight.end(); it_w++) {
+		*it_w -= ((eta / miniBatchSize) * *it_nw);
+		*it_nw = 0.0;
+	}
 	return ;
 }
 
 void	Neuron::updateNabla_w( void ) {
 	for (auto it_nw = this->_nabla_w.begin(), it_dnw = this->_deltaNabla_w.begin(); it_nw != this->_nabla_w.end() && it_dnw != this->_deltaNabla_w.end(); it_nw++)
 		*it_nw += *it_dnw;
-	for (auto it = this->_deltaNabla_w.begin(); it != this->_deltaNabla_w.end(); it++)
-		*it = 0.0;
+	this->_deltaNabla_w.clear();
 	return ;
 }
 
@@ -58,8 +57,7 @@ void	Neuron::setDeltaNabla_w(std::vector<double> const & delta) {
 }
 
 void	Neuron::updateBias(double const eta, double const miniBatchSize) {
-	this->_bias -= (eta / miniBatchSize) * this->_nabla_b;
-	this->_nabla_b = 0.0;
+	this->_bias -= ((eta / miniBatchSize) * this->_nabla_b);
 	return ;
 }
 

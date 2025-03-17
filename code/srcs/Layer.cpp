@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:04:30 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 18:58:17 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/17 14:32:11 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void	Layer::updateNabla_w( void ) {
 
 void	Layer::setDeltaNabla_w(std::vector<double> const & delta, std::vector<double> const & activation) {
 	auto	it_delta = delta.begin();
-
+	
 	for (auto n : this->_neurons) {
 		std::vector<double> temp;
 		for (auto a : activation)
@@ -83,8 +83,9 @@ void	Layer::updateNabla_b( void ) {
 void	Layer::setDeltaNabla_b(std::vector<double> const & delta) {
 	auto	it_n = this->_neurons.begin();
 	auto	it_d = delta.begin();
-	for (;it_d != delta.end() && it_n != this->_neurons.end(); it_d++, it_n++)
+	for (;it_d != delta.end() && it_n != this->_neurons.end(); it_d++, it_n++) {
 		(*it_n)->setDeltaNabla_b(*it_d);
+	}
 	return ;
 }
 
@@ -107,6 +108,8 @@ std::vector<double>*	Layer::calcDelta(std::vector<double> const & delta, std::ve
 			++it_in;
 		}
 	}
+	// Math::printdebug(delta, "delta");
+	// Math::printdebug(sp, "sp");
 	auto	temp = new std::vector<double>;
 	for (auto t : *transposed) {
 		temp->push_back(Math::dotProduct(*t, delta));

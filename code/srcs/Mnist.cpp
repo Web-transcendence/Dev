@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 13:00:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 19:08:53 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/16 20:07:07 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,6 +121,7 @@ void    Mnist::convert( void ) {
         for (auto ti : **it_i)
             temp->input.push_back(static_cast<double>(ti));
         temp->expectedOutput[static_cast<int>(*it_l)] = 1.0;
+        temp->real = static_cast<int>(*it_l);
         this->training.push_back(temp);
     }
     it_i = this->testImages->begin();
@@ -130,6 +131,7 @@ void    Mnist::convert( void ) {
         for (auto ti : **it_i)
             temp->input.push_back(static_cast<double>(ti));
         temp->expectedOutput[static_cast<int>(*it_l)] = 1.0;
+        temp->real = static_cast<int>(*it_l);
         this->testing.push_back(temp);
     }
     return ;
