@@ -168,11 +168,9 @@ async function profile(container: HTMLElement, name: HTMLElement, email: HTMLEle
             }
         })
         const data = await response.json();
-        console.log(data);
         if (response.ok) {
             name.innerText = data.name;
             email.innerText = data.email;
-            console.log(data.email);
         }
 
     }
@@ -216,7 +214,6 @@ function isConnected() {
         document.getElementById("register")!.classList.add("hidden");
         document.getElementById("login")!.classList.add("hidden");
         document.getElementById("disconnect")!.classList.remove("hidden");
-        console.log(localStorage.getItem("token"));
     }
     else {
         document.getElementById("profile")!.classList.add("hidden");

@@ -19,7 +19,6 @@ async function authentificate (req: FastifyRequest, reply: FastifyReply) {
         return ;
     try {
         const authHeader = req.headers.authorization;
-        console.log(authHeader);
         if (!authHeader) {
             return reply.status(401).send({ error: "Unauthorized - No token provided" });
         }
