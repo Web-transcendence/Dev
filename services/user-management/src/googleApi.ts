@@ -2,15 +2,15 @@ import {FastifyReply, FastifyRequest} from "fastify";
 import { OAuth2Client } from 'google-auth-library';
 
 // Initialisation du client Google OAuth2
-const client = new OAuth2Client('/auth/google');
+const client = new OAuth2Client("562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com");
 
-export async function googleAuth(req: FastifyRequest, res: FastifyReply):Promise<void> {
+export async function googleAuth(request: FastifyRequest, reply: FastifyReply):Promise<void> {
     const { credential } = request.body as { credential: string };
     try {
         // Vérification du jeton Google
         const ticket = await client.verifyIdToken({
             idToken: credential,
-            audience: '/auth/google',
+            audience: "562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com",
         });
 
         // Récupération des informations de l'utilisateur
@@ -22,14 +22,14 @@ export async function googleAuth(req: FastifyRequest, res: FastifyReply):Promise
         }
 
         // Log des informations de l'utilisateur
-        app.log.info('User ID:', userId);
-        app.log.info('Email:', payload.email);
-        app.log.info('Name:', payload.name);
+        console.log('User ID:', userId);
+        console.log('Email:', payload.email);
+        console.log('Name:', payload.name);
 
         // Réponse réussie
         reply.status(200).send({ success: true, user: payload });
     } catch (error) {
-        app.log.error('Error verifying Google token:', error);
+        console.log('Error verifying Google token:', error);
         reply.status(400).send({ success: false, error: 'Invalid token' });
     }
 }

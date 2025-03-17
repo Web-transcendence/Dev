@@ -1,18 +1,51 @@
+declare global {
+    interface Window {
+        CredentialResponse: (response: any) => void;
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const aboutBtn = document.getElementById("about")!;
     const contactBtn = document.getElementById("contact")!;
     const registerBtn = document.getElementById("register")!;
     const loginBtn = document.getElementById("login")!;
+
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
     loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
-    // loadPart(window.location.pathname);
-});
 
-window.onpopstate = () => {
-    // loadPart(window.location.pathname);
-};
+    console.log("1");
+    // if (typeof google !== "undefined") {
+    //     google.accounts.id.initialize({
+    //         client_id: "YOUR_CLIENT_ID",
+    //         callback: handleCredentialResponse,
+    //     });
+    //
+    //     google.accounts.id.renderButton(
+    //         document.getElementById("g_id_signin")!,
+    //         { theme: "outline", size: "large" }
+    //     );
+    //
+    //     google.accounts.id.prompt();
+    // } else {
+    //     console.error("Google API not loaded.");
+    // }
+    //
+    // window.onload = function () {
+    //     google.accounts.id.initialize({
+    //         client_id: "562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com",
+    //         callback: handleCredentialResponse,
+    //     });
+    //
+    //     google.accounts.id.renderButton(
+    //         document.getElementById("g_id_signin")!,
+    //         { theme: "outline", size: "large" }
+    //     );
+    //
+    //     google.accounts.id.prompt(); // Demande automatique
+    // };
+});
 
 function navigate(event: MouseEvent, path: string): void {
     event.preventDefault();
@@ -128,7 +161,6 @@ function login(container: HTMLElement, button: HTMLElement): void {
             newElement.innerHTML = html;
             container.appendChild(newElement);
         } else {
-            console.log("CACA");
             const loginError = document.getElementById("LoginError") as HTMLSpanElement;
             // if (!loginError.classList.contains("hidden"))
                 loginError.classList.remove("hidden");
@@ -200,14 +232,13 @@ function validateRegister(result: { name: string; email: string; password: strin
     }
 }
 
-interface CredentialResponse {
-    credential: string; // Le jeton JWT renvoyé par Google
-    select_by?: string; // Méthode de sélection (par exemple, "auto" ou "user")
-    clientId?: string;  // L'ID client Google
-}
+// interface credit {
+//     credential: string; // Le jeton JWT renvoyé par Google
+//     select_by?: string; // Méthode de sélection (par exemple, "auto" ou "user")
+//     clientId?: string;  // L'ID client Google
+// }
 
-
-function handleCredentialResponse(response: CredentialResponse) {
+window.CredentialResponse = (response:  { credential: string }) => {
     console.log('Google response:', response); // Vérifiez si ce log apparaît
 
     // Envoyer le jeton d'identification à votre serveur
@@ -226,3 +257,13 @@ function handleCredentialResponse(response: CredentialResponse) {
             console.error('Error:', error);
         });
 }
+
+// function onSignIn(googleUser) {
+//     // var id_token = googleUser.getAuthResponse().id_token;
+//     // Jeton d'identification
+//     var profile = googleUser.getBasicProfile();
+//     console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+//     console.log('Name: ' + profile.getName());
+//     console.log('Image URL: ' + profile.getImageUrl());
+//     console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+// }
