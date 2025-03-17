@@ -1,5 +1,5 @@
 import {env as nodeEnv} from 'node:process';
-import {z} from 'zod';
+import {z} from "zod";
 
 const zEnv = z.object({
     TRANS_FRONT_PATH: z.string().default('../public/'),

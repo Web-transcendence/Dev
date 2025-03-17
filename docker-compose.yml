@@ -8,8 +8,6 @@ services:
       - transcendence
     ports:
       - "3000:3000"         #DEV
-    depends_on:
-      - database
     restart: unless-stopped
     develop:
       watch:
@@ -40,6 +38,8 @@ services:
         - action: sync
           path: ./frontend/public/
           target: /app/public/
+          ignore:
+            - app/public/dist/*.js
         - action: rebuild
           path: ./frontend/package.json
           target: app/
@@ -62,25 +62,6 @@ services:
           target: /app/src/
         - action: rebuild
           path: ./services/user-management/package.json
-          target: app/
-
-  database:
-    container_name: database
-    build:
-      context: services/database/
-    networks:
-      - transcendence
-    ports:
-      - "6000:6000"         #DEV
-      - "4001:4001"         #DEV
-    restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ./services/database/src/
-          target: /app/src/
-        - action: rebuild
-          path: ./services/database/package.json
           target: app/
 
 #

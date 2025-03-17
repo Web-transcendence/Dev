@@ -1,6 +1,27 @@
-declare global {
-    interface Window {
-        CredentialResponse: (response: any) => void;
+interface Window {
+    CredentialResponse: (response: any) => void;
+}
+
+window.CredentialResponse = async (credit: { credential: string }) => {
+    console.log('Google response:', credit); // Vérifiez si ce log apparaît
+    // FETCH BASE
+    try {
+        const response = await fetch('http://localhost:3000/user-management/auth/google', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({credential: credit.credential})
+        });
+        if (!response.ok)
+            console.error('Error: From UserManager returned an error');
+        else {
+            const reply = await response.json();
+            console.log('Success:', reply);
+        }
+    }
+    catch(error) {
+        console.error('Error:', error);
     }
 }
 
@@ -14,37 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
     loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
-
-    console.log("1");
-    // if (typeof google !== "undefined") {
-    //     google.accounts.id.initialize({
-    //         client_id: "YOUR_CLIENT_ID",
-    //         callback: handleCredentialResponse,
-    //     });
-    //
-    //     google.accounts.id.renderButton(
-    //         document.getElementById("g_id_signin")!,
-    //         { theme: "outline", size: "large" }
-    //     );
-    //
-    //     google.accounts.id.prompt();
-    // } else {
-    //     console.error("Google API not loaded.");
-    // }
-    //
-    // window.onload = function () {
-    //     google.accounts.id.initialize({
-    //         client_id: "562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com",
-    //         callback: handleCredentialResponse,
-    //     });
-    //
-    //     google.accounts.id.renderButton(
-    //         document.getElementById("g_id_signin")!,
-    //         { theme: "outline", size: "large" }
-    //     );
-    //
-    //     google.accounts.id.prompt(); // Demande automatique
-    // };
 });
 
 function navigate(event: MouseEvent, path: string): void {
@@ -231,39 +221,3 @@ function validateRegister(result: { name: string; email: string; password: strin
         }
     }
 }
-
-// interface credit {
-//     credential: string; // Le jeton JWT renvoyé par Google
-//     select_by?: string; // Méthode de sélection (par exemple, "auto" ou "user")
-//     clientId?: string;  // L'ID client Google
-// }
-
-window.CredentialResponse = (response:  { credential: string }) => {
-    console.log('Google response:', response); // Vérifiez si ce log apparaît
-
-    // Envoyer le jeton d'identification à votre serveur
-    fetch('http://localhost:3000/user-management/auth/google', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ credential: response.credential })
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-}
-
-// function onSignIn(googleUser) {
-//     // var id_token = googleUser.getAuthResponse().id_token;
-//     // Jeton d'identification
-//     var profile = googleUser.getBasicProfile();
-//     console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-//     console.log('Name: ' + profile.getName());
-//     console.log('Image URL: ' + profile.getImageUrl());
-//     console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
-// }

@@ -2,8 +2,8 @@
   "name": "trans_node_front",
   "type": "module",
   "scripts": {
-    "test": "tsc && npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css && tsx watch src/index.ts",
-    "dev": "concurrently --kill-others \"tsc --watch\" \"tsx watch --include './src/*' src/index.ts\" \"npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css --watch\" "
+    "test": "tsc src/front.ts && npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css && tsx watch src/api.ts",
+    "dev": "concurrently --kill-others \"tsc src/front.ts --outdir public/dist --watch\" \"tsx watch --include './src/*' src/api.ts\" \"npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css --watch\" "
   },
   "devDependencies": {
     "@types/node": "^22.13.5",

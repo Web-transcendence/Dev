@@ -21,6 +21,7 @@ COPY --chown=app:app src/*.ts src/
 COPY --chown=app:app public/ public/
 
 
+
 RUN npm install
 
 CMD ["npm", "run", "dev"]

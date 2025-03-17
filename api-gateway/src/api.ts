@@ -13,6 +13,12 @@ import cors from "@fastify/cors";
 // };
 //
 // const app = Fastify(httpsOptions)
+// fastify.register(fastifyCors, {
+//     origin: ['http://localhost:5000', 'http://localhost:5000'], // Allowed origins
+//     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+//     allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+//     credentials: true, // Enable cookies and authorization headers
+// });
 
 const app = Fastify();
 

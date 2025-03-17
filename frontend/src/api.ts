@@ -5,6 +5,7 @@ import {join} from "node:path";
 import {env} from "./env.js";
 import {readFileSync} from "node:fs";
 
+
 const httpsOptions = {
     https: {
         key: readFileSync(join(import.meta.dirname, '../secure/key.pem')),      // Private key
@@ -19,7 +20,6 @@ fastify.register(fastifyStatic, {
     root: join(import.meta.dirname, "..", "public"),
     prefix: "/static/"
 })
-
 
 fastify.get("/*", (req, res) => { // Route pour la page d'accueil
     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
