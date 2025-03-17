@@ -12,17 +12,15 @@ export default async function userRoutes(app: FastifyInstance) {
             const zod_result = Schema.signUpSchema.safeParse(req.body);
             if (!zod_result.success)
                 return res.status(400).send({json: zod_result.error.format()});
-            let {name, email, password} = {name: sanitizeHtml(zod_result.data.name), email: sanitizeHtml(zod_result.data.email), password: sanitizeHtml(zod_result.data.password)};
-            if (!name || !email || !password)
+            let {nickName, email, password} = {nickName: sanitizeHtml(zod_result.data.nickName), email: sanitizeHtml(zod_result.data.email), password: sanitizeHtml(zod_result.data.password)};
+            if (!nickName || !email || !password)
                 return res.status(454).send({error: "All information are required !"});
 
-            const client: User = new User(name);
-
-            const addRes = await client.addClient(email, password);
+            const addRes = await User.addClient(nickName, email, password);
             if (!addRes.success) {
                 return res.status(409).send({error: `${addRes.result} already exists`});
             }
-            return res.status(201).send({token: addRes.result, username: name , redirect: "post/login"});
+            return res.status(201).send({token: addRes.result, redirect: "post/login"});
         }
         catch(err) {
             return res.status(500).send({error: "Server error: ", err});

@@ -11,27 +11,25 @@ export const Client_db = new Database('client.db')  // Importation correcte de s
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
+        nickName TEXT NOT NULL,
         email UNIQUE NOT NULL COLLATE NOCASE,
         password TEXT NOT NULL
     )
 `);
 
 export class User {
-    name: string;
-    private status: UserStatus;
+    id: string;
 
-    constructor(name: string) {
-        this.name = name;
-        this.status = "NotExists";
-        if (Client_db.prepare("SELECT * FROM Client WHERE name = ?").get(this.name)) {
-            this.status = "Exists";
+    constructor(id: string) {
+        this.id = id;
+        if (!Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(this.id)) {
+            throw new Error(`${this.id} not found`);
         }
     }
 
-    async addClient(email: string, password: string): Promise<{success: boolean, result: string}> {
-        if (this.status === "Exists") {
-            return {success: false, result: 'name'};
+    static async addClient(nickName: string, email: string, password: string): Promise<{success: boolean, result: string}> {
+        if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(nickName)) {
+            return {success: false, result: 'nickName'};
         }
         if (Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(email)) {
             return {success: false, result: 'email'};
@@ -39,42 +37,44 @@ export class User {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const res = Client_db.prepare("INSERT INTO Client (name, email, password) VALUES (?, ?, ?)")
-            .run(this.name, email, hashedPassword);
+        const res = Client_db.prepare("INSERT INTO Client (nickName, email, password) VALUES (?, ?, ?)")
+            .run(nickName, email, hashedPassword);
         if (res.changes === 0) {
             throw new Error(`User not inserted`);
         }
+        const id : number | bigint = res.lastInsertRowid
+        const stringId: string = id.toString();
+        console.log(res.lastInsertRowid);
 
-        const rows = Client_db.prepare(`SELECT * FROM Client`).all(); // Print clients info
-        console.table(rows);
+        // const rows = Client_db.prepare(`SELECT * FROM Client`).all(); // Print clients info
+        // console.table(rows);
 
-        this.status = "Exists";
         console.log("new user added");
-        return {success: true, result: this.makeToken()};
+        return {success: true, result: this.makeToken(stringId)};
     }
 
+
+
     async isPasswordValid(password: string): Promise<boolean> {
-        const userData = Client_db.prepare("SELECT password FROM Client WHERE name = ?").get(this.name) as { password: string } | undefined;
+        const userData = Client_db.prepare("SELECT password FROM Client WHERE id = ?").get(this.id) as { password: string } | undefined;
         if (!userData) {
-            throw new Error(`Database Error: cannot find password from ${this.name}`);
+            throw new Error(`Database Error: cannot find password from ${this.id}`);
         }
         return (await bcrypt.compare(password, userData.password))
     }
 
-    makeToken(): string {
-        const token = jwt.sign({id: 1, name: this.name}, 'secret_key', {expiresIn: '1h'})
+    private static makeToken(id: string): string {
+        const token = jwt.sign({id: 1}, 'secret_key', {expiresIn: '1h'})
         return (token);
     }
 
-    getProfile(): { name: string, email: string } {
-        const userData = Client_db.prepare("SELECT email FROM Client WHERE name = ?").get(this.name) as { email: string } | undefined;
+    getProfile(): { nickName: string, email: string } {
+        const userData = Client_db.prepare("SELECT (nickName, email) FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string } | undefined;
         if (!userData) {
-            throw new Error(`Database Error: cannot find password from ${this.name}`);
+            throw new Error(`Database Error: cannot find password from ${this.id}`);
         }
-        return {name: this.name, email: userData.email};
+
+        return {nickName: userData.nickName, email: userData.email};
     }
 
-    getStatus() {
-        return this.status;
-    }
 }

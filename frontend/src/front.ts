@@ -119,6 +119,7 @@ function login(container: HTMLElement, button: HTMLElement): void {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
+        console.log(data);
         const response = await fetch('http://localhost:3000/user-management/sign-in', {
             method: 'POST',
             headers: {
