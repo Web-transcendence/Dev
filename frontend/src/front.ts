@@ -20,6 +20,8 @@ window.CredentialResponse = async (credit: { credential: string }) => {
             if (reply.valid) {
                 const container = document.getElementById('content') as HTMLElement;
                 localStorage.setItem('token', reply.token);
+                // @ts-ignore
+                // localStorage.setItem('credit', credit);
                 const res = await fetch('/part/connected');
                 const newElement = document.createElement('div');
                 newElement.className = 'tag';
@@ -32,15 +34,12 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                     nameSpan.textContent = username;
                     console.log("Welcome", username);
                     const avatarImg = document.getElementById('avatar') as HTMLImageElement;
-                    // Récupérer l'avatar en utilisant l'API Google (exemple avec le jeton)
-                    const profileResponse = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${credit.credential}`);
-                    const profileData = await profileResponse.json();
+                    // Récupérer l'avatar en utilisant l'API Google (exemple avec le jeton
 
-                    if (profileData.picture) {
-                        avatarImg.src = profileData.picture;  // Mettre l'URL de l'avatar
-                    } else {
+                    if (reply.avatar)
+                        avatarImg.src = reply.avatar;
+                    else
                         avatarImg.src = '../login.png'; // Image par défaut si pas d'avatar
-                    }
                 }
                 if (!res.ok)
                     throw Error("Page not found: element missing.");
@@ -69,6 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
     loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
+
+    // const token = localStorage.getItem('token'); // Récupération
+    // if (token) {
+    //     console.log("ThereIsUserGoogle:", token);
+    // }
+    // console.log("NOTUserGoogle:");
 });
 
 function navigate(event: MouseEvent, path: string): void {
@@ -107,6 +112,7 @@ async function insert_tag(url: string): Promise<void>{
     const container = document.getElementById('content') as HTMLElement;
     const res = await fetch(url);
     const newElement = document.createElement('div');
+    const scriptElement = document.createElement('script');
     newElement.className = 'tag';
     if (!res.ok)
         throw Error("Page not found: element missing.");
@@ -114,9 +120,19 @@ async function insert_tag(url: string): Promise<void>{
     if (html.includes(container.innerHTML))
         return;
     container.innerHTML = '';
+    const script = document.createElement('script');
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+
+    // Set the innerHTML of the new element to the fetched HTML
     newElement.innerHTML = html;
-    // CheckForToken();
+
+    // Append the script element and new content to the container
     container.appendChild(newElement);
+    container.appendChild(script);
+
+    console.log(script);
 }
 
 function register(container: HTMLElement, button: HTMLElement): void {
