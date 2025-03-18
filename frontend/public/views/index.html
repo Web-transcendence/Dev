@@ -28,23 +28,6 @@
       <span id="username" class="text-lg"></span>
     </div>
   </nav>
-<div class="space-x-4 space-y-4">
-  <!-- Chargement de l'authentification -->
-  <div id="g_id_onload"
-       data-client_id="562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com"
-       data-callback="CredentialResponse">
-  </div>
-
-  <!-- Bouton Google -->
-  <div class="g_id_signin"
-       data-type="standard"
-       data-size="large"
-       data-theme="outline"
-       data-text="signin_with"
-       data-shape="rectangular"
-       data-logo_alignment="left">
-  </div>
-</div>
   <div class="flex-grow p-10">
     <h1 class="text-center text-5xl mt-10 text-yellow-400 font-bold text-shadow-md">Home</h1>
     <p class="text-center mt-4 text-lg">Play the migthy Pong Game, or the other.</p>
@@ -53,9 +36,20 @@
     </div>
   </div>
 </div>
-
+<div id="g_id_onload"
+     data-client_id="562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com"
+     data-callback="CredentialResponse">
+</div>
+<!-- Bouton Google -->
+<div data-width="570" data-height="30" class="g_id_signin"
+     data-type="standard"
+     data-size="large"
+     data-theme="outline"
+     data-text="signin_with"
+     data-shape="rectangular"
+     data-logo_alignment="left">
+</div>
 <script type="module" src="/static/dist/front.js"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>
 
