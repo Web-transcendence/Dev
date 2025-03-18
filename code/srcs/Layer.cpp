@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:04:30 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/17 14:32:11 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/18 10:40:03 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,8 @@ std::vector<double>*	Layer::feedForward(std::vector<double> const & input) {
 std::vector<double>*	Layer::perceptron(std::vector<double> const & input) {
 	std::vector<double>*	res = new std::vector<double>;
 
-	for (auto n : this->_neurons) {
+	for (auto n : this->_neurons)
 		res->push_back(n->perceptron(input));
-	}
 	return res;
 }
 
@@ -108,15 +107,12 @@ std::vector<double>*	Layer::calcDelta(std::vector<double> const & delta, std::ve
 			++it_in;
 		}
 	}
-	// Math::printdebug(delta, "delta");
-	// Math::printdebug(sp, "sp");
-	auto	temp = new std::vector<double>;
+	std::vector<double>	temp;
 	for (auto t : *transposed) {
-		temp->push_back(Math::dotProduct(*t, delta));
+		temp.push_back(Math::dotProduct(*t, delta));
 		delete t;
 	}
 	delete transposed;
-	auto res = Math::hadamardProduct(*temp, sp);
-	delete temp;
+	auto res = Math::hadamardProduct(temp, sp);
 	return res;
 }

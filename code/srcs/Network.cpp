@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/17 14:58:56 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/18 13:02:14 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,23 +91,23 @@ void	Network::backprop(std::vector<double>& input, std::vector<double>& expected
 	auto	sp = Math::sigmoidPrime(*zs.back());
 	auto	delta = Math::hadamardProduct(*cd, *sp);
 	this->_layers.back()->setDeltaNabla_b(*delta);
-	// Math::printdebug(*delta, "delta");
-	// Math::printdebug(*activations.at(activations.size()-2), "act");
 	this->_layers.back()->setDeltaNabla_w(*delta, *activations.at(activations.size()-2));
 	delete cd;
 	delete sp;
 	for (unsigned int i_l = 2; i_l <= lSize; i_l++) {
-		z = zs.at(lSize - i_l);
+		z = zs.at(lSize- i_l);
 		sp = Math::sigmoidPrime(*z);
-		auto nDelta = this->_layers.at(lSize - i_l + 1)->calcDelta(*delta, *sp);
+		auto nDelta = this->_layers.at(lSize-i_l+1)->calcDelta(*delta, *sp);
 		delete delta;
 		delta = nDelta;
-		this->_layers.at(lSize - i_l)->setDeltaNabla_b(*delta);
-		// Math::printdebug(*delta, "in for delta");
-		// Math::printdebug(*activations.at(activations.size()-i_l-1), "in for act");
-		this->_layers.at(lSize - i_l)->setDeltaNabla_w(*delta, *activations.at(activations.size()-i_l-1));
+		this->_layers.at(lSize-i_l)->setDeltaNabla_b(*delta);
+		this->_layers.at(lSize-i_l)->setDeltaNabla_w(*delta, *activations.at(activations.size()-i_l-1));
 		delete sp;
 	}
+	// std::cout << "|----------------------------|" << std::endl;
+	// Math::printdebug(*activations.back(), "output");
+	// Math::printdebug(expectedOutput, "expected");
+	// std::cout << "|----------------------------|" << std::endl;
 	for (auto i : zs)
 		delete i;
 	activations.front() = NULL;
@@ -158,12 +158,6 @@ int     Network::evaluate(std::vector<t_tuple*>& test_data) {
 			++res;
 		delete netResult->at(i);
 	}
-	// for (auto net : *netResult) {
-	// 	if (*net == (*it_td)->real)
-	// 		++res;
-	// 	delete net;
-	// 	++it_td;
-	// }
 	delete netResult;
 	return res;
 }
