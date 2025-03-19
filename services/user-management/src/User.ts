@@ -11,7 +11,8 @@ Client_db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         email UNIQUE NOT NULL COLLATE NOCASE,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        google_id INTEGER
     )
 `);
 
@@ -43,7 +44,7 @@ export class User {
         if (res.changes === 0) {
             throw new Error(`User not inserted`);
         }
-        //
+
         // const rows = Client_db.prepare(`SELECT * FROM Client`).all(); // Print clients info
         // console.table(rows);
 

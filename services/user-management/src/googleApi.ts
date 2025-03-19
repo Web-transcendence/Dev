@@ -32,10 +32,12 @@ export async function googleAuth(request: FastifyRequest, reply: FastifyReply):P
         if (Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(payload.email))
             console.log('Email Already Register:', payload.email);
         else {
-            const res = Client_db.prepare("INSERT INTO Client (name, email, password) VALUES (?, ?, ?)")
-                .run(payload.name, payload.email, '');
+            const res = Client_db.prepare("INSERT INTO Client (name, email, password, google_id) VALUES (?, ?, ?, ?)")
+                .run(payload.name, payload.email, 'NOTGIVEN', userId);
             console.log('New Email:', payload.email);
         }
+            const rows = Client_db.prepare(`SELECT * FROM Client`).all(); // Print clients info
+            console.table(rows);
         const token = jwt.sign({ name: payload.name, email: payload.email, avatar: payload.picture, userId: payload.sub }, 'secret_key', { expiresIn: '1h' });
         return reply.send({token, valid: true, name: payload.name, avatar: payload.picture});
     } catch (error) {

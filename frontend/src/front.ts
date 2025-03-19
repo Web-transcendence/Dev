@@ -69,11 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
     loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
 
-    // const token = localStorage.getItem('token'); // Récupération
-    // if (token) {
-    //     console.log("ThereIsUserGoogle:", token);
-    // }
-    // console.log("NOTUserGoogle:");
+    CheckForToken();
 });
 
 function navigate(event: MouseEvent, path: string): void {
@@ -222,18 +218,23 @@ async function CheckForToken(): Promise<void> {
             body: JSON.stringify({ token }),
         });
         const result = await response.json();
-        console.log("resreslutsuet", result);
+        console.log("CheckToken Result: ", result);
         if (result.valid) {
             if (result.username) {
-                console.log("Userreeerr:", result.username);
-                localStorage.setItem('username', result.username); // Stockage
+                console.log("ResultUsername:", result.username);
+                localStorage.setItem('username', result.username);
 
-                const username = localStorage.getItem('username'); // Récupération
                 const nameSpan = document.getElementById('username') as HTMLSpanElement;
-                nameSpan.textContent = username;
-                console.log("Welcome", username);
-                const avatarImg = document.getElementById('avatar') as HTMLImageElement;
-                avatarImg.src = '../login.png';
+                nameSpan.textContent = result.username;
+                console.log("Welcome :", result.username);
+                if (result.avatar)
+                    localStorage.setItem('avatar', result.avatar);
+                const AvatarSrc = document.getElementById('avatar') as HTMLImageElement;
+                const Avatar = localStorage.getItem('avatar');
+                if (Avatar)
+                    AvatarSrc.src = Avatar;
+                else
+                    AvatarSrc.src = '../login.png';
             }
         }
         else
