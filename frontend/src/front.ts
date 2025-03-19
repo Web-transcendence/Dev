@@ -3,10 +3,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const contactBtn = document.getElementById("contact")!;
     const registerBtn = document.getElementById("register")!;
     const loginBtn = document.getElementById("login")!;
+    const profileBtn = document.getElementById("profile")!;
+    const disconnectBtn = document.getElementById("disconnect")!;
+    isConnected();
+
+    profileBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"))
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
     loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
+    disconnectBtn.addEventListener("click", (event: MouseEvent) => {
+        localStorage.removeItem("token");
+        isConnected();
+        navigate(event, "/");
+
+    });
     // loadPart(window.location.pathname);
 });
 
@@ -39,6 +50,12 @@ async function loadPart(page: string): Promise<void> {
             if (button)
                 login(container, button);
         }
+        if (page === "/profile") {
+            const nickName = document.getElementById("profileNickName")!;
+            const email = document.getElementById("profileEmail")!;
+            if (email && nickName)
+                profile(container, nickName, email);
+        }
     } catch (error) {
         console.error(error);
         container.innerHTML = '';
@@ -58,7 +75,6 @@ async function insert_tag(url: string): Promise<void>{
         return;
     container.innerHTML = '';
     newElement.innerHTML = html;
-    // CheckForToken();
     container.appendChild(newElement);
 }
 
@@ -77,6 +93,7 @@ function register(container: HTMLElement, button: HTMLElement): void {
         const result = await response.json();
         if (result.token) {
             localStorage.setItem('token', result.token);
+            isConnected();
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
             newElement.className = 'tag';
@@ -89,7 +106,6 @@ function register(container: HTMLElement, button: HTMLElement): void {
             newElement.innerHTML = html;
             container.appendChild(newElement);
         } else {
-            console.log("result.token");
             const errors = result.json;
             validateRegister(errors.json);
         }
@@ -110,9 +126,9 @@ function login(container: HTMLElement, button: HTMLElement): void {
         });
         const result = await response.json();
         if (response.ok) {
-            console.log("result.token");
             localStorage.setItem('token', result.token);
-            localStorage.setItem('name', result.name);
+            isConnected()
+            localStorage.setItem('nickName', result.nickName);
             // localStorage.setItem('avatar', result.avatar);
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
@@ -135,6 +151,30 @@ function login(container: HTMLElement, button: HTMLElement): void {
 }
 
 
+async function profile(container: HTMLElement, nickName: HTMLElement, email: HTMLElement) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('token missing');
+            return;
+        }
+        const response = await fetch('http://localhost:3000/user-management/getProfile', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        })
+        const data = await response.json();
+        if (response.ok) {
+            nickName.innerText = data.nickName;
+            email.innerText = data.email;
+        }
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
 
 function validateRegister(result: { name: string; email: string; password: string}): void {
     const nameErrorMin = document.getElementById("nameErrorMin") as HTMLSpanElement;
@@ -163,4 +203,20 @@ function validateRegister(result: { name: string; email: string; password: strin
     }
 }
 
+
+
+function isConnected() {
+    if (localStorage.getItem("token")) {
+        document.getElementById("profile")!.classList.remove("hidden");
+        document.getElementById("register")!.classList.add("hidden");
+        document.getElementById("login")!.classList.add("hidden");
+        document.getElementById("disconnect")!.classList.remove("hidden");
+    }
+    else {
+        document.getElementById("profile")!.classList.add("hidden");
+        document.getElementById("register")!.classList.remove("hidden");
+        document.getElementById("login")!.classList.remove("hidden");
+        document.getElementById("disconnect")!.classList.add("hidden");
+    }
+}
 

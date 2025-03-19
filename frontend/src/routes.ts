@@ -36,6 +36,11 @@ export async function routes(fastify: FastifyInstance) {
         const tag = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(tag)
     })
+    fastify.get('/part/profile', function (req, reply) {
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "profile.html");
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag)
+    })
     // FAV ICON
     fastify.get('/favicon.ico', function (req, reply) {
         try {
