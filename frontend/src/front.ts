@@ -53,7 +53,6 @@ async function loadPart(page: string): Promise<void> {
         if (page === "/profile") {
             const nickName = document.getElementById("profileNickName")!;
             const email = document.getElementById("profileEmail")!;
-            console.log(nickName);
             if (email && nickName)
                 profile(container, nickName, email);
         }
@@ -83,7 +82,6 @@ function register(container: HTMLElement, button: HTMLElement): void {
     button.addEventListener("click", async () => {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
-        console.log(formData);
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
         const response = await fetch('http://localhost:3000/user-management/sign-up', {
             method: 'POST',
@@ -108,7 +106,6 @@ function register(container: HTMLElement, button: HTMLElement): void {
             newElement.innerHTML = html;
             container.appendChild(newElement);
         } else {
-            console.log("result.token");
             const errors = result.json;
             validateRegister(errors.json);
         }
@@ -120,7 +117,6 @@ function login(container: HTMLElement, button: HTMLElement): void {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
-        console.log(data);
         const response = await fetch('http://localhost:3000/user-management/sign-in', {
             method: 'POST',
             headers: {
