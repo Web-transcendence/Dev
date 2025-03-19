@@ -19,17 +19,15 @@ async function authentificate (req: FastifyRequest, reply: FastifyReply) {
         return ;
     try {
         const authHeader = req.headers.authorization;
-        if (!authHeader) {
+        if (!authHeader)
             return reply.status(401).send({ error: "Unauthorized - No token provided" });
-        }
 
         const token = authHeader.split(" ")[1];
-        if (!token) {
+        if (!token)
             return reply.status(401).send({ error: "Unauthorized - No token provided" });
-        }
 
         const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;
-        req.headers.name = decoded.name;
+        req.headers.id = decoded.id;
     }
     catch (error) {
         return reply.status(401).send({ error: "Unauthorized - invalid token" });

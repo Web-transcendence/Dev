@@ -8,10 +8,10 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.post('/sign-up', async (req, res) => {
         try {
-            console.log("sign-up");
             const zod_result = Schema.signUpSchema.safeParse(req.body);
             if (!zod_result.success)
                 return res.status(400).send({json: zod_result.error.format()});
+
             let {nickName, email, password} = {nickName: sanitizeHtml(zod_result.data.nickName), email: sanitizeHtml(zod_result.data.email), password: sanitizeHtml(zod_result.data.password)};
             if (!nickName || !email || !password)
                 return res.status(454).send({error: "All information are required !"});
@@ -33,12 +33,14 @@ export default async function userRoutes(app: FastifyInstance) {
             const zod_result = Schema.profileSchema.safeParse(req.headers);
             if (!zod_result.success)
                 return res.status(400).send({json: zod_result.error.format()});
-            let name = sanitizeHtml(zod_result.data.name);
-            if (!name)
+            const id = sanitizeHtml(zod_result.data.id);
+            if (!id)
                 return res.status(454).send({error: "All information are required !"});
 
-            const user = new User(name);
+            const user = new User(id);
+
             const profileData = user.getProfile();
+
             return res.status(200).send(profileData);
         } catch (err) {
             return res.status(500).send({error: "Server error: ", err});
@@ -60,14 +62,10 @@ export default async function userRoutes(app: FastifyInstance) {
             if (!name || !password)
                 return res.status(454).send({error: "All information are required !"});
 
-            const user = new User(name);
-            if (user.getStatus() === "NotExists")
-                return res.status(401).send({error: "Invalid username"});
-
-            if (await user.isPasswordValid(password))
-                return res.status(201).send({token: user.makeToken(), username: name , redirect: "post/login"});
-            else
-                return res.status(401).send({error: "Invalid password"});
+            const connection = await User.login(name, password);
+            if (connection.code !== 201)
+                return res.status(connection.code).send({error: connection.result});
+            return res.status(200).send({token: connection.result, redirect: "post/login"});
         }
         catch (err) {
             res.status(500).send({error: "Server error: ", err});

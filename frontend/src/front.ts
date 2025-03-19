@@ -51,11 +51,11 @@ async function loadPart(page: string): Promise<void> {
                 login(container, button);
         }
         if (page === "/profile") {
-
-            const name = document.getElementById("profileName")!;
+            const nickName = document.getElementById("profileNickName")!;
             const email = document.getElementById("profileEmail")!;
-            if (email && name)
-                profile(container, name, email);
+            console.log(nickName);
+            if (email && nickName)
+                profile(container, nickName, email);
         }
     } catch (error) {
         console.error(error);
@@ -83,6 +83,7 @@ function register(container: HTMLElement, button: HTMLElement): void {
     button.addEventListener("click", async () => {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
+        console.log(formData);
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
         const response = await fetch('http://localhost:3000/user-management/sign-up', {
             method: 'POST',
@@ -131,7 +132,7 @@ function login(container: HTMLElement, button: HTMLElement): void {
         if (response.ok) {
             localStorage.setItem('token', result.token);
             isConnected()
-            localStorage.setItem('name', result.name);
+            localStorage.setItem('nickName', result.nickName);
             // localStorage.setItem('avatar', result.avatar);
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
@@ -154,7 +155,7 @@ function login(container: HTMLElement, button: HTMLElement): void {
 }
 
 
-async function profile(container: HTMLElement, name: HTMLElement, email: HTMLElement) {
+async function profile(container: HTMLElement, nickName: HTMLElement, email: HTMLElement) {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -170,13 +171,12 @@ async function profile(container: HTMLElement, name: HTMLElement, email: HTMLEle
         })
         const data = await response.json();
         if (response.ok) {
-            name.innerText = data.name;
+            nickName.innerText = data.nickName;
             email.innerText = data.email;
         }
-
     }
     catch (err) {
-
+        console.log(err)
     }
 }
 
