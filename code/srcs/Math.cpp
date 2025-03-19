@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:09:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 11:19:21 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 15:16:16 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ double	Math::dotProduct(std::vector<double> const & v1, std::vector<double> cons
 	double	res = 0.0;
 	
 	for (auto it_w = v2.begin(), it_i = v1.begin(); it_w != v2.end() && it_i != v1.end(); it_w++, it_i++)
-		res += (*it_i * *it_w);
+		res = res + (*it_i) * (*it_w);
 	return res;
 }
 	
@@ -59,7 +59,7 @@ std::vector<double>*	Math::hadamardProduct(std::vector<double> const & lhs, std:
 	auto	it_res = res->begin();
 
 	for (auto it_lhs = lhs.begin(), it_rhs = rhs.begin(); it_lhs != lhs.end() && it_rhs != rhs.end(); it_lhs++, it_rhs++, it_res++)
-		*it_res = *it_rhs * *it_lhs;
+		*it_res = (*it_rhs) * (*it_lhs);
 	return res;
 }
 
@@ -70,7 +70,7 @@ std::vector<std::vector<double>>*	Math::outerProduct(std::vector<double> const &
 	for (auto it_in = in.begin(); it_in != in.end(); it_in++, it_res++) {
 		auto	it_inres = (*it_res).begin();
 		for (auto it_b = base.begin(); it_b != base.end(); it_b++, it_inres++)
-			*it_inres = *it_in * *it_b;
+			*it_inres = (*it_in) * (*it_b);
 	}
 	return res;
 }

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 13:00:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 20:07:07 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 15:29:38 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,8 +70,8 @@ std::vector<std::vector<uint8_t>*>* Mnist::loadImages(std::string const & filena
     auto images = new std::vector<std::vector<uint8_t>*>(numImages);
     for (auto it = images->begin(); it != images->end(); it++)
         *it = new std::vector<uint8_t>(imageSize);
-    for (auto i : *images)
-        file.read(reinterpret_cast<char*>(i->data()), imageSize);
+    for (auto it = images->begin(); it != images->end(); it++)
+        file.read(reinterpret_cast<char*>((*it)->data()), imageSize);
     (void)magic;
     file.close();
     return images;
@@ -118,8 +118,8 @@ void    Mnist::convert( void ) {
     auto    it_l = this->trainLabels->begin();
     for (;it_i != this->trainImages->end(); it_i++, it_l++) {
         auto temp = new t_tuple;
-        for (auto ti : **it_i)
-            temp->input.push_back(static_cast<double>(ti));
+        for (auto it_ti = (*it_i)->begin(); it_ti != (*it_i)->end(); it_ti++)
+            temp->input.push_back(static_cast<double>(*it_ti) / 255.0);
         temp->expectedOutput[static_cast<int>(*it_l)] = 1.0;
         temp->real = static_cast<int>(*it_l);
         this->training.push_back(temp);
@@ -128,8 +128,8 @@ void    Mnist::convert( void ) {
     it_l = this->testLabels->begin();
     for (;it_i != this->testImages->end(); it_i++, it_l++) {
         auto temp = new t_tuple;
-        for (auto ti : **it_i)
-            temp->input.push_back(static_cast<double>(ti));
+        for (auto it_ti = (*it_i)->begin(); it_ti != (*it_i)->end(); it_ti++)
+            temp->input.push_back(static_cast<double>(*it_ti) / 255.0);
         temp->expectedOutput[static_cast<int>(*it_l)] = 1.0;
         temp->real = static_cast<int>(*it_l);
         this->testing.push_back(temp);

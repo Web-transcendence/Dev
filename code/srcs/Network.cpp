@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 14:47:14 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 16:01:44 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void displayProgress(int current, int max) {
     std::cout << "]" << std::flush;
 }
 
-void    Network::SDG(std::vector<t_tuple*> trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data) {
+void    Network::SDG(std::vector<t_tuple*>& trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data) {
 	int	n_test;
 	
 	if (test_data)
@@ -43,15 +43,15 @@ void    Network::SDG(std::vector<t_tuple*> trainingData, int const epoch, int co
 	for (int i = 0; i < epoch; i++) {
 		std::cout<<"Starting Epoch "<<i<<std::endl;
 		myShuffle(trainingData);
-		std::vector<std::vector<t_tuple*>*>  mini_batches;
-		for (auto it_td = trainingData.begin(); it_td != trainingData.end();) {
-			mini_batches.push_back(new std::vector<t_tuple*>);
-			for (int i_mb = 0; i_mb < miniBatchSize && it_td != trainingData.end(); i_mb++, it_td++)
-				mini_batches.back()->push_back(*it_td);
+		auto mini_batches = std::vector<std::vector<t_tuple*>>((trainingData.size() / miniBatchSize), std::vector<t_tuple*>(miniBatchSize));
+		auto it_m = mini_batches.begin();
+		for (auto it_td = trainingData.begin(); it_td != trainingData.end(); it_m++) {
+			for (auto it_mba = (*it_m).begin(); it_mba != (*it_m).end() && it_td != trainingData.end(); it_mba++, it_td++)
+				*it_mba = *it_td;
 		}
 		int	display = 0;
 		for (auto it_mb = mini_batches.begin(); it_mb != mini_batches.end(); it_mb++, display++) {
-			this->updateMiniBatch(**it_mb, eta);
+			this->updateMiniBatch(*it_mb, eta);
 			displayProgress(display, mini_batches.size());
 		}
 		if (test_data) {
@@ -123,38 +123,42 @@ std::vector<double>*	Network::feedForward(std::vector<double> const & input) {
 	return activation;
 }
 
-void	interpretor(std::vector<int>& real, std::vector<std::vector<double>*> const & net) {
-	for (auto it_n = net.begin(); it_n != net.end(); it_n++) {
-		int i_max = 0;
-		for (unsigned int i = 0; i < (*it_n)->size(); i++) {
-			if ((*it_n)->at(i) > (*it_n)->at(i_max))
-				i_max = i;
-		}
-		real.push_back(i_max);
-	}
-	return ;
-}
-
 int     Network::evaluate(std::vector<t_tuple*>& test_data) {
-	auto	netResult = new std::vector<std::vector<double>*>;
-	auto 	it_td = test_data.begin();
-	int		res = 0;
-	std::vector<int>	realResult;
+	int	correct = 0;
 
-	for (; it_td != test_data.end(); it_td++) {
-		std::vector<double>* result = this->feedForward((*it_td)->input);
-		netResult->push_back(result);
+	for (auto it_td = test_data.begin(); it_td != test_data.end(); it_td++) {
+		auto output = this->feedForward((*it_td)->input);
+		int numOutput = std::distance(output->begin(), std::max_element(output->begin(), output->end()));
+		if ((*it_td)->real == numOutput)
+			++correct;
+		delete output;
 	}
-	it_td = test_data.begin();
-	interpretor(realResult, *netResult);
-	for (unsigned int i = 0; i != realResult.size(); i++, it_td++) {
-		if (realResult[i] == (*it_td)->real)
-			++res;
-		delete netResult->at(i);
-	}
-	delete netResult;
-	return res;
+	return correct;
 }
+
+
+
+// int     Network::evaluate(std::vector<t_tuple*>& test_data) {
+// 	auto	netResult = new std::vector<std::vector<double>*>;
+// 	auto 	it_td = test_data.begin();
+// 	int		res = 0;
+// 	std::vector<int>	realResult;
+
+// 	for (; it_td != test_data.end(); it_td++) {
+// 		std::vector<double>* result = this->feedForward((*it_td)->input);
+// 		netResult->push_back(result);
+// 	}
+// 	it_td = test_data.begin();
+// 	int predicted = std::distance(output.begin(), std::max_element(output.begin(), output.end()));
+// 	interpretor(realResult, *netResult);
+// 	for (unsigned int i = 0; i != realResult.size(); i++, it_td++) {
+// 		if (realResult[i] == (*it_td)->real)
+// 			++res;
+// 		delete netResult->at(i);
+// 	}
+// 	delete netResult;
+// 	return res;
+// }
 
 void	Network::updateWeight(double const eta, double const miniBatchSize) {
 	for (auto it_l = this->_layers.begin(); it_l != this->_layers.end(); it_l++)

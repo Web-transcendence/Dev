@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:04:30 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 14:44:38 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 16:05:24 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ std::vector<double>*	Layer::calcDelta(std::vector<double> const & delta, std::ve
 	auto	temp = std::vector<double>(this->_neurons.at(0)->_weight.size());
 	auto	it_t = temp.begin();
 	for (auto it_tr = transposed->begin(); it_tr != transposed->end(); it_tr++, it_t++)
-		(*it_t) = Math::dotProduct(*it_tr, delta);
+		(*it_t) = Math::dotProduct(delta, *it_tr);
 	delete transposed;
 	return Math::hadamardProduct(temp, sp);	
 }
