@@ -1,28 +1,28 @@
 all: up
 
 up:
-	docker-compose -f docker-compose.yml up --build
+	docker compose -f docker-compose.yml up --build
 
 watch:
-	docker-compose -f docker-compose.yml up --watch
+	docker compose -f docker-compose.yml up --watch
 
 build:
-	docker-compose -f docker-compose.yml build
+	docker compose -f docker-compose.yml build
 
 down:
-	docker-compose -f docker-compose.yml down
+	docker compose -f docker-compose.yml down
 
 logs:
-	docker-compose -f docker-compose.yml logs --follow
+	docker compose -f docker-compose.yml logs --follow
 
 prune:
 	docker system prune --all --volumes --force
 
 mysql:
-	docker-compose -f docker-compose.yml exec mariadb mysql
+	docker compose -f docker-compose.yml exec mariadb mysql
 
 clean:
-	docker-compose -f docker-compose.yml down --volumes --rmi all
+	docker compose -f docker-compose.yml down --volumes --rmi all
 
 fclean: clean
 #	Use docker run to remove data because of permissions
@@ -30,7 +30,7 @@ fclean: clean
 
 re: fclean up
 
-rewatch: fclean watch
+rewatch: fclean build watch
 
 help:
 	@echo "Makefile for Docker Compose"
