@@ -63,11 +63,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const contactBtn = document.getElementById("contact")!;
     const registerBtn = document.getElementById("register")!;
     const loginBtn = document.getElementById("login")!;
+    const factor = document.getElementById("2fa")!;
+    const Ping = document.getElementById("Ping")!;
 
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
     loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
+    factor.addEventListener("click", (event: MouseEvent) => navigate(event, "/factor"));
+    Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 
     CheckForToken();
 });
@@ -87,6 +91,14 @@ async function loadPart(page: string): Promise<void> {
     }
     try {
         await insert_tag(`part${page}`);
+        if (page === "/pong") {
+            const script = document.createElement('script');
+            script.src = "pong.ts";
+            // script.async = true;
+            // script.defer = true;
+            document.body.appendChild(script);
+            console.log(script);
+        }
         if (page === "/register") {
             const button = document.getElementById("registerButton")!;
             if (button)
@@ -97,6 +109,11 @@ async function loadPart(page: string): Promise<void> {
             if (button)
                 login(container, button);
         }
+        // if (page === "/factor") {
+        //     const button = document.getElementById("loginButton")!;
+        //     if (button)
+        //         login(container, button);
+        // }
     } catch (error) {
         console.error(error);
         container.innerHTML = '';
@@ -106,6 +123,7 @@ async function loadPart(page: string): Promise<void> {
 
 async function insert_tag(url: string): Promise<void>{
     const container = document.getElementById('content') as HTMLElement;
+    console.log("URL :", url)
     const res = await fetch(url);
     const newElement = document.createElement('div');
     const scriptElement = document.createElement('script');
@@ -116,19 +134,24 @@ async function insert_tag(url: string): Promise<void>{
     if (html.includes(container.innerHTML))
         return;
     container.innerHTML = '';
-    const script = document.createElement('script');
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-
-    // Set the innerHTML of the new element to the fetched HTML
+    if (url === "part/login") {
+        const script = document.createElement('script');
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        container.appendChild(script);
+        console.log(script);
+    }
+    if (url === "part/pong") {
+        const script = document.createElement('script');
+        script.src = "pong.ts";
+        script.async = true;
+        script.defer = true;
+        container.appendChild(script);
+        console.log(script);
+    }
     newElement.innerHTML = html;
-
-    // Append the script element and new content to the container
     container.appendChild(newElement);
-    container.appendChild(script);
-
-    console.log(script);
 }
 
 function register(container: HTMLElement, button: HTMLElement): void {

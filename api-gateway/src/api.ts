@@ -33,6 +33,12 @@ app.register(httpProxy, {
     http2: false
 });
 
+app.register(httpProxy, {
+    upstream: 'http://match-server:8080',
+    prefix: '/match-server',
+    http2: false
+});
+
 app.listen({port: 3000, host: '0.0.0.0'}, (err, adrr) => {
     if (err) {
         console.error(err);
