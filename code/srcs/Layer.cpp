@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:04:30 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/18 10:40:03 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 14:44:38 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,67 +15,67 @@
 #include "Math.namespace.hpp"
 
 Layer::Layer(int const n_neurons, int const n_weights) {
-	for (int i = 0;i < n_neurons; i++)
-		this->_neurons.push_back(new Neuron(n_weights));	
+	this->_neurons = std::vector<Neuron*>(n_neurons);
+	for (auto it = this->_neurons.begin(); it != this->_neurons.end(); it++)
+		*it = new Neuron(n_weights);
 }
 
 Layer::~Layer( void ) {
-	for (auto n : this->_neurons)
-		delete n;
+	for (auto it = this->_neurons.begin(); it != this->_neurons.end(); it++)
+		delete *it;
 	return ;
 }
 
 std::vector<double>*	Layer::feedForward(std::vector<double> const & input) {
-	std::vector<double>*	res = new std::vector<double>;
+	std::vector<double>*	res = new std::vector<double>(this->_neurons.size());
+	auto					it_res = res->begin();
 
-	for (auto n : this->_neurons)
-		res->push_back(n->feedForward(input));
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_res++)
+		(*it_res) = (*it_n)->feedForward(input);
 	return res;
 }
 
 std::vector<double>*	Layer::perceptron(std::vector<double> const & input) {
-	std::vector<double>*	res = new std::vector<double>;
+	std::vector<double>*	res = new std::vector<double>(this->_neurons.size());
+	auto					it_res = res->begin();
 
-	for (auto n : this->_neurons)
-		res->push_back(n->perceptron(input));
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_res++)
+		(*it_res) = (*it_n)->perceptron(input);
 	return res;
 }
 
 void	Layer::updateWeight(double const eta, double const miniBatchSize) {
-	for (auto n : this->_neurons)
-		n->updateWeight(eta, miniBatchSize);
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++)
+		(*it_n)->updateWeight(eta, miniBatchSize);
 	return ;
 }
 
 void	Layer::updateNabla_w( void ) {
-	for (auto n : this->_neurons)
-		n->updateNabla_w();
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++)
+		(*it_n)->updateNabla_w();
 	return ;
 }
 
 void	Layer::setDeltaNabla_w(std::vector<double> const & delta, std::vector<double> const & activation) {
-	auto	it_delta = delta.begin();
+	auto	product = Math::outerProduct(delta, activation);
+	auto	it_p = product->begin();
 	
-	for (auto n : this->_neurons) {
-		std::vector<double> temp;
-		for (auto a : activation)
-			temp.push_back(*it_delta * a);
-		n->setDeltaNabla_w(temp);
-		temp.clear();
-		++it_delta;
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_p++) {
+		(*it_n)->setDeltaNabla_w(*it_p);
 	}
+	delete product;
 	return ;
 }
 
 void	Layer::updateBias(double const eta, double const miniBatchSize) {
-	for (auto n : this->_neurons)
-		n->updateBias(eta, miniBatchSize);
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++)
+		(*it_n)->updateBias(eta, miniBatchSize);
 	return ;
 }
 
 void	Layer::updateNabla_b( void ) {
-	for (auto n : this->_neurons)
-		n->updateNabla_b();
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++)
+		(*it_n)->updateNabla_b();
 	return ;
 }
 
@@ -89,30 +89,22 @@ void	Layer::setDeltaNabla_b(std::vector<double> const & delta) {
 }
 
 std::vector<double>*	Layer::calcDelta(std::vector<double> const & delta, std::vector<double> const & sp) {
-	auto		transposed = new std::vector<std::vector<double>*>;
-	int const	row = this->_neurons.back()->_weight.size();
-	int const	col	= this->_neurons.size();
+	auto	merged = std::vector<std::vector<double>>(this->_neurons.size(), std::vector<double>(this->_neurons.at(0)->_weight.size()));
+	auto	it = merged.begin();
 
-	for (int i = 0; i < row; i++)
-		transposed->push_back(new std::vector<double>(col));
-	auto it_t = transposed->begin();
-	auto it_in = (*it_t)->begin();
-	for (auto n : this->_neurons) {
-		for (auto w : n->_weight) {
-			if (it_in == (*it_t)->end()) {
-				++it_t;
-				it_in = (*it_t)->begin();
-			}
-			*it_in = w;
-			++it_in;
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++) {
+		auto	it_w = (*it).begin();
+		for (auto it_we = (*it_n)->_weight.begin(); it_we != (*it_n)->_weight.begin(); it_we++) {
+			*it_w = *it_we;
+			++it_w;
 		}
+		++it;
 	}
-	std::vector<double>	temp;
-	for (auto t : *transposed) {
-		temp.push_back(Math::dotProduct(*t, delta));
-		delete t;
-	}
+	auto	transposed = Math::transpose2D(merged);
+	auto	temp = std::vector<double>(this->_neurons.at(0)->_weight.size());
+	auto	it_t = temp.begin();
+	for (auto it_tr = transposed->begin(); it_tr != transposed->end(); it_tr++, it_t++)
+		(*it_t) = Math::dotProduct(*it_tr, delta);
 	delete transposed;
-	auto res = Math::hadamardProduct(temp, sp);
-	return res;
+	return Math::hadamardProduct(temp, sp);	
 }

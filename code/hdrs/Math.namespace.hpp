@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 09:50:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/17 14:11:23 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 11:42:14 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,10 @@ namespace Math {
 	
 	double								dotProduct(std::vector<double> const & v1, std::vector<double> const & v2);
 	std::vector<double>*				hadamardProduct(std::vector<double> const & lhs, std::vector<double> const & rhs);
-	std::vector<std::vector<double>*>*	outerProduct(std::vector<double> const & in, std::vector<double> const & transposed);
+	std::vector<std::vector<double>>*	outerProduct(std::vector<double> const & in, std::vector<double> const & transposed);
+
+	std::vector<std::vector<double>>*	transpose1D(std::vector<double> const & base);
+	std::vector<std::vector<double>>*	transpose2D(std::vector<std::vector<double>> const & base);
 
 	template<typename T>
 	void	printdebug(T const & truc, std::string const & name) {

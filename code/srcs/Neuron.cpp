@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/18 12:53:25 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 14:44:45 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,14 @@ Neuron::Neuron(unsigned int const prevLayer) {
 	std::mt19937						gen(rd());
 	std::normal_distribution<double>	dist(0.0, 1.0);
 	
-	for (unsigned int i = 0; i < prevLayer; i++)
-		this->_weight.push_back(dist(gen));
+	this->_weight = std::vector<double>(prevLayer);
+	for (auto it = this->_weight.begin(); it != this->_weight.end(); it++)
+		*it = dist(gen);
 	this->_bias = dist(gen);
-	for (unsigned int i = 0; i < this->_weight.size(); i++)
-		this->_nabla_w.push_back(0.0);
+	this->_nabla_w = std::vector<double>(prevLayer);
+	this->_deltaNabla_w = std::vector<double>(prevLayer);
 	this->_nabla_b = 0.0;
+	this->_deltaNabla_b = 0.0;
 	return ;
 }
 
@@ -44,15 +46,17 @@ void	Neuron::updateWeight(double const eta, double const miniBatchSize) {
 }
 
 void	Neuron::updateNabla_w( void ) {
-	for (auto it_nw = this->_nabla_w.begin(), it_dnw = this->_deltaNabla_w.begin(); it_nw != this->_nabla_w.end() && it_dnw != this->_deltaNabla_w.end(); it_nw++, it_dnw++)
+	for (auto it_nw = this->_nabla_w.begin(), it_dnw = this->_deltaNabla_w.begin(); it_nw != this->_nabla_w.end() && it_dnw != this->_deltaNabla_w.end(); it_nw++, it_dnw++) {
 		*it_nw += *it_dnw;
-	this->_deltaNabla_w.clear();
+		*it_dnw = 0.0;
+	}
 	return ;
 }
 
 void	Neuron::setDeltaNabla_w(std::vector<double> const & delta) {
-	for (auto d : delta)
-		this->_deltaNabla_w.push_back(d);
+	auto it_w = this->_deltaNabla_w.begin();
+	for (auto it = delta.begin(); it != delta.end(); it++, it_w++)
+		*it_w = *it;
 	return ;
 }
 

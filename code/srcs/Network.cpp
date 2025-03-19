@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/18 13:02:14 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 14:47:14 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,9 @@
 #include <iostream>
 
 Network::Network(std::vector<unsigned int>sizes) : _num_layers(sizes.size()), _sizes(sizes) {
+	this->_layers = std::vector<Layer*>(_num_layers - 1);
 	for (int i_layers = 1; i_layers < this->_num_layers; i_layers++) {
-		this->_layers.push_back(new Layer(sizes[i_layers], sizes[i_layers - 1]));
+		this->_layers.at(i_layers - 1) = new Layer(sizes[i_layers], sizes[i_layers - 1]);
 	}
 	return ;
 }
@@ -50,7 +51,7 @@ void    Network::SDG(std::vector<t_tuple*> trainingData, int const epoch, int co
 		}
 		int	display = 0;
 		for (auto it_mb = mini_batches.begin(); it_mb != mini_batches.end(); it_mb++, display++) {
-			this->updateMiniBatch(**it_mb, eta);	
+			this->updateMiniBatch(**it_mb, eta);
 			displayProgress(display, mini_batches.size());
 		}
 		if (test_data) {
@@ -73,19 +74,17 @@ void	Network::updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta
 }
 
 void	Network::backprop(std::vector<double>& input, std::vector<double>& expectedOutput) {
-	std::vector<double>*				activation = &input;
-	std::vector<std::vector<double>*>	activations;
-	std::vector<double>*				z;
-	std::vector<std::vector<double>*>	zs;
-	unsigned int const	lSize = this->_layers.size();
+	std::vector<std::vector<double>*>	activations(this->_layers.size() + 1);
+	auto								it_a = activations.begin();
+	std::vector<std::vector<double>*>	zs(this->_layers.size());
+	auto								it_z = zs.begin();
+	unsigned int const					lSize = this->_layers.size();
 
-
-	activations.push_back(activation);
-	for (auto l : this->_layers) {
-		z = l->perceptron(*activation);
-		zs.push_back(z);
-		activation = Math::sigmoid(*z);
-		activations.push_back(activation);
+	*it_a = &input;
+	for (auto it_l = this->_layers.begin(); it_l != this->_layers.end(); it_l++, it_z++) {
+		*it_z = (*it_l)->perceptron(*(*it_a));
+		it_a++;
+		*it_a = Math::sigmoid(**it_z);
 	}
 	auto	cd = Math::cost_derivative(*activations.back(), expectedOutput);
 	auto	sp = Math::sigmoidPrime(*zs.back());
@@ -95,8 +94,7 @@ void	Network::backprop(std::vector<double>& input, std::vector<double>& expected
 	delete cd;
 	delete sp;
 	for (unsigned int i_l = 2; i_l <= lSize; i_l++) {
-		z = zs.at(lSize- i_l);
-		sp = Math::sigmoidPrime(*z);
+		sp = Math::sigmoidPrime(*zs.at(lSize- i_l));
 		auto nDelta = this->_layers.at(lSize-i_l+1)->calcDelta(*delta, *sp);
 		delete delta;
 		delta = nDelta;
@@ -104,10 +102,6 @@ void	Network::backprop(std::vector<double>& input, std::vector<double>& expected
 		this->_layers.at(lSize-i_l)->setDeltaNabla_w(*delta, *activations.at(activations.size()-i_l-1));
 		delete sp;
 	}
-	// std::cout << "|----------------------------|" << std::endl;
-	// Math::printdebug(*activations.back(), "output");
-	// Math::printdebug(expectedOutput, "expected");
-	// std::cout << "|----------------------------|" << std::endl;
 	for (auto i : zs)
 		delete i;
 	activations.front() = NULL;
@@ -130,10 +124,10 @@ std::vector<double>*	Network::feedForward(std::vector<double> const & input) {
 }
 
 void	interpretor(std::vector<int>& real, std::vector<std::vector<double>*> const & net) {
-	for (auto n : net) {
+	for (auto it_n = net.begin(); it_n != net.end(); it_n++) {
 		int i_max = 0;
-		for (unsigned int i = 0; i < n->size(); i++) {
-			if (n->at(i) > n->at(i_max))
+		for (unsigned int i = 0; i < (*it_n)->size(); i++) {
+			if ((*it_n)->at(i) > (*it_n)->at(i_max))
 				i_max = i;
 		}
 		real.push_back(i_max);
@@ -163,26 +157,26 @@ int     Network::evaluate(std::vector<t_tuple*>& test_data) {
 }
 
 void	Network::updateWeight(double const eta, double const miniBatchSize) {
-	for (auto l : this->_layers)
-		l->updateWeight(eta, miniBatchSize);
+	for (auto it_l = this->_layers.begin(); it_l != this->_layers.end(); it_l++)
+		(*it_l)->updateWeight(eta, miniBatchSize);
 	return ;
 }
 
 void	Network::updateNabla_w( void ) {
-	for (auto l : this->_layers)
-		l->updateNabla_w();
+	for (auto it_l = this->_layers.begin(); it_l != this->_layers.end(); it_l++)
+		(*it_l)->updateNabla_w();
 	return ;
 }
 
 void	Network::updateBias(double const eta, double const miniBatchSize) {
-	for (auto l : this->_layers)
-		l->updateBias(eta, miniBatchSize);
+	for (auto it_l = this->_layers.begin(); it_l != this->_layers.end(); it_l++)
+		(*it_l)->updateBias(eta, miniBatchSize);
 	return ;
 }
 
 void	Network::updateNabla_b( void ) {
-	for (auto l : this->_layers)
-		l->updateNabla_b();
+	for (auto it_l = this->_layers.begin(); it_l != this->_layers.end(); it_l++)
+		(*it_l)->updateNabla_b();
 	return ;
 }	
 
