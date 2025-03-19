@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:04:30 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 16:05:24 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 16:30:06 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ std::vector<double>*	Layer::calcDelta(std::vector<double> const & delta, std::ve
 
 	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++) {
 		auto	it_w = (*it).begin();
-		for (auto it_we = (*it_n)->_weight.begin(); it_we != (*it_n)->_weight.begin(); it_we++) {
+		for (auto it_we = (*it_n)->_weight.begin(); it_we != (*it_n)->_weight.end(); it_we++) {
 			*it_w = *it_we;
 			++it_w;
 		}
@@ -103,8 +103,9 @@ std::vector<double>*	Layer::calcDelta(std::vector<double> const & delta, std::ve
 	auto	transposed = Math::transpose2D(merged);
 	auto	temp = std::vector<double>(this->_neurons.at(0)->_weight.size());
 	auto	it_t = temp.begin();
-	for (auto it_tr = transposed->begin(); it_tr != transposed->end(); it_tr++, it_t++)
-		(*it_t) = Math::dotProduct(delta, *it_tr);
+	for (auto it_tr = transposed->begin(); it_tr != transposed->end(); it_tr++, it_t++) {
+		(*it_t) = Math::dotProduct(*it_tr, delta);
+	}
 	delete transposed;
 	return Math::hadamardProduct(temp, sp);	
 }

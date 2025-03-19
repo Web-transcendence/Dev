@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 16:01:44 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 16:30:22 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,30 +135,6 @@ int     Network::evaluate(std::vector<t_tuple*>& test_data) {
 	}
 	return correct;
 }
-
-
-
-// int     Network::evaluate(std::vector<t_tuple*>& test_data) {
-// 	auto	netResult = new std::vector<std::vector<double>*>;
-// 	auto 	it_td = test_data.begin();
-// 	int		res = 0;
-// 	std::vector<int>	realResult;
-
-// 	for (; it_td != test_data.end(); it_td++) {
-// 		std::vector<double>* result = this->feedForward((*it_td)->input);
-// 		netResult->push_back(result);
-// 	}
-// 	it_td = test_data.begin();
-// 	int predicted = std::distance(output.begin(), std::max_element(output.begin(), output.end()));
-// 	interpretor(realResult, *netResult);
-// 	for (unsigned int i = 0; i != realResult.size(); i++, it_td++) {
-// 		if (realResult[i] == (*it_td)->real)
-// 			++res;
-// 		delete netResult->at(i);
-// 	}
-// 	delete netResult;
-// 	return res;
-// }
 
 void	Network::updateWeight(double const eta, double const miniBatchSize) {
 	for (auto it_l = this->_layers.begin(); it_l != this->_layers.end(); it_l++)

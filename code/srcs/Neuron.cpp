@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 15:39:32 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/19 16:22:59 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ double	Neuron::perceptron(std::vector<double> const & input) const {
 void	Neuron::updateWeight(double const eta, double const miniBatchSize) {
 	for (auto it_w = this->_weight.begin(), it_nw = this->_nabla_w.begin(); it_w != this->_weight.end(); it_w++, it_nw++) {
 		*it_w = *it_w - eta * (*it_nw / miniBatchSize);
-		// *it_w = *it_w - (eta / miniBatchSize) * *it_nw;
 		*it_nw = 0.0;
 	}
 	return ;
@@ -63,7 +62,7 @@ void	Neuron::setDeltaNabla_w(std::vector<double> const & delta) {
 }
 
 void	Neuron::updateBias(double const eta, double const miniBatchSize) {
-	this->_bias = this->_bias - eta * (this->_nabla_b / miniBatchSize);
+	this->_bias -= eta * (this->_nabla_b / miniBatchSize);
 	this->_nabla_b = 0.0;
 	return ;
 }
