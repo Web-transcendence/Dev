@@ -6,6 +6,7 @@ const zEnv = z.object({
     TRANS_FRONT_PATH: z.string().default('../public/'),
     TRANS_VIEWS_PATH: z.string().default('../public/views/'),
     TRANS_ICO_PATH: z.string().default('../public/'),
+    TRANS_ASSETS_PATH: z.string().default('../public/assets'),
     TRANS_TAIL_PATH: z.string().default('../public/'),
 })
 const env = zEnv.parse(nodeEnv);

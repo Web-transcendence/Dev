@@ -24,7 +24,7 @@ fastify.register(fastifyStatic, {
 fastify.get("/*", (req, res) => { // Route pour la page d'accueil
     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
     const readFile = readFileSync(pagePath, 'utf8');
-    res.type('text/html').send(readFile);
+    res.status(202).type('text/html').send(readFile);
 });
 
 fastify.register(routes)

@@ -64,7 +64,24 @@ services:
           path: ./services/user-management/package.json
           target: app/
 
-#
+  match-server:
+    container_name: match-server
+    build:
+      context: services/match-server/
+    networks:
+      - transcendence
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/match-server/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/match-server/package.json
+          target: app/
+
 #  ai-opponent:
 #    container_name: ai-opponent
 #    build:
@@ -97,21 +114,6 @@ services:
 #          path: ./services/live-chat/package.json
 #          target: app/
 #
-  match-server:
-    container_name: match-server
-    build:
-      context: services/match-server/
-    networks:
-      - transcendence
-    restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ./services/match-server/src/
-          target: /app/src/
-        - action: rebuild
-          path: ./services/match-server/package.json
-          target: app/
 
 
 networks:

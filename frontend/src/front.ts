@@ -93,9 +93,7 @@ async function loadPart(page: string): Promise<void> {
         await insert_tag(`part${page}`);
         if (page === "/pong") {
             const script = document.createElement('script');
-            script.src = "pong.ts";
-            // script.async = true;
-            // script.defer = true;
+            script.src = "/static/dist/pong.js";
             document.body.appendChild(script);
             console.log(script);
         }
@@ -137,14 +135,6 @@ async function insert_tag(url: string): Promise<void>{
     if (url === "part/login") {
         const script = document.createElement('script');
         script.src = "https://accounts.google.com/gsi/client";
-        script.async = true;
-        script.defer = true;
-        container.appendChild(script);
-        console.log(script);
-    }
-    if (url === "part/pong") {
-        const script = document.createElement('script');
-        script.src = "pong.ts";
         script.async = true;
         script.defer = true;
         container.appendChild(script);

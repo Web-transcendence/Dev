@@ -81,12 +81,32 @@ export async function routes(fastify: FastifyInstance) {
         const tag = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(tag);
     })
-    // //CSS output
-    // fastify.get("/tail/output.css", (req, res) => {
-    //     const frontPath = join(import.meta.dirname, env.TRANS_TAIL_PATH, "output.css");
-    //     console.log(frontPath);
-    //     const file = readFileSync(frontPath, 'utf8');
-    //     res.type('text/css').send(file);
-    //     return;
-    // })
+    // Png For Pong
+    fastify.get('/assets/ballup.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "ballup.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier ballup non trouvé");
+        }
+    });
+    fastify.get('/assets/bardown.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "bardown.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier bardown non trouvé");
+        }
+    });
+    fastify.get('/assets/barup.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "barup.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier barup non trouvé");
+        }
+    });
 }

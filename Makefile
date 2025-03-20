@@ -32,6 +32,8 @@ re: fclean up
 
 rewatch: fclean watch
 
+bw: build watch
+
 help:
 	@echo "Makefile for Docker Compose"
 	@echo "Available targets:"
