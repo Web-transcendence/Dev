@@ -1,39 +1,48 @@
-import fastify from 'fastify';
-import { WebSocketServer } from 'ws';
-import http from 'http';
+import Fastify from 'fastify';
+import fastifyWebsocket from '@fastify/websocket';
+import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import {readFileSync} from "node:fs";
+import {join} from "node:path";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const fastify = Fastify({
+    https: {
+        key: fs.readFileSync('./secure/key.pem'),
+        cert: fs.readFileSync('./secure/cert.pem'),
+    },
+    logger: true
+});
 
-const app = fastify();
+// const fastify = Fastify({ logger: true });
 
-const server = http.createServer(app.server);
-const wss = new WebSocketServer({ server });
+fastify.register(fastifyWebsocket);
 
-app.register(import('@fastify/static'), {
-    root: path.join(__dirname, '../public'),
+fastify.register(import('@fastify/static'), {
+    root: path.join(import.meta.dirname, '../public'),
     prefix: '/public/',
 });
 
-// WebSocket connection handler
-wss.on('connection', (ws) => {
-    console.log('Client connected');
-    ws.on('message', (message) => {
-        const data = JSON.parse(message.toString());
-        if (data.type === 'input') {
-            console.log(`Touche ${data.key} est ${data.state}`);
-            // Traiter le mouvement de la raquette ici
-        }
+
+fastify.get('/ws', { websocket: true }, (socket, req) => {
+    console.log('Client connecté');
+
+    socket.on('message', message => {  // ✅ Utilisation correcte
+        console.log('Message reçu:', message.toString());
+        socket.send('Message reçu');
     });
-    ws.on('close', () => console.log('Client disconnected'));
+
+    socket.on('close', () => {
+        console.log('Client déconnecté');
+    });
 });
 
-app.listen({port: 8080, host: '0.0.0.0'}, (err, adrr) => {
+fastify.listen({ port: 8080, host: '0.0.0.0' }, (err, adrr) => {
+    console.log("Chargement du certificat SSL...");
+    console.log("Certificat trouvé ?", fs.existsSync('./secure/cert.pem'));
+    console.log("Clé privée trouvée ?", fs.existsSync('./secure/key.pem'));
     if (err) {
         console.error(err);
         process.exit(1);
     }
     console.log(`server running on ${adrr}`)
-})
+});

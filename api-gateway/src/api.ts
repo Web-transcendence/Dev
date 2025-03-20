@@ -34,7 +34,7 @@ app.register(httpProxy, {
 });
 
 app.register(httpProxy, {
-    upstream: 'http://match-server:8080',
+    upstream: 'ws://match-server:8080',
     prefix: '/match-server',
     http2: false
 });
