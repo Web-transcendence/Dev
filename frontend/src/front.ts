@@ -127,7 +127,7 @@ function login(container: HTMLElement, button: HTMLElement): void {
         const result = await response.json();
         if (response.ok) {
             localStorage.setItem('token', result.token);
-            isConnected()
+            isConnected();
             localStorage.setItem('nickName', result.nickName);
             // localStorage.setItem('avatar', result.avatar);
             const res = await fetch('/part/connected');

@@ -18,6 +18,7 @@ async function authentificate (req: FastifyRequest, reply: FastifyReply) {
     if (req.url === "/user-management/sign-up" || req.url === "/user-management/sign-in")
         return ;
     try {
+        console.log(req.headers);
         const authHeader = req.headers.authorization;
         if (!authHeader)
             return reply.status(401).send({ error: "Unauthorized - No token provided" });

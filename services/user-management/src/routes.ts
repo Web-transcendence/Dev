@@ -71,4 +71,8 @@ export default async function userRoutes(app: FastifyInstance) {
             res.status(500).send({error: "Server error: ", err});
         }
     });
+
+    app.get('/ws-connection', {websocket: true}, (connexion, req) => {
+        console.log(req.headers);
+    })
 }
