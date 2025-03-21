@@ -5,3 +5,10 @@ https://introtodeeplearning.com/2020/index.html
 http://neuralnetworksanddeeplearning.com/
 http://neuralnetworksanddeeplearning.com/chap1.html
 https://github.com/mnielsen/neural-networks-and-deep-learning
+
+https://medium.com/@samina.amin/deep-q-learning-dqn-71c109586bae deep Q learning
+https://www.baeldung.com/cs/q-learning-vs-deep-q-learning-vs-deep-q-network
+https://www.baeldung.com/cs/epsilon-greedy-q-learning
+https://towardsdatascience.com/deep-q-learning-tutorial-mindqn-2a4c855abffc/
+
+

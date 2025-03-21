@@ -106,3 +106,49 @@ backprop(x,y) -> x c'est les inputs et y les outputs attendus. Ca peut etre un v
 
 nabla_b = [np.zeros(b.shape) for b in self.biases] -> le but va etre de shape nabla_b comme le vector de biases.
 nabla_w = [np.zeros(w.shape) for w in self.weights] -> Pareil pour weights
+
+Apres avoir developpe un algo de training simple pour reconnaitre des handwritten digits, la question de l'implementation se pose
+par rapport au pong. Il semble que le modele utilise pour les nombres est loin d'etre le plus optimise pour une IA de jeu.
+Il va dont falloir trouver une alternative. Celle ci s'appelle le deep Q learning ou Q learning en fonction du degres de 
+complexite. Le deep Q learning utilise un autre network pour creer des inputs a un network target alors que le second prend 
+directement des inputs fixs. Dans tous les cas ce type d algo a un entrainement bien different du precedent puisque
+desormais l algo cherche a collecter un maximum de reward.
+
+algorithm EpsilonGreedyQLearning():
+    // INPUT
+    //    alpha = learning rate
+    //    gamma = discount factor
+    //   epsilon = exploration rate
+    // OUTPUT
+    //    A Q-table containing Q(S,A) pairs defining estimated optimal policy π*
+
+    // Initialization
+    Initialize Q(s,a) arbitrarily, for all s in S, a in A(s), except for 
+    Q(terminal, .) <- 0
+    
+    for each episode:
+        Initialize state S
+        for each step of episode:
+            // Choose A from S using policy derived from Q (e.g., epsilon-greedy)
+            A <- selectAction(Q, S, epsilon)
+            // Take the action A, observe R, Z
+            Take action A, observe reward R and next state Z
+            // Q-learning update
+            q <- the maximum Q(Z, a) over a
+            Q(S, A) <- Q(S, A) + alpha * (R + gamma * q - Q(S, A))
+            S <- S
+
+algorithm selectAction(Q, S, epsilon):
+    // INPUT
+    //    Q = Q-table
+    //    S = current state
+    //    epsilon = exploration rate
+    // OUTPUT
+    //    Selected action
+
+    n <- uniform random number between 0 and 1
+    if n < epsilon 
+        A <- random action from the action space
+    else:
+        A <- maxQ(S, .)
+    return A
