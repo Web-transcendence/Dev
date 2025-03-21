@@ -72,7 +72,12 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     });
 
-    app.get('/ws-connection', {websocket: true}, (connexion, req) => {
-        console.log(req.headers);
+    app.get('/ws-connexion', {websocket: true}, async (ws, req) => {
+
+        ws.socket.on('message', (message: string) => {
+            console.log(message);
+            ws.socket.send(message);
+
+        })
     })
 }
