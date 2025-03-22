@@ -6,9 +6,11 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 13:00:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 15:29:38 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/22 15:38:16 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+/*HIGHLY AI GENERATED BUT HUMAN ADAPTATION AND SAFE MEMORY HANDLING*/
 
 #include "Mnist.class.hpp"
 #include <iostream>

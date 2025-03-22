@@ -11,4 +11,7 @@ https://www.baeldung.com/cs/q-learning-vs-deep-q-learning-vs-deep-q-network
 https://www.baeldung.com/cs/epsilon-greedy-q-learning
 https://towardsdatascience.com/deep-q-learning-tutorial-mindqn-2a4c855abffc/
 
+http://incompleteideas.net/book/RLbook2020.pdf
+https://medium.com/@qempsil0914/zero-to-one-deep-q-learning-part1-basic-introduction-and-implementation-bb7602b55a2c
+
 
