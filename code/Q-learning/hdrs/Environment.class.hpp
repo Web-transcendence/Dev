@@ -6,13 +6,14 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:41:48 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/22 15:44:24 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/22 15:47:22 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ENVIRONMENT_CLASS_HPP
 # define ENVIRONMENT_CLASS_HPP
 # include <vector>
+# include <array>
 # define UP 0
 # define DOWN 1
 # define RIGHT 2

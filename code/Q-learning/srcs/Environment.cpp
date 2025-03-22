@@ -6,13 +6,12 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/22 15:34:13 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/22 15:53:20 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Environment.class.hpp"
 #include <random>
-#include <array>
 #include <iostream>
 
 Environment::Environment(int const col, int const row, double const rewardTo, unsigned int const maxStep) \
@@ -34,14 +33,14 @@ Environment::Environment(int const col, int const row, double const rewardTo, un
 Environment::~Environment( void ) {}
 
 std::array<int, 2>	Environment::action(int const act) {
-	int const	size = this->_myMap.size();
-	int			nextState = this->_state;
-	int			diff[4] = {-1, 1, 1, -1};
-	if ((act == RIGHT && this->_state % this->_col != this->_col - 1) \ 
+	unsigned int const	size = this->_myMap.size();
+	int					nextState = this->_state;
+	int					diff[4] = {-1, 1, 1, -1};
+	if ((act == RIGHT && this->_state % this->_col != this->_col - 1) \
 		|| (act == LEFT && this->_state % this->_col != 0))
 		nextState += diff[act];
-	else if ((act == UP && this->_state - this->_col >= 0) \
-		|| (act == DOWN && this->_state - this->_col < size))
+	else if ((act == UP || act == DOWN) 
+			&& (this->_state - this->_col) < size)
 		nextState += (diff[act] * this->_col);
 	char const	place = this->_myMap[nextState];
 	int			reward = 0;
@@ -55,10 +54,10 @@ std::array<int, 2>	Environment::action(int const act) {
 
 void	Environment::render( void ) {
 	std::cout << "===========" << std::endl;
-	for (int i = 0; i < this->_myMap.size(); i++) {
+	for (unsigned int i = 0; i < this->_myMap.size(); i++) {
 		if (i % 4 == 0)
 			std::cout << std::endl;
-		if (i == this->_state)
+		if (static_cast<int>(i) == this->_state)
 			std::cout << "'" << this->_myMap[i] << "'";
 		else
 			std::cout << this->_myMap[i];

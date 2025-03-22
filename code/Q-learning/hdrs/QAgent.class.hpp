@@ -6,12 +6,13 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/22 15:24:29 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/22 15:54:37 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef QAGENT_CLASS_HPP
 # define QAGENT_CLASS_HPP
+# include <vector>
 
 class Environment;
 

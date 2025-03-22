@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 15:36:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/22 15:45:46 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/22 15:47:35 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,5 +22,5 @@ int main( void ) {
 	myAgent.train();
 	std::cout << "=== TESTING ===" << std::endl;
 	myAgent.test();
-	return ;
+	return 0;
 }
