@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 15:36:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/22 15:47:35 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/23 09:54:59 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,10 @@ int main( void ) {
 	QAgent		myAgent(20000, 99, 0.83, 0.93, 1.0, 1.0/20000);
 
 	myAgent.setMap(myEnv);
+	myAgent.genQMatrix();
+	std::cout << std::endl << "=== TRAINING ===" << std::endl;
 	myAgent.train();
-	std::cout << "=== TESTING ===" << std::endl;
+	std::cout << std::endl << "=== TESTING ===" << std::endl;
 	myAgent.test();
 	return 0;
 }

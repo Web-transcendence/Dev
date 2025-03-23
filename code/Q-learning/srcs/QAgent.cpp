@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/22 15:35:52 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/23 09:56:42 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,17 @@ QAgent::QAgent(int const maxTraining, int const maxAct, double const learningRat
 
 QAgent::~QAgent( void ) {}
 
+void displayProgress(int current, int max) {
+    int width = 20; // Number of total bar characters
+    int progress = (current * width) / max; // Filled portion
+
+    std::cout << "\r" << (current * 100) / max << "% [";
+    for (int i = 0; i < width; i++) {
+        std::cout << (i < progress ? '#' : '.');
+    }
+    std::cout << "]" << std::flush;
+}
+
 void	QAgent::train( void ) {
 	double exploRate = this->_explorationRate;
 
@@ -50,19 +61,48 @@ void	QAgent::train( void ) {
 				break ;
 		}
 		if (exploRate - this->_explorationDecay > 0.001)
-			exploRate -=  this->_explorationDecay; 
+			exploRate -=  this->_explorationDecay;
+		displayProgress(i, this->_maxEpTraining);
 	}
+	std::cout << std::endl;
+}
+
+bool	QAgent::realisable( void ) {
+	double res0 = 0.0;
+
+	for (auto i : this->_QMatrix[0]) {
+		res0 += i;
+	}
+	if (res0 < 0.1)
+		return false;
+	return true;
 }
 
 void	QAgent::test( void ) {
 	this->_env->reset();
+	if (!this->realisable()) {
+		std::cout << "NOT REALISABLE" << std::endl;
+		this->_env->render();
+		return ;
+	}
+	int count = 0;
+	std::cout << "=== QMATRIX ===" << std::endl;
+	for (auto i : this->_QMatrix) {
+		std::cout << "stage " << count++ << ": ";
+		for (auto a : i) {
+			std::cout << a << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
 	for (int a = 0; a < this->_maxActions; a++) {
+		std::cout << "===========";
 		this->_env->render();
 		int action = this->policy(TEST);
 		std::array<int, 2>newState_Reward = this->_env->action(action);
 		this->_env->_state = newState_Reward[0];
 		if (this->_env->_done == true) {
-			std::cout << "END ";
+			std::cout << "=== END ===";
 			this->_env->render();
 			break ;
 		}
@@ -71,13 +111,14 @@ void	QAgent::test( void ) {
 
 int	QAgent::policy(t_mode const mode) {
 	int	act[4] = {UP, DOWN, RIGHT, LEFT};
-	int	idx;
+	int	idx = 0;
 	
 	if (mode == TRAIN) {
-		if (this->randInt() > this->_explorationRate)
+		if (1 / static_cast<double>(this->randInt()) > this->_explorationRate) {
 			idx = std::distance(this->_QMatrix[this->_env->_state].begin(),\
-				std::max_element(this->_QMatrix[this->_env->_state].begin(),\
-				this->_QMatrix[this->_env->_state].end()));
+			std::max_element(this->_QMatrix[this->_env->_state].begin(),\
+			this->_QMatrix[this->_env->_state].end()));
+		}
 		else
 			idx = randInt() % 4;
 	}

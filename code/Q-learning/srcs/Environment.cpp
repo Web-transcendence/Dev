@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/22 15:53:20 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/23 09:56:26 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,13 @@ std::array<int, 2>	Environment::action(int const act) {
 	int					nextState = this->_state;
 	int					diff[4] = {-1, 1, 1, -1};
 	if ((act == RIGHT && this->_state % this->_col != this->_col - 1) \
-		|| (act == LEFT && this->_state % this->_col != 0))
-		nextState += diff[act];
-	else if ((act == UP || act == DOWN) 
-			&& (this->_state - this->_col) < size)
-		nextState += (diff[act] * this->_col);
+		|| (act == LEFT && this->_state % this->_col != 0)) {
+			nextState += diff[act];
+		}
+	else if ((act == UP && this->_state - this->_col < size) \
+		|| (act == DOWN && this->_state + this->_col < size)) {
+			nextState += (diff[act] * this->_col);
+		}
 	char const	place = this->_myMap[nextState];
 	int			reward = 0;
 	if (place == 'G' || place == 'H') {
@@ -53,7 +55,6 @@ std::array<int, 2>	Environment::action(int const act) {
 }
 
 void	Environment::render( void ) {
-	std::cout << "===========" << std::endl;
 	for (unsigned int i = 0; i < this->_myMap.size(); i++) {
 		if (i % 4 == 0)
 			std::cout << std::endl;
@@ -62,6 +63,7 @@ void	Environment::render( void ) {
 		else
 			std::cout << this->_myMap[i];
 	}
+	std::cout << std::endl;
 	return ;
 }
 

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/22 15:54:37 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/23 09:33:16 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,8 @@ public:
 private:
 	QAgent( void );
 	
-	int	randInt(void);
+	int		randInt(void);
+	bool	realisable( void );
 
 	Environment*						_env;
 	
