@@ -206,55 +206,77 @@ function gameLoop () {
 
 gameLoop();
 
-const socket = new WebSocket("ws://localhost:8080");
+try {
+    const socket = new WebSocket("http://localhost:4443/ws");
+    socket.addEventListener("open", (event) => {
+        console.log("Connected");
+    })
+    socket.addEventListener("message", (event) => {
+        console.log("Received message", event.data);
+    })
 
-window.addEventListener("keydown", (event) => {
-    socket.send(JSON.stringify({ type: "input", key: event.key, state: "down" }));
-});
+    console.log(socket);
+    socket.onopen = (() => {
+        console.log("SOCKET_OPEN");
+        socket.onerror = (err => {
+            console.error(err);
+        })
 
-window.addEventListener("keyup", (event) => {
-    socket.send(JSON.stringify({ type: "input", key: event.key, state: "up" }));
-});
+        window.addEventListener("keydown", (event) => {
+            socket.send(JSON.stringify({ type: "input", key: event.key, state: "down" }));
+        });
 
-socket.onopen = function () { return console.log("Connected to server"); };
+        window.addEventListener("keyup", (event) => {
+            socket.send(JSON.stringify({ type: "input", key: event.key, state: "up" }));
+        });
 
-socket.onmessage = function (event) {
-    const data = JSON.parse(event.data);
-    switch (data.type) {
-        case "Game":
-            game.state = data.state;
-            game.score1 = data.score1;
-            game.score2 = data.score2;
-            game.start = data.start;
-            game.hazard.x = data.hazard.x;
-            game.hazard.y = data.hazard.y;
-            game.hazard.type = data.hazard.type;
-            break;
-        case "Ball":
-            ball.x = data.x;
-            ball.y = data.y;
-            ball.radius = data.radius;
-            ball.color = data.color;
-            break;
-        case "Paddle":
-            if (data.x === 30) {
-                lPaddle.y = data.y;
-                lPaddle.width = data.width;
-                lPaddle.height = data.height;
-                lPaddle.color = data.color;
-                lPaddle.score = data.score;
+        socket.onopen = function () { return console.log("Connected to server"); };
+
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            switch (data.type) {
+                case "Game":
+                    game.state = data.state;
+                    game.score1 = data.score1;
+                    game.score2 = data.score2;
+                    game.start = data.start;
+                    game.hazard.x = data.hazard.x;
+                    game.hazard.y = data.hazard.y;
+                    game.hazard.type = data.hazard.type;
+                    break;
+                case "Ball":
+                    ball.x = data.x;
+                    ball.y = data.y;
+                    ball.radius = data.radius;
+                    ball.color = data.color;
+                    break;
+                case "Paddle":
+                    if (data.x === 30) {
+                        lPaddle.y = data.y;
+                        lPaddle.width = data.width;
+                        lPaddle.height = data.height;
+                        lPaddle.color = data.color;
+                        lPaddle.score = data.score;
+                    }
+                    else {
+                        rPaddle.y = data.y;
+                        rPaddle.width = data.width;
+                        rPaddle.height = data.height;
+                        rPaddle.color = data.color;
+                        rPaddle.score = data.score;
+                    }
+                    break;
+                default:
+                    console.warn("Unknown type received:", data);
             }
-            else {
-                rPaddle.y = data.y;
-                rPaddle.width = data.width;
-                rPaddle.height = data.height;
-                rPaddle.color = data.color;
-                rPaddle.score = data.score;
-            }
-            break;
-        default:
-            console.warn("Unknown type received:", data);
-    }
-};
+        };
+    })
+    console.log(socket);
 
 socket.onclose = function () { return console.log("Disconnected"); };
+
+}
+catch (error) {
+    console.error("CRASH IS HERE");
+    console.error(error);
+}

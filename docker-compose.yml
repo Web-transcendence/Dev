@@ -71,7 +71,7 @@ services:
     networks:
       - transcendence
     ports:
-      - "8080:8080"
+      - "4443:4443"
     restart: unless-stopped
     develop:
       watch:
