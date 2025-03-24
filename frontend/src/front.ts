@@ -124,11 +124,32 @@ function login(container: HTMLElement, button: HTMLElement): void {
             },
             body: JSON.stringify(data)
         });
+
         const result = await response.json();
         if (response.ok) {
             localStorage.setItem('token', result.token);
             isConnected();
             localStorage.setItem('nickName', result.nickName);
+            console.log("te st")
+
+            try {
+                const ws = new WebSocket(`ws://localhost:3000/ws/user-management/ws-connexion`);
+
+                ws.onopen = () => {
+                    console.log('✅ WebSocket connection opened');
+                    const message = JSON.stringify({text: "Hello from frontend!"});
+                    console.log(`📤 Sending: ${message}`);
+                    ws.send(message);
+                };
+
+                ws.onclose = () => {
+                    console.log('Connection closed');
+                }
+            } catch (e) {
+                console.log(e);
+            }
+
+
             // localStorage.setItem('avatar', result.avatar);
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
@@ -149,7 +170,6 @@ function login(container: HTMLElement, button: HTMLElement): void {
         }
     });
 }
-
 
 async function profile(container: HTMLElement, nickName: HTMLElement, email: HTMLElement) {
     try {
@@ -219,4 +239,3 @@ function isConnected() {
         document.getElementById("disconnect")!.classList.add("hidden");
     }
 }
-

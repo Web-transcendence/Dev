@@ -2,6 +2,18 @@ import Fastify, {FastifyReply, FastifyRequest} from "fastify";
 import httpProxy from '@fastify/http-proxy';
 import cors from "@fastify/cors";
 import jwt, {JwtPayload} from 'jsonwebtoken';
+import {readFileSync} from "node:fs";
+import {join} from "node:path";
+
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+//
+// const httpsOptions = {
+//     https: {
+//         key: readFileSync(join(import.meta.dirname, '../secure/key.pem')),      // Private key
+//         cert: readFileSync(join(import.meta.dirname, '../secure/cert.pem'))     // Certificate
+//     },
+//     logger: true
+// };
 
 
 const SECRET_KEY = /*process.env.SECRET_KEY || */ "secret_key";
@@ -14,11 +26,10 @@ app.register(cors, {
     methods: ["GET", "POST", "PUT", "DELETE"]
 })
 
-async function authentificate (req: FastifyRequest, reply: FastifyReply) {
+async function httpAuthJwt (req: FastifyRequest, reply: FastifyReply) {
     if (req.url === "/user-management/sign-up" || req.url === "/user-management/sign-in")
         return ;
     try {
-        console.log(req.headers);
         const authHeader = req.headers.authorization;
         if (!authHeader)
             return reply.status(401).send({ error: "Unauthorized - No token provided" });
@@ -35,12 +46,33 @@ async function authentificate (req: FastifyRequest, reply: FastifyReply) {
     }
 }
 
+async function wsAuthJwt (req: FastifyRequest, reply: FastifyReply) {
+    try {
+        console.log("kkkkkkkk")
+        const token = req.headers['sec-websocket-protocol'];
+        if (!token)
+            return reply.status(401).send({ error: "Unauthorized - No token provided" });
+
+        const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;
+        console.log("UUUUU")
+    }
+    catch (error) {
+        return reply.status(401).send({ error: "Unauthorized - invalid token" });
+    }
+}
+
 
 app.register(httpProxy, {
     upstream: 'http://user-management:5000',
     prefix: '/user-management',
     http2: false,
-    preHandler: authentificate
+    preHandler: httpAuthJwt
+});
+
+app.register(httpProxy, {
+    upstream: 'ws://user-management:5000',
+    prefix: '/ws/user-management',
+    websocket: true,
 });
 
 app.listen({port: 3000, host: '0.0.0.0'}, (err, adrr) => {
