@@ -114,41 +114,28 @@ complexite. Le deep Q learning utilise un autre network pour creer des inputs a 
 directement des inputs fixs. Dans tous les cas ce type d algo a un entrainement bien different du precedent puisque
 desormais l algo cherche a collecter un maximum de reward.
 
-algorithm EpsilonGreedyQLearning():
-    // INPUT
-    //    alpha = learning rate
-    //    gamma = discount factor
-    //   epsilon = exploration rate
-    // OUTPUT
-    //    A Q-table containing Q(S,A) pairs defining estimated optimal policy π*
+Implementation of a Q-learning algorithm based in C++ in the folder Q-learning;
+The Q-learning is a machine learning algorithm taking part in the renforcement learning subregion.
+It is way differente from deep learning but it's very interesting. To give a quick explaination the algo can be
+devided in two section: The agent and the environment. The agent can interact with the environment to discover it
+and earn some potential reward. In my implementation the environment is 4x4 map with a start (S) top left and a goal (G) bottom right.
+There is some frozen ice (F) that the agent can walk on, and some hole (H) where it could fall. 
 
-    // Initialization
-    Initialize Q(s,a) arbitrarily, for all s in S, a in A(s), except for 
-    Q(terminal, .) <- 0
-    
-    for each episode:
-        Initialize state S
-        for each step of episode:
-            // Choose A from S using policy derived from Q (e.g., epsilon-greedy)
-            A <- selectAction(Q, S, epsilon)
-            // Take the action A, observe R, Z
-            Take action A, observe reward R and next state Z
-            // Q-learning update
-            q <- the maximum Q(Z, a) over a
-            Q(S, A) <- Q(S, A) + alpha * (R + gamma * q - Q(S, A))
-            S <- S
+Exemple:
+    'S'FFF
+    HFFH
+    FHFF
+    FHFG
 
-algorithm selectAction(Q, S, epsilon):
-    // INPUT
-    //    Q = Q-table
-    //    S = current state
-    //    epsilon = exploration rate
-    // OUTPUT
-    //    Selected action
+Now we have to create a QMatrix for each state (in our case the emplacement of our agent) and depending of our possible actions. In this exemple
+there is 4 actions (up, down, right, left). So our QMatrix is going to store our QValue for each pair {state:action};
 
-    n <- uniform random number between 0 and 1
-    if n < epsilon 
-        A <- random action from the action space
-    else:
-        A <- maxQ(S, .)
-    return A
+Exemple:
+            |Up    |Down  |Right |Left
+    State 0:|0     |0     |0     |0
+    State 1:|0     |0     |0     |0
+    State...
+
+The Qvalue is the average got reward at the end of a lap for each action took at a state. If the QValue is 0 that signify that the lap will stop here
+if the action is taken (like the agent fall in to a hole). The purpose of our training is to define all the Qvalues so at the end the agent should just
+select the highest value per state to have the best pathing to the goal.
