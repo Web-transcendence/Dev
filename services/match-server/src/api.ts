@@ -300,10 +300,6 @@ function hazardGenerator(game: gameState) {
 }
 
 const fastify = Fastify({
-    // https: {
-    //     key: fs.readFileSync('./secure/key.pem'),
-    //     cert: fs.readFileSync('./secure/cert.pem'),
-    // },
     logger: true
 });
 

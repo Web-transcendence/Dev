@@ -27,19 +27,17 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                 newElement.className = 'tag';
                 if (reply.name) {
                     console.log("UserGoogle:", reply.name);
-                    localStorage.setItem('name', reply.name); // Stockage
+                    localStorage.setItem('name', reply.name);
 
-                    const username = localStorage.getItem('username'); // Récupération
+                    const username = localStorage.getItem('username');
                     const nameSpan = document.getElementById('username') as HTMLSpanElement;
                     nameSpan.textContent = username;
                     console.log("Welcome", username);
                     const avatarImg = document.getElementById('avatar') as HTMLImageElement;
-                    // Récupérer l'avatar en utilisant l'API Google (exemple avec le jeton
-
                     if (reply.avatar)
                         avatarImg.src = reply.avatar;
                     else
-                        avatarImg.src = '../login.png'; // Image par défaut si pas d'avatar
+                        avatarImg.src = '../login.png';
                 }
                 if (!res.ok)
                     throw Error("Page not found: element missing.");
@@ -101,11 +99,6 @@ async function loadPart(page: string): Promise<void> {
             if (button)
                 login(container, button);
         }
-        // if (page === "/factor") {
-        //     const button = document.getElementById("loginButton")!;
-        //     if (button)
-        //         login(container, button);
-        // }
     } catch (error) {
         console.error(error);
         container.innerHTML = '';
@@ -120,7 +113,6 @@ async function insert_tag(url: string): Promise<void>{
         if (existingScript)
             return ;
     }
-    console.log("URL :", url)
     const res = await fetch(url);
     const newElement = document.createElement('div');
     newElement.className = 'tag';
@@ -137,17 +129,11 @@ async function insert_tag(url: string): Promise<void>{
             const script = document.createElement('script');
             script.src = "/static/dist/pong.js";
             document.body.appendChild(script);
-            console.log("Script added:", script);
-        } else {
-            console.log("Script already exists.");
         }
     } else {
         const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
-        if (existingScript) {
-
+        if (existingScript)
             existingScript.remove();
-            console.log("Script retiré.");
-        }
     }
     if (url === "part/login") {
         const script = document.createElement('script');
@@ -155,21 +141,13 @@ async function insert_tag(url: string): Promise<void>{
         script.async = true;
         script.defer = true;
         container.appendChild(script);
-        console.log(script);
     } else {
         const googleID = document.getElementById('googleidentityservice');
         const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
-        console.log(googlemeta);
-        if (googlemeta) {
+        if (googlemeta)
             googlemeta.remove();
-            console.log("Script retiré HttpEquiv.");
-        }
-        console.log(googleID);
-        if (googleID) {
+        if (googleID)
             googleID.remove();
-            console.log("Script retiré Google ID.");
-        }
-
     }
     newElement.innerHTML = html;
     container.appendChild(newElement);
@@ -188,8 +166,6 @@ function register(container: HTMLElement, button: HTMLElement): void {
             body: JSON.stringify(data)
         });
         const result = await response.json();
-        console.log(result);
-        console.log(result.json);
         if (result.token) {
             localStorage.setItem('token', result.token);
             await CheckForToken();
@@ -216,7 +192,6 @@ function login(container: HTMLElement, button: HTMLElement): void {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
-        console.log("DATA", data);
         const response = await fetch('http://localhost:3000/user-management/user-login', {
             method: 'POST',
             headers: {
@@ -228,7 +203,6 @@ function login(container: HTMLElement, button: HTMLElement): void {
         if (result.valid) {
             localStorage.setItem('token', result.token);
             localStorage.setItem('name', result.name);
-            // localStorage.setItem('avatar', result.avatar);
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
             newElement.className = 'tag';
@@ -262,15 +236,12 @@ async function CheckForToken(): Promise<void> {
             body: JSON.stringify({ token }),
         });
         const result = await response.json();
-        console.log("CheckToken Result: ", result);
         if (result.valid) {
             if (result.username) {
-                console.log("ResultUsername:", result.username);
                 localStorage.setItem('username', result.username);
 
                 const nameSpan = document.getElementById('username') as HTMLSpanElement;
                 nameSpan.textContent = result.username;
-                console.log("Welcome :", result.username);
                 if (result.avatar)
                     localStorage.setItem('avatar', result.avatar);
                 const AvatarSrc = document.getElementById('avatar') as HTMLImageElement;
