@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import fastifyWebsocket from '@fastify/websocket';
+import { WebSocket } from "ws";
 import { z } from "zod";
 
 const inputSchema = z.object({ state: z.string(), key: z.string() });
@@ -36,8 +37,7 @@ class Paddle {
     speed: number;
     color: string;
     score: string;
-    ws: WebSocket;
-    constructor(x: number, y: number, width: number, height: number, speed: number, color: string, ws: WebSocket) {
+    constructor(x: number, y: number, width: number, height: number, speed: number, color: string) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -45,7 +45,6 @@ class Paddle {
         this.speed = speed;
         this.color = color;
         this.score = "0";
-        this.ws = ws;
     }
     toJSON() {
         return {type: "Paddle", x: this.x, y: this.y, width: this.width, height: this.height, color: this.color, score: this.score};
@@ -88,9 +87,20 @@ class gameState {
 
 class Room {
     id: number;
-    players: Paddle[] = [];
-    constructor (id: number, paddle: Paddle) {
+    players: Player[] = [];
+    constructor (id: number, player: Player) {
         this.id = id;
+        this.players.push(player);
+    }
+}
+
+class Player {
+    ws: WebSocket;
+    paddle: Paddle = new Paddle(0, 400, 20, 200, 10, "#fcc800");
+    input: keyInput = new keyInput();
+    game: gameState = new gameState();
+    constructor(ws: WebSocket) {
+        this.ws = ws;
     }
 }
 
@@ -116,15 +126,20 @@ function inputHandler(key: string, state: string, input: keyInput, game: gameSta
         game.state = 1;
 }
 
-function resetInput(input: keyInput) {
-    input.arrowUp = false;
-    input.arrowDown = false;
-    input.w = false;
-    input.arrowUp = false;
+function resetInput(lInput: keyInput, rInput: keyInput) {
+    rInput.arrowUp = false;
+    rInput.arrowDown = false;
+    rInput.w = false;
+    rInput.arrowUp = false;
+    lInput.arrowUp = false;
+    lInput.arrowDown = false;
+    lInput.w = false;
+    lInput.arrowUp = false;
 }
 
-function resetGame(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, game: gameState, input: keyInput) {
-    game.start = false;
+function resetGame(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, lGame: gameState, rGame: gameState, lInput: keyInput, rInput: keyInput) {
+    lGame.start = false;
+    rGame.start = false;
     if (ball.x < 0)
         ball.angle = Math.PI;
     else
@@ -135,15 +150,19 @@ function resetGame(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, game: gameState
     ball.speed = ball.ispeed;
     lPaddle.y = 0.5 * 800;
     rPaddle.y = 0.5 * 800;
-    game.hazard.type = "Default";
-    if (rPaddle.score === game.maxScore || lPaddle.score === game.maxScore) {
-        game.state = 2;
-        game.score1 = lPaddle.score;
-        game.score2 = rPaddle.score;
+    lGame.hazard.type = "Default";
+    rGame.hazard.type = "Default";
+    if (rPaddle.score === lGame.maxScore || lPaddle.score === lGame.maxScore) {
+        lGame.state = 2;
+        lGame.score1 = lPaddle.score;
+        lGame.score2 = rPaddle.score;
+        rGame.state = 2;
+        rGame.score1 = lPaddle.score;
+        rGame.score2 = rPaddle.score;
         rPaddle.score = "0";
         lPaddle.score = "0";
     }
-    resetInput(input);
+    resetInput(lInput, rInput);
 }
 
 function norAngle(ball: Ball) {
@@ -178,8 +197,8 @@ function bounceAngle(ball: Ball, paddle: Paddle, side: string) {
     norAngle(ball);
 }
 
-function moveBall(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, input: keyInput, game: gameState) {
-    if (game.start) {
+function moveBall(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, lInput: keyInput, rInput: keyInput, lGame: gameState, rGame: gameState) {
+    if (lGame.start && rGame.start) {
         let oldX = ball.x;
         let oldY = ball.y;
         let collision = 0;
@@ -200,19 +219,20 @@ function moveBall(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, input: keyInput,
             ball.x = oldX + Math.cos(ball.angle) * (Math.sqrt(Math.pow(ball.y - oldY, 2) + Math.pow(ball.x - oldX, 2)));
             ball.y = oldY + Math.sin(ball.angle) * (Math.sqrt(Math.pow(ball.y - oldY, 2) + Math.pow(ball.x - oldX, 2)));
         }
-        if (ball.x > game.hazard.x - 37 && ball.x < game.hazard.x + 37) { // Hazard size is 50 but hitbox is 74 to cover ball radius
-            if (ball.y > game.hazard.y - 37 && ball.y < game.hazard.y + 37) {
-                hazardEffect(game, ball, lPaddle, rPaddle);
-                game.hazard.type = "Default";
+        if (ball.x > lGame.hazard.x - 37 && ball.x < lGame.hazard.x + 37) { // Hazard size is 50 but hitbox is 74 to cover ball radius
+            if (ball.y > lGame.hazard.y - 37 && ball.y < lGame.hazard.y + 37) {
+                hazardEffect(lGame, rGame, ball, lPaddle, rPaddle);
+                lGame.hazard.type = "Default";
+                rGame.hazard.type = "Default";
             }
         }
         if (ball.x > 1200) {
             lPaddle.score = String(Number(lPaddle.score) + 1);
-            resetGame(ball, lPaddle, rPaddle, game, input);
+            resetGame(ball, lPaddle, rPaddle, lGame, rGame, lInput, rInput);
         }
         if (ball.x < 0) {
             rPaddle.score = String(Number(rPaddle.score) + 1);
-            resetGame(ball, lPaddle, rPaddle, game, input);
+            resetGame(ball, lPaddle, rPaddle, lGame, rGame, lInput, rInput);
         }
         if (ball.y > 800) {
             ball.y = 800 - (ball.y - 800);
@@ -223,19 +243,19 @@ function moveBall(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, input: keyInput,
         }
         norAngle(ball);
     }
-    setTimeout(() => moveBall(ball, lPaddle, rPaddle, input, game), 10);
+    setTimeout(() => moveBall(ball, lPaddle, rPaddle, lInput, rInput,  lGame, rGame), 10);
 }
 
-function movePaddle(input: keyInput, lPaddle: Paddle, rPaddle: Paddle, game: gameState) {
-    if (game.state === 1) {
-        if (input.arrowUp)
-            rPaddle.y -= rPaddle.speed;
-        if (input.arrowDown)
-            rPaddle.y += rPaddle.speed;
-        if (input.w)
+function movePaddle(lInput: keyInput, rInput: keyInput, lPaddle: Paddle, rPaddle: Paddle, lGame: gameState, rGame: gameState) {
+    if (lGame.state === 1 && rGame.state === 1) {
+        if (lInput.arrowUp || lInput.w)
             lPaddle.y -= lPaddle.speed;
-        if (input.s)
+        if (lInput.arrowDown || lInput.s)
             lPaddle.y += lPaddle.speed;
+        if (rInput.arrowUp || rInput.w)
+            rPaddle.y -= rPaddle.speed;
+        if (rInput.arrowDown || rInput.s)
+            rPaddle.y += rPaddle.speed;
         if (rPaddle.y < 0.5 * rPaddle.height)
             rPaddle.y = 0.5 * rPaddle.height;
         else if (rPaddle.y > 800 - rPaddle.height * 0.5)
@@ -245,14 +265,15 @@ function movePaddle(input: keyInput, lPaddle: Paddle, rPaddle: Paddle, game: gam
         else if (lPaddle.y > 800 - lPaddle.height * 0.5)
             lPaddle.y = 800 - 0.5 * lPaddle.height;
     }
-    setTimeout(() => movePaddle(input, lPaddle, rPaddle, game), 10);
+    setTimeout(() => movePaddle(lInput, rInput, lPaddle, rPaddle, lGame, rGame), 10);
 }
 
-function moveHazard(game: gameState, ball: Ball) {
-    if (game.state === 1) {
-        game.hazard.y += game.hazard.speed;
+function moveHazard(lGame: gameState, rGame: gameState, ball: Ball) {
+    if (lGame.state === 1 && rGame.state === 1) {
+        lGame.hazard.y += lGame.hazard.speed;
+        rGame.hazard.y += rGame.hazard.speed;
     }
-    setTimeout(() => moveHazard(game, ball), 10);
+    setTimeout(() => moveHazard(lGame, rGame, ball), 10);
 }
 
 function resetHazard(lPaddle: Paddle, rPaddle: Paddle, ball: Ball) {
@@ -261,11 +282,11 @@ function resetHazard(lPaddle: Paddle, rPaddle: Paddle, ball: Ball) {
     ball.ispeed = ball.ospeed;
 }
 
-function hazardEffect(game: gameState, ball: Ball, lPaddle: Paddle, rPaddle: Paddle) {
+function hazardEffect(lGame: gameState, rGame: gameState, ball: Ball, lPaddle: Paddle, rPaddle: Paddle) {
     let left = true;
     if (ball.angle > Math.PI * 0.5 && ball.angle < Math.PI * 1.5)
         left = false;
-    switch (game.hazard.type) {
+    switch (lGame.hazard.type) {
         case "BallSpeedUp":
             ball.ospeed = ball.ispeed;
             ball.speed *= 1.5;
@@ -289,65 +310,67 @@ function hazardEffect(game: gameState, ball: Ball, lPaddle: Paddle, rPaddle: Pad
     setTimeout(() => resetHazard(lPaddle, rPaddle, ball), 5000);
 }
 
-function hazardGenerator(game: gameState) {
-    if (game.start) {
+function hazardGenerator(lGame: gameState, rGame: gameState) {
+    if (lGame.start && rGame.start) {
         let type = Math.floor(Math.random() * 3);
+        let rdm = Math.random();
         switch (type) {
             case 2 :
-                game.hazard = new Hazard(450 + Math.random() * 300, 1 + Math.floor(Math.random() * 2), "BallSpeedUp");
+                lGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BallSpeedUp");
+                rGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BallSpeedUp");
                 break;
             case 1:
-                game.hazard = new Hazard(450 + Math.random() * 300, 1 + Math.floor(Math.random() * 2), "BarSizeUp");
+                lGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BarSizeUp");
+                rGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BarSizeUp");
                 break;
             case 0:
-                game.hazard = new Hazard(450 + Math.random() * 300, 1 + Math.floor(Math.random() * 2), "BarSizeDown");
+                lGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BarSizeDown");
+                rGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BarSizeDown");
                 break;
             default:
                 break;
         }
     }
-    setTimeout(() => hazardGenerator(game), 10000);
+    setTimeout(() => hazardGenerator(lGame, rGame), 10000);
 }
 
-function joinRoom(paddle: Paddle) {
+function joinRoom(player: Player) {
     let id: number = -1;
     let i : number = 0;
     for (; i < rooms.length; i++) {
         if (rooms[i].players.length === 1) {
-            paddle.x = 400 - 30;
-            rooms[i].players.push(paddle);
+            player.paddle.x = 1200 - 30;
+            rooms[i].players.push(player);
             id = rooms[i].id;
             break ;
         }
     }
     if (id === -1) {
-        paddle.x = 30;
-        let room = new Room(1, paddle);
+        player.paddle.x = 30;
+        let room = new Room(1, player);
         rooms.push(room);
         return ;
     }
     let ball = new Ball (1200 / 2, 800 / 2, 0, 8, 12, "#fcc800");
-    let input = new keyInput();
-    let game = new gameState();
     const intervalId = setInterval(() => {
         let i = rooms.findIndex(room => room.id === id);
         if (i === -1) {
             clearInterval(intervalId);
             return;
         }
-        rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[0]));
-        rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[1]));
+        rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[0].paddle));
+        rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[1].paddle));
         rooms[i].players[0].ws.send(JSON.stringify(ball));
-        rooms[i].players[0].ws.send(JSON.stringify(game));
-        rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[0]));
-        rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[1]));
+        rooms[i].players[0].ws.send(JSON.stringify(player.game));
+        rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[0].paddle));
+        rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[1].paddle));
         rooms[i].players[1].ws.send(JSON.stringify(ball));
-        rooms[i].players[1].ws.send(JSON.stringify(game));
+        rooms[i].players[1].ws.send(JSON.stringify(player.game));
     }, 10);
-    moveBall(ball, rooms[i].players[0], rooms[i].players[1], input, game);
-    movePaddle(input, rooms[i].players[0], rooms[i].players[1], game);
-    moveHazard(game, ball);
-    hazardGenerator(game);
+    moveBall(ball, rooms[i].players[0].paddle, rooms[i].players[1].paddle, rooms[i].players[0].input, rooms[i].players[1].input,  rooms[i].players[0].game, rooms[i].players[1].game);
+    movePaddle(rooms[i].players[0].input, rooms[i].players[1].input, rooms[i].players[0].paddle, rooms[i].players[1].paddle, rooms[i].players[0].game, rooms[i].players[1].game);
+    moveHazard(rooms[i].players[0].game, rooms[i].players[1].game, ball);
+    hazardGenerator(rooms[i].players[0].game, rooms[i].players[1].game);
 }
 
 const fastify = Fastify({
@@ -363,19 +386,19 @@ fastify.register(fastifyWebsocket);
 fastify.register(async function (fastify) {
     fastify.get('/ws', { websocket: true }, (socket, req) => {
         console.log("Client connected");
-        let paddle = new Paddle(0, 400, 20, 200, 10, "#fcc800", socket);
+        let player = new Player(socket);
         socket.on("message", (message) => {
             const {data, success, error} = inputSchema.safeParse(JSON.parse(message.toString()));
             if (!success || !data) {
                 console.error(error);
                 return ;
             }
-            //inputHandler(data.key, data.state, input, game);
+            inputHandler(data.key, data.state, player.input, player.game);
         });
         socket.on("close", () => {
             console.log("Client disconnected");
         });
-        joinRoom(paddle);
+        joinRoom(player);
     });
 });
 
