@@ -91,12 +91,6 @@ async function loadPart(page: string): Promise<void> {
     }
     try {
         await insert_tag(`part${page}`);
-        if (page === "/pong") {
-            const script = document.createElement('script');
-            script.src = "/static/dist/pong.js";
-            document.body.appendChild(script);
-            console.log(script);
-        }
         if (page === "/register") {
             const button = document.getElementById("registerButton")!;
             if (button)
@@ -121,17 +115,39 @@ async function loadPart(page: string): Promise<void> {
 
 async function insert_tag(url: string): Promise<void>{
     const container = document.getElementById('content') as HTMLElement;
+    if (url === "part/pong") {
+        const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
+        if (existingScript)
+            return ;
+    }
     console.log("URL :", url)
     const res = await fetch(url);
     const newElement = document.createElement('div');
-    const scriptElement = document.createElement('script');
     newElement.className = 'tag';
     if (!res.ok)
         throw Error("Page not found: element missing.");
     const html = await res.text();
+    if (container.innerHTML.includes(html))
+        return;
     if (html.includes(container.innerHTML))
         return;
     container.innerHTML = '';
+    if (url === "part/pong") {
+        if (!document.querySelector('script[src="/static/dist/pong.js"]')) {
+            const script = document.createElement('script');
+            script.src = "/static/dist/pong.js";
+            document.body.appendChild(script);
+            console.log("Script added:", script);
+        } else {
+            console.log("Script already exists.");
+        }
+    } else {
+        const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
+        if (existingScript) {
+            existingScript.remove();
+            console.log("Script retiré.");
+        }
+    }
     if (url === "part/login") {
         const script = document.createElement('script');
         script.src = "https://accounts.google.com/gsi/client";
@@ -139,6 +155,20 @@ async function insert_tag(url: string): Promise<void>{
         script.defer = true;
         container.appendChild(script);
         console.log(script);
+    } else {
+        const googleID = document.getElementById('googleidentityservice');
+        const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
+        console.log(googlemeta);
+        if (googlemeta) {
+            googlemeta.remove();
+            console.log("Script retiré HttpEquiv.");
+        }
+        console.log(googleID);
+        if (googleID) {
+            googleID.remove();
+            console.log("Script retiré Google ID.");
+        }
+
     }
     newElement.innerHTML = html;
     container.appendChild(newElement);

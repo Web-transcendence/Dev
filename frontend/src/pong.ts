@@ -1,5 +1,6 @@
 const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
+let connect: boolean = true;
 
 class Ball {
     x: number;
@@ -151,7 +152,6 @@ function drawHazard() {
 }
 
 function mainLoop() {
-    console.log("EXPLOSION !!!")
     // Background
     ctx.fillStyle = "#101828";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -167,18 +167,11 @@ function mainLoop() {
     ctx.textAlign = "right"
     ctx.fillText(lPaddle.score, canvas.width * 0.5 - 40, 80);
     // Hazard
-    // if (game.hazard.type !== "Default") { // Hazard hitbox
-    //     ctx.fillStyle = "red";
-    //     ctx.fillRect(game.hazard.x - 37, game.hazard.y - 37, 74, 74);
-    // }
     drawHazard();
-    // Ball : Square or Circle ?
+    // Ball
     ctx.fillStyle = ball.color;
     ctx.fillRect(ball.x - ball.radius, ball.y - ball.radius + 4, ball.radius * 2, (ball.radius - 4) * 2)
     ctx.fillRect(ball.x - ball.radius + 4, ball.y - ball.radius, (ball.radius - 4) * 2, ball.radius * 2)
-    // ctx.beginPath();
-    // ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    // ctx.fill();
     // lPaddle
     ctx.fillStyle = lPaddle.color;
     ctx.fillRect(lPaddle.x + 3 - lPaddle.width * 0.5, lPaddle.y - lPaddle.height * 0.5, lPaddle.width - 6, lPaddle.height);
@@ -201,39 +194,35 @@ function gameLoop () {
             endScreen();
             break;
     }
-    requestAnimationFrame(gameLoop);
+    if (connect)
+        requestAnimationFrame(gameLoop);
 }
 
 gameLoop();
-
 try {
     const socket = new WebSocket("http://localhost:4443/ws");
     socket.addEventListener("open", (event) => {
         console.log("Connected");
     })
-    socket.addEventListener("message", (event) => {
-        console.log("Received message", event.data);
-    })
-
-    console.log(socket);
     socket.onopen = (() => {
-        console.log("SOCKET_OPEN");
         socket.onerror = (err => {
             console.error(err);
         })
-
         window.addEventListener("keydown", (event) => {
             socket.send(JSON.stringify({ type: "input", key: event.key, state: "down" }));
         });
-
         window.addEventListener("keyup", (event) => {
             socket.send(JSON.stringify({ type: "input", key: event.key, state: "up" }));
         });
-
         socket.onopen = function () { return console.log("Connected to server"); };
-
         socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
+            const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
+            if (!existingScript) {
+                socket.close();
+                connect = false;
+                console.log("Pong script finished, socket closed.");
+            }
             switch (data.type) {
                 case "Game":
                     game.state = data.state;
@@ -271,12 +260,8 @@ try {
             }
         };
     })
-    console.log(socket);
-
-socket.onclose = function () { return console.log("Disconnected"); };
-
+    socket.onclose = function () { return console.log("Disconnected"); };
 }
 catch (error) {
-    console.error("CRASH IS HERE");
-    console.error(error);
+    console.error("Unexpected error: ", error);
 }
