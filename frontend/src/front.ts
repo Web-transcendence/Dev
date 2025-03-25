@@ -144,6 +144,7 @@ async function insert_tag(url: string): Promise<void>{
     } else {
         const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
         if (existingScript) {
+
             existingScript.remove();
             console.log("Script retiré.");
         }

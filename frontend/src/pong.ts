@@ -209,9 +209,13 @@ try {
             console.error(err);
         })
         window.addEventListener("keydown", (event) => {
+            if (!connect)
+                return;
             socket.send(JSON.stringify({ type: "input", key: event.key, state: "down" }));
         });
         window.addEventListener("keyup", (event) => {
+            if (!connect)
+                return ;
             socket.send(JSON.stringify({ type: "input", key: event.key, state: "up" }));
         });
         socket.onopen = function () { return console.log("Connected to server"); };
