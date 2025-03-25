@@ -132,24 +132,20 @@ function login(container: HTMLElement, button: HTMLElement): void {
             localStorage.setItem('nickName', result.nickName);
             console.log("te st")
 
-            try {
-                const ws = new WebSocket(`ws://localhost:3000/ws/user-management/ws-connexion`);
-
-                ws.onopen = () => {
-                    console.log('✅ WebSocket connection opened');
-                    const message = JSON.stringify({text: "Hello from frontend!"});
-                    console.log(`📤 Sending: ${message}`);
-                    ws.send(message);
-                };
-
-                ws.onclose = () => {
-                    console.log('Connection closed');
+            const sseResponse = await fetch("http://localhost:3000/user-management/sse", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'text/event-stream',
+                    'Authorization': `Bearer ${result.token}`
                 }
-            } catch (e) {
-                console.log(e);
+            })
+
+            const reader = sseResponse.body?.pipeThrough(new TextDecoderStream()).getReader() ?? null;
+            while (reader) {
+                const {value, done} = await reader.read();
+                if (done) break;
+                console.log('Received', value);
             }
-
-
             // localStorage.setItem('avatar', result.avatar);
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');

@@ -1,13 +1,13 @@
 import fastify from 'fastify'
 import userRoutes from "./routes.js"
-import websocketPlugin, {WebSocket} from "@fastify/websocket"
+import { FastifySSEPlugin } from "fastify-sse-v2";
 
 const app = fastify();
 
-app.register(websocketPlugin);
+app.register(FastifySSEPlugin);
 app.register(userRoutes);
 
-const connectedUsers = new Map<string, WebSocket>();
+export const connectedUsers = new Map<string, WebSocket>();
 
 app.listen({port: 5000, host: '0.0.0.0'}, (err, adrr) => {
     if (err) {

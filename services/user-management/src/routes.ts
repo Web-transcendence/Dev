@@ -2,7 +2,9 @@ import * as Schema from "./schema.js";
 import sanitizeHtml from "sanitize-html";
 import {User} from "./User.js";
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
-import { WebSocket } from "@fastify/websocket"
+import {connectedUsers} from "./api.js"
+
+
 
 export default async function userRoutes(app: FastifyInstance) {
 
@@ -72,24 +74,12 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     });
 
-    app.get('/ws-connexion', {websocket: true}, (connection: WebSocket, req) => {
-        console.log("WebSocket connection established");
 
-        try {
-            connection.on('message', (message: string) => {
-                console.log("Received message:", message.toString());
-            });
+    app.get('/sse', async function (req, res) {
 
-            connection.on('close', () => {
-                console.log("WebSocket connection closed by client.");
-            });
-
-            connection.on('error', (err) => {
-                console.error("WebSocket error:", err);
-            });
-        } catch (err) {
-            console.log(err)
-        }
-    })
+        res.sse({ id: String(0), data: "Some message" });
+        await new Promise(f => setTimeout(f, 1000));
+        res.sse({ id: String(1), data: "Some message" });
+    });
 
 }

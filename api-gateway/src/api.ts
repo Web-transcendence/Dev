@@ -48,13 +48,13 @@ async function httpAuthJwt (req: FastifyRequest, reply: FastifyReply) {
 
 async function wsAuthJwt (req: FastifyRequest, reply: FastifyReply) {
     try {
-        console.log("kkkkkkkk")
-        const token = req.headers['sec-websocket-protocol'];
-        if (!token)
-            return reply.status(401).send({ error: "Unauthorized - No token provided" });
-
-        const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;
-        console.log("UUUUU")
+        console.log("Received message:", req.url);
+        // const token = req.headers['sec-websocket-protocol'];
+        // if (!token)
+        //     return reply.status(401).send({ error: "Unauthorized - No token provided" });
+        //
+        // const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;
+        // req.headers.id = decoded.id;
     }
     catch (error) {
         return reply.status(401).send({ error: "Unauthorized - invalid token" });
@@ -73,6 +73,7 @@ app.register(httpProxy, {
     upstream: 'ws://user-management:5000',
     prefix: '/ws/user-management',
     websocket: true,
+    preHandler: wsAuthJwt
 });
 
 app.listen({port: 3000, host: '0.0.0.0'}, (err, adrr) => {
