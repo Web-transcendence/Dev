@@ -3,7 +3,6 @@ import sanitizeHtml from "sanitize-html";
 import {User} from "./User.js";
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
 import { WebSocket } from "@fastify/websocket"
-import Websocket from "ws"
 
 export default async function userRoutes(app: FastifyInstance) {
 
@@ -73,25 +72,24 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     });
 
-    // app.get('/ws-connexion', {websocket: true}, (connection: WebSocket, req) => {
-    //     console.log("WebSocket connection established");
-    //
-    //     try {
-    //         connection.on('message', (message: string) => {
-    //             console.log("Received message:", message.toString());
-    //         });
-    //
-    //
-    //         connection.on('close', () => {
-    //             console.log("WebSocket connection closed by client.");
-    //         });
-    //
-    //         connection.on('error', (err) => {
-    //             console.error("WebSocket error:", err);
-    //         });
-    //     } catch (err) {
-    //         console.log(err)
-    //     }
-    // })
+    app.get('/ws-connexion', {websocket: true}, (connection: WebSocket, req) => {
+        console.log("WebSocket connection established");
+
+        try {
+            connection.on('message', (message: string) => {
+                console.log("Received message:", message.toString());
+            });
+
+            connection.on('close', () => {
+                console.log("WebSocket connection closed by client.");
+            });
+
+            connection.on('error', (err) => {
+                console.error("WebSocket error:", err);
+            });
+        } catch (err) {
+            console.log(err)
+        }
+    })
 
 }
