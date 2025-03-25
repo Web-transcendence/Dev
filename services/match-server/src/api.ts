@@ -314,7 +314,7 @@ function joinRoom(paddle: Paddle) {
     let i : number = 0;
     for (; i < rooms.length; i++) {
         if (rooms[i].players.length === 1) {
-            paddle.x = canvas.width - 30;
+            paddle.x = 400 - 30;
             rooms[i].players.push(paddle);
             id = rooms[i].id;
             break ;
@@ -363,7 +363,7 @@ fastify.register(fastifyWebsocket);
 fastify.register(async function (fastify) {
     fastify.get('/ws', { websocket: true }, (socket, req) => {
         console.log("Client connected");
-        let paddle = new Paddle(0, canvas.width * 0.5, 20, 200, 10, "#fcc800", socket);
+        let paddle = new Paddle(0, 400, 20, 200, 10, "#fcc800", socket);
         socket.on("message", (message) => {
             const {data, success, error} = inputSchema.safeParse(JSON.parse(message.toString()));
             if (!success || !data) {
@@ -373,7 +373,6 @@ fastify.register(async function (fastify) {
             //inputHandler(data.key, data.state, input, game);
         });
         socket.on("close", () => {
-            clearInterval(intervalId);
             console.log("Client disconnected");
         });
         joinRoom(paddle);
