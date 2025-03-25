@@ -30,7 +30,7 @@ fclean: clean
 
 re: fclean up
 
-rewatch: fclean watch
+full: fclean build watch
 
 bw: build watch
 

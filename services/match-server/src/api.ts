@@ -1,10 +1,8 @@
 import Fastify from 'fastify';
 import fastifyWebsocket from '@fastify/websocket';
-import fs from 'fs';
 import { z } from "zod";
 
 const inputSchema = z.object({ state: z.string(), key: z.string() });
-
 
 class Ball {
     x: number;
@@ -38,7 +36,8 @@ class Paddle {
     speed: number;
     color: string;
     score: string;
-    constructor(x: number, y: number, width: number, height: number, speed: number, color: string) {
+    ws: WebSocket;
+    constructor(x: number, y: number, width: number, height: number, speed: number, color: string, ws: WebSocket) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -46,6 +45,7 @@ class Paddle {
         this.speed = speed;
         this.color = color;
         this.score = "0";
+        this.ws = ws;
     }
     toJSON() {
         return {type: "Paddle", x: this.x, y: this.y, width: this.width, height: this.height, color: this.color, score: this.score};
@@ -85,6 +85,16 @@ class gameState {
         return {type: "Game", state: this.state, start: this.start, score1: this.score1, score2: this.score2, hazard: this.hazard};
     }
 }
+
+class Room {
+    id: number;
+    players: Paddle[] = [];
+    constructor (id: number, paddle: Paddle) {
+        this.id = id;
+    }
+}
+
+let rooms: Room[] = [];
 
 function inputHandler(key: string, state: string, input: keyInput, game: gameState) {
     let upordown = false;
@@ -299,6 +309,47 @@ function hazardGenerator(game: gameState) {
     setTimeout(() => hazardGenerator(game), 10000);
 }
 
+function joinRoom(paddle: Paddle) {
+    let id: number = -1;
+    let i : number = 0;
+    for (; i < rooms.length; i++) {
+        if (rooms[i].players.length === 1) {
+            paddle.x = canvas.width - 30;
+            rooms[i].players.push(paddle);
+            id = rooms[i].id;
+            break ;
+        }
+    }
+    if (id === -1) {
+        paddle.x = 30;
+        let room = new Room(1, paddle);
+        rooms.push(room);
+        return ;
+    }
+    let ball = new Ball (1200 / 2, 800 / 2, 0, 8, 12, "#fcc800");
+    let input = new keyInput();
+    let game = new gameState();
+    const intervalId = setInterval(() => {
+        let i = rooms.findIndex(room => room.id === id);
+        if (i === -1) {
+            clearInterval(intervalId);
+            return;
+        }
+        rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[0]));
+        rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[1]));
+        rooms[i].players[0].ws.send(JSON.stringify(ball));
+        rooms[i].players[0].ws.send(JSON.stringify(game));
+        rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[0]));
+        rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[1]));
+        rooms[i].players[1].ws.send(JSON.stringify(ball));
+        rooms[i].players[1].ws.send(JSON.stringify(game));
+    }, 10);
+    moveBall(ball, rooms[i].players[0], rooms[i].players[1], input, game);
+    movePaddle(input, rooms[i].players[0], rooms[i].players[1], game);
+    moveHazard(game, ball);
+    hazardGenerator(game);
+}
+
 const fastify = Fastify({
     // https: {
     //     key: fs.readFileSync('./secure/key.pem'),
@@ -312,44 +363,24 @@ fastify.register(fastifyWebsocket);
 fastify.register(async function (fastify) {
     fastify.get('/ws', { websocket: true }, (socket, req) => {
         console.log("Client connected");
-        let ball = new Ball (1200 / 2, 800 / 2, 0, 8, 12, "#fcc800");
-        let lPaddle = new Paddle(30, 800 / 2, 20, 200, 10, "#fcc800");
-        let rPaddle = new Paddle(1200 - 30, 800 / 2, 20, 200, 10, "#fcc800");
-        let input = new keyInput();
-        let game = new gameState();
-
+        let paddle = new Paddle(0, canvas.width * 0.5, 20, 200, 10, "#fcc800", socket);
         socket.on("message", (message) => {
             const {data, success, error} = inputSchema.safeParse(JSON.parse(message.toString()));
             if (!success || !data) {
                 console.error(error);
                 return ;
             }
-            inputHandler(data.key, data.state, input, game);
+            //inputHandler(data.key, data.state, input, game);
         });
-
-        const intervalId = setInterval(() => {
-            socket.send(JSON.stringify(lPaddle));
-            socket.send(JSON.stringify(rPaddle));
-            socket.send(JSON.stringify(ball));
-            socket.send(JSON.stringify(game));
-        }, 10);
-
         socket.on("close", () => {
             clearInterval(intervalId);
             console.log("Client disconnected");
         });
-
-        moveBall(ball, lPaddle, rPaddle, input, game);
-        movePaddle(input, lPaddle, rPaddle, game);
-        moveHazard(game, ball);
-        hazardGenerator(game);
+        joinRoom(paddle);
     });
 });
 
 fastify.listen({ port: 4443, host: '0.0.0.0' }, (err, adrr) => {
-    console.log("Chargement du certificat SSL...");
-    console.log("Certificat trouvé ?", fs.existsSync('./secure/cert.pem'));
-    console.log("Clé privée trouvée ?", fs.existsSync('./secure/key.pem'));
     if (err) {
         console.error(err);
         process.exit(1);
