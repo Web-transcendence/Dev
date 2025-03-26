@@ -41,6 +41,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const user = new User(id);
 
+            user.sendNotification();
             const profileData = user.getProfile();
 
             return res.status(200).send(profileData);
@@ -76,6 +77,11 @@ export default async function userRoutes(app: FastifyInstance) {
 
 
     app.get('/sse', async function (req, res) {
+        const userId = req.headers.id as string;
+        if (!userId)
+            return res.status(500).send({error: "Server error: Id not found"});
+
+        connectedUsers.set(userId, res);
 
         res.sse({ id: String(0), data: "Some message" });
         await new Promise(f => setTimeout(f, 1000));

@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
+import {connectedUsers} from "./api.js";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
@@ -79,4 +80,10 @@ export class User {
         return {nickName: userData.nickName, email: userData.email};
     }
 
+    sendNotification() {
+        const res = connectedUsers.get(this.id);
+        if (!res)
+            return console.log("Server error: res not found in connectedUsers");
+        res.sse({ id: "String(1)", data: "teeest" });
+    }
 }
