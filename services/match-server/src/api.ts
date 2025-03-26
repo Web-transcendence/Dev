@@ -80,8 +80,9 @@ class gameState {
     score1: string = "0";
     score2: string = "0";
     hazard: Hazard = new Hazard(0, 0, "Default");
+    timer: Timer = new Timer (0, 3);
     toJSON() {
-        return {type: "Game", state: this.state, start: this.start, score1: this.score1, score2: this.score2, hazard: this.hazard};
+        return {type: "Game", state: this.state, start: this.start, score1: this.score1, score2: this.score2, hazard: this.hazard, timer: this.timer};
     }
 }
 
@@ -104,6 +105,34 @@ class Player {
     }
 }
 
+class Timer {
+    timeLeft: number;
+    started: boolean = false;
+    intervalId: ReturnType<typeof setInterval> | null = null;
+    constructor(minutes: number, seconds: number) {
+        this.timeLeft = minutes * 60 + seconds;
+    }
+    start() {
+        this.started = true;
+        this.intervalId = setInterval(() => {
+            if (this.timeLeft > 0)
+                this.timeLeft--;
+            else
+                this.stop();
+        }, 1000);
+    }
+    stop() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+            this.started = false;
+        }
+    }
+    toJSON() {
+        return {timeLeft: this.timeLeft, started: this.started};
+    }
+}
+
 let rooms: Room[] = [];
 
 function inputHandler(key: string, state: string, input: keyInput, game: gameState) {
@@ -119,8 +148,6 @@ function inputHandler(key: string, state: string, input: keyInput, game: gameSta
             input.arrowUp = upordown;
         if (key === "ArrowDown")
             input.arrowDown = upordown;
-        if (key === "Control")
-            game.start = true;
     }
     else if (state === "down")
         game.state = 1;
@@ -140,6 +167,8 @@ function resetInput(lInput: keyInput, rInput: keyInput) {
 function resetGame(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, lGame: gameState, rGame: gameState, lInput: keyInput, rInput: keyInput) {
     lGame.start = false;
     rGame.start = false;
+    lGame.timer = new Timer (0, 2);
+    rGame.timer = new Timer (0, 2);
     if (ball.x < 0)
         ball.angle = Math.PI;
     else
@@ -334,6 +363,21 @@ function hazardGenerator(lGame: gameState, rGame: gameState) {
     setTimeout(() => hazardGenerator(lGame, rGame), 10000);
 }
 
+function timerCheck(lGame: gameState, rGame: gameState) {
+    if (lGame.state === 1 && rGame.state === 1) {
+        if (lGame.timer.timeLeft === 0 && rGame.timer.timeLeft === 0) {
+            lGame.start = true;
+            rGame.start = true;
+        }
+        else if (!lGame.timer.started && !rGame.timer.started) {
+            lGame.timer.start();
+            rGame.timer.start();
+        }
+
+    }
+    setTimeout(() => timerCheck(lGame, rGame), 1000);
+}
+
 function joinRoom(player: Player) {
     let id: number = -1;
     let i : number = 0;
@@ -347,7 +391,7 @@ function joinRoom(player: Player) {
     }
     if (id === -1) {
         player.paddle.x = 30;
-        let room = new Room(1, player);
+        let room = new Room(rooms.length, player);
         rooms.push(room);
         return ;
     }
@@ -361,16 +405,17 @@ function joinRoom(player: Player) {
         rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[0].paddle));
         rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[1].paddle));
         rooms[i].players[0].ws.send(JSON.stringify(ball));
-        rooms[i].players[0].ws.send(JSON.stringify(player.game));
+        rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[0].game));
         rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[0].paddle));
         rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[1].paddle));
         rooms[i].players[1].ws.send(JSON.stringify(ball));
-        rooms[i].players[1].ws.send(JSON.stringify(player.game));
+        rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[1].game));
     }, 10);
     moveBall(ball, rooms[i].players[0].paddle, rooms[i].players[1].paddle, rooms[i].players[0].input, rooms[i].players[1].input,  rooms[i].players[0].game, rooms[i].players[1].game);
     movePaddle(rooms[i].players[0].input, rooms[i].players[1].input, rooms[i].players[0].paddle, rooms[i].players[1].paddle, rooms[i].players[0].game, rooms[i].players[1].game);
     moveHazard(rooms[i].players[0].game, rooms[i].players[1].game, ball);
     hazardGenerator(rooms[i].players[0].game, rooms[i].players[1].game);
+    timerCheck(rooms[i].players[0].game, rooms[i].players[1].game);
 }
 
 const fastify = Fastify({

@@ -38,6 +38,7 @@ class gameState {
     score1: string = "0";
     score2: string = "0";
     hazard: Hazard = new Hazard (0, 0, "Default");
+    timer: Timer = new Timer(0, 4);
 }
 
 class Hazard {
@@ -49,6 +50,15 @@ class Hazard {
         this.y = y;
         this.type = type;
     }
+}
+
+class Timer {
+    timeLeft: number;
+    started: boolean = false
+    constructor(minutes: number, seconds: number) {
+        this.timeLeft = minutes * 60 + seconds;
+    }
+
 }
 
 class Assets {
@@ -180,6 +190,12 @@ function mainLoop() {
     ctx.fillStyle = rPaddle.color;
     ctx.fillRect(rPaddle.x + 3 - rPaddle.width * 0.5, rPaddle.y - rPaddle.height * 0.5, rPaddle.width - 6, rPaddle.height);
     ctx.fillRect(rPaddle.x - rPaddle.width * 0.5, rPaddle.y + 3 - rPaddle.height * 0.5, rPaddle.width, rPaddle.height - 6);
+    if (game.timer.started) {
+        ctx.fillStyle = "#fcc800";
+        ctx.font = "60px 'Press Start 2P'";
+        ctx.textAlign = "center"
+        ctx.fillText(game.timer.timeLeft.toString(), canvas.width * 0.5, canvas.height * 0.75);
+    }
 }
 
 function gameLoop () {
@@ -236,6 +252,8 @@ try {
                     game.hazard.x = data.hazard.x;
                     game.hazard.y = data.hazard.y;
                     game.hazard.type = data.hazard.type;
+                    game.timer.timeLeft = data.timer.timeLeft;
+                    game.timer.started = data.timer.started;
                     break;
                 case "Ball":
                     ball.x = data.x;
