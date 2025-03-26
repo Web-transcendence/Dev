@@ -2,6 +2,18 @@ import Fastify, {FastifyReply, FastifyRequest} from "fastify";
 import httpProxy from '@fastify/http-proxy';
 import cors from "@fastify/cors";
 import jwt, {JwtPayload} from 'jsonwebtoken';
+import {readFileSync} from "node:fs";
+import {join} from "node:path";
+
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+//
+// const httpsOptions = {
+//     https: {
+//         key: readFileSync(join(import.meta.dirname, '../secure/key.pem')),      // Private key
+//         cert: readFileSync(join(import.meta.dirname, '../secure/cert.pem'))     // Certificate
+//     },
+//     logger: true
+// };
 
 
 const SECRET_KEY = /*process.env.SECRET_KEY || */ "secret_key";

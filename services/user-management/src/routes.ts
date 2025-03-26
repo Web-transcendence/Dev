@@ -1,7 +1,10 @@
 import * as Schema from "./schema.js";
 import sanitizeHtml from "sanitize-html";
 import {User} from "./User.js";
-import {FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
+import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
+import {connectedUsers} from "./api.js"
+import {EventMessage} from "fastify-sse-v2";
+
 
 
 export default async function userRoutes(app: FastifyInstance) {
@@ -39,6 +42,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const user = new User(id);
 
+            user.sendNotification();
             const profileData = user.getProfile();
 
             return res.status(200).send(profileData);
@@ -52,7 +56,6 @@ export default async function userRoutes(app: FastifyInstance) {
     app.post('/sign-in', async (req: FastifyRequest, res: FastifyReply) => {
         try {
             console.log("sign-in");
-            console.log(req.body);
             const zod_result = Schema.signInSchema.safeParse(req.body);
             if (!zod_result.success)
                 return res.status(400).send({json: zod_result.error.format()});
@@ -72,4 +75,15 @@ export default async function userRoutes(app: FastifyInstance) {
             res.status(500).send({error: "Server error: ", err});
         }
     });
+
+
+    app.get('/sse', async function (req, res) {
+        const userId = req.headers.id as string;
+        if (!userId)
+            return res.status(500).send({error: "Server error: Id not found"});
+        connectedUsers.set(userId, res);
+        const message: EventMessage = { event: "inititation", data: "Some message" }
+        res.sse({data: JSON.stringify(message)});
+    });
+
 }
