@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/25 12:26:29 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/26 15:18:05 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,17 +22,6 @@ Network::Network(std::vector<unsigned int>sizes) : _num_layers(sizes.size()), _s
 		this->_layers.at(i_layers - 1) = new Layer(sizes[i_layers], sizes[i_layers - 1]);
 	}
 	return ;
-}
-
-void displayProgress(int current, int max) {
-    int width = 20; // Number of total bar characters
-    int progress = (current * width) / max; // Filled portion
-
-    std::cout << "\r" << (current * 100) / max << "% [";
-    for (int i = 0; i < width; i++) {
-        std::cout << (i < progress ? '#' : '.');
-    }
-    std::cout << "]" << std::flush;
 }
 
 void    Network::SDG(std::vector<t_tuple*>& trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data) {
@@ -52,7 +41,7 @@ void    Network::SDG(std::vector<t_tuple*>& trainingData, int const epoch, int c
 		int	display = 0;
 		for (auto it_mb = mini_batches.begin(); it_mb != mini_batches.end(); it_mb++, display++) {
 			this->updateMiniBatch(*it_mb, eta);
-			displayProgress(display, mini_batches.size());
+			// displayProgress(display, mini_batches.size());
 		}
 		if (test_data) {
 			std::cout<<std::endl<<"Epoch "<<i<<": "<<this->evaluate(*test_data)<<" / "<<n_test<<std::endl;
@@ -60,6 +49,14 @@ void    Network::SDG(std::vector<t_tuple*>& trainingData, int const epoch, int c
 		else
 			std::cout<<std::endl<<"Epoch "<<i<<": complete"<<std::endl;
 	}
+}
+
+void    Network::updateSingle(std::vector<double> & input, std::vector<double> & expected, double const eta) {
+	this->backprop(input, expected);
+	this->updateNabla_b();
+	this->updateNabla_w();
+	this->updateBias(eta, 1.);
+	this->updateWeight(eta, 1.);
 }
 
 void	Network::updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta) {

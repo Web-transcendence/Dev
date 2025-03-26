@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 15:06:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/26 09:21:58 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ private:
     int const                   _num_layers;
     std::vector<unsigned int>&  _sizes;
     std::vector<Layer*>         _layers;
-
 };
 
 #endif

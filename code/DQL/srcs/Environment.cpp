@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/26 15:50:13 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/26 15:51:07 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,6 @@ Environment::Environment(int const col, int const row, double const rewardTo, un
 }
 
 Environment::~Environment( void ) {}
-
-
 
 std::array<int, 2>	Environment::action(int const act) {
 	unsigned int const	size = this->_myMap.size();
@@ -71,6 +69,14 @@ void	Environment::reset( void ) {
 	this->_state = 0;
 	this->_done = false;
 	return ;
+}
+
+int	Environment::getObservationSpaceSize( void ) const {
+	return this->_myMap.size();
+}
+
+int	Environment::getActionsSpaceSize( void ) const {
+	return NUM_ACTION;
 }
 
 int	Environment::randInt( void ) {
