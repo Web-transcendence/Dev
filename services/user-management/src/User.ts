@@ -77,6 +77,7 @@ export class User {
         if (!userData) {
             throw new Error(`Database Error: cannot find data from ${this.id}`);
         }
+        console.log("hh")
         return {nickName: userData.nickName, email: userData.email};
     }
 
@@ -84,6 +85,6 @@ export class User {
         const res = connectedUsers.get(this.id);
         if (!res)
             return console.log("Server error: res not found in connectedUsers");
-        res.sse({ id: "String(1)", data: "teeest" });
+        res.sse({data: JSON.stringify({event: "invite", data: "teeest"})});
     }
 }

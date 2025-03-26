@@ -3,6 +3,7 @@ import sanitizeHtml from "sanitize-html";
 import {User} from "./User.js";
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
 import {connectedUsers} from "./api.js"
+import {EventMessage} from "fastify-sse-v2";
 
 
 
@@ -80,12 +81,10 @@ export default async function userRoutes(app: FastifyInstance) {
         const userId = req.headers.id as string;
         if (!userId)
             return res.status(500).send({error: "Server error: Id not found"});
-
+        console.log(userId);
         connectedUsers.set(userId, res);
-
-        res.sse({ id: String(0), data: "Some message" });
-        await new Promise(f => setTimeout(f, 1000));
-        res.sse({ id: String(1), data: "Some message" });
+        const message: EventMessage = { event: "inititation", data: "Some message" }
+        res.sse({data: JSON.stringify(message)});
     });
 
 }
