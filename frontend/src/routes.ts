@@ -10,6 +10,12 @@ export async function routes(fastify: FastifyInstance) {
         res.type('text/js').send(file);
         return;
     })
+    fastify.get("/pong.js", (req, res) => {
+        const pongPath = join(import.meta.dirname, env.TRANS_FRONT_PATH, "pong.js");
+        const file = readFileSync(pongPath, 'utf8');
+        res.type('text/js').send(file);
+        return;
+    })
     // ROAD OF TAG
     fastify.get('/part/about', function (req, reply) {
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "about.html");
@@ -70,12 +76,42 @@ export async function routes(fastify: FastifyInstance) {
             reply.code(404).send("Fichier non trouvé");
         }
     });
-    // //CSS output
-    // fastify.get("/tail/output.css", (req, res) => {
-    //     const frontPath = join(import.meta.dirname, env.TRANS_TAIL_PATH, "output.css");
-    //     console.log(frontPath);
-    //     const file = readFileSync(frontPath, 'utf8');
-    //     res.type('text/css').send(file);
-    //     return;
-    // })
+    fastify.get('/part/factor', function (req, reply) {
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "factor.html");
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag);
+    })
+    fastify.get('/part/pong', function (req, reply) {
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "pong.html");
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag);
+    })
+    // Png For Pong
+    fastify.get('/assets/ballup.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "ballup.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier ballup non trouvé");
+        }
+    });
+    fastify.get('/assets/bardown.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "bardown.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier bardown non trouvé");
+        }
+    });
+    fastify.get('/assets/barup.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "barup.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier barup non trouvé");
+        }
+    });
 }

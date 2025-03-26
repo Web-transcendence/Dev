@@ -30,7 +30,9 @@ fclean: clean
 
 re: fclean up
 
-rewatch: fclean build watch
+full: fclean build watch
+
+bw: build watch
 
 help:
 	@echo "Makefile for Docker Compose"

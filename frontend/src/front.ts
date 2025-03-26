@@ -1,29 +1,72 @@
+interface Window {
+    CredentialResponse: (response: any) => void;
+}
+
+window.CredentialResponse = async (credit: { credential: string }) => {
+    try {
+        const response = await fetch('http://localhost:3000/user-management/auth/google', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({credential: credit.credential})
+        });
+        if (!response.ok)
+            console.error('Error: From UserManager returned an error');
+        else {
+            const reply = await response.json();
+            if (reply.valid) {
+                const container = document.getElementById('content') as HTMLElement;
+                localStorage.setItem('token', reply.token);
+                const res = await fetch('/part/connected');
+                const newElement = document.createElement('div');
+                newElement.className = 'tag';
+                if (reply.nickName) {
+                    console.log("UserGoogle:", reply.nickName);
+                    localStorage.setItem('nickName', reply.nickName);
+                    const nickName = localStorage.getItem('nickName');
+                    const nameSpan = document.getElementById('nickName') as HTMLSpanElement;
+                    nameSpan.textContent = reply.nickName;
+                    console.log("Welcome", nickName);
+                    const avatarImg = document.getElementById('avatar') as HTMLImageElement;
+                    if (reply.avatar)
+                        avatarImg.src = reply.avatar;
+                    else
+                        avatarImg.src = '../login.png';
+                }
+                if (!res.ok)
+                    throw Error("Page not found: element missing.");
+                const html = await res.text();
+                if (html.includes(container.innerHTML))
+                    return;
+                container.innerHTML = '';
+                newElement.innerHTML = html;
+                container.appendChild(newElement);
+            }
+            console.log('Success:', reply);
+        }
+    }
+    catch(error) {
+        console.error('Error:', error);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const aboutBtn = document.getElementById("about")!;
     const contactBtn = document.getElementById("contact")!;
     const registerBtn = document.getElementById("register")!;
     const loginBtn = document.getElementById("login")!;
-    const profileBtn = document.getElementById("profile")!;
-    const disconnectBtn = document.getElementById("disconnect")!;
-    isConnected();
+    const factor = document.getElementById("2fa")!;
+    const Ping = document.getElementById("Ping")!;
 
-    profileBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"))
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
     loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
-    disconnectBtn.addEventListener("click", (event: MouseEvent) => {
-        localStorage.removeItem("token");
-        isConnected();
-        navigate(event, "/");
+    factor.addEventListener("click", (event: MouseEvent) => navigate(event, "/factor"));
+    Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 
-    });
-    // loadPart(window.location.pathname);
 });
-
-window.onpopstate = () => {
-    // loadPart(window.location.pathname);
-};
 
 function navigate(event: MouseEvent, path: string): void {
     event.preventDefault();
@@ -65,15 +108,47 @@ async function loadPart(page: string): Promise<void> {
 
 async function insert_tag(url: string): Promise<void>{
     const container = document.getElementById('content') as HTMLElement;
+    if (url === "part/pong") {
+        const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
+        if (existingScript)
+            return ;
+    }
     const res = await fetch(url);
     const newElement = document.createElement('div');
     newElement.className = 'tag';
     if (!res.ok)
         throw Error("Page not found: element missing.");
     const html = await res.text();
+    if (container.innerHTML.includes(html))
+        return;
     if (html.includes(container.innerHTML))
         return;
     container.innerHTML = '';
+    if (url === "part/pong") {
+        if (!document.querySelector('script[src="/static/dist/pong.js"]')) {
+            const script = document.createElement('script');
+            script.src = "/static/dist/pong.js";
+            document.body.appendChild(script);
+        }
+    } else {
+        const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
+        if (existingScript)
+            existingScript.remove();
+    }
+    if (url === "part/login") {
+        const script = document.createElement('script');
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        container.appendChild(script);
+    } else {
+        const googleID = document.getElementById('googleidentityservice');
+        const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
+        if (googlemeta)
+            googlemeta.remove();
+        if (googleID)
+            googleID.remove();
+    }
     newElement.innerHTML = html;
     container.appendChild(newElement);
 }
@@ -93,7 +168,6 @@ function register(container: HTMLElement, button: HTMLElement): void {
         const result = await response.json();
         if (result.token) {
             localStorage.setItem('token', result.token);
-            isConnected();
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
             newElement.className = 'tag';
@@ -127,7 +201,6 @@ function login(container: HTMLElement, button: HTMLElement): void {
         const result = await response.json();
         if (response.ok) {
             localStorage.setItem('token', result.token);
-            isConnected()
             localStorage.setItem('nickName', result.nickName);
             // localStorage.setItem('avatar', result.avatar);
             const res = await fetch('/part/connected');
@@ -149,7 +222,6 @@ function login(container: HTMLElement, button: HTMLElement): void {
         }
     });
 }
-
 
 async function profile(container: HTMLElement, nickName: HTMLElement, email: HTMLElement) {
     try {
@@ -176,15 +248,15 @@ async function profile(container: HTMLElement, nickName: HTMLElement, email: HTM
     }
 }
 
-function validateRegister(result: { name: string; email: string; password: string}): void {
-    const nameErrorMin = document.getElementById("nameErrorMin") as HTMLSpanElement;
+function validateRegister(result: { nickName: string; email: string; password: string}): void {
+    const nickNameErrorMin = document.getElementById("nickNameErrorMin") as HTMLSpanElement;
     const emailError = document.getElementById("emailError") as HTMLSpanElement;
     const passwordError = document.getElementById("passwordError") as HTMLSpanElement;
-    if (result.name)
-        nameErrorMin.classList.remove("hidden");
+    if (result.nickName)
+        nickNameErrorMin.classList.remove("hidden");
     else {
-        if (!nameErrorMin.classList.contains("hidden")) {
-            nameErrorMin.classList.add("hidden");
+        if (!nickNameErrorMin.classList.contains("hidden")) {
+            nickNameErrorMin.classList.add("hidden");
         }
     }
     if (result.email)
@@ -202,21 +274,3 @@ function validateRegister(result: { name: string; email: string; password: strin
         }
     }
 }
-
-
-
-function isConnected() {
-    if (localStorage.getItem("token")) {
-        document.getElementById("profile")!.classList.remove("hidden");
-        document.getElementById("register")!.classList.add("hidden");
-        document.getElementById("login")!.classList.add("hidden");
-        document.getElementById("disconnect")!.classList.remove("hidden");
-    }
-    else {
-        document.getElementById("profile")!.classList.add("hidden");
-        document.getElementById("register")!.classList.remove("hidden");
-        document.getElementById("login")!.classList.remove("hidden");
-        document.getElementById("disconnect")!.classList.add("hidden");
-    }
-}
-

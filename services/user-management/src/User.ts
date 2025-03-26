@@ -9,7 +9,8 @@ Client_db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nickName TEXT NOT NULL,
         email UNIQUE NOT NULL COLLATE NOCASE,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        google_id INTEGER
     )
 `);
 

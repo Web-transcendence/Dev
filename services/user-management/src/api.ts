@@ -1,9 +1,11 @@
 import fastify from 'fastify'
 import userRoutes from "./routes.js"
+import {googleAuth} from "./googleApi.js";
 
 const app = fastify();
 
 app.register(userRoutes);
+app.post('/auth/google', googleAuth);
 
 app.listen({port: 5000, host: '0.0.0.0'}, (err, adrr) => {
     if (err) {

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Transcandance</title>
+  <title>Transcendence</title>
   <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <link href="/static/output.css" rel="stylesheet">
@@ -13,27 +13,23 @@
 <body class="bg-gray-900 text-white" style="font-family: 'Press Start 2P', cursive;">
 
 <div id="app" class="flex flex-col min-h-screen">
-
-  <nav id="header" class="bg-gray-800 p-4 flex justify-between items-center border-b-4 border-yellow-400">
+  <nav class="bg-gray-800 p-4 flex justify-between items-center border-b-4 border-yellow-400">
     <div class="flex items-center">
       <img src="../favicon.ico" alt="Logo" class="h-10">
     </div>
-
-    <div class="flex space-x-4 mx-auto">
+    <div class="flex space-x-4">
       <button id="about" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">About</button>
       <button id="contact" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Contact</button>
       <button id="register" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Sign in</button>
       <button id="login" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Login</button>
-      <button id="disconnect" class="hidden px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">disconnect</button>
+      <button id="2fa" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">2FA</button>
+      <button id="Ping" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Ping</button>
     </div>
-
-    <div id="profile" class="hidden flex items-center space-x-2 hover:scale-105 transition-all ml-auto ">
+    <div class="flex items-center space-x-2">
       <img id="avatar" src="../logout.png" alt="Avatar" class="h-10 w-10 rounded-full border-4 border-white">
-      <span id="username" class="text-lg"></span>
+      <span id="nickName" class="text-lg"></span>
     </div>
   </nav>
-
-
   <div class="flex-grow p-10">
     <h1 class="text-center text-5xl mt-10 text-yellow-400 font-bold text-shadow-md">Home</h1>
     <p class="text-center mt-4 text-lg">Play the migthy Pong Game, or the other.</p>
@@ -41,66 +37,15 @@
       <p class="text-center text-xl">Work In Progress.</p>
     </div>
   </div>
-  <!--  <div class="flex justify-center items-center">-->
-  <!--    <img src="chemin/vers/ton-gif.gif" alt="Un joli GIF" class="w-64 h-64 object-contain rounded-lg shadow-lg">-->
-  <!--  </div>-->
-
 </div>
+
+<footer class="flex-1/2  bg-grey-600 text-white p-4 text-xs">
+  <div class="flex items-center space-x-2">
+    <img id="bottom-img" src="../favicon.ico" class="h-10 w-10 rounded-full">
+    <span id="bottom-text" class="text-xl font-bold"></span>
+  </div>
+</footer>
 <script type="module" src="/static/dist/front.js"></script>
+
 </body>
 </html>
-
-
-
-<!--<!DOCTYPE html>-->
-<!--<html lang="fr">-->
-
-<!--<head>-->
-<!--  <meta charset="UTF-8">-->
-<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--  <title>Transcandance</title>-->
-<!--  <link rel="shortcut icon" type="image/x-icon" href="../favicon/favicon.ico">-->
-<!--  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@4.0.0/build/cjs/index.min.js"></script>-->
-<!--  <link href="../tail/output.css" rel="stylesheet">-->
-<!--</head>-->
-
-<!--<body>-->
-<!--<div id="app" class="flex flex-col min-h-screen">-->
-<!--  &lt;!&ndash; Barre de navigation &ndash;&gt;-->
-<!--  <nav class="bg-blue-600 p-4 flex justify-between items-center">-->
-<!--    &lt;!&ndash; Logo &ndash;&gt;-->
-<!--    <div class="flex items-center">-->
-<!--      <img src="../favicon/favicon.ico" alt="Logo" class="h-10">-->
-<!--    </div>-->
-
-<!--    &lt;!&ndash; Boutons de navigation &ndash;&gt;-->
-<!--    <div class="flex space-x-4">-->
-<!--      <button id="about" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700">About</button>-->
-<!--      <button id="contact" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700">Contact</button>-->
-<!--      <button id="register" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700">Sign in</button>-->
-<!--    </div>-->
-
-<!--    &lt;!&ndash; Avatar et nom de l'utilisateur &ndash;&gt;-->
-<!--    <div class="flex items-center space-x-2">-->
-<!--      <img id="avatar" src="../favicon/logout.png" alt="Avatar" class="h-10 w-10 rounded-full">-->
-<!--      <span id="username" class="text-white">Guest</span>-->
-<!--    </div>-->
-<!--  </nav>-->
-
-<!--  &lt;!&ndash; Contenu principal &ndash;&gt;-->
-<!--  <div class="flex-grow p-10">-->
-<!--    <h1 class="text-center text-4xl mt-10">Bienvenue sur notre application dynamique</h1>-->
-<!--    <p class="text-center mt-4">Cliquez sur les boutons ci-dessous pour charger du contenu dynamiquement.</p>-->
-
-<!--    &lt;!&ndash; Conteneur de contenu dynamique &ndash;&gt;-->
-<!--    <div id="content" class="h-full flex justify-center mt-8">-->
-<!--      <p>Choisissez une option pour charger le contenu.</p>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</div>-->
-
-<!--&lt;!&ndash; Inclusion du script JavaScript &ndash;&gt;-->
-<!--<script src="front.js"></script>-->
-<!--</body>-->
-
-<!--</html>-->
