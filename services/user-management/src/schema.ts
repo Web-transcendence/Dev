@@ -12,7 +12,7 @@ export const signUpSchema = z.object({
 });
 
 export const signInSchema = z.object({
-    name: z.string().min(3, "Minimum 3 caracteres"),
+    nickName: z.string().min(3, "Minimum 3 caracteres"),
     password: z.string().min(6, "Minimum 6 caracteres"),
 });
 

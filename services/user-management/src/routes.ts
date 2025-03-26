@@ -52,17 +52,18 @@ export default async function userRoutes(app: FastifyInstance) {
     app.post('/sign-in', async (req: FastifyRequest, res: FastifyReply) => {
         try {
             console.log("sign-in");
+            console.log(req.body);
             const zod_result = Schema.signInSchema.safeParse(req.body);
             if (!zod_result.success)
                 return res.status(400).send({json: zod_result.error.format()});
-            let {name, password} = {
-                name: sanitizeHtml(zod_result.data.name),
+            let {nickName, password} = {
+                nickName: sanitizeHtml(zod_result.data.nickName),
                 password: sanitizeHtml(zod_result.data.password)
             };
-            if (!name || !password)
+            if (!nickName || !password)
                 return res.status(454).send({error: "All information are required !"});
 
-            const connection = await User.login(name, password);
+            const connection = await User.login(nickName, password);
             if (connection.code !== 201)
                 return res.status(connection.code).send({error: connection.result});
             return res.status(200).send({token: connection.result, redirect: "post/login"});
