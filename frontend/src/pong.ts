@@ -2,6 +2,14 @@ const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 let connect: boolean = true;
 
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
 class Ball {
     x: number;
     y: number;
@@ -79,31 +87,49 @@ let ball = new Ball(canvas.width / 2, canvas.height / 2, 10, "#fcc800");
 let lPaddle = new Paddle(30, canvas.height / 2, 20, 200, "#fcc800");
 let rPaddle = new Paddle(canvas.width - 30, canvas.height / 2, 20, 200, "#fcc800");
 let asset = new Assets;
+let fSize: number;
+let ready = false;
+function ratio(wh: string) {
+    if (wh === "w")
+        return (canvas.width / 1200);
+    return (canvas.height / 800);
+}
 
 function titleScreen() {
     ctx.fillStyle = "#364153";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#101828";
-    ctx.fillRect(15, 15, canvas.width - 30, canvas.height - 30);
+    ctx.fillRect(15 * ratio("w"), 15 * ratio("h"), canvas.width - 30 * ratio("w"), canvas.height - 30 * ratio("h"));
     ctx.fillStyle = "#fcc800";
-    ctx.font = "84px 'Press Start 2P'";
+    fSize = Math.round(84 * Math.min(ratio("w"), ratio("h")));
+    console.log(fSize);
+    ctx.font = `${fSize}px 'Press Start 2P'`;
     ctx.textAlign = "center"
     ctx.fillText("Pong Game", canvas.width * 0.5, canvas.height * 0.5);
-    if (animFrame === 0 || animFrame === 1)
-        ctx.fillStyle = "#fcc800";
-    else if (animFrame === 2 || animFrame === 3)
-        ctx.fillStyle = "#ffd014";
-    else if (animFrame === 4 || animFrame === 5)
-        ctx.fillStyle = "#ffd52b";
-    else if (animFrame === 6 || animFrame === 7)
-        ctx.fillStyle = "#ffd83e";
-    else if (animFrame === 8 || animFrame === 9)
-        ctx.fillStyle = "#ffdb5e";
-    ctx.font = "30px 'Press Start 2P'";
-    ctx.fillText("Press any key", canvas.width * 0.5, canvas.height * 0.5 + 60 + animFrame);
-    animFrame += animLoop;
-    if (animFrame === 0 || animFrame === 9)
-        animLoop *= -1;
+    if (!ready) {
+        if (animFrame === 0 || animFrame === 1)
+            ctx.fillStyle = "#fcc800";
+        else if (animFrame === 2 || animFrame === 3)
+            ctx.fillStyle = "#ffd014";
+        else if (animFrame === 4 || animFrame === 5)
+            ctx.fillStyle = "#ffd52b";
+        else if (animFrame === 6 || animFrame === 7)
+            ctx.fillStyle = "#ffd83e";
+        else if (animFrame === 8 || animFrame === 9)
+            ctx.fillStyle = "#ffdb5e";
+        fSize = Math.round(30 * Math.min(ratio("w"), ratio("h")));
+        ctx.font = `${fSize}px 'Press Start 2P'`;
+        ctx.fillText("Press any key", canvas.width * 0.5, canvas.height * 0.5 + (60 + animFrame) * ratio("h"));
+        animFrame += animLoop;
+        if (animFrame === 0 || animFrame === 9)
+            animLoop *= -1;
+    }
+    else {
+        fSize = Math.round(30 * Math.min(ratio("w"), ratio("h")));
+        ctx.font = `${fSize}px 'Press Start 2P'`;
+        ctx.fillText("Waiting for opponent...", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio("h")));
+    }
+
 }
 
 function endScreen() {
@@ -115,26 +141,29 @@ function endScreen() {
     }
     ctx.fillStyle = ball.color;
     ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.arc(ball.x, ball.y, Math.round(ball.radius * Math.min(ratio("w"), ratio("h"))), 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = lPaddle.color;
-    ctx.fillRect(lPaddle.x - lPaddle.width * 0.5, lPaddle.y - lPaddle.height * 0.5, lPaddle.width, lPaddle.height);
+    ctx.fillRect((lPaddle.x - lPaddle.width * 0.5) * ratio("w"), (lPaddle.y - lPaddle.height * 0.5) * ratio("h"), lPaddle.width * ratio("w"), lPaddle.height * ratio("h"));
     ctx.fillStyle = rPaddle.color;
-    ctx.fillRect(rPaddle.x - rPaddle.width * 0.5, rPaddle.y - rPaddle.height * 0.5, rPaddle.width, rPaddle.height);
+    ctx.fillRect((rPaddle.x - rPaddle.width * 0.5) * ratio("w"), (rPaddle.y - rPaddle.height * 0.5) * ratio("h"), rPaddle.width * ratio("w"), rPaddle.height * ratio("h"));
     ctx.fillStyle = "#fcc800";
-    ctx.font = "48px 'Press Start 2P'";
+    fSize = Math.round(48 * Math.min(ratio("w"), ratio("h")));
+    ctx.font = `${fSize}px 'Press Start 2P'`;
     ctx.textAlign = "left"
-    ctx.fillText(game.score2, canvas.width * 0.5 + 46, 80);
+    ctx.fillText(game.score2, canvas.width * 0.5 + 46 * ratio("w"), 80 * ratio("h"));
     ctx.textAlign = "right"
-    ctx.fillText(game.score1, canvas.width * 0.5 - 40, 80);
+    ctx.fillText(game.score1, canvas.width * 0.5 - 40 * ratio("w"), 80 * ratio("h"));
     ctx.fillStyle = "#ddae00";
-    ctx.font = "60px 'Press Start 2P'";
+    fSize = Math.round(60 * Math.min(ratio("w"), ratio("h")));
+    ctx.font = `${fSize}px 'Press Start 2P'`;
     ctx.textAlign = "center";
     if (game.score1 > game.score2)
         ctx.fillText("Player 1 Wins", canvas.width * 0.5, canvas.height * 0.4);
     else
         ctx.fillText("Player 2 Wins", canvas.width * 0.5, canvas.height * 0.4);
-    ctx.font = "26px 'Press Start 2P'";
+    fSize = Math.round(26 * Math.min(ratio("w"), ratio("h")));
+    ctx.font = `${fSize}px 'Press Start 2P'`;
     ctx.textAlign = "center";
     ctx.fillText("Press any key to restart game", canvas.width * 0.5, canvas.height * 0.65);
 }
@@ -143,18 +172,12 @@ function drawHazard() {
     switch (game.hazard.type) {
         case "BarSizeUp":
             ctx.drawImage(asset.BarUp, game.hazard.x - 25, game.hazard.y - 25, 50, 50);
-            //ctx.fillStyle = "green";
-            //ctx.fillRect(game.hazard.x - 25, game.hazard.y - 25, 50, 50);
             break;
         case "BarSizeDown":
             ctx.drawImage(asset.BarDown, game.hazard.x - 25, game.hazard.y - 25, 50, 50);
-            //ctx.fillStyle = "red";
-            //ctx.fillRect(game.hazard.x - 25, game.hazard.y - 25, 50, 50);
             break;
         case "BallSpeedUp":
             ctx.drawImage(asset.BallUp, game.hazard.x - 25, game.hazard.y - 25, 50, 50);
-            //ctx.fillStyle = "blue";
-            //ctx.fillRect(game.hazard.x - 25, game.hazard.y - 25, 50, 50);
             break;
         default:
             break;
@@ -227,6 +250,7 @@ try {
         window.addEventListener("keydown", (event) => {
             if (!connect)
                 return;
+            ready = true;
             socket.send(JSON.stringify({ type: "input", key: event.key, state: "down" }));
         });
         window.addEventListener("keyup", (event) => {
