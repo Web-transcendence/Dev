@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:41:48 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/26 11:18:11 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/27 11:29:05 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 # define DOWN 1
 # define RIGHT 2
 # define LEFT 3
-# define NUM_ACTION 4 
+# define NUM_ACTION 4
 
 class Environment {
 public:

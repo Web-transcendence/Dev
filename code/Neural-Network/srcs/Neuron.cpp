@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 16:22:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/27 14:00:45 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ double	Neuron::feedForward(std::vector<double> const & input) const {
 	return Math::sigmoid(Math::dotProduct(input, this->_weight) + this->_bias);	
 }
 
-double	Neuron::perceptron(std::vector<double> const & input) const {
+double	Neuron::affineTransformation(std::vector<double> const & input) const {
 	return Math::dotProduct(input, this->_weight) + this->_bias;	
 }
 

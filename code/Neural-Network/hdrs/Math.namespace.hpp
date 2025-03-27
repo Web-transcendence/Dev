@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 09:50:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 11:42:14 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/27 13:56:50 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,26 +26,45 @@ typedef struct  s_tuple {
 
 
 namespace Math {
+	// ACTIVATION FUNCTIONS
 	double								sigmoid(double const z);
 	std::vector<double>*				sigmoid(std::vector<double> const & zs);
-
 	double								sigmoidPrime(double const z);
 	std::vector<double>*				sigmoidPrime(std::vector<double> const & zs);
 
+	double								reLu(double const z);
+	std::vector<double>*				reLu(std::vector<double> const & zs);
+	double								reLuPrime(double const z);
+	std::vector<double>*				reLuPrime(std::vector<double> const & zs);
+
+	double								leakyReLU(double const z);
+	std::vector<double>*				leakyReLu(std::vector<double> const & zs);
+	double								leakyReLUPrime(double const z);
+	std::vector<double>*				leakyReLuPrime(std::vector<double> const & zs);
+	
+	double								tanh(double const z);
+	std::vector<double>*				tanh(std::vector<double> const & zs);
+	double								tanhPrime(double const z);
+	std::vector<double>*				tanhPrime(std::vector<double> const & zs);
+
+	// COST FUNCTIONS
 	double								cost_derivative(double& output, double& expected);
 	std::vector<double>*				cost_derivative(std::vector<double> const & output, std::vector<double> const & expected);
 	
+	// PRODUCT FUNCTIONS
 	double								dotProduct(std::vector<double> const & v1, std::vector<double> const & v2);
 	std::vector<double>*				hadamardProduct(std::vector<double> const & lhs, std::vector<double> const & rhs);
 	std::vector<std::vector<double>>*	outerProduct(std::vector<double> const & in, std::vector<double> const & transposed);
 
+	// TRANSPOSITION FUNCTIONS
 	std::vector<std::vector<double>>*	transpose1D(std::vector<double> const & base);
 	std::vector<std::vector<double>>*	transpose2D(std::vector<std::vector<double>> const & base);
 
+	// DEBUG
 	template<typename T>
-	void	printdebug(T const & truc, std::string const & name) {
+	void	printdebug(T const & cont, std::string const & name) {
 		std::cout<<name<<":[";
-		for (auto t : truc)
+		for (auto c : cont)
 			std::cout<<t<<";";
 		std::cout<<"]"<<std::endl;
 	}

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/23 09:56:42 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/27 17:34:38 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,12 +42,13 @@ void displayProgress(int current, int max) {
 
 void	QAgent::train( void ) {
 	double exploRate = this->_explorationRate;
-
+	int	goal = 0;
 	for (int i = 0; i < this->_maxEpTraining; i++) {
 		this->_env->reset();
 		for (int a = 0; a < this->_maxActions; a++) {
 			int action = this->policy(TRAIN);
 			std::array<int, 2>newState_Reward = this->_env->action(action);
+			goal += newState_Reward[1];
 			this->_QMatrix[this->_env->_state][action] = this->_QMatrix[this->_env->_state][action]\
 				+this->_learningRate\
 				*(\
@@ -65,6 +66,7 @@ void	QAgent::train( void ) {
 		displayProgress(i, this->_maxEpTraining);
 	}
 	std::cout << std::endl;
+	std::cout << "Goal hit: " << goal << std::endl;
 }
 
 bool	QAgent::realisable( void ) {
@@ -110,23 +112,22 @@ void	QAgent::test( void ) {
 }
 
 int	QAgent::policy(t_mode const mode) {
-	int	act[4] = {UP, DOWN, RIGHT, LEFT};
-	int	idx = 0;
+	int	act = 0;
 	
 	if (mode == TRAIN) {
 		if (1 / static_cast<double>(this->randInt()) > this->_explorationRate) {
-			idx = std::distance(this->_QMatrix[this->_env->_state].begin(),\
+			act = std::distance(this->_QMatrix[this->_env->_state].begin(),\
 			std::max_element(this->_QMatrix[this->_env->_state].begin(),\
 			this->_QMatrix[this->_env->_state].end()));
 		}
 		else
-			idx = randInt() % 4;
+			act = randInt() % 4;
 	}
 	else
-		idx = std::distance(this->_QMatrix[this->_env->_state].begin(),\
+		act = std::distance(this->_QMatrix[this->_env->_state].begin(),\
 			std::max_element(this->_QMatrix[this->_env->_state].begin(),\
 			this->_QMatrix[this->_env->_state].end()));
-	return act[idx];
+	return act;
 }
 
 

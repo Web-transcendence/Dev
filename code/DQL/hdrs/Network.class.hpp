@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/26 14:40:51 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/27 14:21:07 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,15 @@ public:
     Network(std::vector<unsigned int>sizes);
     ~Network( void ) {}
     
-    void                    SDG(std::vector<t_tuple*>& trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data);
-    std::vector<double>*	feedForward(std::vector<double> const & input);
-    void                    updateSingle(std::vector<double>& input, std::vector<double>& expected, double const eta);
+    void                    SDG(std::vector<double>& input, std::vector<double>& expected, double const eta);
+    std::vector<double>*	feedForwardSigmoid(std::vector<double> const & input);
+    std::vector<double>*	feedForwardReLu(std::vector<double> const & input);
     
 private:
     void    updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta);
     void    backprop(std::vector<double>& input, std::vector<double>& expectedOutput);
+    void	backprop_reLu(std::vector<double>& input, std::vector<double>& expectedOutput);
+
     int     evaluate(std::vector<t_tuple*>& test_data);
     void    myShuffle(std::vector<t_tuple*>& myVector);
     void    updateWeight(double const eta, double const miniBatchSize);

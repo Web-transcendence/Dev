@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/26 15:51:07 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/27 16:30:05 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ std::array<int, 2>	Environment::action(int const act) {
 		nextState += diff[act];
 	char const	place = this->_myMap[nextState];
 	int			reward = 0;
-	if (place == 'G' || place == 'H' || this->_state == nextState) {
+	if (place == 'G' || place == 'H') {
 		this->_done = true;
 		if (place == 'G')
 			++reward;

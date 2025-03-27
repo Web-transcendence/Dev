@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 10:25:23 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 14:22:58 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/27 14:18:12 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,9 @@ public:
 	Neuron(unsigned int const prevLayer);
 	~Neuron( void ) {}
 	
-	double	feedForward(std::vector<double> const & input) const;
-	double	perceptron(std::vector<double> const & input) const;
+	double	feedForwardSigmoid(std::vector<double> const & input) const;
+	double	feedForwardReLu(std::vector<double> const & input) const;
+	double	affineTransformation(std::vector<double> const & input) const;
 	void	updateWeight(double const eta, double const miniBatchSize);
 	void	updateNabla_w( void );
 	void	setDeltaNabla_w(std::vector<double> const & delta);

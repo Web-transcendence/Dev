@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:04:30 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 16:30:06 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/27 14:19:04 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,21 +26,30 @@ Layer::~Layer( void ) {
 	return ;
 }
 
-std::vector<double>*	Layer::feedForward(std::vector<double> const & input) {
+std::vector<double>*	Layer::feedForwardSigmoid(std::vector<double> const & input) {
 	std::vector<double>*	res = new std::vector<double>(this->_neurons.size());
 	auto					it_res = res->begin();
 
 	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_res++)
-		(*it_res) = (*it_n)->feedForward(input);
+		(*it_res) = (*it_n)->feedForwardSigmoid(input);
 	return res;
 }
 
-std::vector<double>*	Layer::perceptron(std::vector<double> const & input) {
+std::vector<double>*	Layer::feedForwardReLu(std::vector<double> const & input) {
 	std::vector<double>*	res = new std::vector<double>(this->_neurons.size());
 	auto					it_res = res->begin();
 
 	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_res++)
-		(*it_res) = (*it_n)->perceptron(input);
+		(*it_res) = (*it_n)->feedForwardReLu(input);
+	return res;
+}
+
+std::vector<double>*	Layer::affineTransformation(std::vector<double> const & input) {
+	std::vector<double>*	res = new std::vector<double>(this->_neurons.size());
+	auto					it_res = res->begin();
+
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_res++)
+		(*it_res) = (*it_n)->affineTransformation(input);
 	return res;
 }
 

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 16:22:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/27 17:44:21 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 Neuron::Neuron(unsigned int const prevLayer) {
 	std::random_device					rd;
 	std::mt19937						gen(rd());
-	double 								stddev = 1.0 / std::sqrt(prevLayer);
+	double 								stddev = 1.0 / prevLayer;
 	std::normal_distribution<double> 	dist(0.0, stddev);	
 
 	this->_weight = std::vector<double>(prevLayer);
@@ -30,11 +30,15 @@ Neuron::Neuron(unsigned int const prevLayer) {
 	return ;
 }
 
-double	Neuron::feedForward(std::vector<double> const & input) const {
+double	Neuron::feedForwardSigmoid(std::vector<double> const & input) const {
 	return Math::sigmoid(Math::dotProduct(input, this->_weight) + this->_bias);	
 }
 
-double	Neuron::perceptron(std::vector<double> const & input) const {
+double	Neuron::feedForwardReLu(std::vector<double> const & input) const {
+	return Math::reLu(Math::dotProduct(input, this->_weight) + this->_bias);	
+}
+
+double	Neuron::affineTransformation(std::vector<double> const & input) const {
 	return Math::dotProduct(input, this->_weight) + this->_bias;	
 }
 

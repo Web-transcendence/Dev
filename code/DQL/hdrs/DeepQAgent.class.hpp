@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/26 13:29:11 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/27 17:35:55 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ private:
 	std::vector<double>*	mapPlacement(int const state);
 	bool					realisable( void );
 
+	void					printQmatrix(void);
+
 	Environment*						_env;
 	Network*							_QNet;
 	
@@ -51,6 +53,7 @@ private:
 	double const						_discount;
 	double const						_explorationRate;
 	double const						_explorationDecay;
+
 };
 
 #endif
