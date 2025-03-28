@@ -3,8 +3,14 @@ const ctx = canvas.getContext("2d")!;
 let connect: boolean = true;
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Récupère la taille du conteneur
+    const container = document.getElementById("canvasContainer");
+    const width = container.clientWidth;
+    const height = width * (2 / 3); // Respecte le ratio 3:2
+
+    // Définit la taille de la zone de dessin interne
+    canvas.width = width;
+    canvas.height = height;
 }
 
 window.addEventListener("resize", resizeCanvas);
@@ -89,20 +95,18 @@ let rPaddle = new Paddle(canvas.width - 30, canvas.height / 2, 20, 200, "#fcc800
 let asset = new Assets;
 let fSize: number;
 let ready = false;
-function ratio(wh: string) {
-    if (wh === "w")
-        return (canvas.width / 1200);
-    return (canvas.height / 800);
+
+function ratio() {
+    return (canvas.width / 1200);
 }
 
 function titleScreen() {
     ctx.fillStyle = "#364153";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#101828";
-    ctx.fillRect(15 * ratio("w"), 15 * ratio("h"), canvas.width - 30 * ratio("w"), canvas.height - 30 * ratio("h"));
+    ctx.fillRect(15 * ratio(), 15 * ratio(), canvas.width - 30 * ratio(), canvas.height - 30 * ratio());
     ctx.fillStyle = "#fcc800";
-    fSize = Math.round(84 * Math.min(ratio("w"), ratio("h")));
-    console.log(fSize);
+    fSize = Math.round(84 * ratio());
     ctx.font = `${fSize}px 'Press Start 2P'`;
     ctx.textAlign = "center"
     ctx.fillText("Pong Game", canvas.width * 0.5, canvas.height * 0.5);
@@ -117,52 +121,69 @@ function titleScreen() {
             ctx.fillStyle = "#ffd83e";
         else if (animFrame === 8 || animFrame === 9)
             ctx.fillStyle = "#ffdb5e";
-        fSize = Math.round(30 * Math.min(ratio("w"), ratio("h")));
+        fSize = Math.round(30 * ratio());
         ctx.font = `${fSize}px 'Press Start 2P'`;
-        ctx.fillText("Press any key", canvas.width * 0.5, canvas.height * 0.5 + (60 + animFrame) * ratio("h"));
+        ctx.fillText("Press any key", canvas.width * 0.5, canvas.height * 0.5 + (60 + animFrame) * ratio());
         animFrame += animLoop;
         if (animFrame === 0 || animFrame === 9)
             animLoop *= -1;
     }
     else {
-        fSize = Math.round(30 * Math.min(ratio("w"), ratio("h")));
+        fSize = Math.round(30 * ratio());
         ctx.font = `${fSize}px 'Press Start 2P'`;
-        ctx.fillText("Waiting for opponent...", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio("h")));
+        ctx.fillText("Waiting for opponent...", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio()));
     }
 
 }
 
-function endScreen() {
+function drawBg () {
     ctx.fillStyle = "#101828";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#364153";
     for (let i = 0; i < canvas.height; i += 60) {
-        ctx.fillRect(canvas.width * 0.5 - 4, i, 8, 30);
+        ctx.fillRect(canvas.width * 0.5 - 4 * ratio(), i, 8 * ratio(), 30);
     }
+}
+
+function drawBall () {
     ctx.fillStyle = ball.color;
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, Math.round(ball.radius * Math.min(ratio("w"), ratio("h"))), 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillRect((ball.x - ball.radius) * ratio(), (ball.y - ball.radius + 4) * ratio(), ball.radius * 2 * ratio(), (ball.radius - 4) * 2 * ratio());
+    ctx.fillRect((ball.x - ball.radius + 4) * ratio(), (ball.y - ball.radius) * ratio(), (ball.radius - 4) * 2 * ratio(), ball.radius * 2 * ratio());
+}
+
+function drawPaddles () {
     ctx.fillStyle = lPaddle.color;
-    ctx.fillRect((lPaddle.x - lPaddle.width * 0.5) * ratio("w"), (lPaddle.y - lPaddle.height * 0.5) * ratio("h"), lPaddle.width * ratio("w"), lPaddle.height * ratio("h"));
+    ctx.fillRect((lPaddle.x + 3 - lPaddle.width * 0.5) * ratio(), (lPaddle.y - lPaddle.height * 0.5) * ratio(), (lPaddle.width - 6) * ratio(), lPaddle.height * ratio());
+    ctx.fillRect((lPaddle.x - lPaddle.width * 0.5) * ratio(), (lPaddle.y + 3 - lPaddle.height * 0.5) * ratio(), lPaddle.width * ratio(), (lPaddle.height - 6) * ratio());
     ctx.fillStyle = rPaddle.color;
-    ctx.fillRect((rPaddle.x - rPaddle.width * 0.5) * ratio("w"), (rPaddle.y - rPaddle.height * 0.5) * ratio("h"), rPaddle.width * ratio("w"), rPaddle.height * ratio("h"));
+    ctx.fillRect((rPaddle.x + 3 - rPaddle.width * 0.5) * ratio(), (rPaddle.y - rPaddle.height * 0.5) * ratio(), (rPaddle.width - 6) * ratio(), rPaddle.height * ratio());
+    ctx.fillRect((rPaddle.x - rPaddle.width * 0.5) * ratio(), (rPaddle.y + 3 - rPaddle.height * 0.5) * ratio(), rPaddle.width * ratio(), (rPaddle.height - 6) * ratio());
+}
+
+function drawScores (score1: string, score2: string) {
     ctx.fillStyle = "#fcc800";
-    fSize = Math.round(48 * Math.min(ratio("w"), ratio("h")));
+    fSize = Math.round(48 * ratio());
     ctx.font = `${fSize}px 'Press Start 2P'`;
     ctx.textAlign = "left"
-    ctx.fillText(game.score2, canvas.width * 0.5 + 46 * ratio("w"), 80 * ratio("h"));
+    ctx.fillText(score2, canvas.width * 0.5 + 46 * ratio(), 80 * ratio());
     ctx.textAlign = "right"
-    ctx.fillText(game.score1, canvas.width * 0.5 - 40 * ratio("w"), 80 * ratio("h"));
+    ctx.fillText(score1, canvas.width * 0.5 - 40 * ratio(), 80 * ratio());
+}
+
+function endScreen() {
+    drawBg();
+    drawBall();
+    drawPaddles();
+    drawScores(game.score1, game.score2);
     ctx.fillStyle = "#ddae00";
-    fSize = Math.round(60 * Math.min(ratio("w"), ratio("h")));
+    fSize = Math.round(60 * ratio());
     ctx.font = `${fSize}px 'Press Start 2P'`;
     ctx.textAlign = "center";
     if (game.score1 > game.score2)
         ctx.fillText("Player 1 Wins", canvas.width * 0.5, canvas.height * 0.4);
     else
         ctx.fillText("Player 2 Wins", canvas.width * 0.5, canvas.height * 0.4);
-    fSize = Math.round(26 * Math.min(ratio("w"), ratio("h")));
+    fSize = Math.round(26 * ratio());
     ctx.font = `${fSize}px 'Press Start 2P'`;
     ctx.textAlign = "center";
     ctx.fillText("Press any key to restart game", canvas.width * 0.5, canvas.height * 0.65);
@@ -171,13 +192,13 @@ function endScreen() {
 function drawHazard() {
     switch (game.hazard.type) {
         case "BarSizeUp":
-            ctx.drawImage(asset.BarUp, game.hazard.x - 25, game.hazard.y - 25, 50, 50);
+            ctx.drawImage(asset.BarUp, (game.hazard.x - 25) * ratio(), (game.hazard.y - 25) * ratio(), 50 * ratio(), 50 * ratio());
             break;
         case "BarSizeDown":
-            ctx.drawImage(asset.BarDown, game.hazard.x - 25, game.hazard.y - 25, 50, 50);
+            ctx.drawImage(asset.BarDown, (game.hazard.x - 25) * ratio(), (game.hazard.y - 25) * ratio(), 50 * ratio(), 50 * ratio());
             break;
         case "BallSpeedUp":
-            ctx.drawImage(asset.BallUp, game.hazard.x - 25, game.hazard.y - 25, 50, 50);
+            ctx.drawImage(asset.BallUp, (game.hazard.x - 25) * ratio(), (game.hazard.y - 25) * ratio(), 50 * ratio(), 50 * ratio());
             break;
         default:
             break;
@@ -185,37 +206,16 @@ function drawHazard() {
 }
 
 function mainLoop() {
-    // Background
-    ctx.fillStyle = "#101828";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Mid
-    ctx.fillStyle = "#364153";
-    for (let i = 0; i < canvas.height; i += 60)
-        ctx.fillRect(canvas.width * 0.5 - 4, i, 8, 30);
-    // Score
-    ctx.fillStyle = "#fcc800";
-    ctx.font = "48px 'Press Start 2P'";
-    ctx.textAlign = "left"
-    ctx.fillText(rPaddle.score, canvas.width * 0.5 + 46, 80);
-    ctx.textAlign = "right"
-    ctx.fillText(lPaddle.score, canvas.width * 0.5 - 40, 80);
-    // Hazard
+    drawBg();
+    drawBall();
+    drawScores(lPaddle.score, rPaddle.score);
     drawHazard();
-    // Ball
-    ctx.fillStyle = ball.color;
-    ctx.fillRect(ball.x - ball.radius, ball.y - ball.radius + 4, ball.radius * 2, (ball.radius - 4) * 2)
-    ctx.fillRect(ball.x - ball.radius + 4, ball.y - ball.radius, (ball.radius - 4) * 2, ball.radius * 2)
-    // lPaddle
-    ctx.fillStyle = lPaddle.color;
-    ctx.fillRect(lPaddle.x + 3 - lPaddle.width * 0.5, lPaddle.y - lPaddle.height * 0.5, lPaddle.width - 6, lPaddle.height);
-    ctx.fillRect(lPaddle.x - lPaddle.width * 0.5, lPaddle.y + 3 - lPaddle.height * 0.5, lPaddle.width, lPaddle.height - 6);
-    // rPaddle
-    ctx.fillStyle = rPaddle.color;
-    ctx.fillRect(rPaddle.x + 3 - rPaddle.width * 0.5, rPaddle.y - rPaddle.height * 0.5, rPaddle.width - 6, rPaddle.height);
-    ctx.fillRect(rPaddle.x - rPaddle.width * 0.5, rPaddle.y + 3 - rPaddle.height * 0.5, rPaddle.width, rPaddle.height - 6);
+    drawPaddles();
+    // Timer
     if (game.timer.started) {
         ctx.fillStyle = "#fcc800";
-        ctx.font = "60px 'Press Start 2P'";
+        fSize = Math.round(60 * ratio());
+        ctx.font = `${fSize}px 'Press Start 2P'`;
         ctx.textAlign = "center"
         ctx.fillText(game.timer.timeLeft.toString(), canvas.width * 0.5, canvas.height * 0.75);
     }
@@ -238,6 +238,7 @@ function gameLoop () {
 }
 
 gameLoop();
+
 try {
     const socket = new WebSocket("http://localhost:4443/ws");
     socket.addEventListener("open", (event) => {
@@ -287,6 +288,7 @@ try {
                     break;
                 case "Paddle":
                     if (data.x === 30) {
+                        lPaddle.x = data.x;
                         lPaddle.y = data.y;
                         lPaddle.width = data.width;
                         lPaddle.height = data.height;
@@ -294,6 +296,7 @@ try {
                         lPaddle.score = data.score;
                     }
                     else {
+                        rPaddle.x = data.x;
                         rPaddle.y = data.y;
                         rPaddle.width = data.width;
                         rPaddle.height = data.height;
