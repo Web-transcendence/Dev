@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 17:03:11 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 03:14:42 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ Network::Network(std::vector<unsigned int>sizes) : _num_layers(sizes.size()), _s
 }
 
 void    Network::SDG(std::vector<double> & input, std::vector<double> & expected, double const eta) {
-	this->backprop_reLu(input, expected);
+	this->backprop(input, expected);
 	this->updateNabla_b();
 	this->updateNabla_w();
 	this->updateBias(eta, 1.);

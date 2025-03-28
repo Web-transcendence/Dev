@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 15:36:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 16:02:17 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 02:23:28 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,3 @@ int main( void ) {
 	myAgent.test();
 	return 0;
 }
-
-
-// myNetwork.SDG(dataset.training, 30, 10, 3.0, &dataset.testing);

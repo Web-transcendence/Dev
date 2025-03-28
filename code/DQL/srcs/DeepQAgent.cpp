@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 17:38:34 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 03:13:19 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,29 +58,38 @@ void	DeepQAgent::train( void ) {
 			auto	pred_Q = this->_QNet->feedForwardReLu(*input);
 			short	action = std::distance(pred_Q->begin(),\
 			std::max_element(pred_Q->begin(), pred_Q->end()));
-			if (1 / static_cast<double>(this->randInt()) < exploRate)
+			if (1 / static_cast<double>(this->randInt()) < exploRate) {
 				action = randInt() % 4;
+			}
 			std::array<int, 2>newState_Reward = this->_env->action(action);
 			goal += newState_Reward[1];
-			delete input;
-			input = this->mapPlacement(newState_Reward[0]);
-			auto	next_Q = this->_QNet->feedForwardReLu(*input);
-			// std::cout << "state: " << this->_env->_state << std::endl;
-			// Math::printdebug(*pred_Q, "predQ");
-			pred_Q->at(action) = newState_Reward[1] + (this->_discount * *std::max_element(next_Q->begin(), next_Q->end()));
-			// std::cout << "Nstate: " << newState_Reward[0] << std::endl;
-			// Math::printdebug(*pred_Q, "upQ");
+			auto 	nextInput = this->mapPlacement(newState_Reward[0]);
+			auto	next_Q = this->_QNet->feedForwardReLu(*nextInput);
+			delete nextInput;
+			pred_Q->at(action) = (newState_Reward[1] + (this->_discount * (*std::max_element(next_Q->begin(), next_Q->end()))));
+			delete next_Q;
 			this->_QNet->SDG(*input, *pred_Q, 0.05);
 			this->_env->_state = newState_Reward[0];
 			delete input;
 			delete pred_Q;
-			delete next_Q;
 			if (this->_env->_done == true)
 				break ;
 		}
 		if (exploRate - this->_explorationDecay > 0.001)
 			exploRate -=  this->_explorationDecay;
-		displayProgress(i,this->_maxEpTraining);
+		if (i % 1000 == 0) {
+			std::cout << "Epoch " << i << " - Sample Q-values: " << std::endl;
+			for (size_t s = 0; s < 16; s++) {
+				auto input = this->mapPlacement(s);
+				auto pred_Q = this->_QNet->feedForwardReLu(*input);
+				std::cout << "State " << s << ": ";
+				for (double q : *pred_Q) std::cout << q << " ";
+				std::cout << std::endl;
+				delete input;
+				delete pred_Q;
+			}
+		}
+		// displayProgress(i,this->_maxEpTraining);
 	}
 	std::cout << std::endl;
 	std::cout << "Goal hit: " << goal << std::endl;

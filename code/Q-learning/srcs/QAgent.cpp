@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 17:34:38 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 01:24:39 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,21 +42,16 @@ void displayProgress(int current, int max) {
 
 void	QAgent::train( void ) {
 	double exploRate = this->_explorationRate;
-	int	goal = 0;
 	for (int i = 0; i < this->_maxEpTraining; i++) {
 		this->_env->reset();
 		for (int a = 0; a < this->_maxActions; a++) {
 			int action = this->policy(TRAIN);
 			std::array<int, 2>newState_Reward = this->_env->action(action);
-			goal += newState_Reward[1];
-			this->_QMatrix[this->_env->_state][action] = this->_QMatrix[this->_env->_state][action]\
-				+this->_learningRate\
-				*(\
-					newState_Reward[1]\
-					+this->_discount\
-					*(*std::max_element(this->_QMatrix[newState_Reward[0]].begin(), this->_QMatrix[newState_Reward[0]].end()))\
-				)\
-				-this->_QMatrix[this->_env->_state][action];
+			this->_QMatrix[this->_env->_state][action] = this->_learningRate\
+				*(newState_Reward[1]\
+				+this->_discount\
+				*(*std::max_element(this->_QMatrix[newState_Reward[0]].begin(), \
+					this->_QMatrix[newState_Reward[0]].end())));
 			this->_env->_state = newState_Reward[0];
 			if (this->_env->_done == true)
 				break ;
@@ -66,7 +61,6 @@ void	QAgent::train( void ) {
 		displayProgress(i, this->_maxEpTraining);
 	}
 	std::cout << std::endl;
-	std::cout << "Goal hit: " << goal << std::endl;
 }
 
 bool	QAgent::realisable( void ) {

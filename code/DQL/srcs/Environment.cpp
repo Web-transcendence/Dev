@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 16:30:05 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 02:46:52 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ Environment::~Environment( void ) {}
 std::array<int, 2>	Environment::action(int const act) {
 	unsigned int const	size = this->_myMap.size();
 	int					nextState = this->_state;
-	int					diff[4] = {-1 * int(this->_col), 1* int(this->_col), 1 , -1 };
+	int					diff[4] = {-1 * int(this->_col), int(this->_col), 1 , -1 };
 
 	if ((act == RIGHT && this->_state % this->_col != this->_col - 1) \
 	|| (act == LEFT && this->_state % this->_col != 0) \

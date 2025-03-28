@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 17:44:21 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 02:54:16 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,12 @@
 Neuron::Neuron(unsigned int const prevLayer) {
 	std::random_device					rd;
 	std::mt19937						gen(rd());
-	double 								stddev = 1.0 / prevLayer;
+	double 								stddev = 1.0 / std::sqrt(prevLayer);
 	std::normal_distribution<double> 	dist(0.0, stddev);	
 
 	this->_weight = std::vector<double>(prevLayer);
 	for (auto it = this->_weight.begin(); it != this->_weight.end(); it++)
-		*it = dist(gen);
+		*it = 0.0;
 	this->_bias = dist(gen);
 	this->_nabla_w = std::vector<double>(prevLayer);
 	this->_deltaNabla_w = std::vector<double>(prevLayer);
