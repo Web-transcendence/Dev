@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/28 02:54:16 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 16:30:02 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ Neuron::Neuron(unsigned int const prevLayer) {
 
 	this->_weight = std::vector<double>(prevLayer);
 	for (auto it = this->_weight.begin(); it != this->_weight.end(); it++)
-		*it = 0.0;
+		*it = dist(gen);
 	this->_bias = dist(gen);
 	this->_nabla_w = std::vector<double>(prevLayer);
 	this->_deltaNabla_w = std::vector<double>(prevLayer);
@@ -35,7 +35,7 @@ double	Neuron::feedForwardSigmoid(std::vector<double> const & input) const {
 }
 
 double	Neuron::feedForwardReLu(std::vector<double> const & input) const {
-	return Math::reLu(Math::dotProduct(input, this->_weight) + this->_bias);	
+	return Math::leakyReLu(Math::dotProduct(input, this->_weight) + this->_bias);	
 }
 
 double	Neuron::affineTransformation(std::vector<double> const & input) const {

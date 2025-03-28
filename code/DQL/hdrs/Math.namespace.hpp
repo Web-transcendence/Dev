@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 09:50:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 14:22:16 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 14:06:19 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,10 @@ namespace Math {
 	std::vector<double>*				tanhPrime(std::vector<double> const & zs);
 
 	// COST FUNCTIONS
-	double								cost_derivative(double& output, double& expected);
-	std::vector<double>*				cost_derivative(std::vector<double> const & output, std::vector<double> const & expected);
+	double								costDerivative(double& output, double& expected);
+	std::vector<double>*				costDerivative(std::vector<double> const & output, std::vector<double> const & expected);
+	double								sqCostDerivative(double const & output, double const & expected);
+	std::vector<double>*				sqCostDerivative(std::vector<double> const & output, std::vector<double> const & expected);
 	
 	// PRODUCT FUNCTIONS
 	double								dotProduct(std::vector<double> const & v1, std::vector<double> const & v2);

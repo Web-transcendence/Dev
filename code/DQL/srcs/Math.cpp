@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:09:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 15:49:03 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 14:41:02 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ std::vector<double>*	Math::sigmoidPrime(std::vector<double> const & zs) {
 	return res;
 }
 
-double	Math::reLu(double const z) {return (z>0. ? z:0.);}
+double	Math::reLu(double const z) {return (z > 0. ? z : 0.);}
 	
 std::vector<double>*	Math::reLu(std::vector<double> const & zs) {
 	auto	res = new std::vector<double>(zs.size());
@@ -47,7 +47,7 @@ std::vector<double>*	Math::reLu(std::vector<double> const & zs) {
 	return res;
 }
 
-double	Math::reLuPrime(double const z) {return (z>0. ? 1.:0.);}
+double	Math::reLuPrime(double const z) {return (z > 0. ? 1. : 0.);}
 
 std::vector<double>*	Math::reLuPrime(std::vector<double> const & zs) {
 	auto	res = new std::vector<double>(zs.size());
@@ -103,14 +103,25 @@ std::vector<double>*	Math::tanhPrime(std::vector<double> const & zs) {
 }
 
 // COST FUNCTIONS
-double	Math::cost_derivative(double& output, double& expected) {return output - expected;}
+double	Math::costDerivative(double& output, double& expected) {return output - expected;}
 
-std::vector<double>*	Math::cost_derivative(std::vector<double> const & output, std::vector<double> const & expected) {
+std::vector<double>*	Math::costDerivative(std::vector<double> const & output, std::vector<double> const & expected) {
 	auto	res = new std::vector<double>(output.size());
 	auto	it_res = res->begin();
 	
 	for (auto it_o = output.begin(), it_e = expected.begin(); it_o != output.end() && it_e != expected.end(); it_o++, it_e++, it_res++)
 		*it_res = *it_o - *it_e;
+	return res;
+}
+
+double	Math::sqCostDerivative(double const & output, double const & expected) {return (std::pow((output - expected), 2));}
+
+std::vector<double>*	Math::sqCostDerivative(std::vector<double> const & output, std::vector<double> const & expected) {
+	auto	res = new std::vector<double>(output.size());
+	auto	it_res = res->begin();
+	
+	for (auto it_o = output.begin(), it_e = expected.begin(); it_o != output.end() && it_e != expected.end(); it_o++, it_e++, it_res++)
+		*it_res = Math::sqCostDerivative(*it_o, *it_e);
 	return res;
 }
 

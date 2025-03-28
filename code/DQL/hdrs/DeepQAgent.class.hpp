@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 17:35:55 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 16:42:42 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,13 @@ public:
 			double const discount, double const exploRate, double const exploDecay);
 	~DeepQAgent( void );
 
-	void	train( void );
-	void	test( void );
-	int		policy(t_mode const mode);
+	void	trainQMatrix( void );
+	void	testQMatrix( void );
+	int		policyQMatrix(t_mode const mode);
+	
+	void	trainQNetFromQMatrix( void );
+	void	trainQNet( void );
+	void	testQNet( void );
 
 	void	setMap(Environment & env) {this->_env = &env;};
 	void	genQMatrix( void );
@@ -38,14 +42,14 @@ private:
 	
 	int						randInt(void);
 	std::vector<double>*	mapPlacement(int const state);
-	bool					realisable( void );
 
-	void					printQmatrix(void);
+	void					printQMatrix(void);
+	void					printQNet(void);
 
 	Environment*						_env;
-	Network*							_QNet;
 	
 	std::vector<std::vector<double>>	_QMatrix;
+	Network*							_QNet;
 
 	int const							_maxEpTraining;
 	int const							_maxActions;
@@ -53,6 +57,8 @@ private:
 	double const						_discount;
 	double const						_explorationRate;
 	double const						_explorationDecay;
+
+	int									_goalTraining;
 
 };
 

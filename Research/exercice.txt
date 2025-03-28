@@ -139,3 +139,122 @@ Exemple:
 The Qvalue is the average got reward at the end of a lap for each action took at a state. If the QValue is 0 that signify that the lap will stop here
 if the action is taken (like the agent fall in to a hole). The purpose of our training is to define all the Qvalues so at the end the agent should just
 select the highest value per state to have the best pathing to the goal.
+
+Le passage de Qlearning a Deep Qlearning n'a pas dutout ete simple, l'approche du debut a ete d utilise naivement le neural network implementé précédement.
+Malheureusement rien ne fonctionnait, soit les Qvalues explosaient, soit tout tendait vers 0 ou en négatif. Une piste d'amelioration a ete de passer la
+fonction d'activation de sigmoid vers reLu puis leakyReLu, mais toujous les memes problèmes. A ce moment il est compliqué de savoir si le problèmes provient du
+NN ou de l'agent, si c'est un mauvais paramétrage ou si c'est un bug. L'approche de débug a donc été de train l'agent en Qlearning puis de train mon reseau avec
+une QMatrix deja complete pour voir s'il arrivait à la répliquer. Dans le cas où il n'y arrive pas le problème vient de mon NN, s'il y arrive le problème vient
+de l'agent.
+
+=== TRAINING ===
+99% [###################.]
+QMatrix trained
+99% [###################.]
+QNet trained
+
+=== TESTING ===
+== QMatrix TEST ==
+=========== =========== =========== =========== =========== =========== === END ===
+'S'FFF      SFFF        SFFF        SFFF        SFFF        SFFF        SFFF
+FHHH        'F'HHH      FHHH        FHHH        FHHH        FHHH        FHHH
+FFFF        FFFF        'F'FFF      F'F'FF      FF'F'F      FFF'F'      FFFF
+FFHG        FFHG        FFHG        FFHG        FFHG        FFHG        FFH'G'
+
+== QNET TEST ==
+=========== ==========
+'S'FFF      ...
+FHHH
+FFFF
+FFHG
+
+Le QNET n'a pas bougé du start et a donc une QMatrix qui n'a rien à voir avec celle de base.
+Dans l'investigation je decide de rechanger ma fonction d'activation en fonction sigmoid et d'ajuster
+mes hyperparametres: Aucun résultat.
+Par contre j'ai doublé le nombre de neurons sur la hidden layer en passant de 10 à 25 et là on a quelque chose
+de beaucoup beaucoup mieux puisque l'output prend la bonne direction, il est pas parfait mais utilisable.
+
+== QMATRIX PRINT ==                                 == QNET PRINT ==             
+Stage 0:[0.175568;0.227449;0.227449;0.175568;]  |   Stage :[0.174778;0.226761;0.226667;0.174341;]   
+Stage 1:[0.227449;0.294661;0;0.175568;]         |   Stage :[0.226902;0.294474;0.0124059;0.174463;]   
+Stage 2:[0;0;0;0;]                              |   Stage :[0.0108453;0.0142061;0.0127237;0.0154973;]   
+Stage 3:[0;0;0;0;]                              |   Stage :[0.0126188;0.0140058;0.0125415;0.0144115;]   
+Stage 4:[0.175568;0.294661;0.294661;0.227449;]  |   Stage :[0.174659;0.294308;0.294321;0.227041;]   
+Stage 5:[0.227449;0.381734;0.381734;0.227449;]  |   Stage :[0.226937;0.381542;0.381405;0.226874;]   
+Stage 6:[0;0;0.494539;0.294661;]                |   Stage :[0.01077;0.013672;0.494154;0.294053;]   
+Stage 7:[0;0.640677;0.494539;0.381734;]         |   Stage :[0.014343;0.639941;0.493787;0.381223;]   
+Stage 8:[0.227449;0.381734;0.381734;0.294661;]  |   Stage :[0.226799;0.381255;0.381262;0.294087;]   
+Stage 9:[0.294661;0.494539;0;0.294661;]         |   Stage :[0.294305;0.494546;0.0142642;0.294253;]   
+Stage 10:[0;0;0;0;]                             |   Stage :[0.0101867;0.0121218;0.0110794;0.0135048;]   
+Stage 11:[0.494539;0.83;0.640677;0;]            |   Stage :[0.493749;0.828946;0.640315;0.0155336;]   
+Stage 12:[0.294661;0.381734;0.494539;0.381734;] |   Stage :[0.294142;0.381381;0.494256;0.381598;]   
+Stage 13:[0.381734;0.494539;0.640677;0.381734;] |   Stage :[0.381474;0.494364;0.640479;0.381578;]   
+Stage 14:[0;0.640677;0.83;0.494539;]            |   Stage :[0.0144255;0.640126;0.829136;0.494051;]              
+Stage 15:[0;0;0;0;]                             |   Stage :[0.00859477;0.0122772;0.0115655;0.013055;]
+
+Je vais continuer l'ajustement en mettant deux hidden layers ou en montant le nombre de neurones dans les dit
+layers ou en ajustant les hyperparametres.
+Augmenter le nombre de layers augmente grandement le temps de training et dans ce cas n'ameliore pas grandement
+l'output, en tout cas pas suffisament pour que cela soit rentable par rapport au temps de training.
+Doubler le nombre d'épisodes de training augmente linéairement le temps mais le résultat est beaucoup mieux:
+
+Sigmoid->
+== QMATRIX PRINT ==                                == QNET PRINT ==
+Stage 0:[0.175568;0.227449;0.227449;0.175568;]  |   Stage :[0.17536;0.227118;0.227164;0.175187;]
+Stage 1:[0.227449;0.294661;0;0.175568;]         |   Stage :[0.227204;0.294281;0.00938033;0.174953;]
+Stage 2:[0;0;0;0;]                              |   Stage :[0.00676294;0.00589958;0.00470355;0.00588309;]
+Stage 3:[0.381734;0.494539;0.381734;0;]         |   Stage :[0.381547;0.494312;0.381438;0.00999566;]
+Stage 4:[0.175568;0.294661;0.294661;0.227449;]  |   Stage :[0.175394;0.294391;0.294475;0.227144;]
+Stage 5:[0.227449;0.381734;0;0.227449;]         |   Stage :[0.227211;0.381404;0.00910994;0.227018;]
+Stage 6:[0;0;0;0;]                              |   Stage :[0.00705997;0.00619347;0.00523256;0.00600208;]
+Stage 7:[0.381734;0.640677;0.494539;0;]         |   Stage :[0.38151;0.640452;0.494294;0.0100483;]
+Stage 8:[0.227449;0;0.381734;0.294661;]         |   Stage :[0.227069;0.00731659;0.381556;0.294534;]
+Stage 9:[0.294661;0;0.494539;0.294661;]         |   Stage :[0.294373;0.00782601;0.494426;0.294541;]
+Stage 10:[0;0;0.640677;0.381734;]               |   Stage :[0.0096711;0.00703944;0.640562;0.381265;]
+Stage 11:[0.494539;0.83;0.640677;0.494539;]     |   Stage :[0.494442;0.829786;0.640552;0.494407;]
+Stage 12:[0;0;0;0;]                             |   Stage :[0.00496642;0.00424668;0.00490137;0.00700651;]
+Stage 13:[0;0;0;0;]                             |   Stage :[0.00686377;0.00633059;0.00524241;0.00636774;]
+Stage 14:[0;0;0;0;]                             |   Stage :[0.00589238;0.00582695;0.00539554;0.00641726;]
+Stage 15:[0;0;0;0;]                             |   Stage :[0.00597867;0.00615911;0.00531417;0.00704465;]
+
+leakyRelu->
+== QMATRIX PRINT ==                               == QNET PRINT ==                                 
+Stage 0:[0.175568;0.227449;0.227449;0.175568;]  |  Stage 0:[0.175567;0.227475;0.227458;0.175574;] 
+Stage 1:[0.227449;0;0.294661;0.175568;]         |  Stage 1:[0.227452;-0.000305927;0.294667;0.175572;] 
+Stage 2:[0.294661;0.381734;0.227449;0.227449;]  |  Stage 2:[0.294649;0.381751;0.227461;0.227449;] 
+Stage 3:[0.227449;0;0.227449;0.294661;]         |  Stage 3:[0.227454;-0.00141238;0.227448;0.294667;] 
+Stage 4:[0.175568;0.294661;0;0.227449;]         |  Stage 4:[0.175556;0.294685;1.60346e-05;0.227454;] 
+Stage 5:[0;0;0;0;]                              |  Stage 5:[-0.00103266;-0.00393853;-0.00173526;-0.000589719;] 
+Stage 6:[0.294661;0.494539;0;0;]                |  Stage 6:[0.294669;0.494522;-0.00186211;-0.000874553;] 
+Stage 7:[0;0;0;0;]                              |  Stage 7:[-0.000535429;-0.0017476;-0.000826771;1.05206e-05;] 
+Stage 8:[0.227449;0;0.381734;0.294661;]         |  Stage 8:[0.227453;-0.000524044;0.381726;0.294659;] 
+Stage 9:[0;0;0.494539;0.294661;]                |  Stage 9:[1.02875e-05;-0.00106612;0.494532;0.294654;] 
+Stage 10:[0.381734;0;0.640677;0.381734;]        |  Stage 10:[0.381728;7.28252e-06;0.640683;0.381736;] 
+Stage 11:[0;0.83;0.640677;0.494539;]            |  Stage 11:[4.35925e-06;0.83;0.640673;0.494539;] 
+Stage 12:[0;0;0;0;]                             |  Stage 12:[-0.000357001;-4.22569e-05;3.35403e-06;-3.5494e-06;] 
+Stage 13:[0;0;0;0;]                             |  Stage 13:[9.95121e-06;-0.00131012;-0.00025965;-0.000187553;] 
+Stage 14:[0;0;0;0;]                             |  Stage 14:[-0.000273896;2.42333e-05;1.46759e-05;-5.44259e-05;] 
+Stage 15:[0;0;0;0;]                             |  Stage 15:[-3.13004e-05;-0.000296792;-0.00101181;-0.000589724;] 
+
+Comme on voit la fonction leakyReLu a des résultats un peu meilleurs mais certaine valeur étant négative j'ai peur
+que cela impact le training. 
+
+Cette période de test m'a permis de definir l'architecture de mon réseau:
+    16 inputs, 25 hidden neurons pour 1 layer, 4 outputs
+    40 000      épisodes de training
+    0,05        d'eta
+    leakyReLu   activation function
+
+
+
+
+
+
+
+
+
+
+
+
+
+

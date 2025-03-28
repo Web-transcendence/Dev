@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 14:21:07 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 15:51:48 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ public:
     
 private:
     void    updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta);
-    void    backprop(std::vector<double>& input, std::vector<double>& expectedOutput);
+    void    backprop_sigmoid(std::vector<double>& input, std::vector<double>& expectedOutput);
     void	backprop_reLu(std::vector<double>& input, std::vector<double>& expectedOutput);
 
     int     evaluate(std::vector<t_tuple*>& test_data);
@@ -42,6 +42,7 @@ private:
     std::vector<unsigned int>&  _sizes;
     std::vector<Layer*>         _layers;
 
+friend class DeepQAgent;
 };
 
 #endif

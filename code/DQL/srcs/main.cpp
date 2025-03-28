@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 15:36:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/28 02:23:28 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/28 16:23:01 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,16 @@
 
 int main( void ) {
 	Environment	myEnv(4,4, 0.82, 100);
-	DeepQAgent	myAgent(20000, 99, 0.83, 0.93, 1.0, 1.0/20000);
+	DeepQAgent	myAgent(40000, 99, 0.83, 0.93, 1.0, 1.0/40000);
 
 	myAgent.setMap(myEnv);
+	myAgent.genQMatrix();
 	myAgent.genQNet();
 	std::cout << std::endl << "=== TRAINING ===" << std::endl;
-	myAgent.train();
+	myAgent.trainQMatrix();
+	myAgent.trainQNet();
 	std::cout << std::endl << "=== TESTING ===" << std::endl;
-	myAgent.test();
+	myAgent.testQMatrix();
+	myAgent.testQNet();
 	return 0;
 }
