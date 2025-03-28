@@ -133,6 +133,10 @@ export default async function userRoutes(app: FastifyInstance) {
     })
 
 
+    /**
+     * initiate the sse connection between the server and the client, stock the response in a map.
+     *      the response can call the method .sse to send data in this format : {data: JSON.stringify({ event: string, data: any })}
+     */
     app.get('/sse', async function (req, res) {
         const userId = req.headers.id as string;
         if (!userId)

@@ -37,6 +37,16 @@ export class User {
         }
     }
 
+    /**
+     * check if nickName and email aren't in the db, hash the password
+     *      and add the data in the db. Then the db return the id of
+     *      this client
+     *
+     * @param nickName
+     * @param email
+     * @param password
+     * @return boolean about status and if it success the JWT
+     */
     static async addClient(nickName: string, email: string, password: string): Promise<{success: boolean, result: string}> {
         if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(nickName)) {
             return {success: false, result: 'nickName'};
@@ -59,6 +69,15 @@ export class User {
         return {success: true, result: this.makeToken(stringId)};
     }
 
+
+    /**
+     * check in the db if this nickname exist. if yes it call .isPasswordValid() to
+     *      check if the password match with the password given.
+     *
+     * @param nickName
+     * @param password
+     * @return JWT on success
+     */
     static async login(nickName: string, password: string): Promise<{code: number, result: string}> {
         const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: string};
         if (!userData)
@@ -71,6 +90,10 @@ export class User {
         return {code: 201, result: User.makeToken(client.id)}
     }
 
+    /** recover the hashed password from the db and use bcrypt tu compare with the one given.
+     *
+     * @param password
+     */
     async isPasswordValid(password: string): Promise<boolean> {
         const userData = Client_db.prepare("SELECT password FROM Client WHERE id = ?").get(this.id) as { password: string } | undefined;
         if (!userData) {
@@ -99,6 +122,14 @@ export class User {
         res.sse({data: JSON.stringify({event: "invite", data: "teeest"})});
     }
 
+
+    /**
+     * recover the id of the friend, check his friendship status in db, if it doesn't exist it add with status = pending,
+     *      if it is pending and the user is userB_id, it update status to accepted, it it is userA_id nothing happens.
+     *
+     * @param nickName
+     * @return a status for the client
+     */
     addFriend(nickName: string): {code: number, message: string} {
         const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number};
         if (!friendId)
@@ -120,6 +151,11 @@ export class User {
         return {code: 201, message: `friend invitation sent successfully`};
     }
 
+    /**
+     * recover the id of the client, remove it. if there wasn't friend nothing happens (checkstatus.changes set to 0)
+     *
+     * @param nickName
+     */
     removeFriend(nickName: string): {code: number, message: string} {
         const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number};
         if (!friendId)
@@ -131,6 +167,14 @@ export class User {
         return {code: 201, message: "Friend removed"};
     }
 
+    /**
+     * recover friend by status:
+     *      - accepted when each of them accepted the friendship
+     *      - pending when the user is waiting the friend to accept
+     *      - received when the user received an invitation by another user and he didn't accept yet
+     *
+     * @return an object with three array of id. One for each type of friend.
+     */
     getFriendList(): {acceptedIds: number[], pendingIds: number[], receivedIds: number[]} {
         const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[];
         const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[];
