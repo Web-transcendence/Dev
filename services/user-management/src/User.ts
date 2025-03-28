@@ -16,14 +16,15 @@ Client_db.exec(`
 `);
 
 Client_db.exec(`
-    CREATE TABLE IF NOT EXISTS FriendListe (
+    CREATE TABLE IF NOT EXISTS FriendList (
         userA_id INTEGER NOT NULL,
         userB_id INTEGER NOT NULL,
         status TEXT check(status IN ('pending', 'accepted')) DEFAULT ('pending'),
-        PRIMARY KEY (userA_id, serB_id),
-        FOREIGN KEY (userA_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (userB_id) REFERENCES users(id) ON DELETE CASCADE,
-)`)
+        PRIMARY KEY (userA_id, userB_id),
+        FOREIGN KEY (userA_id) REFERENCES Client(id) ON DELETE CASCADE,
+        FOREIGN KEY (userB_id) REFERENCES Client(id) ON DELETE CASCADE
+    )
+`)
 
 export class User {
     id: string;
@@ -98,31 +99,48 @@ export class User {
         res.sse({data: JSON.stringify({event: "invite", data: "teeest"})});
     }
 
-    addFriend(nickName: string): {code: number, result: string} {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName);
+    addFriend(nickName: string): {code: number, message: string} {
+        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number};
         if (!friendId)
-            return {code: 409, result: "this nickName doesn't exist"};
+            return {code: 409, message: "this nickName doesn't exist"};
 
-        const checkStatus = Client_db.prepare("SELECT status FROM FriendList WHERE userA_id = ? AND userB_id = ?").get(friendId, this.id);
-        if (checkStatus == 'accepted')
-            return {code: 409, result: "Friend already added"};
+        const checkStatus = Client_db.prepare("SELECT status FROM FriendList WHERE userA_id = ? AND userB_id = ?").get(friendId.id, this.id) as {status: string};
+        if (checkStatus?.status == 'accepted')
+            return {code: 409, message: "Friend already added"};
 
-        else if (checkStatus == 'pending') {
-            Client_db.prepare(`UPDATE FriendList SET status = 'accepted' WHERE userA_id = ? AND userB_id = ?`).run(friendId, this.id);
-            return {code: 201, result: "Friend invitation accepted"};
+        else if (checkStatus?.status == 'pending') {
+            Client_db.prepare(`UPDATE FriendList SET status = 'accepted' WHERE userA_id = ? AND userB_id = ?`).run(friendId.id, this.id);
+            return {code: 201, message: "Friend invitation accepted"};
         }
 
-        const res = Client_db.prepare(`INSERT OR IGNORE INTO FriendList (userA_id, userB_id, status) VALUES (?, ?, ?)`).run(this.id, friendId);
-        if (!res)
-            return {code: 409, result: "Friend invitation already sent"};
-        return {code: 201, result: `friend invitation sent successfully`};
+        const res = Client_db.prepare(`INSERT OR IGNORE INTO FriendList (userA_id, userB_id, status) VALUES (?, ?, ?)`).run(this.id, friendId.id, 'pending');
+        if (res.changes === 0)
+            return {code: 409, message: "Friend invitation already sent"};
+
+        return {code: 201, message: `friend invitation sent successfully`};
     }
 
-    getFriendList(): {accepted: { id: number }[], pending: { id: number }[], invited: { id: number }[]} {
-        const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id) as {id: number}[];
-        const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {id: number}[];
-        const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {id: number}[];
-        return {accepted, pending, invited};
+    removeFriend(nickName: string): {code: number, message: string} {
+        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number};
+        if (!friendId)
+            return {code: 409, message: "this nickName doesn't exist"};
+
+        const checkStatus = Client_db.prepare("DELETE FROM FriendList WHERE (userA_id = ? AND userB_id = ?) OR (userB_id = ? AND userA_id = ?)").run(friendId.id, this.id, friendId.id, this.id);
+        if (!checkStatus.changes)
+            return {code: 409, message: "This user isn't your friendList"};
+        return {code: 201, message: "Friend removed"};
+    }
+
+    getFriendList(): {acceptedIds: number[], pendingIds: number[], receivedIds: number[]} {
+        const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[];
+        const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[];
+        const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[];
+
+        const acceptedIds = accepted.map(row => row.userA_id ?? row.userB_id).filter(id => id !== undefined);
+        const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined);
+        const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined);
+
+        return {acceptedIds, pendingIds, receivedIds};
     }
 
 }

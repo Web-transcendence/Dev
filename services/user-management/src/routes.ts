@@ -26,28 +26,23 @@ export default async function userRoutes(app: FastifyInstance) {
             return res.status(201).send({token: addRes.result, redirect: "post/login"});
         }
         catch(err) {
-            return res.status(500).send({error: "Server error: ", err});
+            res.status(500).send({error: `Server error: ${err}`});
         }
     });
 
     app.get('/getProfile', async (req, res) => {
 
         try {
-            const zod_result = Schema.profileSchema.safeParse(req.headers);
-            if (!zod_result.success)
-                return res.status(400).send({json: zod_result.error.format()});
-            const id = sanitizeHtml(zod_result.data.id);
+            const id = req.headers.id as string;
             if (!id)
-                return res.status(454).send({error: "All information are required !"});
-
+                throw "cannot recover id";
             const user = new User(id);
 
-            user.sendNotification();
             const profileData = user.getProfile();
 
             return res.status(200).send(profileData);
         } catch (err) {
-            return res.status(500).send({error: "Server error: ", err});
+            res.status(500).send({error: `Server error: ${err}`});
         }
 
 
@@ -72,9 +67,70 @@ export default async function userRoutes(app: FastifyInstance) {
             return res.status(200).send({token: connection.result, redirect: "post/login"});
         }
         catch (err) {
-            res.status(500).send({error: "Server error: ", err});
+            res.status(500).send({error: `Server error: ${err}`});
         }
     });
+
+    app.post('/addFriend', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            console.log("add friend");
+            const zod_result = Schema.manageFriendSchema.safeParse(req.body);
+            if (!zod_result.success)
+                return res.status(400).send({json: zod_result.error.format()});
+            let friendNickName = sanitizeHtml(zod_result.data.friendNickName);
+            if (!friendNickName)
+                return res.status(454).send({error: "All information are required !"});
+
+            const id = req.headers.id as string;
+            if (!id)
+                throw "cannot recover id";
+
+            const user = new User(id);
+            const result = user.addFriend(friendNickName);
+
+            return res.status(result.code).send(result.message);
+        } catch (err) {
+            return res.status(500).send({error: `Server error: ${err}`});
+        }
+    })
+
+    app.get('/friendList', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const id = req.headers.id as string;
+            if (!id)
+                throw "cannot recover id";
+
+            const user = new User(id);
+            const result = user.getFriendList();
+
+            return res.status(200).send(result);
+        } catch (err) {
+            res.status(500).send({error: `Server error: ${err}`});
+        }
+    })
+
+    app.post('/removeFriend', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            console.log("remove friend");
+            const zod_result = Schema.manageFriendSchema.safeParse(req.body);
+            if (!zod_result.success)
+                return res.status(400).send({json: zod_result.error.format()});
+            let friendNickName = sanitizeHtml(zod_result.data.friendNickName);
+            if (!friendNickName)
+                return res.status(454).send({error: "All information are required !"});
+
+            const id = req.headers.id as string;
+            if (!id)
+                throw "cannot recover id";
+
+            const user = new User(id);
+            const result = user.removeFriend(friendNickName);
+
+            return res.status(result.code).send(result.message);
+        } catch (err) {
+            return res.status(500).send({error: `Server error: ${err}`});
+        }
+    })
 
 
     app.get('/sse', async function (req, res) {
