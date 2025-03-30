@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/28 16:43:19 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/30 01:23:27 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,10 +72,40 @@ void	DeepQAgent::trainQMatrix( void ) {
 	std::cout << std::endl << "QMatrix trained" << std::endl;
 }
 
-void	DeepQAgent::trainQMatrix( void )  {
+void	DeepQAgent::trainQNet( void )  {
+	double exploRate = this->_explorationRate;
 
-
-
+	if (!this->_goalTraining)
+		return ;
+	for (int iEp = 0; iEp < this->_maxEpTraining; iEp++) {
+		this->_env->reset();
+		for (int iAct = 0; iAct < this->_maxActions; iAct++) {
+			auto	inputPrev = this->mapPlacement(this->_env->_state);
+			auto	prevO = this->_QNet->feedForwardReLu(*inputPrev);
+			int		action = std::distance(prevO->begin(),\
+					std::max_element(prevO->begin(), prevO->end()));
+			if (1.0/static_cast<double>(this->randInt()) < this->_explorationRate)
+				action = this->randInt() % 4;
+			std::array<int, 2>nextNreward = this->_env->action(action);	
+			auto	inputNext = this->mapPlacement(nextNreward[0]);
+			auto	nextO = this->_QNet->feedForwardReLu(*inputNext);
+			auto	update0 = std::vector<double>(*prevO);
+			update0[action] = (nextNreward[1] + (this->_discount * *std::max_element(nextO->begin(), nextO->end())));
+			this->_QNet->SDG(*inputPrev, update0, 0.05);
+			this->_env->_state = nextNreward[0];
+			delete inputPrev;
+			delete prevO;
+			delete inputNext;
+			delete nextO;
+			if (this->_env->_done == true)
+				break ;
+		}
+		if (exploRate - this->_explorationDecay > 0.0001)
+			exploRate -= this->_explorationDecay;
+		displayProgress(iEp, this->_maxEpTraining);
+	}
+	this->printQNet();
+	this->printQMatrix();
 	return ;
 }
 
@@ -86,8 +116,8 @@ void	DeepQAgent::trainQNetFromQMatrix( void ) {
 		for (int state = 0; state < this->_env->getObservationSpaceSize(); state++) {
 			auto	input = this->mapPlacement(state);
 			auto&	expected = this->_QMatrix.at(state);
-			this->_QNet->SDG(*input, expected, 0.05);
-			delete input;
+			this->_QNet->SDG(*input, expected, 0.055);
+ 			delete input;
 		}
 		displayProgress(i, this->_maxEpTraining);
 	}
@@ -146,7 +176,7 @@ int	DeepQAgent::policyQMatrix(t_mode const mode) {
 	int	act = 0;
 	
 	if (mode == TRAIN) {
-		if (1 / static_cast<double>(this->randInt()) > this->_explorationRate) {
+		if (1.0 / static_cast<double>(this->randInt()) > this->_explorationRate) {
 			act = std::distance(this->_QMatrix[this->_env->_state].begin(),\
 			std::max_element(this->_QMatrix[this->_env->_state].begin(),\
 			this->_QMatrix[this->_env->_state].end()));
@@ -162,6 +192,8 @@ int	DeepQAgent::policyQMatrix(t_mode const mode) {
 }
 
 void	DeepQAgent::printQMatrix(void) {
+	std::cout<<std::endl;
+	std::cout<<"==QMATRIX=="<<std::endl;
 	for (int i = 0; i < this->_env->getObservationSpaceSize(); i++) {
 		std::cout<<"Stage "<<i;
 		Math::printdebug(this->_QMatrix.at(i), "");
@@ -170,6 +202,8 @@ void	DeepQAgent::printQMatrix(void) {
 }
 
 void	DeepQAgent::printQNet(void) {
+	std::cout<<std::endl;
+	std::cout<<"==QNET=="<<std::endl;
 	for (int i = 0; i < this->_env->getObservationSpaceSize(); i++) {
 		auto	input = this->mapPlacement(i);
 		auto	output = this->_QNet->feedForwardReLu(*input);
@@ -192,7 +226,7 @@ void	DeepQAgent::genQNet( void ) {
 		throw std::exception();
 	std::vector<unsigned int>	sizes(3);
 	sizes[0] = 16;
-	sizes[1] = 25; // Arbitral value;
+	sizes[1] = 20;
 	sizes[2] = 4;
 	this->_QNet = new Network(sizes);
 	return ;
@@ -210,3 +244,4 @@ int	DeepQAgent::randInt( void ) {
     static std::uniform_int_distribution<int>	dist(0, 100);
 	return dist(gen);
 }
+
