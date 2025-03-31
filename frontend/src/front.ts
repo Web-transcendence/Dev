@@ -66,6 +66,21 @@ document.addEventListener("DOMContentLoaded", () => {
     factor.addEventListener("click", (event: MouseEvent) => navigate(event, "/factor"));
     Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 
+    document.addEventListener('click', function(event) {
+        const profileMenu = document.getElementById('profile-menu');
+        const dropdown = document.getElementById('dropdown');
+        const targetElement = event.target;
+
+        if (profileMenu && dropdown) {
+            if (targetElement instanceof Node) {
+                if (profileMenu.contains(targetElement)) {
+                    dropdown.classList.toggle('hidden');
+                } else if (!dropdown.contains(targetElement)) {
+                    dropdown.classList.add('hidden');
+                }
+            }
+        }
+    });
 });
 
 function navigate(event: MouseEvent, path: string): void {

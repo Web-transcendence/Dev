@@ -25,9 +25,16 @@
       <button id="2fa" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">2FA</button>
       <button id="Ping" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Ping</button>
     </div>
-    <div class="flex items-center space-x-2">
-      <img id="avatar" src="../logout.png" alt="Avatar" class="h-10 w-10 rounded-full border-4 border-white">
-      <span id="nickName" class="text-lg"></span>
+    <div class="relative">
+      <div id="profile-menu" class="flex items-center space-x-2 cursor-pointer">
+        <img src="../logout.png" alt="Avatar" class="h-10 w-10 rounded-full border-4 border-white">
+        <span class="text-lg"></span>
+      </div>
+      <div id="dropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-700 border border-yellow-400 rounded-lg shadow-lg overflow-hidden">
+        <a id="ddProfil" class="block px-4 py-2 text-white hover:bg-gray-600">Profil</a>
+        <a id="ddSettings" class="block px-4 py-2 text-white hover:bg-gray-600">Settings</a>
+        <a id="ddLogout" class="block px-4 py-2 text-white hover:bg-gray-600">Logout</a>
+      </div>
     </div>
   </nav>
   <div class="flex-grow p-10">
