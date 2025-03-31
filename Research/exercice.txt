@@ -245,7 +245,29 @@ Cette période de test m'a permis de definir l'architecture de mon réseau:
     0,05        d'eta
     leakyReLu   activation function
 
-qvalue trop importante 
+Le reseau fonctionne, il n'est pas toujours tres precis et on peut y observer des manquements mais il fonctionne suffisament
+pour ne pas assimiler ces reussites a du hasard. Toutefois comme tous les dql il rencontre un probleme de Qvalue trop
+importante ce qui ammene a des choix pas toujours optimises mais surtout dans le notre a un echec. Pour regler ce 
+probleme bien connu, le Deep Q network a ete theorise afin de regler ce probleme de surestimation et donc d'imprecision.
+Je vais tout de meme mener des tests afin de savoir si la valeur d initialisation des weights et biaises ont un quelconque 
+impact.
+Le test va etre de lancer vingts fois le probleme avec ume map realisable. 10 fois avec des valeurs aleatoires suivant une 
+distribution normal entre parmi [0.0; 1 / sqrt(nb de neurons dans la layer precedente)] et 10 fois initialise a 0.0.
+
+0.0 -> 0/10
+
+random -> 2/10
+
+De ce que je remarque le reseau essaye quoi qu il arrive d'aller a droite en premier ce qui est tres genant dans mon cas puisque
+s'il fait ca et qu'il y a un H a cote c'est un echec directement. Cela fausse completement l'echantillon. Pour terminer je vais juste
+set mes weights a 0.0 mais laisser le bais entre 0 et 0.01 je trouve que c'est le meilleur compromis puisqu'avec cette technique j'obtient
+un score de 5/10. Un plafond autour de 50% est un resultat logique pour un dql sans xp replay.
+
+Je vais donc passer directement au developpement d'un DQN avec exp replay pour l'implementation de mon pong. Je vais aussi mettre un systeme de reward scaling,
+une recompense unique (+1 lorsque le point est marque) genereait l exploration et pourrait donner une ia qui ne test pas grand chose en jeu.
+Je vais donc partir sur des bases simples : +1 lorsque le point est marque, -0.5 lorsque le point est concede, +0.05 lorsque la balle est recuperee.
+Le but est de favoriser l agressivite sans pour autant que cela soit trop rentable. Elle va devoir ne pas etre trop passive. 2
+
 
 
 

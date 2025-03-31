@@ -6,12 +6,13 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 10:25:23 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 14:22:58 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/31 12:40:59 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef NEURON_HPP
 # define NEURON_HPP
+# include "Math.namespace.hpp"
 # include <vector>
 # include <random>
 
@@ -20,8 +21,8 @@ public:
 	Neuron(unsigned int const prevLayer);
 	~Neuron( void ) {}
 	
-	double	feedForward(std::vector<double> const & input) const;
-	double	perceptron(std::vector<double> const & input) const;
+	double	feedForward(std::vector<double> const & input, ptrFuncS actFunc) const;
+	double	affineTransformation(std::vector<double> const & input) const;
 	void	updateWeight(double const eta, double const miniBatchSize);
 	void	updateNabla_w( void );
 	void	setDeltaNabla_w(std::vector<double> const & delta);
@@ -36,7 +37,7 @@ private:
 	double				_bias;
 	double				_nabla_b;
 	double				_deltaNabla_b;
-
+	
 friend class Network;
 friend class Layer;
 };

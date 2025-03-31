@@ -6,15 +6,14 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/31 08:35:46 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/31 11:06:19 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "DeepQAgent.class.hpp"
 
-#include "Environment.class.hpp"
-#include "Network.class.hpp"
-#include "Math.namespace.hpp"
+#include "../Network/Network.class.hpp"
+#include "../Utils/Math.namespace.hpp"
 #include <exception>
 #include <algorithm>
 #include <iostream>

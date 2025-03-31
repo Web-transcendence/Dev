@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/26 09:31:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/31 12:56:14 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,24 @@
 #include <algorithm>
 #include <iostream>
 
-Network::Network(std::vector<unsigned int>sizes) : _num_layers(sizes.size()), _sizes(sizes) {
+Network::Network(std::vector<unsigned int>sizes, t_actFunc actHiddenFunc, t_actFunc actOutputFunc) : _num_layers(sizes.size()), _sizes(sizes) {
+	int	i_layers;
+
 	this->_layers = std::vector<Layer*>(_num_layers - 1);
-	for (int i_layers = 1; i_layers < this->_num_layers; i_layers++) {
-		this->_layers.at(i_layers - 1) = new Layer(sizes[i_layers], sizes[i_layers - 1]);
-	}
+	for (i_layers = 1; i_layers < this->_num_layers - 1; i_layers++)
+		this->_layers.at(i_layers - 1) = new Layer(sizes[i_layers], sizes[i_layers - 1], actHiddenFunc);
+	this->_layers.at(i_layers - 1) = new Layer(sizes[i_layers], sizes[i_layers - 1], actOutputFunc);
 	return ;
 }
 
-
+void    Network::SDG(t_tuple* trainingData, double const eta) {
+	this->backprop(trainingData->input, trainingData->expectedOutput);
+	this->updateNabla_b();
+	this->updateNabla_w();
+	this->updateWeight(eta, 1.);
+	this->updateBias(eta, 1.);
+	return ;
+}
 
 void    Network::SDG(std::vector<t_tuple*>& trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data) {
 	int	n_test;
@@ -51,17 +60,6 @@ void    Network::SDG(std::vector<t_tuple*>& trainingData, int const epoch, int c
 	}
 }
 
-void	Network::updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta) {
-	for (auto it_mb = miniBatch.begin(); it_mb != miniBatch.end(); it_mb++) {
-		this->backprop((*it_mb)->input, (*it_mb)->expectedOutput);
-		this->updateNabla_b();
-		this->updateNabla_w();
-	}
-	this->updateBias(eta, static_cast<double>(miniBatch.size()));
-	this->updateWeight(eta, static_cast<double>(miniBatch.size()));
-	return ;
-}
-
 void	Network::backprop(std::vector<double>& input, std::vector<double>& expectedOutput) {
 	std::vector<std::vector<double>*>	activations(this->_layers.size() + 1);
 	auto								it_a = activations.begin();
@@ -71,19 +69,19 @@ void	Network::backprop(std::vector<double>& input, std::vector<double>& expected
 
 	*it_a = &input;
 	for (auto it_l = this->_layers.begin(); it_l != this->_layers.end(); it_l++, it_z++) {
-		*it_z = (*it_l)->perceptron(*(*it_a));
+		*it_z = (*it_l)->affineTransformation(*(*it_a));
 		it_a++;
-		*it_a = Math::sigmoid(**it_z);
+		*it_a = (*it_l)->callActFunc(**it_z);
 	}
-	auto	cd = Math::cost_derivative(*activations.back(), expectedOutput);
-	auto	sp = Math::sigmoidPrime(*zs.back());
+	auto	cd = Math::costDerivative(*activations.back(), expectedOutput);
+	auto	sp = this->_layers.back()->callActFunc(*zs.back());
 	auto	delta = Math::hadamardProduct(*cd, *sp);
 	this->_layers.back()->setDeltaNabla_b(*delta);
 	this->_layers.back()->setDeltaNabla_w(*delta, *activations.at(activations.size()-2));
 	delete cd;
 	delete sp;
 	for (unsigned int i_l = 2; i_l <= lSize; i_l++) {
-		sp = Math::sigmoidPrime(*zs.at(lSize- i_l));
+		sp = this->_layers.at(lSize-i_l+1)->callActFunc(*zs.at(lSize- i_l));
 		auto nDelta = this->_layers.at(lSize-i_l+1)->calcDelta(*delta, *sp);
 		delete delta;
 		delta = nDelta;
@@ -110,19 +108,6 @@ std::vector<double>*	Network::feedForward(std::vector<double> const & input) {
 		delete temp;
 	}
 	return activation;
-}
-
-int     Network::evaluate(std::vector<t_tuple*>& test_data) {
-	int	correct = 0;
-
-	for (auto it_td = test_data.begin(); it_td != test_data.end(); it_td++) {
-		auto output = this->feedForward((*it_td)->input);
-		int numOutput = std::distance(output->begin(), std::max_element(output->begin(), output->end()));
-		if ((*it_td)->real == numOutput)
-			++correct;
-		delete output;
-	}
-	return correct;
 }
 
 void	Network::updateWeight(double const eta, double const miniBatchSize) {

@@ -6,35 +6,34 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/19 16:22:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/03/31 12:37:39 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Neuron.class.hpp"
-#include "Math.namespace.hpp"
 
 Neuron::Neuron(unsigned int const prevLayer) {
 	std::random_device					rd;
 	std::mt19937						gen(rd());
-	double 								stddev = 1.0 / std::sqrt(prevLayer);
-	std::normal_distribution<double> 	dist(0.0, stddev);	
+	std::normal_distribution<double> 	dist(0.0, 0.01);	
 
 	this->_weight = std::vector<double>(prevLayer);
 	for (auto it = this->_weight.begin(); it != this->_weight.end(); it++)
-		*it = dist(gen);
+		*it = 0.0;
 	this->_bias = dist(gen);
 	this->_nabla_w = std::vector<double>(prevLayer);
 	this->_deltaNabla_w = std::vector<double>(prevLayer);
 	this->_nabla_b = 0.0;
 	this->_deltaNabla_b = 0.0;
+	
 	return ;
 }
 
-double	Neuron::feedForward(std::vector<double> const & input) const {
-	return Math::sigmoid(Math::dotProduct(input, this->_weight) + this->_bias);	
+double	Neuron::feedForward(std::vector<double> const & input, ptrFuncS actFunc) const {
+	return (actFunc)(Math::dotProduct(input, this->_weight) + this->_bias);	
 }
 
-double	Neuron::perceptron(std::vector<double> const & input) const {
+double	Neuron::affineTransformation(std::vector<double> const & input) const {
 	return Math::dotProduct(input, this->_weight) + this->_bias;	
 }
 

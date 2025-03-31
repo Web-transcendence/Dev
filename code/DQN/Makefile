@@ -6,17 +6,23 @@
 #    By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:21:22 by thibaud           #+#    #+#              #
-#    Updated: 2025/03/25 13:20:09 by thibaud          ###   ########.fr        #
+#    Updated: 2025/03/26 15:42:49 by thibaud          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME		= myQlearn
+NAME		= myDQL
 
 HEADER		=	hdrs/
 SRCS_DIR	=	srcs/
 OBJS_DIR	=	.objs/
 DEPS_DIR	=	.deps/
-SRCS		=	main.cpp ExpReplay.cpp
+SRCS		=	main.cpp \
+				DeepQAgent.cpp \
+				Environment.cpp \
+				Network.cpp \
+				Layer.cpp \
+				Neuron.cpp \
+				Math.cpp
 
 
 OBJS		= $(SRCS:%.cpp=$(OBJS_DIR)%.o)
