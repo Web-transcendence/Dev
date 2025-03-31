@@ -168,6 +168,7 @@ function register(container: HTMLElement, button: HTMLElement): void {
         const result = await response.json();
         if (result.token) {
             localStorage.setItem('token', result.token);
+            sseConnection(result.token);
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
             newElement.className = 'tag';
@@ -198,10 +199,12 @@ function login(container: HTMLElement, button: HTMLElement): void {
             },
             body: JSON.stringify(data)
         });
+
         const result = await response.json();
         if (response.ok) {
             localStorage.setItem('token', result.token);
             localStorage.setItem('nickName', result.nickName);
+            sseConnection(result.token);
             // localStorage.setItem('avatar', result.avatar);
             const res = await fetch('/part/connected');
             const newElement = document.createElement('div');
@@ -272,5 +275,31 @@ function validateRegister(result: { nickName: string; email: string; password: s
         if (!passwordError.classList.contains("hidden")) {
             passwordError.classList.add("hidden");
         }
+    }
+}
+
+async function sseConnection(token: string) {
+    const res = await fetch("http://localhost:3000/user-management/sse", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'text/event-stream',
+            'Authorization': `Bearer ${token}`
+        }
+    })
+
+    const reader = res.body?.pipeThrough(new TextDecoderStream()).getReader() ?? null;
+    while (reader) {
+        const {value, done} = await reader.read();
+        if (done) break;
+        if (value.startsWith('retry: ')) continue;
+        const parse = JSON.parse(value?.replace('data: ', ''));
+        console.log(parse);
+        sseHandler(parse.event, parse.data);
+    }
+}
+
+function sseHandler(process: string, data: any ) {
+    if (process == "invite") {
+        console.log(data,  " et ", process);
     }
 }

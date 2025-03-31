@@ -1,7 +1,10 @@
 import * as Schema from "./schema.js";
 import sanitizeHtml from "sanitize-html";
 import {User} from "./User.js";
-import {FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
+import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
+import {connectedUsers} from "./api.js"
+import {EventMessage} from "fastify-sse-v2";
+
 
 
 export default async function userRoutes(app: FastifyInstance) {
@@ -23,27 +26,23 @@ export default async function userRoutes(app: FastifyInstance) {
             return res.status(201).send({token: addRes.result, redirect: "post/login"});
         }
         catch(err) {
-            return res.status(500).send({error: "Server error: ", err});
+            res.status(500).send({error: `Server error: ${err}`});
         }
     });
 
     app.get('/getProfile', async (req, res) => {
 
         try {
-            const zod_result = Schema.profileSchema.safeParse(req.headers);
-            if (!zod_result.success)
-                return res.status(400).send({json: zod_result.error.format()});
-            const id = sanitizeHtml(zod_result.data.id);
+            const id = req.headers.id as string;
             if (!id)
-                return res.status(454).send({error: "All information are required !"});
-
+                throw "cannot recover id";
             const user = new User(id);
 
             const profileData = user.getProfile();
 
             return res.status(200).send(profileData);
         } catch (err) {
-            return res.status(500).send({error: "Server error: ", err});
+            res.status(500).send({error: `Server error: ${err}`});
         }
 
 
@@ -52,7 +51,6 @@ export default async function userRoutes(app: FastifyInstance) {
     app.post('/sign-in', async (req: FastifyRequest, res: FastifyReply) => {
         try {
             console.log("sign-in");
-            console.log(req.body);
             const zod_result = Schema.signInSchema.safeParse(req.body);
             if (!zod_result.success)
                 return res.status(400).send({json: zod_result.error.format()});
@@ -69,7 +67,82 @@ export default async function userRoutes(app: FastifyInstance) {
             return res.status(200).send({token: connection.result, redirect: "post/login"});
         }
         catch (err) {
-            res.status(500).send({error: "Server error: ", err});
+            res.status(500).send({error: `Server error: ${err}`});
         }
     });
+
+    app.post('/addFriend', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            console.log("add friend");
+            const zod_result = Schema.manageFriendSchema.safeParse(req.body);
+            if (!zod_result.success)
+                return res.status(400).send({json: zod_result.error.format()});
+            let friendNickName = sanitizeHtml(zod_result.data.friendNickName);
+            if (!friendNickName)
+                return res.status(454).send({error: "All information are required !"});
+
+            const id = req.headers.id as string;
+            if (!id)
+                throw new Error("cannot recover id");
+            const user = new User(id);
+            const result = user.addFriend(friendNickName);
+
+            return res.status(result.code).send(result.message);
+        } catch (err) {
+            return res.status(500).send({error: `Server error: ${err}`});
+        }
+    })
+
+    app.get('/friendList', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const id = req.headers.id as string;
+            if (!id)
+                throw "cannot recover id";
+
+            const user = new User(id);
+            const result = user.getFriendList();
+
+            return res.status(200).send(result);
+        } catch (err) {
+            res.status(500).send({error: `Server error: ${err}`});
+        }
+    })
+
+    app.post('/removeFriend', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            console.log("remove friend");
+            const zod_result = Schema.manageFriendSchema.safeParse(req.body);
+            if (!zod_result.success)
+                return res.status(400).send({json: zod_result.error.format()});
+            let friendNickName = sanitizeHtml(zod_result.data.friendNickName);
+            if (!friendNickName)
+                return res.status(454).send({error: "All information are required !"});
+
+            const id = req.headers.id as string;
+            if (!id)
+                throw "cannot recover id";
+
+            const user = new User(id);
+            const result = user.removeFriend(friendNickName);
+
+            return res.status(result.code).send(result.message);
+        } catch (err) {
+            return res.status(500).send({error: `Server error: ${err}`});
+        }
+    })
+
+
+    /**
+     * initiate the sse connection between the server and the client, stock the response in a map.
+     *      the response can call the method .sse to send data in this format : {data: JSON.stringify({ event: string, data: any })}
+     */
+    app.get('/sse', async function (req, res) {
+        const userId = req.headers.id as string;
+        if (!userId)
+            return res.status(500).send({error: "Server error: Id not found"});
+        connectedUsers.set(userId, res);
+        const message: EventMessage = { event: "initiation", data: "Some message" }
+        res.sse({data: JSON.stringify(message)});
+    });
+
 }

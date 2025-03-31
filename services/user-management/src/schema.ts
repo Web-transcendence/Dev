@@ -4,6 +4,9 @@ export const profileSchema = z.object({
     id: z.string().regex(/^\d+$/, "Only numeric characters are allowed")
 });
 
+export const manageFriendSchema = z.object({
+    friendNickName: z.string().min(3, "Minimum 3 caracteres")
+})
 
 export const signUpSchema = z.object({
     nickName: z.string().min(3, "Minimum 3 caracteres"),
