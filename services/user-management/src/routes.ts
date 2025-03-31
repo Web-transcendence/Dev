@@ -141,7 +141,7 @@ export default async function userRoutes(app: FastifyInstance) {
         if (!userId)
             return res.status(500).send({error: "Server error: Id not found"});
         connectedUsers.set(userId, res);
-        const message: EventMessage = { event: "inititation", data: "Some message" }
+        const message: EventMessage = { event: "initiation", data: "Some message" }
         res.sse({data: JSON.stringify(message)});
     });
 
