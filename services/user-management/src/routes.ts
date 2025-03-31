@@ -83,8 +83,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const id = req.headers.id as string;
             if (!id)
-                throw "cannot recover id";
-
+                throw new Error("cannot recover id");
             const user = new User(id);
             const result = user.addFriend(friendNickName);
 
