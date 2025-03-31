@@ -56,14 +56,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const contactBtn = document.getElementById("contact")!;
     const registerBtn = document.getElementById("register")!;
     const loginBtn = document.getElementById("login")!;
-    const factor = document.getElementById("2fa")!;
     const Ping = document.getElementById("Ping")!;
 
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
     registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
     loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
-    factor.addEventListener("click", (event: MouseEvent) => navigate(event, "/factor"));
     Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 
     document.addEventListener('click', function(event) {
