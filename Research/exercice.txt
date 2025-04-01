@@ -266,7 +266,7 @@ un score de 5/10. Un plafond autour de 50% est un resultat logique pour un dql s
 Je vais donc passer directement au developpement d'un DQN avec exp replay pour l'implementation de mon pong. Je vais aussi mettre un systeme de reward scaling,
 une recompense unique (+1 lorsque le point est marque) genereait l exploration et pourrait donner une ia qui ne test pas grand chose en jeu.
 Je vais donc partir sur des bases simples : +1 lorsque le point est marque, -0.5 lorsque le point est concede, +0.05 lorsque la balle est recuperee.
-Le but est de favoriser l agressivite sans pour autant que cela soit trop rentable. Elle va devoir ne pas etre trop passive. 2
+Le but est de favoriser l agressivite sans pour autant que cela soit trop rentable. Elle va devoir ne pas etre trop passive.
 
 
 

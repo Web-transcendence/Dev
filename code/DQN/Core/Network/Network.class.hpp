@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/31 12:56:37 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/01 11:40:45 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ public:
     void                    SDG(std::vector<t_tuple*>& trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data);
     std::vector<double>*	feedForward(std::vector<double> const & input);
     
+    static void             displayProgress(int current, int max);
+
 private:
     void    updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta);
     void    backprop(std::vector<double>& input, std::vector<double>& expectedOutput);

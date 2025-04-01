@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:04:30 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/31 12:45:13 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/01 10:56:01 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,9 +81,8 @@ void	Layer::setDeltaNabla_w(std::vector<double> const & delta, std::vector<doubl
 	auto	product = Math::outerProduct(delta, activation);
 	auto	it_p = product->begin();
 	
-	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_p++) {
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_p++)
 		(*it_n)->setDeltaNabla_w(*it_p);
-	}
 	delete product;
 	return ;
 }

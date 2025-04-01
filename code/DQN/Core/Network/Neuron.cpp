@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/31 12:37:39 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/01 11:22:20 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,17 @@
 Neuron::Neuron(unsigned int const prevLayer) {
 	std::random_device					rd;
 	std::mt19937						gen(rd());
-	std::normal_distribution<double> 	dist(0.0, 0.01);	
+	double 								stddev = 1.0 / std::sqrt(prevLayer);
+	std::normal_distribution<double> 	dist(0.0, stddev);	
 
 	this->_weight = std::vector<double>(prevLayer);
 	for (auto it = this->_weight.begin(); it != this->_weight.end(); it++)
-		*it = 0.0;
+		*it = dist(gen);
 	this->_bias = dist(gen);
 	this->_nabla_w = std::vector<double>(prevLayer);
 	this->_deltaNabla_w = std::vector<double>(prevLayer);
 	this->_nabla_b = 0.0;
 	this->_deltaNabla_b = 0.0;
-	
 	return ;
 }
 
@@ -39,7 +39,7 @@ double	Neuron::affineTransformation(std::vector<double> const & input) const {
 
 void	Neuron::updateWeight(double const eta, double const miniBatchSize) {
 	for (auto it_w = this->_weight.begin(), it_nw = this->_nabla_w.begin(); it_w != this->_weight.end(); it_w++, it_nw++) {
-		*it_w = *it_w - eta * (*it_nw / miniBatchSize);
+		*it_w -= eta * (*it_nw / miniBatchSize);
 		*it_nw = 0.0;
 	}
 	return ;

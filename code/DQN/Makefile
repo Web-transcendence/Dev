@@ -6,11 +6,11 @@
 #    By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:21:22 by thibaud           #+#    #+#              #
-#    Updated: 2025/03/26 15:42:49 by thibaud          ###   ########.fr        #
+#    Updated: 2025/04/01 11:33:49 by thibaud          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME		= myDQL
+NAME		= myDQN
 
 HEADER		=	hdrs/
 SRCS_DIR	=	srcs/
