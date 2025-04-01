@@ -23,11 +23,18 @@
       <button id="login" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Login</button>
       <button id="Ping" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Pong</button>
     </div>
-    <div class="relative">
-      <div id="profile-menu" class="flex items-center space-x-2 cursor-pointer">
-        <img id="avatar" src="../logout.png" alt="Avatar" class="h-10 w-10 rounded-full border-4 border-white">
-        <span id= "nickName" class="text-lg"></span>
+    <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">
+      <div class="relative group">
+        <!-- Avatar -->
+        <img id="avatar" src="../logout.png" alt="Avatar" class="relative h-10 w-10 rounded-full z-10">
+
+        <!-- Bouton (caché par défaut) -->
+        <button class="absolute top-1/2 -right-6 -translate-x-11 h-10 -translate-y-1/2  rounded-r-none w-0 bg-white ease-in-out cursor-pointer
+        text-black group-hover:px-6 group-hover:pr-10 rounded-full text-sm group-hover:w-38 transition-[all,width] overflow-hidden duration-300 group-hover:delay-0">
+          Connect
+        </button>
       </div>
+      <span id="nickName" class="text-lg"></span>
       <div id="dropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-700 border border-yellow-400 rounded-lg shadow-lg overflow-hidden">
         <a id="ddProfil" class="block px-4 py-2 text-white hover:bg-gray-600">Profil</a>
         <a id="ddLogout" class="block px-4 py-2 text-white hover:bg-gray-600">Logout</a>
