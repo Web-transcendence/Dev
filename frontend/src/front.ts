@@ -2,6 +2,21 @@ interface Window {
     CredentialResponse: (response: any) => void;
 }
 
+let connected = false;
+
+function handleConnection(input: boolean) {
+    const connect = document.getElementById('connect');
+    const profile = document.getElementById('profile');
+    if (input && profile && connect) {
+        connect.classList.add('hidden');
+        profile.classList.toggle('hidden');
+    } else if (profile && connect) {
+        connect.classList.toggle('hidden');
+        profile.classList.add('hidden');
+    }
+    connected = input;
+}
+
 window.CredentialResponse = async (credit: { credential: string }) => {
     try {
         const response = await fetch('http://localhost:3000/user-management/auth/google', {
@@ -42,6 +57,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                 container.innerHTML = '';
                 newElement.innerHTML = html;
                 container.appendChild(newElement);
+                handleConnection(true);
             }
             console.log('Success:', reply);
         }
@@ -51,35 +67,46 @@ window.CredentialResponse = async (credit: { credential: string }) => {
     }
 }
 
+
 document.addEventListener("DOMContentLoaded", () => {
+    // Constant button on the Single Page Application
     const aboutBtn = document.getElementById("about")!;
     const contactBtn = document.getElementById("contact")!;
-    const registerBtn = document.getElementById("register")!;
-    const loginBtn = document.getElementById("login")!;
     const Ping = document.getElementById("Ping")!;
 
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
-    registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
-    loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
     Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 
-    document.addEventListener('click', function(event) {
-        const profileMenu = document.getElementById('profile-menu');
-        const dropdown = document.getElementById('dropdown');
-        const targetElement = event.target;
-
-        if (profileMenu && dropdown) {
-            if (targetElement instanceof Node) {
-                if (profileMenu.contains(targetElement)) {
-                    dropdown.classList.toggle('hidden');
-                } else if (!dropdown.contains(targetElement)) {
-                    dropdown.classList.add('hidden');
-                }
-            }
-        }
-    });
+    // For Client Connection
+    const connectBtn = document.getElementById('connect');
+    const profilBtn = document.getElementById('profile');
+    if (profilBtn && connected)
+        profilBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
+    if (connectBtn && !connected)
+        connectBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
 });
+
+//
+// const connect = document.getElementById('connect');
+// const profil = document.getElementById('profil');
+//
+// if (Client.connected) {
+//     connect.classList.add('hidden');
+//     profil.classList.toggle('hidden');
+//     const profil = document.getElementById("profil");
+//     if (profil)
+//         profil.addEventListener("click", (event: MouseEvent) => navigate(event, "/profil"));
+//     const profile = document.getElementById("ddProfil")!;
+//     const logout = document.getElementById("ddLogout")!;
+//     profile.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
+//     logout.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
+// } else {
+//     const connect = document.getElementById("connect");
+//     if (connect)
+//         connect.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+// }
+// // connect.classList.add('hidden');
 
 function navigate(event: MouseEvent, path: string): void {
     event.preventDefault();
@@ -111,6 +138,15 @@ async function loadPart(page: string): Promise<void> {
             const email = document.getElementById("profileEmail")!;
             if (email && nickName)
                 profile(container, nickName, email);
+        }
+        if (page === "/logout") {
+            handleConnection(false);
+            const avatar = document.getElementById("avatar") as HTMLImageElement;
+            if (avatar)
+                avatar.src = "../logout.png";
+            const nickName = document.getElementById("nickName") as HTMLSpanElement;
+            if (nickName)
+                nickName.textContent = '';
         }
     } catch (error) {
         console.error(error);
@@ -148,7 +184,7 @@ async function insert_tag(url: string): Promise<void>{
         if (existingScript)
             existingScript.remove();
     }
-    if (url === "part/login") {
+    if (url === "part/login" || url === "part/connect") {
         const script = document.createElement('script');
         script.src = "https://accounts.google.com/gsi/client";
         script.async = true;
@@ -192,6 +228,7 @@ function register(container: HTMLElement, button: HTMLElement): void {
             container.innerHTML = '';
             newElement.innerHTML = html;
             container.appendChild(newElement);
+            handleConnection(true);
         } else {
             const errors = result.json;
             validateRegister(errors.json);
@@ -227,6 +264,7 @@ function login(container: HTMLElement, button: HTMLElement): void {
             container.innerHTML = '';
             newElement.innerHTML = html;
             container.appendChild(newElement);
+            handleConnection(true);
         } else {
             const loginError = document.getElementById("LoginError") as HTMLSpanElement;
             // if (!loginError.classList.contains("hidden"))

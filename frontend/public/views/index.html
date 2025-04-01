@@ -13,34 +13,32 @@
 <body class="bg-gray-900 text-white" style="font-family: 'Press Start 2P', cursive;">
 
 <div id="app" class="flex flex-col">
+
   <nav class="bg-gray-800 p-4 flex justify-between items-center border-b-4 border-yellow-400">
     <div class="flex items-center">
       <img src="../favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
       <p class="text-center text-xl"> TRANS </p>
     </div>
-    <div class="flex space-x-4">
-      <button id="register" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Sign in</button>
-      <button id="login" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Login</button>
-      <button id="Ping" class="px-6 py-3 bg-yellow-400 text-white rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Pong</button>
+    <div class="flex space-x-4 *:cursor-pointer">
+      <button id="Ping" class="px-6 py-3 bg-yellow-400 text-white  rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transform hover:scale-105 transition-all">Pong</button>
     </div>
     <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">
       <div class="relative group">
-        <!-- Avatar -->
         <img id="avatar" src="../logout.png" alt="Avatar" class="relative h-10 w-10 rounded-full z-10">
 
-        <!-- Bouton (caché par défaut) -->
-        <button class="absolute top-1/2 -right-6 -translate-x-11 h-10 -translate-y-1/2  rounded-r-none w-0 bg-white ease-in-out cursor-pointer
+        <button id="profile" class="hidden absolute top-1/2 -right-6 -translate-x-11 h-10 -translate-y-1/2  rounded-r-none w-0 bg-pink-400 ease-in-out cursor-pointer
+        text-black group-hover:px-6 group-hover:pr-10 rounded-full text-sm group-hover:w-38 transition-[all,width] overflow-hidden duration-300 group-hover:delay-0">
+          Profil
+        </button>
+
+        <button id="connect" class="absolute top-1/2 -right-6 -translate-x-11 h-10 -translate-y-1/2  rounded-r-none w-0 bg-pink-400 ease-in-out cursor-pointer
         text-black group-hover:px-6 group-hover:pr-10 rounded-full text-sm group-hover:w-38 transition-[all,width] overflow-hidden duration-300 group-hover:delay-0">
           Connect
         </button>
       </div>
-      <span id="nickName" class="text-lg"></span>
-      <div id="dropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-700 border border-yellow-400 rounded-lg shadow-lg overflow-hidden">
-        <a id="ddProfil" class="block px-4 py-2 text-white hover:bg-gray-600">Profil</a>
-        <a id="ddLogout" class="block px-4 py-2 text-white hover:bg-gray-600">Logout</a>
-      </div>
     </div>
   </nav>
+
   <div class="flex-grow p-5">
     <h1 class="text-center text-5xl mt-10 text-yellow-400 font-bold text-shadow-md">Home</h1>
     <p class="text-center mt-4 text-lg">Play the migthy Pong Game, or the other.</p>
@@ -62,3 +60,9 @@
 
 </body>
 </html>
+
+<!--<span id="nickName" class="text-lg"></span>-->
+<!--<div id="dropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-700 border border-yellow-400 rounded-lg shadow-lg overflow-hidden">-->
+<!--  <a id="ddProfil" class="block px-4 py-2 text-white hover:bg-gray-600">Profil</a>-->
+<!--  <a id="ddLogout" class="block px-4 py-2 text-white hover:bg-gray-600">Logout</a>-->
+<!--</div>-->

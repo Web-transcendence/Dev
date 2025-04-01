@@ -42,6 +42,11 @@ export async function routes(fastify: FastifyInstance) {
         const tag = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(tag)
     })
+    fastify.get('/part/connect', function (req, reply) {
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "register.html");
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag)
+    })
     fastify.get('/part/contact', function (req, reply) {
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "contact.html");
         const tag = readFileSync(frontPath, 'utf8');
