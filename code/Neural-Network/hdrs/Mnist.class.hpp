@@ -6,15 +6,15 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 12:55:43 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/16 16:52:07 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/01 09:44:53 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MNIST_CLASS_HPP
 # define MNIST_CLASS_HPP
+# include "Math.namespace.hpp"
 # include <vector>
 # include <string>
-# include "Math.namespace.hpp"
 
 class Mnist {
 public:
@@ -39,7 +39,5 @@ private:
 	
 	int32_t 							readInt(std::ifstream & file) const;
 };
-
-
 
 #endif

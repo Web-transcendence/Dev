@@ -6,12 +6,11 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 14:00:45 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/01 11:22:20 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Neuron.class.hpp"
-#include "Math.namespace.hpp"
 
 Neuron::Neuron(unsigned int const prevLayer) {
 	std::random_device					rd;
@@ -30,8 +29,8 @@ Neuron::Neuron(unsigned int const prevLayer) {
 	return ;
 }
 
-double	Neuron::feedForward(std::vector<double> const & input) const {
-	return Math::sigmoid(Math::dotProduct(input, this->_weight) + this->_bias);	
+double	Neuron::feedForward(std::vector<double> const & input, ptrFuncS actFunc) const {
+	return (actFunc)(Math::dotProduct(input, this->_weight) + this->_bias);	
 }
 
 double	Neuron::affineTransformation(std::vector<double> const & input) const {
@@ -40,7 +39,7 @@ double	Neuron::affineTransformation(std::vector<double> const & input) const {
 
 void	Neuron::updateWeight(double const eta, double const miniBatchSize) {
 	for (auto it_w = this->_weight.begin(), it_nw = this->_nabla_w.begin(); it_w != this->_weight.end(); it_w++, it_nw++) {
-		*it_w = *it_w - eta * (*it_nw / miniBatchSize);
+		*it_w -= eta * (*it_nw / miniBatchSize);
 		*it_nw = 0.0;
 	}
 	return ;

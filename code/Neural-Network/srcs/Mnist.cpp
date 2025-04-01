@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 13:00:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/22 15:38:16 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/01 10:59:25 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,20 +120,20 @@ void    Mnist::convert( void ) {
     auto    it_l = this->trainLabels->begin();
     for (;it_i != this->trainImages->end(); it_i++, it_l++) {
         auto temp = new t_tuple;
-        for (auto it_ti = (*it_i)->begin(); it_ti != (*it_i)->end(); it_ti++)
-            temp->input.push_back(static_cast<double>(*it_ti) / 255.0);
+        auto it_tempI = temp->input.begin();
+        for (auto it_ti = (*it_i)->begin(); it_ti != (*it_i)->end(); it_ti++, it_tempI++)
+            *it_tempI = static_cast<double>((*it_ti) / 255.0);
         temp->expectedOutput[static_cast<int>(*it_l)] = 1.0;
-        temp->real = static_cast<int>(*it_l);
         this->training.push_back(temp);
     }
     it_i = this->testImages->begin();
     it_l = this->testLabels->begin();
     for (;it_i != this->testImages->end(); it_i++, it_l++) {
         auto temp = new t_tuple;
-        for (auto it_ti = (*it_i)->begin(); it_ti != (*it_i)->end(); it_ti++)
-            temp->input.push_back(static_cast<double>(*it_ti) / 255.0);
+        auto it_tempI = temp->input.begin();
+        for (auto it_ti = (*it_i)->begin(); it_ti != (*it_i)->end(); it_ti++, it_tempI++)
+            *it_tempI = static_cast<double>((*it_ti) / 255.0);
         temp->expectedOutput[static_cast<int>(*it_l)] = 1.0;
-        temp->real = static_cast<int>(*it_l);
         this->testing.push_back(temp);
     }
     return ;
