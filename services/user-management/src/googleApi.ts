@@ -30,9 +30,11 @@ export async function googleAuth(request: FastifyRequest, reply: FastifyReply):P
                 .run(payload.name, payload.email, 'NOTGIVEN', userId);
             console.log('New Email:', payload.email);
         }
-            const rows = Client_db.prepare(`SELECT * FROM Client`).all();
-            console.table(rows);
-        const token = jwt.sign({ name: payload.name, email: payload.email, avatar: payload.picture, userId: payload.sub }, 'secret_key', { expiresIn: '1h' });
+        const rows = Client_db.prepare(`SELECT * FROM Client`).all();
+        console.table(rows);
+        const userData = Client_db.prepare("SELECT id FROM Client WHERE email = ?").get(payload.email) as {id: string};
+
+        const token = jwt.sign({ id: userData.id, name: payload.name, email: payload.email, avatar: payload.picture, userId: payload.sub }, 'secret_key', { expiresIn: '1h' });
         return reply.send({token, valid: true, nickName: payload.name, avatar: payload.picture});
     } catch (error) {
         console.log('Error verifying Google token:', error);
