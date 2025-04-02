@@ -4,15 +4,23 @@ interface Window {
 
 let connected = false;
 
+window.addEventListener("popstate", (event) => {
+    console.log("Navigating back:", window.location.pathname);
+    loadPart(window.location.pathname);
+});
+
+
 function handleConnection(input: boolean) {
     const connect = document.getElementById('connect');
     const profile = document.getElementById('profile');
     if (input && profile && connect) {
         connect.classList.add('hidden');
         profile.classList.toggle('hidden');
+        profile.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
     } else if (profile && connect) {
         connect.classList.toggle('hidden');
         profile.classList.add('hidden');
+        connect.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
     }
     connected = input;
 }
@@ -37,12 +45,10 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                 const newElement = document.createElement('div');
                 newElement.className = 'tag';
                 if (reply.nickName) {
-                    console.log("UserGoogle:", reply.nickName);
                     localStorage.setItem('nickName', reply.nickName);
                     const nickName = localStorage.getItem('nickName');
                     const nameSpan = document.getElementById('nickName') as HTMLSpanElement;
                     nameSpan.textContent = reply.nickName;
-                    console.log("Welcome", nickName);
                     const avatarImg = document.getElementById('avatar') as HTMLImageElement;
                     if (reply.avatar)
                         avatarImg.src = reply.avatar;
@@ -54,10 +60,14 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                 const html = await res.text();
                 if (html.includes(container.innerHTML))
                     return;
+                window.history.pushState({}, "", "/connected");
                 container.innerHTML = '';
                 newElement.innerHTML = html;
                 container.appendChild(newElement);
                 handleConnection(true);
+                const Ping = document.getElementById("pong");
+                if (Ping)
+                    Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
             }
             console.log('Success:', reply);
         }
@@ -72,11 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Constant button on the Single Page Application
     const aboutBtn = document.getElementById("about")!;
     const contactBtn = document.getElementById("contact")!;
-    const Ping = document.getElementById("Ping")!;
 
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
-    Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 
     // For Client Connection
     const connectBtn = document.getElementById('connect');
@@ -86,27 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (connectBtn && !connected)
         connectBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
 });
-
-//
-// const connect = document.getElementById('connect');
-// const profil = document.getElementById('profil');
-//
-// if (Client.connected) {
-//     connect.classList.add('hidden');
-//     profil.classList.toggle('hidden');
-//     const profil = document.getElementById("profil");
-//     if (profil)
-//         profil.addEventListener("click", (event: MouseEvent) => navigate(event, "/profil"));
-//     const profile = document.getElementById("ddProfil")!;
-//     const logout = document.getElementById("ddLogout")!;
-//     profile.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
-//     logout.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
-// } else {
-//     const connect = document.getElementById("connect");
-//     if (connect)
-//         connect.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
-// }
-// // connect.classList.add('hidden');
 
 function navigate(event: MouseEvent, path: string): void {
     event.preventDefault();
@@ -123,6 +110,13 @@ async function loadPart(page: string): Promise<void> {
     }
     try {
         await insert_tag(`part${page}`);
+        console.log(`Part ${page}`);
+        // Home Page
+        const Home = document.getElementById('home');
+        if (Home) {
+            console.log("Home");
+            Home.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
+        }
         if (page === "/register") {
             const button = document.getElementById("registerButton")!;
             if (button)
@@ -225,6 +219,8 @@ function register(container: HTMLElement, button: HTMLElement): void {
             const html = await res.text();
             if (html.includes(container.innerHTML))
                 return;
+            window.history.pushState({}, "", "/connected");
+            console.log("HISTORYtttttttttttISMADE");
             container.innerHTML = '';
             newElement.innerHTML = html;
             container.appendChild(newElement);
