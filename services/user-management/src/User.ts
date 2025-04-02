@@ -2,6 +2,8 @@ import Database from "better-sqlite3";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import {connectedUsers} from "./api.js";
+import speakeasy, {GeneratedSecret} from "speakeasy";
+import QRCode from "qrcode";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
@@ -11,7 +13,8 @@ Client_db.exec(`
         nickName TEXT NOT NULL,
         email UNIQUE NOT NULL COLLATE NOCASE,
         password TEXT NOT NULL,
-        google_id INTEGER
+        google_id INTEGER,
+        secret_key TEXT DEFAULT NULL,
     )
 `);
 
@@ -105,6 +108,40 @@ export class User {
     private static makeToken(id: string): string {
         const token = jwt.sign({id: id}, 'secret_key', {expiresIn: '1h'})
         return (token);
+    }
+
+    generateSecretKey() :{code: number, result: string} | undefined {
+        if (Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id))
+            return {code: 409, result: "secret_key already exists"};
+
+        const secret:GeneratedSecret = speakeasy.generateSecret();
+        if (!secret || !secret.otpauth_url)
+            return {code: 500, result: "speakeasy failed to generate secret"};
+        Client_db.prepare("UPDATE Client = ? set secret_key where id = ?").run(secret.base32, this.id);
+
+        QRCode.toDataURL(secret.otpauth_url, function(err: Error | null | undefined, data_url: string) {
+            if (err)
+                return {code: 500, result: err.message};
+            return {code: 200, result: data_url};
+        });
+    }
+
+    verify(token: string): {code: number, result: string} | undefined {
+        const secret = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined;
+        if (!secret)
+            return {code: 500, result: "dataBase failed to Select secret_key"};
+        if (!secret.secret_key)
+            return {code: 409, result: "2fa isn't activated"};
+
+        const verified = speakeasy.totp.verify({
+            secret: secret.secret_key,
+            encoding: 'base32',
+            token: token,
+            window: 1
+        });
+        if (!verified)
+            return {code: 401, result: "wrong code for authentification"};
+        return {code: 200, result: "valid code for authentification"};
     }
 
     getProfile(): { nickName: string, email: string } {

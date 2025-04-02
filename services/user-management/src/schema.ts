@@ -8,6 +8,10 @@ export const manageFriendSchema = z.object({
     friendNickName: z.string().min(3, "Minimum 3 caracteres")
 })
 
+export const verifySchema = z.object({
+    secret: z.number().int().gte(100000).lte(999999)
+})
+
 export const signUpSchema = z.object({
     nickName: z.string().min(3, "Minimum 3 caracteres"),
     email: z.string().email("Invalid email"),
