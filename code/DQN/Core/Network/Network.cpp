@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/01 11:41:00 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 17:15:23 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,15 @@ void    Network::SDG(std::vector<t_tuple*>& trainingData, int const epoch, int c
 		else
 			std::cout<<std::endl<<"Epoch "<<i<<": complete"<<std::endl;
 	}
+}
+
+void	Network::copyNetwork(Network const & src) {
+	auto	it_t = this->_layers.begin();
+	auto	it_c = src._layers.begin();
+
+	for (;it_t != this->_layers.end(); it_t++, it_c++)
+		(*it_t)->copyLayer(*(*it_c));
+	return ;
 }
 
 void	Network::backprop(std::vector<double>& input, std::vector<double>& expectedOutput) {

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/01 11:40:45 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 17:14:19 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ public:
     std::vector<double>*	feedForward(std::vector<double> const & input);
     
     static void             displayProgress(int current, int max);
+
+    void                    copyNetwork(Network const & src);
 
 private:
     void    updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta);

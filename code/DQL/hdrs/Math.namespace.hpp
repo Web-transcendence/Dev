@@ -6,24 +6,16 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 09:50:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/28 14:06:19 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/01 10:09:19 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MATH_NAMESPACE_HPP
 # define MATH_NAMESPACE_HPP
 # include <vector>
+# include "TypeDefinition.hpp"
 
 #include <iostream>
-
-typedef struct  s_tuple {
-    std::vector<double> input;
-    std::vector<double> expectedOutput;
-	int					real;
-
-	s_tuple() : expectedOutput(10, 0.0) {}
-}      t_tuple;
-
 
 namespace Math {
 	// ACTIVATION FUNCTIONS
@@ -46,6 +38,16 @@ namespace Math {
 	std::vector<double>*				tanh(std::vector<double> const & zs);
 	double								tanhPrime(double const z);
 	std::vector<double>*				tanhPrime(std::vector<double> const & zs);
+
+	double								step(double const z);
+	std::vector<double>*				step(std::vector<double> const & zs);
+	double								stepPrime(double const z);
+	std::vector<double>*				stepPrime(std::vector<double> const & zs);
+
+	extern double(*const actFuncS[5])(double);
+	extern std::vector<double>*(*const actFuncV[5])(std::vector<double> const &);
+	extern double(*const primeActFuncS[5])(double);
+	extern std::vector<double>*(*const primeActFuncV[5])(std::vector<double> const &);
 
 	// COST FUNCTIONS
 	double								costDerivative(double& output, double& expected);

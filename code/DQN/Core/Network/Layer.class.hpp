@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 15:56:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/31 12:44:47 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 17:13:10 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ public:
 	std::vector<double>*	callActFunc(std::vector<double> const & input);
 	double					callPrimeActFunc(double const input);
 	std::vector<double>*	callPrimeActFunc(std::vector<double> const & input);
+
+	void	copyLayer(Layer const & src);
 
 	void	updateWeight(double const eta, double const miniBatchSize);
 	void	updateNabla_w( void );

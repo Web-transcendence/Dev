@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:04:30 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/01 10:56:01 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 17:13:18 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,15 @@ double	Layer::callPrimeActFunc(double const input) {
 
 std::vector<double>*	Layer::callPrimeActFunc(std::vector<double> const & input) {
 	return this->_primeActFuncVector(input);
+}
+
+void	Layer::copyLayer(Layer const & src) {
+	auto	it_t = this->_neurons.begin();
+	auto	it_c = src._neurons.begin();
+
+	for (;it_t != this->_neurons.end(); it_t++, it_c++)
+		(*it_t)->copyNeuron(*(*it_c));
+	return ;
 }
 
 void	Layer::updateWeight(double const eta, double const miniBatchSize) {

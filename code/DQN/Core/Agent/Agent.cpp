@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/01 14:18:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 17:58:15 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,17 +43,39 @@ void	Agent::batchTrain(unsigned int const batchSize) {
 	if (this->_xp->getNum() < this->_xp->getMin())
 		return ;
 	auto	batches = this->_xp->getBatch(batchSize);
-	auto	TNetQ = std::vector<double>(batchSize);
-	auto	it_tnet = TNetQ.begin();
-	for (auto it_b = batches.begin(); it_b != batches.end(); it_b++,it_tnet++) {
+	auto	QNetQ = std::vector<double>(batchSize);
+	auto	it_qnet = QNetQ.begin();
+	auto	expected = std::vector<double>(OUTPUT_SIZE);
+	t_tuple	training;
+	for (auto it_b = batches.begin(); it_b != batches.end(); it_b++,it_qnet++) {
 		auto	oQNet = this->_QNet->feedForward((*it_b)->nextState->allState);
-		delete oQNet;
 		action = std::distance(oQNet->begin(), std::max_element(oQNet->begin(), oQNet->end()));
-		auto	oTNet = this->_QNet->feedForward((*it_b)->nextState->allState);
-		*it_tnet = oTNet->at(action);
+		delete oQNet;
+		auto	oTNet = this->_TNet->feedForward((*it_b)->nextState->allState);
+		expected.at(action) = (*it_b)->reward;
+		if (!(*it_b)->done)
+		expected.at(action) += this->_discount * oTNet->at(action);
 		delete oTNet;
+		training.input = (*it_b)->state->allState;
+		training.expectedOutput = expected;
+		this->_QNet->SDG(&training, this->_learningRate);
+		expected.clear();
 	}
-		
+	return ;
+}
+
+t_action	Agent::getAction(std::vector<double> const & state, double exploRate) const {
+	auto		output = this->_QNet->feedForward(state);
+	t_action	action = UP;
+	if (this->randDouble() < exploRate)
+		action = this->randInt() % 4;
+	else
+	return action;
+}
+
+void	Agent::TNetUpdate( void ) {
+	this->_TNet->copyNetwork(*this->_QNet);
+	return ;
 }
 
 void	Agent::trainQNet( void )  {

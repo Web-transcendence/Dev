@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:04:30 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 14:19:04 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 17:13:18 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,15 @@
 #include "Neuron.class.hpp"
 #include "Math.namespace.hpp"
 
-Layer::Layer(int const n_neurons, int const n_weights) {
+Layer::Layer(int const n_neurons, int const n_weights, t_actFunc actFunc) {
 	this->_neurons = std::vector<Neuron*>(n_neurons);
 	for (auto it = this->_neurons.begin(); it != this->_neurons.end(); it++)
 		*it = new Neuron(n_weights);
+	this->_actFuncSingle = Math::actFuncS[actFunc];
+	this->_actFuncVector = Math::actFuncV[actFunc];
+	this->_primeActFuncSingle = Math::primeActFuncS[actFunc];
+	this->_primeActFuncVector = Math::primeActFuncV[actFunc];
+	return ;
 }
 
 Layer::~Layer( void ) {
@@ -26,21 +31,12 @@ Layer::~Layer( void ) {
 	return ;
 }
 
-std::vector<double>*	Layer::feedForwardSigmoid(std::vector<double> const & input) {
+std::vector<double>*	Layer::feedForward(std::vector<double> const & input) {
 	std::vector<double>*	res = new std::vector<double>(this->_neurons.size());
 	auto					it_res = res->begin();
 
 	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_res++)
-		(*it_res) = (*it_n)->feedForwardSigmoid(input);
-	return res;
-}
-
-std::vector<double>*	Layer::feedForwardReLu(std::vector<double> const & input) {
-	std::vector<double>*	res = new std::vector<double>(this->_neurons.size());
-	auto					it_res = res->begin();
-
-	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_res++)
-		(*it_res) = (*it_n)->feedForwardReLu(input);
+		(*it_res) = (*it_n)->feedForward(input, this->_actFuncSingle);
 	return res;
 }
 
@@ -51,6 +47,31 @@ std::vector<double>*	Layer::affineTransformation(std::vector<double> const & inp
 	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_res++)
 		(*it_res) = (*it_n)->affineTransformation(input);
 	return res;
+}
+
+double	Layer::callActFunc(double const input) {
+	return this->_actFuncSingle(input);
+}
+
+std::vector<double>*	Layer::callActFunc(std::vector<double> const & input) {
+	return this->_actFuncVector(input);
+}
+
+double	Layer::callPrimeActFunc(double const input) {
+	return this->_primeActFuncSingle(input);
+}
+
+std::vector<double>*	Layer::callPrimeActFunc(std::vector<double> const & input) {
+	return this->_primeActFuncVector(input);
+}
+
+void	Layer::copyLayer(Layer const & src) {
+	auto	it_t = this->_neurons.begin();
+	auto	it_c = src._neurons.begin();
+
+	for (;it_t != this->_neurons.end(); it_t++, it_c++)
+		(*it_t)->copyNeuron(*(*it_c));
+	return ;
 }
 
 void	Layer::updateWeight(double const eta, double const miniBatchSize) {
@@ -69,9 +90,8 @@ void	Layer::setDeltaNabla_w(std::vector<double> const & delta, std::vector<doubl
 	auto	product = Math::outerProduct(delta, activation);
 	auto	it_p = product->begin();
 	
-	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_p++) {
+	for (auto it_n = this->_neurons.begin(); it_n != this->_neurons.end(); it_n++, it_p++)
 		(*it_n)->setDeltaNabla_w(*it_p);
-	}
 	delete product;
 	return ;
 }

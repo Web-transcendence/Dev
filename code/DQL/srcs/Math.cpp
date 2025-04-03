@@ -6,12 +6,42 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:09:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/28 14:41:02 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/01 10:55:41 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Math.namespace.hpp"
 #include <cmath>
+
+namespace Math {	
+	double(*const actFuncS[5])(double) = {\
+		static_cast<double(*)(double const)>(&Math::sigmoid),\
+		static_cast<double(*)(double const)>(&Math::reLu),\
+		static_cast<double(*)(double const)>(&Math::leakyReLu),\
+		static_cast<double(*)(double const)>(&Math::tanh),\
+		static_cast<double(*)(double const)>(&Math::step)};
+		
+	std::vector<double>*(*const actFuncV[5])(std::vector<double> const &) = {\
+		static_cast<std::vector<double>*(*)(std::vector<double> const &)>(&Math::sigmoid),\
+		static_cast<std::vector<double>*(*)(std::vector<double> const &)>(&Math::reLu),\
+		static_cast<std::vector<double>*(*)(std::vector<double> const &)>(&Math::leakyReLu),\
+		static_cast<std::vector<double>*(*)(std::vector<double> const &)>(&Math::tanh),\
+		static_cast<std::vector<double>*(*)(std::vector<double> const &)>(&Math::step)};
+		
+	double(*const primeActFuncS[5])(double) = {\
+		static_cast<double(*)(double const)>(&Math::sigmoidPrime),\
+		static_cast<double(*)(double const)>(&Math::reLuPrime),\
+		static_cast<double(*)(double const)>(&Math::leakyReLuPrime),\
+		static_cast<double(*)(double const)>(&Math::tanhPrime),\
+		static_cast<double(*)(double const)>(&Math::stepPrime)};
+		
+	std::vector<double>*(*const primeActFuncV[5])(std::vector<double> const &) = {\
+		static_cast<std::vector<double>*(*)(std::vector<double> const &)>(&Math::sigmoidPrime),\
+		static_cast<std::vector<double>*(*)(std::vector<double> const &)>(&Math::reLuPrime),\
+		static_cast<std::vector<double>*(*)(std::vector<double> const &)>(&Math::leakyReLuPrime),\
+		static_cast<std::vector<double>*(*)(std::vector<double> const &)>(&Math::tanhPrime),\
+		static_cast<std::vector<double>*(*)(std::vector<double> const &)>(&Math::stepPrime)};
+}
 
 // ACTIVATION FONCTION
 double	Math::sigmoid(double const z) {return (1.0/(1.0+std::exp(-z)));}
@@ -94,6 +124,28 @@ std::vector<double>*	Math::tanh(std::vector<double> const & zs) {
 double	Math::tanhPrime(double const z) {return (1-Math::tanh(z)*Math::tanh(z));}
 
 std::vector<double>*	Math::tanhPrime(std::vector<double> const & zs) {
+	auto	res = new std::vector<double>(zs.size());
+	auto	it_res = res->begin();
+	
+	for (auto it_zs = zs.begin(); it_zs != zs.end(); it_zs++, it_res++)
+		*it_res = Math::tanhPrime(*it_zs);
+	return res;
+}
+
+double	Math::step(double const z) {return (z > 0 ? 1 : 0);}
+	
+std::vector<double>*	Math::step(std::vector<double> const & zs) {
+	auto	res = new std::vector<double>(zs.size());
+	auto	it_res = res->begin();
+	
+	for (auto it_zs = zs.begin(); it_zs != zs.end(); it_zs++, it_res++)
+		*it_res = Math::tanh(*it_zs);
+	return res;
+}
+
+double	Math::stepPrime(double const z) {(void)z;return 0;}
+
+std::vector<double>*	Math::stepPrime(std::vector<double> const & zs) {
 	auto	res = new std::vector<double>(zs.size());
 	auto	it_res = res->begin();
 	

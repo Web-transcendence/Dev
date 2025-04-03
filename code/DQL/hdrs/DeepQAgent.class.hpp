@@ -6,18 +6,17 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/31 08:34:19 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 18:19:39 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef DEEPQAGENT_CLASS_HPP
 # define DEEPQAGENT_CLASS_HPP
 # include <vector>
+# include "Math.namespace.hpp"
 
 class Environment;
 class Network;
-
-typedef enum e_mode {TRAIN, TEST} t_mode;
 
 class DeepQAgent {
 public:

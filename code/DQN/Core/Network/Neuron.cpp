@@ -6,11 +6,12 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/01 11:22:20 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 17:07:12 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Neuron.class.hpp"
+#include <cstring>
 
 Neuron::Neuron(unsigned int const prevLayer) {
 	std::random_device					rd;
@@ -35,6 +36,14 @@ double	Neuron::feedForward(std::vector<double> const & input, ptrFuncS actFunc) 
 
 double	Neuron::affineTransformation(std::vector<double> const & input) const {
 	return Math::dotProduct(input, this->_weight) + this->_bias;	
+}
+
+void	Neuron::copyNeuron(Neuron const & src) {
+	if (src._weight.size() != this->_weight.size())
+		throw std::exception();
+	std::memcpy(this->_weight.data(), src._weight.data(), this->_weight.size() * sizeof(double));
+	this->_bias = src._bias;
+	return ;
 }
 
 void	Neuron::updateWeight(double const eta, double const miniBatchSize) {

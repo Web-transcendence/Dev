@@ -6,21 +6,22 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/31 08:14:10 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 17:07:12 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Neuron.class.hpp"
-#include "Math.namespace.hpp"
+#include <cstring>
 
 Neuron::Neuron(unsigned int const prevLayer) {
 	std::random_device					rd;
 	std::mt19937						gen(rd());
-	std::normal_distribution<double> 	dist(0.0, 0.01);	
+	double 								stddev = 1.0 / std::sqrt(prevLayer);
+	std::normal_distribution<double> 	dist(0.0, stddev);	
 
 	this->_weight = std::vector<double>(prevLayer);
 	for (auto it = this->_weight.begin(); it != this->_weight.end(); it++)
-		*it = 0.0;
+		*it = dist(gen);
 	this->_bias = dist(gen);
 	this->_nabla_w = std::vector<double>(prevLayer);
 	this->_deltaNabla_w = std::vector<double>(prevLayer);
@@ -29,21 +30,25 @@ Neuron::Neuron(unsigned int const prevLayer) {
 	return ;
 }
 
-double	Neuron::feedForwardSigmoid(std::vector<double> const & input) const {
-	return Math::sigmoid(Math::dotProduct(input, this->_weight) + this->_bias);	
-}
-
-double	Neuron::feedForwardReLu(std::vector<double> const & input) const {
-	return Math::leakyReLu(Math::dotProduct(input, this->_weight) + this->_bias);	
+double	Neuron::feedForward(std::vector<double> const & input, ptrFuncS actFunc) const {
+	return (actFunc)(Math::dotProduct(input, this->_weight) + this->_bias);	
 }
 
 double	Neuron::affineTransformation(std::vector<double> const & input) const {
 	return Math::dotProduct(input, this->_weight) + this->_bias;	
 }
 
+void	Neuron::copyNeuron(Neuron const & src) {
+	if (src._weight.size() != this->_weight.size())
+		throw std::exception();
+	std::memcpy(this->_weight.data(), src._weight.data(), this->_weight.size() * sizeof(double));
+	this->_bias = src._bias;
+	return ;
+}
+
 void	Neuron::updateWeight(double const eta, double const miniBatchSize) {
 	for (auto it_w = this->_weight.begin(), it_nw = this->_nabla_w.begin(); it_w != this->_weight.end(); it_w++, it_nw++) {
-		*it_w = *it_w - eta * (*it_nw / miniBatchSize);
+		*it_w -= eta * (*it_nw / miniBatchSize);
 		*it_nw = 0.0;
 	}
 	return ;

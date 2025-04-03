@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 10:25:23 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/31 12:40:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 17:07:23 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,9 @@ public:
 	
 	double	feedForward(std::vector<double> const & input, ptrFuncS actFunc) const;
 	double	affineTransformation(std::vector<double> const & input) const;
+
+	void	copyNeuron(Neuron const & src);
+
 	void	updateWeight(double const eta, double const miniBatchSize);
 	void	updateNabla_w( void );
 	void	setDeltaNabla_w(std::vector<double> const & delta);
