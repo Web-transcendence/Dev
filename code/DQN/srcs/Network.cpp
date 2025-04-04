@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/03 17:15:23 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/04 09:47:01 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,12 @@ Network::Network(std::vector<unsigned int>sizes, t_actFunc actHiddenFunc, t_actF
 	for (i_layers = 1; i_layers < this->_num_layers - 1; i_layers++)
 		this->_layers.at(i_layers - 1) = new Layer(sizes[i_layers], sizes[i_layers - 1], actHiddenFunc);
 	this->_layers.at(i_layers - 1) = new Layer(sizes[i_layers], sizes[i_layers - 1], actOutputFunc);
+	return ;
+}
+
+Network::~Network( void ) {
+	for (auto it_l = this->_layers.begin(); it_l != this->_layers.end(); it_l++)
+		delete *it_l;
 	return ;
 }
 

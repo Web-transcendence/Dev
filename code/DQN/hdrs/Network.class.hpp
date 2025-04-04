@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/03 20:41:52 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/04 09:45:29 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ class Layer;
 class Network {
 public:
     Network(std::vector<unsigned int>sizes, t_actFunc actHiddenFunc, t_actFunc actOutputFunc);
-    ~Network( void ) {}
+    ~Network( void );
     
     void                    SDG(t_tuple* trainingData, double const eta);
     void                    SDG(std::vector<t_tuple*>& trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data);

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:07:10 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/01 11:33:34 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/04 09:31:34 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ public:
 	unsigned int			getMax( void ) const;
 	unsigned int			getMin( void ) const;
 	unsigned int			getNum( void ) const;
-	std::vector<t_exp*>		getBatch(unsigned int const size) const;
+	std::vector<t_exp*>*	getBatch(unsigned int const size) const;
 private:
 	unsigned int const	_max;
 	unsigned int const	_min;

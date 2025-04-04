@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/03 21:41:51 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/04 12:11:27 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,14 @@ public:
 	void	train( void );
 	void	test( void );
 
+	void	trainQMatrix( void );
+	int		policyQMatrix(t_mode const mode);
+
 	void	setMap(Environment & env) {this->_env = &env;};
 	void	genQNet(std::vector<unsigned int> const & sizes, t_actFunc hidden, t_actFunc output);
 	void	genTNet(std::vector<unsigned int> const & sizes, t_actFunc hidden, t_actFunc output);
+	void	genExpReplay(unsigned int const max, unsigned int const min);
+	void	genQMatrix( void );
 	
 private:
 	Agent( void );
@@ -43,8 +48,6 @@ private:
 	int		randInt(void) const;
 	double	randDouble( void ) const;
 
-	void	printQNet(void);
-
 	Environment*	_env;
 	
 	Network*		_QNet;
@@ -52,6 +55,8 @@ private:
 
 	ExpReplay*		_xp;
 
+	std::vector<std::vector<double>>	_QMatrix;
+	
 	int const		_maxEpTraining;
 	int const		_maxActions;
 	double const	_learningRate;

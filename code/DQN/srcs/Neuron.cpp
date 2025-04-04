@@ -6,12 +6,12 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:14:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/03 17:07:12 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/04 11:06:44 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Neuron.class.hpp"
-#include <cstring>
+#include <algorithm>
 
 Neuron::Neuron(unsigned int const prevLayer) {
 	std::random_device					rd;
@@ -41,7 +41,7 @@ double	Neuron::affineTransformation(std::vector<double> const & input) const {
 void	Neuron::copyNeuron(Neuron const & src) {
 	if (src._weight.size() != this->_weight.size())
 		throw std::exception();
-	std::memcpy(this->_weight.data(), src._weight.data(), this->_weight.size() * sizeof(double));
+	std::copy(src._weight.begin(), src._weight.end(),this->_weight.begin());
 	this->_bias = src._bias;
 	return ;
 }

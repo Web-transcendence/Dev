@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:39:14 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/03 21:49:36 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/04 13:16:56 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,20 @@
 #include <set>
 #include <random>
 
+#include <iostream>
+
 ExpReplay::ExpReplay( void ) : _max(0), _min(0) {};
 
 ExpReplay::ExpReplay(unsigned int const max, unsigned int const min) : _max(max), _min(min) {
 	this->_size = 0;
-	this->_experiences = std::vector<t_exp*>(this->_max);
+	this->_experiences = std::vector<t_exp*>(this->_max, NULL);
 	return ;
 }
 
 ExpReplay::~ExpReplay( void ) {
 	for (auto it = this->_experiences.begin(); it != this->_experiences.end(); it++) {
-		if (*it) {
+		if (*it)
 			delete *it;
-		}
 	}
 	return ;
 }
@@ -46,17 +47,17 @@ void	ExpReplay::add(t_exp * experience) {
 	return ;
 }
 
-std::vector<t_exp*>	ExpReplay::getBatch(unsigned int const size) const {
+std::vector<t_exp*>*	ExpReplay::getBatch(unsigned int const size) const {
 	std::set<int>						resRandomIdx;
 	std::random_device 					rd;
 	std::mt19937 						gen(rd());  
-	std::uniform_int_distribution<int>	dist(0, this->_size);
-	auto								res = std::vector<t_exp*>(size);
+	std::uniform_int_distribution<int>	dist(0, this->_size - 1);
+	auto								res = new std::vector<t_exp*>(size);
 	
 	if (size > this->_size)
 		throw std::exception();
 	for (;resRandomIdx.size() < size;) {resRandomIdx.emplace(dist(gen));}
-	auto it_res = res.begin();
+	auto it_res = res->begin();
 	for (auto idx : resRandomIdx)
 		*it_res++ = this->_experiences.at(idx);
 	return res;

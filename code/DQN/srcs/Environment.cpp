@@ -6,15 +6,17 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/03 21:57:09 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/04 13:36:37 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Environment.class.hpp"
 
 #include "TypeDefinition.hpp"
+#include "Math.namespace.hpp"
 #include <random>
 #include <iostream>
+#include <algorithm>
 
 Environment::Environment(int const col, int const row, double const rewardTo, unsigned int const maxStep) \
 	: _row(row), _col(col), _rewardThreshold(rewardTo), _maxEpStep(maxStep) {
@@ -27,7 +29,7 @@ Environment::Environment(int const col, int const row, double const rewardTo, un
 		if (!*it)
 			*it = corpus[randInt()];
 	}
-	this->_state= std::vector<double>(IN_STATE);
+	this->_state = std::vector<double>(IN_STATE);
 	return ;
 }
 
@@ -35,22 +37,27 @@ Environment::~Environment( void ) {}
 
 void	Environment::action(t_exp * exp) {
 	unsigned int const	size = this->_myMap.size();
+	unsigned int		state = this->getUIntState(exp->state);
 	int					diff[4] = {-1 * int(this->_col), int(this->_col), 1 , -1 };
-
-	exp->state = this->_state;
-	exp->nextState = this->_state;
-	if ((exp->action == RIGHT && static_cast<unsigned int>(exp->state[0]) % this->_col != this->_col - 1) \
-	|| (exp->action == LEFT && static_cast<unsigned int>(exp->state[0]) % this->_col != 0) \
-	|| (exp->action == UP && static_cast<unsigned int>(exp->state[0]) - this->_col < size) \
-	|| (exp->action == DOWN && static_cast<unsigned int>(exp->state[0]) + this->_col < size))
-		exp->nextState[0] += diff[exp->action];
-	char const	place = this->_myMap[exp->nextState[0]];
-	exp->reward = 0;
+	if ((exp->action == RIGHT && state % this->_col != this->_col - 1) \
+	|| (exp->action == LEFT && state % this->_col != 0) \
+	|| (exp->action == UP && state - this->_col < size) \
+	|| (exp->action == DOWN && state + this->_col < size))
+		state += diff[exp->action];
+	char const	place = this->_myMap[state];
 	if (place == 'G' || place == 'H') {
 		exp->done = true;
 		if (place == 'G')
 			++exp->reward;
 	}
+	exp->nextState.at(state) = 1.0;
+	return ;
+}
+
+void	Environment::reset( void ) {
+	this->_done = false;
+	std::fill(this->_state.begin(), this->_state.end(), 0.0);
+	this->_state.front() = 1.0;
 	return ;
 }
 
@@ -58,13 +65,14 @@ void	Environment::render( void ) {
 	for (unsigned int i = 0; i < this->_myMap.size(); i++) {
 		if (i % 4 == 0)
 			std::cout << std::endl;
-		if (static_cast<int>(i) == this->_state[0])
-			std::cout << "'" << this->_myMap[i] << "'";
-		else
-			std::cout << this->_myMap[i];
+		std::cout << this->_myMap[i];
 	}
 	std::cout << std::endl;
 	return ;
+}
+
+unsigned int	Environment::getUIntState(std::vector<double> const & src) {
+	return std::distance(src.begin(), std::max_element(src.begin(), src.end()));
 }
 
 int	Environment::randInt( void ) {

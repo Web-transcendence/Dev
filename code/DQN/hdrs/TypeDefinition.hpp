@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:15:27 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/03 21:52:15 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/04 10:16:47 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,9 @@
 # define RIGHT 2
 # define LEFT 3
 # define NUM_ACTION 4
-# define IN_STATE 1
+# define IN_STATE 16
 # include <vector>
+# include <cstring>
 
 using ptrFuncV = std::vector<double>*(*)(std::vector<double> const &);
 using ptrFuncS = double(*)(double const);
@@ -34,7 +35,7 @@ typedef struct s_exp {
 	double				reward;
 	std::vector<double>	nextState;
 	bool				done;
-	s_exp() : state(IN_STATE, 0.0), nextState(IN_STATE, 0.0), done(false) {}
+	s_exp() : state(IN_STATE, 0.0), reward(0.), nextState(IN_STATE, 0.0), done(false) {}
 }	t_exp;
 
 typedef struct  s_tuple {
