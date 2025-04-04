@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 15:36:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/01 11:55:06 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 21:57:17 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@ int main( void ) {
 	myAgent.genTNet(net, LEAKYRELU, LEAKYRELU);
 	myAgent.genQNet(net, LEAKYRELU, LEAKYRELU);
 	std::cout << std::endl << "=== TRAINING ===" << std::endl;
-	myAgent.trainQNet();
+	myAgent.train();
 	std::cout << std::endl << "=== TESTING ===" << std::endl;
-	myAgent.testQNet();
+	// myAgent.test();
 	return 0;
 }

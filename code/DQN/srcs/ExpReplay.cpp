@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:39:14 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/31 10:51:58 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 21:49:36 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,6 @@ ExpReplay::ExpReplay(unsigned int const max, unsigned int const min) : _max(max)
 ExpReplay::~ExpReplay( void ) {
 	for (auto it = this->_experiences.begin(); it != this->_experiences.end(); it++) {
 		if (*it) {
-			if ((*it)->state)
-				delete (*it)->state;
-			if ((*it)->nextState)
-				delete (*it)->nextState;
 			delete *it;
 		}
 	}
@@ -56,7 +52,6 @@ std::vector<t_exp*>	ExpReplay::getBatch(unsigned int const size) const {
 	std::mt19937 						gen(rd());  
 	std::uniform_int_distribution<int>	dist(0, this->_size);
 	auto								res = std::vector<t_exp*>(size);
-	int									idx = 0;
 	
 	if (size > this->_size)
 		throw std::exception();

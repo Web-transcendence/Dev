@@ -6,12 +6,13 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/03 17:46:06 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 21:41:51 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef AGENT_CLASS_HPP
 # define AGENT_CLASS_HPP
+# include "TypeDefinition.hpp"
 # include <vector>
 
 class Environment;
@@ -24,8 +25,8 @@ public:
 			double const discount, double const exploRate, double const exploDecay);
 	~Agent( void );
 
-	void	trainQNet( void );
-	void	testQNet( void );
+	void	train( void );
+	void	test( void );
 
 	void	setMap(Environment & env) {this->_env = &env;};
 	void	genQNet(std::vector<unsigned int> const & sizes, t_actFunc hidden, t_actFunc output);
@@ -35,12 +36,12 @@ private:
 	Agent( void );
 	
 	void	batchTrain(unsigned int const batchSize);				
-	t_action	getAction(std::vector<double> const & state, double exploRate) const;
+	void	getAction(t_exp * exp, double exploRate) const;
 
 	void	TNetUpdate( void );
 
-	int		randInt(void);
-	double	randDouble( void );
+	int		randInt(void) const;
+	double	randDouble( void ) const;
 
 	void	printQNet(void);
 

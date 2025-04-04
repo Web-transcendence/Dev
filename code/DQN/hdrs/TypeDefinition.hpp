@@ -6,38 +6,35 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:15:27 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/01 13:43:56 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 21:52:15 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef TYPEDEFINITION_HPP
 # define TYPEDEFINITION_HPP
-# define OUTPUT_SIZE 2
-# define INPUT_SIZE 6
+# define OUTPUT_SIZE 4
+# define INPUT_SIZE 16
+# define UP 0
+# define DOWN 1
+# define RIGHT 2
+# define LEFT 3
+# define NUM_ACTION 4
+# define IN_STATE 1
 # include <vector>
 
 using ptrFuncV = std::vector<double>*(*)(std::vector<double> const &);
 using ptrFuncS = double(*)(double const);
 
-typedef	enum e_actFunc {SIGMOID, RELU, LEAKYRELU, TANH, STEP} t_actFunc;
+typedef	enum e_actFunc {SIGMOIDs, RELU, LEAKYRELU, TANH, STEP} t_actFunc;
 typedef enum e_mode {TRAIN, TEST} t_mode;
-typedef enum e_action {UP, DOWN} t_action;
-
-typedef struct s_state {
-	// double	ballXY[2];
-	// double	ballAngle;
-	// double	pad;
-	// double	OppPad;
-	std::vector<double>	allState;
-	s_state() : allState(5, 0.0) {}
-}	t_state;
 
 typedef struct s_exp {
-	t_state*	state;
-	t_action	action;	
-	double		reward;
-	t_state*	nextState;
-	bool		done;
+	std::vector<double>	state;
+	int					action;	
+	double				reward;
+	std::vector<double>	nextState;
+	bool				done;
+	s_exp() : state(IN_STATE, 0.0), nextState(IN_STATE, 0.0), done(false) {}
 }	t_exp;
 
 typedef struct  s_tuple {

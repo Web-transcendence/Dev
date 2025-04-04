@@ -6,7 +6,7 @@
 #    By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:21:22 by thibaud           #+#    #+#              #
-#    Updated: 2025/04/01 11:33:49 by thibaud          ###   ########.fr        #
+#    Updated: 2025/04/03 21:57:53 by thibaud          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,13 +17,13 @@ SRCS_DIR	=	srcs/
 OBJS_DIR	=	.objs/
 DEPS_DIR	=	.deps/
 SRCS		=	main.cpp \
-				DeepQAgent.cpp \
+				Agent.cpp \
+				ExpReplay.cpp \
 				Environment.cpp \
 				Network.cpp \
 				Layer.cpp \
 				Neuron.cpp \
 				Math.cpp
-
 
 OBJS		= $(SRCS:%.cpp=$(OBJS_DIR)%.o)
 DEPS		= $(SRCS:%.cpp=$(DEPS_DIR)%.d)

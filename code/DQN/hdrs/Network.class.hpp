@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/03 17:14:19 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 20:41:52 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ private:
     std::vector<unsigned int>&  _sizes;
     std::vector<Layer*>         _layers;
 
-friend class DeepQAgent;
+friend class Agent;
 };
 
 #endif

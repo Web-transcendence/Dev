@@ -6,44 +6,35 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:41:48 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/27 11:29:05 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/03 21:53:51 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef ENVIRONMENT_CLASS_HPP
 # define ENVIRONMENT_CLASS_HPP
+# include "TypeDefinition.hpp"
 # include <vector>
 # include <array>
-# define UP 0
-# define DOWN 1
-# define RIGHT 2
-# define LEFT 3
-# define NUM_ACTION 4
 
 class Environment {
 public:
 	Environment(int const col, int const row, double const rewardTo, unsigned int const maxStep);
 	~Environment( void );
 
-	std::array<int, 2>	action(int const act);
-	void				reset( void );
-	void				render( void );
+	void	action(s_exp * exp);
+	void	render( void );
 
-	int					getObservationSpaceSize( void ) const ;
-	int					getActionsSpaceSize( void ) const ;
 private:
 	int		randInt(void);
 
-	bool							_done;
-	
-	int								_state;
-	std::vector<char>				_myMap;
-	unsigned int const				_row;
-	unsigned int const				_col;
-	double const					_rewardThreshold;
-	unsigned int const				_maxEpStep;
+	std::vector<double>	_state;
+	std::vector<char>	_myMap;
+	unsigned int const	_row;
+	unsigned int const	_col;
+	double const		_rewardThreshold;
+	unsigned int const	_maxEpStep;
 
-friend class DeepQAgent;
+friend class Agent;
 };
 
 #endif
