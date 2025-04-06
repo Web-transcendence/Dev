@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/04 12:11:27 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/06 14:59:04 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,9 @@ private:
 	int		randInt(void) const;
 	double	randDouble( void ) const;
 
+	void	printQMatrix(void);
+	void	printQNet(void);
+	
 	Environment*	_env;
 	
 	Network*		_QNet;
