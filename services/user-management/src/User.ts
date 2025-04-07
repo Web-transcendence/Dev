@@ -11,7 +11,8 @@ Client_db.exec(`
         nickName TEXT NOT NULL,
         email UNIQUE NOT NULL COLLATE NOCASE,
         password TEXT NOT NULL,
-        google_id INTEGER
+        google_id INTEGER,
+        pictureProfile TEXT DEFAULT NULL,
     )
 `);
 
@@ -122,6 +123,12 @@ export class User {
         res.sse({data: JSON.stringify({event: "invite", data: "teeest"})});
     }
 
+    updatePictureProfile(pictureURL: string): {code: number, message: string} {
+        const change = Client_db.prepare(`UPDATE Client SET pictureProfile = ? WHERE id = ?`).run(pictureURL, this.id);
+        if (!change || !change.changes)
+            throw new Error(`Database Error: cannot update pictureProfile changes for ${this.id}`);
+        return {code: 200, message: "picture updated"};
+    }
 
     /**
      * recover the id of the friend, check his friendship status in db, if it doesn't exist it add with status = pending,

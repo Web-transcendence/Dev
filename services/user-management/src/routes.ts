@@ -145,4 +145,24 @@ export default async function userRoutes(app: FastifyInstance) {
         res.sse({data: JSON.stringify(message)});
     });
 
+    app.post('/updatePicture', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const zod_result = Schema.pictureSchema.safeParse(req.body);
+            if (!zod_result.success)
+                return res.status(400).send({json: zod_result.error.format()});
+            let pictureURL = sanitizeHtml(zod_result.data.pictureURL);
+            if (!pictureURL)
+                return res.status(454).send({error: "All information are required !"});
+
+            const id = req.headers.id as string;
+            if (!id)
+                throw "cannot recover id";
+
+            const user = new User(id);
+
+            const result = user.updatePictureProfile(pictureURL);
+        } catch (e) {
+
+        }
+    })
 }

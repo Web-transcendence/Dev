@@ -114,4 +114,5 @@ export async function routes(fastify: FastifyInstance) {
             reply.code(404).send("Fichier barup non trouvé");
         }
     });
+
 }
