@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 12:57:08 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/07 11:46:17 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,62 +97,13 @@ void	Agent::test( void ) {
 			break ;
 		delete output;
 	}
-	if (this->_env->_myMap[this->_env->getUIntState(this->_env->_state)] == 'G') {
+	if (this->_env->_myMap[this->_env->getUIntState(this->_env->_state)] == 'G')
 		std::cout << "=== SUCESS ===" << std::endl;
-		this->_QNet->printNetworkToJson("weight.json");
-	}
 	else
 		std::cout << "=== FAIL ===" << std::endl;
 	return ;
 }
 
-void	Agent::trainQMatrix( void ) {
-	double exploRate = this->_explorationRate;
-	this->_goalTraining = 0;
-	for (int i = 0; i < 10000; i++) {
-		this->_env->reset();
-		for (int a = 0; a < this->_maxActions; a++) {
-			t_exp	xp;
-			xp.action = this->policyQMatrix(TRAIN);
-			xp.state = this->_env->_state;
-			this->_env->action(&xp);
-			this->_QMatrix[this->_env->getUIntState(xp.state)][xp.action] = this->_learningRate\
-				*(xp.reward\
-				+this->_discount\
-				*(*std::max_element(this->_QMatrix[this->_env->getUIntState(xp.nextState)].begin(), \
-					this->_QMatrix[this->_env->getUIntState(xp.nextState)].end())));
-			this->_env->_state = xp.nextState;
-			this->_goalTraining += xp.reward;
-			this->_env->_done = xp.done;
-			if (this->_env->_done == true)
-				break ;
-		}
-		if (exploRate - this->_explorationDecay > 0.001)
-			exploRate -=  this->_explorationDecay;
-	}
-	std::cout << "Training finished ";
-	if (this->_goalTraining)
-		std::cout << "map ok" << std::endl;
-	else
-		std::cout << "map nok" << std::endl;
-	this->_env->render();
-}
-
-int	Agent::policyQMatrix(t_mode const mode) {
-	int	act = -1;
-	
-	if (mode == TRAIN) {	
-		if (this->randDouble() < this->_explorationRate) 
-			act = randInt() % 4;
-	}
-	if (act == -1) {
-		unsigned int const state = this->_env->getUIntState(this->_env->_state);
-		act = std::distance(this->_QMatrix[state].begin(),\
-		std::max_element(this->_QMatrix[state].begin(),\
-		this->_QMatrix[state].end()));
-	}
-	return act;
-}
 
 void	Agent::batchTrain(unsigned int const batchSize) {
  	if (this->_xp->getNum() < this->_xp->getMin())
@@ -213,12 +164,6 @@ void	Agent::genExpReplay(unsigned int const min, unsigned int const max) {
 	return ;
 }
 
-void	Agent::genQMatrix( void ) {
-	if (!this->_env)
-		throw std::exception();
-	this->_QMatrix = std::vector<std::vector<double>>(this->_env->_myMap.size(), std::vector<double>(NUM_ACTION));
-}
-
 int	Agent::randInt( void ) const {
 	static std::random_device 					rd;
     static std::mt19937 						gen(rd());  
@@ -231,28 +176,4 @@ double	Agent::randDouble( void ) const {
     static std::mt19937 						gen(rd());  
     static std::uniform_real_distribution<double>	dist(0., 1.);
 	return dist(gen);
-}
-
-void	Agent::printQMatrix(void) {
-	std::cout<<std::endl;
-	std::cout<<"==QMATRIX=="<<std::endl;
-	for (int i = 0; i < 16; i++) {
-		std::cout<<"Stage "<<i;
-		Math::printdebug(this->_QMatrix.at(i), "");
-	}
-	return ;
-}
-
-void	Agent::printQNet( void ) {
-	std::vector<double>	state(16);
-	std::cout<<std::endl;
-	std::cout<<"==QNET=="<<std::endl;
-	for (int i = 0; i < 16; i++) {
-		state.at(i) = 1.;
-		auto	output = this->_QNet->feedForward(state);
-		std::cout<<"Stage "<<i<<": ";
-		Math::printdebug(*output, "");
-		delete output;
-		state.at(i) = 0.;
-	}
 }

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 13:17:48 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/07 13:19:07 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,7 +191,7 @@ void	Network::printNetworkToJson(std::string const & outputFile) {
 	return ;
 }
 
-void Network::displayProgress(int current, int max) {
+void	Network::displayProgress(int current, int max) {
     int width = 20;
     int progress = (current * width) / max;
 

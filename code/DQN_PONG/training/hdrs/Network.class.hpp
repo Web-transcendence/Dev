@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 12:55:40 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/07 12:24:10 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define NETWORK_CLASS_HPP
 # include "Math.namespace.hpp"
 # include <vector>
+# include <string>
 
 class Layer;
 
@@ -29,6 +30,7 @@ public:
     static void             displayProgress(int current, int max);
 
     void                    copyNetwork(Network const & src);
+
     void                    printNetworkToJson(std::string const & outputFile);
 
 private:
