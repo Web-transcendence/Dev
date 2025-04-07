@@ -4,7 +4,7 @@ interface Window {
 
 let connected = false;
 
-window.addEventListener("popstate", (event) => {
+window.addEventListener("popstate", () => {
     console.log("Navigating back:", window.location.pathname);
     loadPart(window.location.pathname);
 });
@@ -46,7 +46,6 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                 newElement.className = 'tag';
                 if (reply.nickName) {
                     localStorage.setItem('nickName', reply.nickName);
-                    const nickName = localStorage.getItem('nickName');
                     const nameSpan = document.getElementById('nickName') as HTMLSpanElement;
                     nameSpan.textContent = reply.nickName;
                     const avatarImg = document.getElementById('avatar') as HTMLImageElement;
@@ -65,7 +64,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                 newElement.innerHTML = html;
                 container.appendChild(newElement);
                 handleConnection(true);
-                const Ping = document.getElementById("pong");
+                const Ping = document.getElementById("pongConnected");
                 if (Ping)
                     Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
             }
@@ -93,6 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const connectBtn = document.getElementById('connect');
     if (connectBtn && !connected)
         connectBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+    const Ping = document.getElementById("pong");
+    if (Ping)
+        Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 });
 
 function navigate(event: MouseEvent, path: string): void {
