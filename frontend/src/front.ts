@@ -113,10 +113,8 @@ async function loadPart(page: string): Promise<void> {
         console.log(`Part ${page}`);
         // Home Page
         const Home = document.getElementById('home');
-        if (Home) {
-            console.log("Home");
+        if (Home)
             Home.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
-        }
         if (page === "/register") {
             const button = document.getElementById("registerButton")!;
             if (button)
