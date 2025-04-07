@@ -1,3 +1,23 @@
+document.addEventListener("DOMContentLoaded", () => {
+    // Constant button on the Single Page Application
+    const aboutBtn = document.getElementById("about")!;
+    const contactBtn = document.getElementById("contact")!;
+
+    aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
+    contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
+
+    // For Client Connection
+    const profilBtn = document.getElementById('profile');
+    if (profilBtn && connected)
+        profilBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
+    const connectBtn = document.getElementById('connect');
+    if (connectBtn && !connected)
+        connectBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+    const Ping = document.getElementById("pong");
+    if (Ping)
+        Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
+});
+
 interface Window {
     CredentialResponse: (response: any) => void;
 }
@@ -76,27 +96,6 @@ window.CredentialResponse = async (credit: { credential: string }) => {
     }
 }
 
-
-document.addEventListener("DOMContentLoaded", () => {
-    // Constant button on the Single Page Application
-    const aboutBtn = document.getElementById("about")!;
-    const contactBtn = document.getElementById("contact")!;
-
-    aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
-    contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
-
-    // For Client Connection
-    const profilBtn = document.getElementById('profile');
-    if (profilBtn && connected)
-        profilBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
-    const connectBtn = document.getElementById('connect');
-    if (connectBtn && !connected)
-        connectBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
-    const Ping = document.getElementById("pong");
-    if (Ping)
-        Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
-});
-
 function navigate(event: MouseEvent, path: string): void {
     event.preventDefault();
     window.history.pushState({}, "", path);
@@ -117,19 +116,23 @@ async function loadPart(page: string): Promise<void> {
         const Home = document.getElementById('home');
         if (Home)
             Home.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
+        // Login
+        const loginBtn = document.getElementById("loginButton");
+        if (loginBtn)
+            loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
         //logout
         const logoutBtn = document.getElementById('logout');
         if (logoutBtn && connected)
             logoutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
-        if (page === "/register") {
-            const button = document.getElementById("registerButton")!;
+        if (page === "/connect") {
+            const button = document.getElementById("registerButton") as HTMLButtonElement;
             if (button)
-                register(container, button);
+                register(button);
         }
         if (page === "/login") {
-            const button = document.getElementById("loginButton")!;
+            const button = document.getElementById("loginButton") as HTMLButtonElement;
             if (button)
-                login(container, button);
+                login(button);
         }
         if (page === "/profile") {
             const nickName = document.getElementById("profileNickName")!;
@@ -171,6 +174,12 @@ async function insert_tag(url: string): Promise<void>{
     if (html.includes(container.innerHTML))
         return;
     container.innerHTML = '';
+    afterInsert(url, container);
+    newElement.innerHTML = html;
+    container.appendChild(newElement);
+}
+
+function afterInsert(url: string, container: HTMLElement): void {
     if (url === "part/pong") {
         if (!document.querySelector('script[src="/static/dist/pong.js"]')) {
             const script = document.createElement('script');
@@ -182,25 +191,25 @@ async function insert_tag(url: string): Promise<void>{
         if (existingScript)
             existingScript.remove();
     }
+    const googleID = document.getElementById('googleidentityservice');
+    const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
+    if (googlemeta)
+        googlemeta.remove();
+    if (googleID)
+        googleID.remove();
     if (url === "part/login" || url === "part/connect") {
-        const script = document.createElement('script');
-        script.src = "https://accounts.google.com/gsi/client";
-        script.async = true;
-        script.defer = true;
-        container.appendChild(script);
-    } else {
         const googleID = document.getElementById('googleidentityservice');
-        const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
-        if (googlemeta)
-            googlemeta.remove();
-        if (googleID)
-            googleID.remove();
+        if (!googleID) {
+            const script = document.createElement('script');
+            script.src = "https://accounts.google.com/gsi/client";
+            script.async = true;
+            script.defer = true;
+            container.appendChild(script);
+        }
     }
-    newElement.innerHTML = html;
-    container.appendChild(newElement);
 }
 
-function register(container: HTMLElement, button: HTMLElement): void {
+function register(button: HTMLElement): void {
     button.addEventListener("click", async () => {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
@@ -216,27 +225,15 @@ function register(container: HTMLElement, button: HTMLElement): void {
         if (result.token) {
             localStorage.setItem('token', result.token);
             sseConnection(result.token);
-            const res = await fetch('/part/connected');
-            const newElement = document.createElement('div');
-            newElement.className = 'tag';
-            if (!res.ok)
-                throw Error("Page not found: element missing.");
-            const html = await res.text();
-            if (html.includes(container.innerHTML))
-                return;
-            window.history.pushState({}, "", "/connected");
-            container.innerHTML = '';
-            newElement.innerHTML = html;
-            container.appendChild(newElement);
+            loadPart("/connected");
             handleConnection(true);
         } else {
-            const errors = result.json;
-            validateRegister(errors.json);
+            validateRegister(result.json);
         }
     });
 }
 
-function login(container: HTMLElement, button: HTMLElement): void {
+function login(button: HTMLElement): void {
     button.addEventListener("click", async () => {
         const myForm = document.getElementById("myForm") as HTMLFormElement;
         const formData = new FormData(myForm);
@@ -254,22 +251,10 @@ function login(container: HTMLElement, button: HTMLElement): void {
             localStorage.setItem('token', result.token);
             localStorage.setItem('nickName', result.nickName);
             sseConnection(result.token);
-            // localStorage.setItem('avatar', result.avatar);
-            const res = await fetch('/part/connected');
-            const newElement = document.createElement('div');
-            newElement.className = 'tag';
-            if (!res.ok)
-                throw Error("Page not found: element missing.");
-            const html = await res.text();
-            if (html.includes(container.innerHTML))
-                return;
-            container.innerHTML = '';
-            newElement.innerHTML = html;
-            container.appendChild(newElement);
+            loadPart("/connected");
             handleConnection(true);
         } else {
             const loginError = document.getElementById("LoginError") as HTMLSpanElement;
-            // if (!loginError.classList.contains("hidden"))
             loginError.textContent = result?.error ?? "An error occurred";
             loginError.classList.remove("hidden");
         }
@@ -302,7 +287,8 @@ async function profile(container: HTMLElement, nickName: HTMLElement, email: HTM
 }
 
 function validateRegister(result: { nickName: string; email: string; password: string}): void {
-    const nickNameErrorMin = document.getElementById("nickNameErrorMin") as HTMLSpanElement;
+    console.log(result);
+    const nickNameErrorMin = document.getElementById("nickNameError") as HTMLSpanElement;
     const emailError = document.getElementById("emailError") as HTMLSpanElement;
     const passwordError = document.getElementById("passwordError") as HTMLSpanElement;
     if (result.nickName)
