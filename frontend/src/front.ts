@@ -87,10 +87,10 @@ document.addEventListener("DOMContentLoaded", () => {
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
 
     // For Client Connection
-    const connectBtn = document.getElementById('connect');
     const profilBtn = document.getElementById('profile');
     if (profilBtn && connected)
         profilBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
+    const connectBtn = document.getElementById('connect');
     if (connectBtn && !connected)
         connectBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
 });
@@ -115,6 +115,10 @@ async function loadPart(page: string): Promise<void> {
         const Home = document.getElementById('home');
         if (Home)
             Home.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
+        //logout
+        const logoutBtn = document.getElementById('logout');
+        if (logoutBtn && connected)
+            logoutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
         if (page === "/register") {
             const button = document.getElementById("registerButton")!;
             if (button)
@@ -219,7 +223,6 @@ function register(container: HTMLElement, button: HTMLElement): void {
             if (html.includes(container.innerHTML))
                 return;
             window.history.pushState({}, "", "/connected");
-            console.log("HISTORYtttttttttttISMADE");
             container.innerHTML = '';
             newElement.innerHTML = html;
             container.appendChild(newElement);
