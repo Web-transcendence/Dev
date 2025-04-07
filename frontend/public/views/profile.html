@@ -1,45 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<div class="flex gap-4 center-items text-white container">
 
-<div class="w-7xl max-w-xl bg-gray-900 shadow-lg rounded-lg p-8">
-    <h1 class="text-xl font-bold text-yellow-400 mb-4 text-center">Your Profile</h1>
+    <div class="w-full bg-gray-900 shadow-lg rounded-lg p-8 overflow-hidden">
+        <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">Your Profile</h1>
 
-    <div class="border-t border-gray-300 my-4"></div>
+        <div class="border-t border-gray-300 my-4"></div>
 
-    <div class="profile-details space-y-4">
-        <div class="insert-nickName">
-            <div id="profileNickName" class="text-gray-300 font-semibold">loading ...</div> <!-- Placeholder for name -->
+        <div class="profile-details space-y-4">
+            <div class="insert-nickName">
+                <div id="profileNickName" class="text-gray-300 font-semibold truncate">loading ...</div>
+            </div>
+
+            <div class="insert-email">
+                <div id="profileEmail" class="text-gray-300 font-semibold truncate">loading ...</div>
+            </div>
+
+            <div class="profile-actions">
+                <button id="editProfileButton" class="w-full bg-yellow-400 text-white px-5 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition transform hover:scale-105">
+                    Edit Profile
+                </button>
+                <button id="logoutButton" class="w-full bg-gray-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-gray-600 transition transform hover:scale-105 mt-4">
+                    Logout
+                </button>
+            </div>
         </div>
 
-        <div class="insert-email">
-            <div id="profileEmail" class="text-gray-300 font-semibold">loading ...</div> <!-- Placeholder for email -->
-        </div>
+        <div class="border-spacing-2 border-spacing-x-2 border-spacing-y-2 border-gray-300 my-6"></div>
+    </div>
 
-        <div class="profile-actions">
-            <button id="editProfileButton" class="w-full bg-yellow-400 text-white px-5 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition transform hover:scale-105">
-                Edit Profile
-            </button>
-            <button id="logoutButton" class="w-full bg-gray-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-gray-600 transition transform hover:scale-105 mt-4">
-                Logout
-            </button>
+    <div class="w-full bg-gray-900 shadow-lg rounded-lg p-8 overflow-hidden ">
+        <h2 class="text-lg font-bold text-yellow-400 text-center mb-4">Friends List</h2>
+
+        <div class="border-t border-gray-300 my-4"></div>
+
+        <!-- Section Liste d'Amis -->
+        <div class="rounded-lg shadow-md flex w-full">
+            <!-- Formulaire d'ajout -->
+            <div class="mb-4 bg-white rounded-lg flex w-full">
+                <input id="friendName" type="text" placeholder="Enter a name" class="w-full p-2 rounded-l-lg text-black  outline-none">
+                <button onclick="addFriend()" class="bg-pink-500 px-4 text-white rounded-r-lg hover:bg-pink-600 transition hover:scale-105">Add</button>
+            </div>
+
+            <!-- Liste des amis -->
+            <ul id="friendList" class="space-y-2">
+                <!-- Les amis seront ajoutés ici dynamiquement -->
+            </ul>
         </div>
     </div>
 
-    <div class="border-t border-gray-300 my-6"></div>
-
-    <div class="text-center">
-        <a href="/" class="bg-gray-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-gray-600 transition transform hover:scale-105">
-            Back to Home
-        </a>
-    </div>
 </div>
 
-<script type="module" src="/static/dist/front.js"></script>
+<div class="border-t border-gray-300 my-6"></div>
 
-</body>
-</html>
+<div class="text-center">
+        <button id="home" class="bg-gray-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-gray-600 transition transform hover:scale-105">
+            Back to Home
+        </button>
+</div>

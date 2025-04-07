@@ -2,6 +2,29 @@ interface Window {
     CredentialResponse: (response: any) => void;
 }
 
+let connected = false;
+
+window.addEventListener("popstate", (event) => {
+    console.log("Navigating back:", window.location.pathname);
+    loadPart(window.location.pathname);
+});
+
+
+function handleConnection(input: boolean) {
+    const connect = document.getElementById('connect');
+    const profile = document.getElementById('profile');
+    if (input && profile && connect) {
+        connect.classList.add('hidden');
+        profile.classList.toggle('hidden');
+        profile.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
+    } else if (profile && connect) {
+        connect.classList.toggle('hidden');
+        profile.classList.add('hidden');
+        connect.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+    }
+    connected = input;
+}
+
 window.CredentialResponse = async (credit: { credential: string }) => {
     try {
         const response = await fetch('http://localhost:3000/user-management/auth/google', {
@@ -22,12 +45,10 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                 const newElement = document.createElement('div');
                 newElement.className = 'tag';
                 if (reply.nickName) {
-                    console.log("UserGoogle:", reply.nickName);
                     localStorage.setItem('nickName', reply.nickName);
                     const nickName = localStorage.getItem('nickName');
                     const nameSpan = document.getElementById('nickName') as HTMLSpanElement;
                     nameSpan.textContent = reply.nickName;
-                    console.log("Welcome", nickName);
                     const avatarImg = document.getElementById('avatar') as HTMLImageElement;
                     if (reply.avatar)
                         avatarImg.src = reply.avatar;
@@ -39,9 +60,14 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                 const html = await res.text();
                 if (html.includes(container.innerHTML))
                     return;
+                window.history.pushState({}, "", "/connected");
                 container.innerHTML = '';
                 newElement.innerHTML = html;
                 container.appendChild(newElement);
+                handleConnection(true);
+                const Ping = document.getElementById("pong");
+                if (Ping)
+                    Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
             }
             console.log('Success:', reply);
         }
@@ -51,21 +77,22 @@ window.CredentialResponse = async (credit: { credential: string }) => {
     }
 }
 
+
 document.addEventListener("DOMContentLoaded", () => {
+    // Constant button on the Single Page Application
     const aboutBtn = document.getElementById("about")!;
     const contactBtn = document.getElementById("contact")!;
-    const registerBtn = document.getElementById("register")!;
-    const loginBtn = document.getElementById("login")!;
-    const factor = document.getElementById("2fa")!;
-    const Ping = document.getElementById("Ping")!;
 
     aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
-    registerBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/register"));
-    loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
-    factor.addEventListener("click", (event: MouseEvent) => navigate(event, "/factor"));
-    Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 
+    // For Client Connection
+    const connectBtn = document.getElementById('connect');
+    const profilBtn = document.getElementById('profile');
+    if (profilBtn && connected)
+        profilBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
+    if (connectBtn && !connected)
+        connectBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
 });
 
 function navigate(event: MouseEvent, path: string): void {
@@ -83,6 +110,11 @@ async function loadPart(page: string): Promise<void> {
     }
     try {
         await insert_tag(`part${page}`);
+        console.log(`Part ${page}`);
+        // Home Page
+        const Home = document.getElementById('home');
+        if (Home)
+            Home.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
         if (page === "/register") {
             const button = document.getElementById("registerButton")!;
             if (button)
@@ -98,6 +130,15 @@ async function loadPart(page: string): Promise<void> {
             const email = document.getElementById("profileEmail")!;
             if (email && nickName)
                 profile(container, nickName, email);
+        }
+        if (page === "/logout") {
+            handleConnection(false);
+            const avatar = document.getElementById("avatar") as HTMLImageElement;
+            if (avatar)
+                avatar.src = "../logout.png";
+            const nickName = document.getElementById("nickName") as HTMLSpanElement;
+            if (nickName)
+                nickName.textContent = '';
         }
     } catch (error) {
         console.error(error);
@@ -135,7 +176,7 @@ async function insert_tag(url: string): Promise<void>{
         if (existingScript)
             existingScript.remove();
     }
-    if (url === "part/login") {
+    if (url === "part/login" || url === "part/connect") {
         const script = document.createElement('script');
         script.src = "https://accounts.google.com/gsi/client";
         script.async = true;
@@ -177,9 +218,12 @@ function register(container: HTMLElement, button: HTMLElement): void {
             const html = await res.text();
             if (html.includes(container.innerHTML))
                 return;
+            window.history.pushState({}, "", "/connected");
+            console.log("HISTORYtttttttttttISMADE");
             container.innerHTML = '';
             newElement.innerHTML = html;
             container.appendChild(newElement);
+            handleConnection(true);
         } else {
             const errors = result.json;
             validateRegister(errors.json);
@@ -217,6 +261,7 @@ function login(container: HTMLElement, button: HTMLElement): void {
             container.innerHTML = '';
             newElement.innerHTML = html;
             container.appendChild(newElement);
+            handleConnection(true);
         } else {
             const loginError = document.getElementById("LoginError") as HTMLSpanElement;
             // if (!loginError.classList.contains("hidden"))
