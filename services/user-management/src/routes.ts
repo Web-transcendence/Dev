@@ -55,14 +55,14 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     });
 
-    app.get("/2faInit", (req: FastifyRequest, res: FastifyReply) => {
+    app.get("/2faInit", async (req: FastifyRequest, res: FastifyReply) => {
         try {
             const id = req.headers.id as string;
             if (!id)
                 throw "cannot recover id";
             const user = new User(id);
 
-            const status = user.generateSecretKey()
+            const status = await user.generateSecretKey()
             if (!status)
                 return res.status(500).send("idk what happend");
             return res.status(status.code).send(status.result);
@@ -87,7 +87,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const result = user.verify(secret);
 
-            return res.status(result.code).send(result.message);
+            return res.status(result.code).send(result.result);
         } catch (err) {
             return res.status(500).send({error: `Server error: ${err}`});
         }

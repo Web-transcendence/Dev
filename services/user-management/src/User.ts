@@ -14,7 +14,7 @@ Client_db.exec(`
         email UNIQUE NOT NULL COLLATE NOCASE,
         password TEXT NOT NULL,
         google_id INTEGER,
-        secret_key TEXT DEFAULT NULL,
+        secret_key TEXT DEFAULT NULL
     )
 `);
 
@@ -27,7 +27,7 @@ Client_db.exec(`
         FOREIGN KEY (userA_id) REFERENCES Client(id) ON DELETE CASCADE,
         FOREIGN KEY (userB_id) REFERENCES Client(id) ON DELETE CASCADE
     )
-`)
+`);
 
 export class User {
     id: string;
@@ -110,23 +110,25 @@ export class User {
         return (token);
     }
 
-    generateSecretKey() :{code: number, result: string} | undefined {
-        if (Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id))
+    async generateSecretKey() :Promise<{ code: number, result: string }> {
+        const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id)as { secret_key: string } | undefined;
+        if (!data)
+            throw new Error(`Database failed`);
+        if (data.secret_key)
             return {code: 409, result: "secret_key already exists"};
 
         const secret:GeneratedSecret = speakeasy.generateSecret();
         if (!secret || !secret.otpauth_url)
             return {code: 500, result: "speakeasy failed to generate secret"};
-        Client_db.prepare("UPDATE Client = ? set secret_key where id = ?").run(secret.base32, this.id);
 
-        QRCode.toDataURL(secret.otpauth_url, function(err: Error | null | undefined, data_url: string) {
-            if (err)
-                return {code: 500, result: err.message};
-            return {code: 200, result: data_url};
-        });
+        Client_db.prepare("UPDATE Client set secret_key = ? where id = ?").run(secret.base32, this.id);
+
+        const dataURL = await QRCode.toDataURL(secret.otpauth_url);
+
+        return {code: 200, result: dataURL};
     }
 
-    verify(token: string): {code: number, result: string} | undefined {
+    verify(token: string): {code: number, result: string} {
         const secret = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined;
         if (!secret)
             return {code: 500, result: "dataBase failed to Select secret_key"};

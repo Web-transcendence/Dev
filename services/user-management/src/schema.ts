@@ -9,7 +9,9 @@ export const manageFriendSchema = z.object({
 })
 
 export const verifySchema = z.object({
-    secret: z.number().int().gte(100000).lte(999999)
+    secret: z.string().regex(/^\d{6}$/, {
+        message: "only 6 digits are allowed",
+    })
 })
 
 export const signUpSchema = z.object({
