@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:39:14 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/04 13:16:56 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/07 11:04:50 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,9 +39,8 @@ void	ExpReplay::add(t_exp * experience) {
 	}
 	else {
 		delete this->_experiences.back();
-		for (auto it_a = this->_experiences.begin(), it_b = it_a + 1; it_b != this->_experiences.end(); it_a++, it_b++) {
-			*it_b = *it_a;
-		}
+		for (auto it_a = this->_experiences.end() - 1, it_b = it_a - 1; it_a != this->_experiences.begin(); it_a--, it_b--)
+			*it_a = *it_b;
 		this->_experiences.front() = experience;
 	}
 	return ;

@@ -268,6 +268,25 @@ une recompense unique (+1 lorsque le point est marque) genereait l exploration e
 Je vais donc partir sur des bases simples : +1 lorsque le point est marque, -0.5 lorsque le point est concede, +0.05 lorsque la balle est recuperee.
 Le but est de favoriser l agressivite sans pour autant que cela soit trop rentable. Elle va devoir ne pas etre trop passive.
 
+Apres de nombreux tests j'ai donc developpe un DQN sur le probleme du frozenlake. Le probleme est simple mais l algo pour le resoudre est lui complique.
+J'ai fait cette etape intermediaire pour me faire la main et m'assurer que mq logique etait la bonne avant de passer au pong. Le DQN est interessant et 
+bien pense, il est complique a comprendre mais pas tellement a realise par rapport au NN. Cela m'a pris du temps parce que j avais l xp replay a ajouter aussi.
+L'exp replay c est un buffer d experience passee qui vont venir train notre network a chaque actions de l'episode de training ce qui decuple le nombre d entrainement.
+Pour mon probleme ici je store dans chaque experience, le state, l action, le next state, la reward de celui ci et si l episode est done ou pas (ici si le goal a ete
+reach ou si on est tombe dans un hole). Mais l xp replay n'est qu un ajout par rapport a mon DQL mais c est pas le plus interessant ici puisqu il aurait pu etre ajoute
+avant. Le DQN ajoute un second NN appelle target network qui va venir sauvegarder le reseau principal a un instant T afin de venir reduire la variance de celui-ci.
+Je m'explique, que le reseau fire un bon ou un mauvais input il va quand meme se mettre a jour ce qui peut ralentir le process voir l emmener sur une fausse piste. le tnet
+va sauvegarder le reseau apres un episode concretisant (une suite de reponse satisfaisante) et venir fire des outputs afin de guider la suite du training. Il sert un peu 
+de tuteur en quelque sorte. Pour un DQN on calcule la Qvalue(st, at) de la facon suivante :
+    Qvalue(st, at) = Reward(t+1) + discount * (Tvalue(nextState, maxTvalue(nextState)))
+On vient dans un premier temps recuperer la reward decoulant de la nextState qu on va sommer avec le produit du discount (l importance apportee aux rewards futures) et de la 
+Qvalue du nextState pour une action a, pour a soit l action avec la qvalue maximale dans les Qvalues fired par Tnet.
+
+
+
+On passe au pong maintenant !
+
+ 
 
 
 
