@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 11:46:17 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/07 13:50:24 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,17 @@ void	Agent::genTNet(std::vector<unsigned int> const & sizes, t_actFunc hidden, t
 void	Agent::genExpReplay(unsigned int const min, unsigned int const max) {
 	this->_xp = new ExpReplay(max, min);
 	return ;
+}
+
+void	Agent::stateToVector(t_state const & src, std::vector<double>& dest) {
+	if (dest.size() != IN_STATE)
+		throw std::exception();
+	std::memcpy(dest.data(), &src, sizeof(t_state));
+	return ;
+}
+
+void	Agent::vectorToState(std::vector<double> const & src, t_state const & dest) {
+	
 }
 
 int	Agent::randInt( void ) const {

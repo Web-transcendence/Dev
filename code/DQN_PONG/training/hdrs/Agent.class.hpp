@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 12:21:55 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/07 13:50:34 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ private:
 
 	void	TNetUpdate( void );
 
-	void	stateToVector(t_state const & src, std::vector<double> const & dest);
+	void	stateToVector(t_state const & src, std::vector<double>& dest);
 	void	vectorToState(std::vector<double> const & src, t_state const & dest);
 	
 	int		randInt(void) const;
