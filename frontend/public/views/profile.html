@@ -1,6 +1,6 @@
-<div class="flex gap-4 center-items text-white container">
+<div class="flex gap-4 center-items text-white mb-4 container">
 
-    <div class="w-full bg-gray-900 shadow-lg rounded-lg p-8 overflow-hidden">
+    <div class="relative w-full bg-gray-900 shadow-lg rounded-lg p-8 pb-40 overflow-hidden">
         <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">Your Profile</h1>
 
         <div class="border-t border-gray-300 my-4"></div>
@@ -14,8 +14,8 @@
                 <div id="profileEmail" class="text-gray-300 font-semibold truncate">loading ...</div>
             </div>
 
-            <div class="profile-actions">
-                <button id="editProfileButton" class="w-full bg-yellow-400 text-white px-5 py-2 rounded-lg shadow-md hover:bg-yellow-600 transition transform hover:scale-105">
+            <div class="flex justify-center items-center">
+                <button id="editProfileButton" class="absolute bottom-0 mb-4 px-4 py-2 bg-yellow-400 text-white rounded-full shadow-md hover:bg-yellow-600 transition transform hover:scale-105">
                     Edit Profile
                 </button>
             </div>
@@ -24,37 +24,31 @@
         <div class="border-spacing-2 border-spacing-x-2 border-spacing-y-2 border-gray-300 my-6"></div>
     </div>
 
-    <div class="w-full bg-gray-900 shadow-lg rounded-lg p-8 overflow-hidden ">
+    <div class="relative w-full bg-gray-900 shadow-lg rounded-lg p-8 overflow-hidden ">
         <h2 class="text-lg font-bold text-yellow-400 text-center mb-4">Friends List</h2>
 
         <div class="border-t border-gray-300 my-4"></div>
 
         <!-- Section Liste d'Amis -->
         <div class="rounded-lg shadow-md flex w-full">
-            <!-- Formulaire d'ajout -->
-            <div class="mb-4 bg-white rounded-lg flex w-full">
-                <input id="friendNameIpt" type="text" placeholder="Enter a name" class="w-full p-2 rounded-l-lg text-black  outline-none">
-                <button id="friendNameBtn" class="bg-yellow-500 px-4 text-white rounded-r-lg hover:bg-yellow-600 transition hover:scale-105">Add</button>
-            </div>
-
             <!-- Liste des amis -->
             <ul id="friendList" class="space-y-2">
+                <h2 class="text-sm font-bold text-gray-300 text-center mb-4 hidden">You don't have friends :/</h2>
 
-<!--                <div class="relative">-->
-<!--                    <div class="fixed top-0 right-0 left-0">Contacts</div>-->
-<!--                    <div>-->
-<!--                        <div>-->
-<!--                            <img src="/img/andrew.jpg" />-->
-<!--   Voir la documentation de tailwind sur les absolute et relative                         <strong>Andrew Alfred</strong>-->
-<!--                        </div>-->
-<!--                        <div>-->
-<!--                            <img src="/img/debra.jpg" />-->
-<!--                            <strong>Debra Houston</strong>-->
-<!--                        </div>-->
-<!--                        &lt;!&ndash; ... &ndash;&gt;-->
-<!--                    </div>-->
-<!--                </div>-->
+                <div class=" content-between gap-4">
+                    <div>
+                        <div class=" flex items-center w-full content-start">
+                            <img src="../login.png" class="w-10 h-10 rounded-full " />
+                            <strong class="ml-2">Debra Houston</strong>
+                        </div>
+                    </div>
+                </div>
             </ul>
+        </div>
+
+        <div class="flex justify-center items-center py-8">
+            <input id="friendNameIpt" type="text" placeholder="Name" class="rounded-full px-4 py-2 mb-4 absolute bottom-0 left-0 bg-white text-black">
+            <button id="friendNameBtn" class="px-4 py-2 absolute bottom-0 right-0 mb-4 bg-yellow-500 text-white rounded-r-full hover:bg-yellow-600 transition hover:scale-105">Add</button>
         </div>
     </div>
 
@@ -63,11 +57,11 @@
 <div class="border-t border-gray-300 my-6"></div>
 
 <div class="text-center">
-    <button id="home" class="bg-gray-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-gray-600 transition transform hover:scale-105">
+    <button id="home" class="bg-gray-500 text-white px-5 py-2 rounded-full shadow-md hover:bg-gray-600 transition transform hover:scale-105">
         Back to Home
     </button>
 
-    <button id="logout" class="bg-pink-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-pink-600 transition transform hover:scale-105">
+    <button id="logout" class="bg-pink-500 text-white px-5 py-2 rounded-full shadow-md hover:bg-pink-600 transition transform hover:scale-105">
         Logout
     </button>
 </div>
