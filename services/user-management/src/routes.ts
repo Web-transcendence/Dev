@@ -161,8 +161,24 @@ export default async function userRoutes(app: FastifyInstance) {
             const user = new User(id);
 
             const result = user.updatePictureProfile(pictureURL);
+            return res.status(result.code).send(result.message);
         } catch (e) {
+            return res.status(500).send({error: `Server error: ${e}`});
+        }
+    })
 
+    app.get('/getPicture', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const id = req.headers.id as string;
+            if (!id)
+                throw "cannot recover id";
+
+            const user = new User(id);
+            const result = user.getPictureProfile();
+
+            return res.status(200).send(result);
+        } catch (err) {
+            res.status(500).send({error: `Server error: ${err}`});
         }
     })
 }

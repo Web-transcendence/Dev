@@ -5,6 +5,8 @@ import {connectedUsers} from "./api.js";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
+const BASE64_UNDEFINED_PICTURES = 'A DEFINIR' // attention !!
+
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -128,6 +130,15 @@ export class User {
         if (!change || !change.changes)
             throw new Error(`Database Error: cannot update pictureProfile changes for ${this.id}`);
         return {code: 200, message: "picture updated"};
+    }
+
+    getpictureProfile(): {code: number, message: string} {
+        const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`).get(this.id) as {base64Picture: string};
+        if (!userData)
+            throw new Error(`Database Failed`);
+        if (!userData.base64Picture)
+            return {code: 200, message: BASE64_UNDEFINED_PICTURES};
+        return {code: 200, message: userData.base64Picture};
     }
 
     /**
