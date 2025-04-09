@@ -147,6 +147,9 @@ async function loadPart(page: string): Promise<void> {
             const email = document.getElementById("profileEmail")!;
             if (email && nickName)
                 profile(container, nickName, email);
+            const addFriendBtn = document.getElementById("friendName") as HTMLButtonElement;
+            if (addFriendBtn)
+                addFriendBtn.addEventListener("click", (event: MouseEvent) => addFriend());
         }
         if (page === "/logout") {
             handleConnection(false);
@@ -162,6 +165,10 @@ async function loadPart(page: string): Promise<void> {
         container.innerHTML = '';
         container.innerHTML = "<h2>404 - Page non trouvée</h2>";
     }
+}
+
+function addFriend() {
+
 }
 
 async function insert_tag(url: string): Promise<void>{
@@ -308,6 +315,7 @@ async function profile(container: HTMLElement, nickName: HTMLElement, email: HTM
     catch (err) {
         console.log(err)
     }
+
 }
 
 function validateRegister(result: { nickName: string; email: string; password: string}): void {
