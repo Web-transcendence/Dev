@@ -2,6 +2,8 @@ import Database from "better-sqlite3";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import {connectedUsers} from "./api.js";
+import speakeasy, {GeneratedSecret} from "speakeasy";
+import QRCode from "qrcode";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
@@ -14,6 +16,7 @@ Client_db.exec(`
         email UNIQUE NOT NULL COLLATE NOCASE,
         password TEXT NOT NULL,
         google_id INTEGER,
+        secret_key TEXT DEFAULT NULL
         pictureProfile TEXT DEFAULT NULL,
     )
 `);
@@ -110,6 +113,42 @@ export class User {
         return (token);
     }
 
+    async generateSecretKey() :Promise<{ code: number, result: string }> {
+        const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id)as { secret_key: string } | undefined;
+        if (!data)
+            throw new Error(`Database failed`);
+        if (data.secret_key)
+            return {code: 409, result: "secret_key already exists"};
+
+        const secret:GeneratedSecret = speakeasy.generateSecret();
+        if (!secret || !secret.otpauth_url)
+            return {code: 500, result: "speakeasy failed to generate secret"};
+
+        Client_db.prepare("UPDATE Client set secret_key = ? where id = ?").run(secret.base32, this.id);
+
+        const dataURL = await QRCode.toDataURL(secret.otpauth_url);
+
+        return {code: 200, result: dataURL};
+    }
+
+    verify(token: string): {code: number, result: string} {
+        const secret = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined;
+        if (!secret)
+            return {code: 500, result: "dataBase failed to Select secret_key"};
+        if (!secret.secret_key)
+            return {code: 409, result: "2fa isn't activated"};
+
+        const verified = speakeasy.totp.verify({
+            secret: secret.secret_key,
+            encoding: 'base32',
+            token: token,
+            window: 1
+        });
+        if (!verified)
+            return {code: 401, result: "wrong code for authentification"};
+        return {code: 200, result: "valid code for authentification"};
+    }
+
     getProfile(): { nickName: string, email: string } {
         const userData = Client_db.prepare("SELECT nickName, email FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string } | undefined;
         if (!userData) {
@@ -132,7 +171,7 @@ export class User {
         return {code: 200, message: "picture updated"};
     }
 
-    getpictureProfile(): {code: number, message: string} {
+    getPictureProfile(): {code: number, message: string} {
         const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`).get(this.id) as {base64Picture: string};
         if (!userData)
             throw new Error(`Database Failed`);
@@ -193,7 +232,7 @@ export class User {
      *
      * @return an object with three array of id. One for each type of friend.
      */
-    getFriendList(): {acceptedIds: number[], pendingIds: number[], receivedIds: number[]} {
+    getFriendList(): {acceptedNickName: string[], pendingNickName: string[], receivedNickName: string[]} {
         const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[];
         const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[];
         const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[];
@@ -202,7 +241,22 @@ export class User {
         const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined);
         const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined);
 
-        return {acceptedIds, pendingIds, receivedIds};
+        const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row));
+        const pendingNickName = pendingIds.map(row => this.getNickNameById(row));
+        const receivedNickName = receivedIds.map(row => this.getNickNameById(row));
+
+
+        return {acceptedNickName, pendingNickName, receivedNickName};
+    }
+
+    getNickNameById(id: number): string {
+        const userData = Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(id) as {nickName: string};
+        if (!userData)
+            throw new Error('Database failed');
+        if (!userData.nickName) {
+            throw new Error(`${id} not found`);
+        }
+        return (userData.nickName);
     }
 
 }

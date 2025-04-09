@@ -46,6 +46,12 @@ async function authentificate (req: FastifyRequest, reply: FastifyReply) {
     }
 }
 
+app.get('/authJWT', (req: FastifyRequest, res: FastifyReply) => {
+    authentificate(req, res);
+    if (!req.headers.id)
+        return res.status(401).send({ error: "Unauthorized - No token provided" });
+    return res.status(200).send({validation: true});
+})
 
 app.register(httpProxy, {
     upstream: 'http://user-management:5000',
