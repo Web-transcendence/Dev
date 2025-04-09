@@ -16,8 +16,8 @@ Client_db.exec(`
         email UNIQUE NOT NULL COLLATE NOCASE,
         password TEXT NOT NULL,
         google_id INTEGER,
-        secret_key TEXT DEFAULT NULL
-        pictureProfile TEXT DEFAULT NULL,
+        secret_key TEXT DEFAULT NULL,
+        pictureProfile TEXT DEFAULT NULL
     )
 `);
 
