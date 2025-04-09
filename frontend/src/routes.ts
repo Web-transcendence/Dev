@@ -129,4 +129,22 @@ export async function routes(fastify: FastifyInstance) {
             reply.code(404).send("Fichier barup non trouvé");
         }
     });
+    fastify.get('/assets/pong.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "pong.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier pong non trouvé");
+        }
+    });
+    fastify.get('/assets/docker_compose.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "docker_compose.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier docker_compose non trouvé");
+        }
+    });
 }
