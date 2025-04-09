@@ -12,4 +12,4 @@ COPY --chown=app:app src/*.ts src/
 
 RUN npm install
 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]
