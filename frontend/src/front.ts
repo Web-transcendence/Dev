@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const Ping = document.getElementById("pong");
     if (Ping)
         Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
+    loadPart("/home");
 });
 
 interface Window {
@@ -45,6 +46,7 @@ function handleConnection(input: boolean) {
     connected = input;
 }
 
+// @ts-ignore
 window.CredentialResponse = async (credit: { credential: string }) => {
     try {
         const response = await fetch('http://localhost:3000/user-management/auth/google', {
@@ -113,15 +115,18 @@ async function loadPart(page: string): Promise<void> {
         await insert_tag(`part${page}`);
         console.log(`Part ${page}`);
         // Home Page
-        const Home = document.getElementById('home');
+        const Ping = document.getElementById("pongConnected") as HTMLButtonElement;
+        if (Ping)
+            Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
+        const Home = document.getElementById('home')  as HTMLButtonElement;
         if (Home)
             Home.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
         // Login
-        const loginBtn = document.getElementById("loginButton");
+        const loginBtn = document.getElementById("loginButton")  as HTMLButtonElement;
         if (loginBtn)
             loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
         //logout
-        const logoutBtn = document.getElementById('logout');
+        const logoutBtn = document.getElementById('logout')  as HTMLButtonElement;
         if (logoutBtn && connected)
             logoutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
         if (page === "/connect") {
@@ -130,6 +135,9 @@ async function loadPart(page: string): Promise<void> {
                 register(button);
         }
         if (page === "/login") {
+            const connect = document.getElementById('connectPageBtn') as HTMLButtonElement;
+            if (connect)
+                connect.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
             const button = document.getElementById("loginButton") as HTMLButtonElement;
             if (button)
                 login(button);
@@ -193,10 +201,14 @@ function afterInsert(url: string, container: HTMLElement): void {
     }
     const googleID = document.getElementById('googleidentityservice');
     const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
-    if (googlemeta)
+    if (googlemeta) {
+        console.log("REMOVE 33 googlemeta");
         googlemeta.remove();
-    if (googleID)
+    }
+    if (googleID) {
+        console.log("REMOVE 22 googleID");
         googleID.remove();
+    }
     if (url === "part/login" || url === "part/connect") {
         const googleID = document.getElementById('googleidentityservice');
         if (!googleID) {
@@ -226,6 +238,7 @@ function register(button: HTMLElement): void {
             localStorage.setItem('token', result.token);
             sseConnection(result.token);
             loadPart("/connected");
+            window.history.pushState({}, "", "/connected");
             handleConnection(true);
         } else {
             validateRegister(result.json);
@@ -251,7 +264,18 @@ function login(button: HTMLElement): void {
             localStorage.setItem('token', result.token);
             localStorage.setItem('nickName', result.nickName);
             sseConnection(result.token);
+            const googleID = document.getElementById('googleidentityservice');
+            const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
+            if (googlemeta) {
+                console.log("REMOVE googlemeta");
+                googlemeta.remove();
+            }
+            if (googleID) {
+                console.log("REMOVE googleID");
+                googleID.remove();
+            }
             loadPart("/connected");
+            window.history.pushState({}, "", "/connected");
             handleConnection(true);
         } else {
             const loginError = document.getElementById("LoginError") as HTMLSpanElement;
