@@ -214,7 +214,7 @@ export class User {
      *
      * @return an object with three array of id. One for each type of friend.
      */
-    getFriendList(): {acceptedIds: number[], pendingIds: number[], receivedIds: number[]} {
+    getFriendList(): {acceptedNickName: string[], pendingNickName: string[], receivedNickName: string[]} {
         const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[];
         const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[];
         const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[];
@@ -223,7 +223,22 @@ export class User {
         const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined);
         const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined);
 
-        return {acceptedIds, pendingIds, receivedIds};
+        const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row));
+        const pendingNickName = pendingIds.map(row => this.getNickNameById(row));
+        const receivedNickName = receivedIds.map(row => this.getNickNameById(row));
+
+
+        return {acceptedNickName, pendingNickName, receivedNickName};
+    }
+
+    getNickNameById(id: number): string {
+        const userData = Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(id) as {nickName: string};
+        if (!userData)
+            throw new Error('Database failed');
+        if (!userData.nickName) {
+            throw new Error(`${id} not found`);
+        }
+        return (userData.nickName);
     }
 
 }
