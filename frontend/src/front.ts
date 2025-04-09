@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     // Constant button on the Single Page Application
     const aboutBtn = document.getElementById("about")!;
     const contactBtn = document.getElementById("contact")!;
@@ -7,17 +7,39 @@ document.addEventListener("DOMContentLoaded", () => {
     contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
 
     // For Client Connection
-    const profilBtn = document.getElementById('profile');
-    if (profilBtn && connected)
-        profilBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
-    const connectBtn = document.getElementById('connect');
-    if (connectBtn && !connected)
-        connectBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+    if (await checkForTocken()) {
+        // getAvatar();
+        handleConnection(true);
+    }
+    else
+        handleConnection(false);
     const Ping = document.getElementById("pong");
     if (Ping)
         Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
     loadPart("/home");
 });
+
+async function checkForTocken(): Promise<boolean>  {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/authJWT', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            console.log("token checker", error.message);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
 
 interface Window {
     CredentialResponse: (response: any) => void;
@@ -35,11 +57,13 @@ function handleConnection(input: boolean) {
     const connect = document.getElementById('connect');
     const profile = document.getElementById('profile');
     if (input && profile && connect) {
+        console.log("PROFILEGO")
         connect.classList.add('hidden');
-        profile.classList.toggle('hidden');
+        profile.classList.remove('hidden');
         profile.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
     } else if (profile && connect) {
-        connect.classList.toggle('hidden');
+        console.log("CONNECTGO")
+        connect.classList.remove('hidden');
         profile.classList.add('hidden');
         connect.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
     }
@@ -186,9 +210,6 @@ async function addFriend(friendNickName: string) {
             console.log("USUS", error.message);
             return ;
         }
-
-
-
     } catch (error) {
         console.error(error);
     }
