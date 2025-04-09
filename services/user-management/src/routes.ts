@@ -111,7 +111,6 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.post('/addFriend', (req: FastifyRequest, res: FastifyReply) => {
         try {
-            console.log("add friend");
             const zod_result = Schema.manageFriendSchema.safeParse(req.body);
             if (!zod_result.success)
                 return res.status(400).send({json: zod_result.error.format()});
@@ -125,7 +124,7 @@ export default async function userRoutes(app: FastifyInstance) {
             const user = new User(id);
             const result = user.addFriend(friendNickName);
 
-            return res.status(result.code).send(result.message);
+            return res.status(result.code).send({message: result.message});
         } catch (err) {
             return res.status(500).send({error: `Server error: ${err}`});
         }

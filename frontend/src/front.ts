@@ -147,9 +147,11 @@ async function loadPart(page: string): Promise<void> {
             const email = document.getElementById("profileEmail")!;
             if (email && nickName)
                 profile(container, nickName, email);
-            const addFriendBtn = document.getElementById("friendName") as HTMLButtonElement;
-            if (addFriendBtn)
-                addFriendBtn.addEventListener("click", (event: MouseEvent) => addFriend());
+            const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
+            const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
+            if (addFriendBtn && addFriendIpt) {
+                addFriendBtn.addEventListener("click", (event: MouseEvent) => addFriend(addFriendIpt.value));
+            }
         }
         if (page === "/logout") {
             handleConnection(false);
@@ -167,8 +169,29 @@ async function loadPart(page: string): Promise<void> {
     }
 }
 
-function addFriend() {
+async function addFriend(friendNickName: string) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/user-management/addFriend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+            body: JSON.stringify({friendNickName: friendNickName}),
+        });
 
+        if (!response.ok) {
+            const error = await response.json();
+            console.log("USUS", error.message);
+            return ;
+        }
+
+
+
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 async function insert_tag(url: string): Promise<void>{
@@ -273,6 +296,9 @@ function login(button: HTMLElement): void {
             sseConnection(result.token);
             const googleID = document.getElementById('googleidentityservice');
             const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
+            loadPart("/connected");
+            window.history.pushState({}, "", "/connected");
+            handleConnection(true);
             if (googlemeta) {
                 console.log("REMOVE googlemeta");
                 googlemeta.remove();
@@ -281,9 +307,6 @@ function login(button: HTMLElement): void {
                 console.log("REMOVE googleID");
                 googleID.remove();
             }
-            loadPart("/connected");
-            window.history.pushState({}, "", "/connected");
-            handleConnection(true);
         } else {
             const loginError = document.getElementById("LoginError") as HTMLSpanElement;
             loginError.textContent = result?.error ?? "An error occurred";
