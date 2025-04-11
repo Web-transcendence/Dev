@@ -3,19 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Network.class.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 15:33:52 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/10 19:31:53 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/04/11 13:40:39 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef NETWORK_CLASS_HPP
 # define NETWORK_CLASS_HPP
-# define N_LAYER_HIDDEN 1
-# define N_NEURON_INPUT 16
-# define N_NEURON_OUTPUT 4
-# define N_NEURON_HIDDEN 25
+
+#include "Math.namespace.hpp"
 
 #include <string>
 #include <vector>

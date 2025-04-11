@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Math.namespace.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 09:50:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/10 15:50:07 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/04/11 09:36:07 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MATH_NAMESPACE_HPP
 # define MATH_NAMESPACE_HPP
+# include "TypeDefinition.hpp"
 # include <vector>
 # include <iostream>
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Network.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 15:45:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/10 19:33:50 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/04/11 13:40:20 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,16 @@ Network::Network(std::string const & inFile) {
 }
 
 std::vector<double>	Network::feedForward(std::vector<double> const & input) {
-	std::vector<double>	res(N_NEURON_OUTPUT);
-
+	std::vector<double>	layerOutput(input);
 	
+	for (auto it_l = this->_weights.begin();it_l != this->_weights.end(); it_l++) {
+		layerOutput.resize((*it_l).size());
+		auto	it_lo = layerOutput.begin();
+		for (auto it_n = (*it_l).begin(); it_n != (*it_l).end(); it_n++, it_lo++) {
+			std::vector<double>	input(layerOutput);
+			*it_lo = Math::leakyReLu(Math::dotProduct(input, *it_n));
+		}
+	}
+	layerOutput.resize(N_NEURON_OUTPUT);
+	return layerOutput;
 }

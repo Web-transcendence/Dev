@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+         #
+#    By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:21:22 by thibaud           #+#    #+#              #
-#    Updated: 2025/04/10 16:39:35 by tmouche          ###   ########.fr        #
+#    Updated: 2025/04/11 11:57:33 by thibaud          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ SRCS_DIR	=	srcs/
 OBJS_DIR	=	.objs/
 DEPS_DIR	=	.deps/
 SRCS		=	main.cpp \
+				AiServer.cpp \
 				Network.cpp \
 				Math.cpp
 

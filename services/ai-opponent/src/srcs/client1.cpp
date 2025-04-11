@@ -8,7 +8,6 @@
 
 typedef websocketpp::client<websocketpp::config::asio_client> client;
 
-
 int main( void ) {
 	client	c;
 
@@ -17,17 +16,17 @@ int main( void ) {
 		c.set_message_handler([](websocketpp::connection_hdl, client::message_ptr msg) {
 			char	*dup = strdup(msg->get_payload().c_str());
 			double	*rec = reinterpret_cast<double*>(dup);
-			std::cout << "Received: " << rec[0] << " " << rec[1] << " " << rec[2] << " " << std::endl;
+			std::cout << "Received: " << rec[0] << " " << rec[1] << " " << rec[2] << " " << rec[3] << std::endl;
 			free(dup);
 		});
 		
 		websocketpp::lib::error_code ec;
-		auto con = c.get_connection("ws://localhost:8080", ec);
+		auto con = c.get_connection("ws://localhost:9002", ec);
 		if (ec) {
 			std::cout << "Error: " << ec.message() << std::endl;
 			return 1;
 		}
-		
+
 		c.connect(con);
 		
 		std::thread t([&c]() {
@@ -35,12 +34,10 @@ int main( void ) {
 		});
 		
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		while (1) {
-			double test[3] = {0.3,0.3,0.3};
-			char	*test_r = reinterpret_cast<char*>(test);
-			con->send(test_r, sizeof(test));
-			std::this_thread::sleep_for(std::chrono::seconds(3));
-		}
+		double test[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0};
+		char	*test_r = reinterpret_cast<char*>(test);
+		con->send(test_r, sizeof(test));
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 		c.stop();
 		t.join();
 	} catch (std::exception const & e) {
