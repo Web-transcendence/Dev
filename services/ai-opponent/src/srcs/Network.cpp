@@ -6,12 +6,12 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 15:45:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/11 13:40:20 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/14 00:32:08 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Network.class.hpp"
-#include "json.hpp"
+#include "json/json.hpp"
 
 #include <fstream>
 #include <sstream>

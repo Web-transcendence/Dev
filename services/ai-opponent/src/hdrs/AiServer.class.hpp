@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 10:33:19 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/11 12:56:51 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/14 00:38:47 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,6 @@
 # include <websocketpp/server.hpp>
 
 typedef websocketpp::server<websocketpp::config::asio> server;
-
-using websocketpp::lib::placeholders::_1;
-using websocketpp::lib::placeholders::_2;
-using websocketpp::lib::bind;
 
 // pull out the type of messages sent by our config
 typedef server::message_ptr message_ptr;

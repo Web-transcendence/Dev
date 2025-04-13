@@ -6,7 +6,23 @@
 #include <vector>
 #include <stdio.h>
 
+
 typedef websocketpp::client<websocketpp::config::asio_client> client;
+
+char	_1[sizeof(double)*16]; //place holder input
+double	_2[sizeof(double)*4]; //place holder output
+
+
+void	printDouble(double const * d, unsigned int const size) {
+	unsigned int	idx = 0;
+
+	std::cout << "My double: ";
+	while (idx < size) {
+		std::cout << d[idx++] << "; "; 
+	}
+	std::cout << std::endl;
+	return ;
+}	
 
 int main( void ) {
 	client	c;
@@ -14,10 +30,8 @@ int main( void ) {
 	try {
 		c.init_asio();
 		c.set_message_handler([](websocketpp::connection_hdl, client::message_ptr msg) {
-			char	*dup = strdup(msg->get_payload().c_str());
-			double	*rec = reinterpret_cast<double*>(dup);
-			std::cout << "Received: " << rec[0] << " " << rec[1] << " " << rec[2] << " " << rec[3] << std::endl;
-			free(dup);
+			memcpy(_2, msg->get_payload().c_str(), sizeof(double)*4);
+			printDouble(_2, 4);
 		});
 		
 		websocketpp::lib::error_code ec;
@@ -34,9 +48,9 @@ int main( void ) {
 		});
 		
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		double test[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0};
-		char	*test_r = reinterpret_cast<char*>(test);
-		con->send(test_r, sizeof(test));
+		double	test[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0};
+		memcpy(_1, test, sizeof(double)*16);
+		con->send(_1, sizeof(double)*16);
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		c.stop();
 		t.join();

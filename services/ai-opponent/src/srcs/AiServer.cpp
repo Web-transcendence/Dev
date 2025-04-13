@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/11 14:03:25 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/14 00:49:18 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,10 @@
 
 #include <iostream>
 #include <string>
+#include <cstdlib>
+
+double	_1[sizeof(double)*16]; //place holder input
+char	_2[sizeof(double)*4]; // place holder output
 
 AiServer::AiServer(std::string const & QNetConfigFile) : _QNet(Network(QNetConfigFile)) {
 		return ;
@@ -52,25 +56,28 @@ void	AiServer::on_close(websocketpp::connection_hdl hdl) {
 	return ;
 }
 
-void	AiServer::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
-	if (msg->get_payload().size() != N_NEURON_INPUT * sizeof(double))	{
-		std::cout << "error: " << hdl.lock().get() << " send " << msg->get_payload() <<\
-		": Not a correct message" << std::endl;
-		return ;
-	}
-	std::cout << "input raw: " << msg->get_payload() << std::endl;
-	char*		dup = strdup(msg->get_payload().c_str());
-	double*		myDouble = reinterpret_cast<double*>(dup);
-	auto		input = std::vector<double>(N_NEURON_INPUT);
-	std::cout << "input: ";
-	int	i = 0;
-	for (auto it = input.begin(); it != input.end(); it++) {
-		*it = myDouble[i];
-		std::cout << *it << " ";
+void	printDouble(double const * d, unsigned int const size) {
+	unsigned int	idx = 0;
+
+	std::cout << "My double: ";
+	while (idx < size) {
+		std::cout << d[idx++] << "; "; 
 	}
 	std::cout << std::endl;
-	auto		oQNet = this->_QNet.feedForward(input);
-	std::string	out(reinterpret_cast<char const *>(oQNet.data()), oQNet.size() * sizeof(double));
-	this->_myServer.send(hdl, out, websocketpp::frame::opcode::binary);
+	return ;
+}	
+
+void	AiServer::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
+	memcpy(_1, msg->get_payload().c_str(), sizeof(double)*16);
+	printDouble(_1, N_NEURON_INPUT);
+	auto	input = std::vector<double>(_1, _1+16);
+	std::cout << "input: ";
+	for (auto it = input.begin(); it != input.end(); it++)
+		std::cout << *it << " ";
+	std::cout << std::endl;
+	auto	oQNet = this->_QNet.feedForward(input);
+	memcpy(_2, oQNet.data(), sizeof(double)*4);
+	this->_myServer.send(hdl, _2, websocketpp::frame::opcode::binary);
+	// this->_myServer.stop();
 	return ;
 }

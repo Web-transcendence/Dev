@@ -6,7 +6,7 @@
 #    By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:21:22 by thibaud           #+#    #+#              #
-#    Updated: 2025/04/11 11:57:33 by thibaud          ###   ########.fr        #
+#    Updated: 2025/04/13 21:54:51 by thibaud          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,6 +14,7 @@ NAME		= myDQN
 
 HEADER		=	hdrs/
 SRCS_DIR	=	srcs/
+THIRDPARTY	=	third-party/
 OBJS_DIR	=	.objs/
 DEPS_DIR	=	.deps/
 SRCS		=	main.cpp \
@@ -25,7 +26,7 @@ OBJS		= $(SRCS:%.cpp=$(OBJS_DIR)%.o)
 DEPS		= $(SRCS:%.cpp=$(DEPS_DIR)%.d)
 
 CC		= c++
-CFLAGS	= -I $(HEADER) # -Wall -Wextra -Werror -g3
+CFLAGS	= -I$(HEADER) -I$(THIRDPARTY) # -Wall -Wextra -Werror -g3
 DFLAGS	= -MMD -MP -MT $@ -MF $(DEPS_DIR)$*.d
 RM		= rm -rf
 
