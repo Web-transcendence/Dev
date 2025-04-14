@@ -1,0 +1,90 @@
+import {tournamentSessions} from "./api.js";
+import {User} from "./User.js";
+
+export class tournament {
+
+    creatorId: string;
+    private participantId: string[];
+    private status: 'waiting' | 'started';
+    private result;
+
+    constructor(creatorId: string) {
+        this.creatorId = creatorId;
+        this.participantId = [this.creatorId];
+        this.status = 'waiting';
+        this.result = {};
+    }
+
+    hasParticipant(userId: string): boolean {
+        return this.participantId.includes(userId);
+    }
+
+    addParticipant(participantId: string): boolean {
+        if (this.status === 'started')
+            return false;
+
+        for (const [id, tournament] of tournamentSessions)
+            if (tournament.hasParticipant(participantId))
+                return false
+        this.participantId.push(participantId);
+        return true
+    }
+
+    getData(): {creatorId: string,creatorNickName: string, participantCount: number, status: string} {
+        const user = new User(this.creatorId);
+        const data = {
+            creatorId: this.creatorId,
+            creatorNickName: user.getProfile().nickName,
+            participantCount: this.participantId.length,
+            status : this.status,
+        }
+        return data;
+    }
+
+    quit(id: string): void {
+        this.participantId.filter(participantId => participantId !== id);
+    }
+
+    async bracketHandler(bracket: string[]): Promise<string> {
+        if (bracket.length === 2) {
+            //await startMatch(bracket[0], bracket[1]);
+            console.log(`Match entre ${bracket[0]} et ${bracket[1]}`);
+            await new Promise(res => setTimeout(res, 1000));
+            console.log(`Match terminé: ${bracket[0]} vs ${bracket[1]}`);
+            return bracket[Math.floor(Math.random() > 0.5 ? 0 : 1)]
+        }
+        else {
+            const winner = await Promise.all([
+                this.bracketHandler(bracket.slice(0, bracket.length / 2)),
+                this.bracketHandler(bracket.slice(bracket.length / 2))
+            ])
+
+            //await startMatch(bracket[0], bracket[1]);
+            console.log(`Match entre ${winner[0]} et ${winner[1]}`);
+            await new Promise(res => setTimeout(res, 1000));
+            console.log(`Match terminé: ${winner[0]} vs ${winner[1]}`);
+            return bracket[Math.floor(Math.random() > 0.5 ? 0 : 1)];
+        }
+    }
+
+    async launch(): Promise<{ code: number, message: string }> {
+        if (this.status === 'started')
+            return {code: 409, message: 'this tournement is already launched'};
+        if (![4, 8, 16, 32].includes(this.participantId.length))
+            return {code: 403, message: 'participant have to be 4, 8, 16 or 32.'};
+
+        const arr = [...this.participantId];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+
+        const winner = await this.bracketHandler(arr);
+        console.log(`${winner} is the winner`);
+        return {code: 200, message: winner};
+    }
+
+
+}
+
+

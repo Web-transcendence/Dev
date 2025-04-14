@@ -1,9 +1,10 @@
 import Database from "better-sqlite3";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
-import {connectedUsers} from "./api.js";
+import {connectedUsers, tournamentSessions} from "./api.js";
 import speakeasy, {GeneratedSecret} from "speakeasy";
 import QRCode from "qrcode";
+import {tournament} from "./tournament.js";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
@@ -38,6 +39,13 @@ export class User {
         if (!Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(this.id)) {
             throw new Error(`${this.id} not found`);
         }
+    }
+
+    static getIdbyNickName(nickName: string): string | null {
+        const userData = Client_db.prepare("SELECT id FROM Client WHERE id = ?").get(nickName) as {id: string};
+        if (!userData)
+            return null;
+        return userData.id;
     }
 
     /**
@@ -232,7 +240,7 @@ export class User {
     }
 
     getNickNameById(id: number): string {
-        const userData = Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(id) as {nickName: string};
+        const userData = Client_db.prepare("SELECT nickName FROM Client WHERE id = ?").get(id) as {nickName: string};
         if (!userData)
             throw new Error('Database failed');
         if (!userData.nickName) {
@@ -241,4 +249,17 @@ export class User {
         return (userData.nickName);
     }
 
+    createTournament(): tournament | null {
+        for (const [id, tournament] of tournamentSessions)
+            if (tournament.hasParticipant(this.id))
+                return null;
+        return new tournament(this.id);
+    }
+
+    getActualTournament(): tournament | null {
+        for (const [id, tournament] of tournamentSessions)
+            if (tournament.hasParticipant(this.id))
+                return tournament;
+        return null
+    }
 }

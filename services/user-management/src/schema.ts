@@ -8,6 +8,7 @@ export const manageFriendSchema = z.object({
     friendNickName: z.string().min(3, "Minimum 3 caracteres")
 })
 
+
 export const verifySchema = z.object({
     secret: z.string().regex(/^\d{6}$/, {
         message: "only 6 digits are allowed",

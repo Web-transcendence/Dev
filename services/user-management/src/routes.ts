@@ -2,7 +2,7 @@ import * as Schema from "./schema.js";
 import sanitizeHtml from "sanitize-html";
 import {User} from "./User.js";
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
-import {connectedUsers} from "./api.js"
+import {connectedUsers, tournamentSessions} from "./api.js"
 import {EventMessage} from "fastify-sse-v2";
 
 
@@ -168,6 +168,100 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
+
+    app.post('/createTournament', (req: FastifyRequest, res: FastifyReply) => {
+        try
+        {
+            const id = req.headers.id as string;
+            if (!id)
+                throw "cannot recover id";
+
+            const user = new User(id);
+
+            const tournament = user.createTournament();
+            if (!tournament)
+                return res.status(409).send({error: "this user is already in  a tournament!"});
+
+            tournamentSessions.set(id, tournament);
+
+            return res.status(200).send({result: "success"});
+        } catch (err) {
+            return res.status(500).send({error: `Server error: ${err}`});
+        }
+    })
+
+    app.post('/joinTournament', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const zod_result = Schema.manageFriendSchema.safeParse(req.body);
+            if (!zod_result.success)
+                return res.status(400).send({json: zod_result.error.format()});
+            let friendNickName = sanitizeHtml(zod_result.data.friendNickName);
+            if (!friendNickName)
+                return res.status(454).send({error: "All information are required !"});
+
+            const id = req.headers.id as string;
+            if (!id)
+                throw "cannot recover id";
+
+            new User(id);
+
+            const idToJoin = User.getIdbyNickName(friendNickName);
+            if (!idToJoin)
+                return res.status(404).send({error : "this user doesn't exist"})
+
+            const tournament = tournamentSessions.get(idToJoin);
+            if (!tournament)
+                return res.status(404).send({error: "this user doesn't have a tournament"})
+            if (!tournament.addParticipant(id))
+                return res.status(404).send({error: `this user is already in a tournament`});
+            return res.status(200).send({result: "success"});
+        } catch (err) {
+            return res.status(500).send({error: `Server error: ${err}`});
+        }
+    })
+
+    app.get('/getTournamentList', (req: FastifyRequest, res: FastifyReply) => {
+        const tournamentList: {creatorId: string, participantCount: number, status: string}[] = [];
+
+        for (const [id, tournament] of tournamentSessions)
+            tournamentList.push(tournament.getData());
+
+        return res.status(200).send(tournamentList);
+    })
+
+    app.post('/quitTournament', (req: FastifyRequest, res: FastifyReply) => {
+        const id = req.headers.id as string;
+        if (!id)
+            throw "cannot recover id";
+
+        const user = new User(id);
+        const tournament = user.getActualTournament();
+        if (!tournament)
+            return res.status(404).send({error: "this user isn't in a tournament!"});
+        tournament.quit(id);
+        return res.status(200).send({result: "success"});
+    })
+
+    app.post('/launchTournament', async (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const id = req.headers.id as string;
+            if (!id)
+                throw "cannot recover id";
+
+            new User(id);
+
+            const tournament = tournamentSessions.get(id);
+            if (!tournament)
+                return res.status(404).send({error: "this user doesn't have a tournament"});
+
+            const result = await tournament.launch();
+
+            return res.status(result.code).send({error: result.message});
+
+        } catch (err) {
+            return res.status(500).send({error: `Server error: ${err}`});
+        }
+    })
 
     /**
      * initiate the sse connection between the server and the client, stock the response in a map.
