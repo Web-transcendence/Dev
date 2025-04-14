@@ -4,6 +4,7 @@ import {User} from "./User.js";
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
 import {connectedUsers, tournamentSessions} from "./api.js"
 import {EventMessage} from "fastify-sse-v2";
+import {tournament} from "./tournament.js";
 
 
 
@@ -205,7 +206,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             new User(id);
 
-            const idToJoin = User.getIdbyNickName(friendNickName);
+            const idToJoin: string | null = User.getIdbyNickName(friendNickName) as string | null;
             if (!idToJoin)
                 return res.status(404).send({error : "this user doesn't exist"})
 
@@ -256,7 +257,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const result = await tournament.launch();
 
-            return res.status(result.code).send({error: result.message});
+            return res.status(result.code).send({result: result.message});
 
         } catch (err) {
             return res.status(500).send({error: `Server error: ${err}`});

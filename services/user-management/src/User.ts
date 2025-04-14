@@ -42,10 +42,10 @@ export class User {
     }
 
     static getIdbyNickName(nickName: string): string | null {
-        const userData = Client_db.prepare("SELECT id FROM Client WHERE id = ?").get(nickName) as {id: string};
+        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: string};
         if (!userData)
             return null;
-        return userData.id;
+        return userData.id.toString();
     }
 
     /**
