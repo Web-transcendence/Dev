@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/14 00:49:18 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/14 09:34:01 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,28 +56,11 @@ void	AiServer::on_close(websocketpp::connection_hdl hdl) {
 	return ;
 }
 
-void	printDouble(double const * d, unsigned int const size) {
-	unsigned int	idx = 0;
-
-	std::cout << "My double: ";
-	while (idx < size) {
-		std::cout << d[idx++] << "; "; 
-	}
-	std::cout << std::endl;
-	return ;
-}	
-
 void	AiServer::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
 	memcpy(_1, msg->get_payload().c_str(), sizeof(double)*16);
-	printDouble(_1, N_NEURON_INPUT);
 	auto	input = std::vector<double>(_1, _1+16);
-	std::cout << "input: ";
-	for (auto it = input.begin(); it != input.end(); it++)
-		std::cout << *it << " ";
-	std::cout << std::endl;
 	auto	oQNet = this->_QNet.feedForward(input);
 	memcpy(_2, oQNet.data(), sizeof(double)*4);
 	this->_myServer.send(hdl, _2, websocketpp::frame::opcode::binary);
-	// this->_myServer.stop();
 	return ;
 }
