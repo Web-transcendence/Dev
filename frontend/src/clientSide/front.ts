@@ -1,4 +1,5 @@
-import {register} from "./user.js"
+import {getAvatar} from "./user.js"
+import {activateBtn} from "./button.js";
 
 
 
@@ -6,7 +7,7 @@ interface Window {
     CredentialResponse: (response: any) => void;
 }
 
-let connected = false;
+export let connected = false;
 
 window.addEventListener("popstate", () => {
     console.log("Navigating back:", window.location.pathname);
@@ -56,19 +57,7 @@ async function checkForTocken(): Promise<boolean>  {
     }
 }
 
-function getAvatar() {
-    if (!connected)
-        return;
-    const avatarImg = document.getElementById('avatar') as HTMLImageElement;
-    const avatar = localStorage.getItem("avatar");
-    if (!avatar) {
-        console.log("No Avatar");
-        avatarImg.src = '../login.png';
-    } else {
-        console.log("Avatar Found");
-        avatarImg.src = avatar;
-    }
-}
+
 
 
 export function handleConnection(input: boolean) {
@@ -118,7 +107,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
     }
 }
 
-function navigate(event: MouseEvent, path: string): void {
+export function navigate(event: MouseEvent, path: string): void {
     event.preventDefault();
     loadPart(path);
 }
@@ -162,7 +151,7 @@ async function insert_tag(url: string): Promise<void>{
     container.appendChild(newElement);
 }
 
-function afterInsert(url: string, container: HTMLElement): void {
+function afterInsert(url: string,/* container: HTMLElement*/): void {
     console.log("afterInsert url :", url);
     if (url === "part/pong") {
         if (!document.querySelector('script[src="/static/dist/pong.js"]')) {
@@ -177,78 +166,6 @@ function afterInsert(url: string, container: HTMLElement): void {
     }
 }
 
-function activateBtn(page: string) {
-    const container = document.getElementById('content') as HTMLElement;
-    const Ping = document.getElementById("pongConnected") as HTMLButtonElement;
-    if (Ping)
-        Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
-    const Home = document.getElementById('home')  as HTMLButtonElement;
-    if (Home)
-        Home.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
-    const loginBtn = document.getElementById("loginButton")  as HTMLButtonElement;
-    if (loginBtn)
-        loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
-    const logoutBtn = document.getElementById('logout')  as HTMLButtonElement;
-    if (logoutBtn && connected)
-        logoutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
-    if (page === "/connect") {
-        const button = document.getElementById("registerButton") as HTMLButtonElement;
-        if (button)
-            register(button);
-    }
-    if (page === "/login") {
-        const connect = document.getElementById('connectPageBtn') as HTMLButtonElement;
-        if (connect)
-            connect.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
-        const button = document.getElementById("loginButton") as HTMLButtonElement;
-        if (button)
-            login(button);
-    }
-    if (page === "/profile") {
-        const nickName = document.getElementById("profileNickName")!;
-        const email = document.getElementById("profileEmail")!;
-        if (email && nickName)
-            profile(container, nickName, email);
-        const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
-        const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
-        if (addFriendBtn && addFriendIpt) {
-            addFriendBtn.addEventListener("click", (event: MouseEvent) => addFriend(addFriendIpt.value));
-        }
-    }
-    if (page === "/logout") {
-        handleConnection(false);
-        localStorage.removeItem('avatar');
-        localStorage.removeItem('token');
-        const avatar = document.getElementById("avatar") as HTMLImageElement;
-        if (avatar)
-            avatar.src = "../logout.png";
-        const nickName = document.getElementById("nickName") as HTMLSpanElement;
-        if (nickName)
-            nickName.textContent = '';
-    }
-}
-
-async function addFriend(friendNickName: string) {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/user-management/addFriend', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
-            },
-            body: JSON.stringify({friendNickName: friendNickName}),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            console.log("USUS", error.message);
-            return ;
-        }
-    } catch (error) {
-        console.error(error);
-    }
-}
 
 function activateGoogle(page: string) {
     console.log("activateGoogle", page);
@@ -298,61 +215,6 @@ function activateGoogle(page: string) {
 }
 
 
-
-function login(button: HTMLElement): void {
-    button.addEventListener("click", async () => {
-        const myForm = document.getElementById("myForm") as HTMLFormElement;
-        const formData = new FormData(myForm);
-        const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
-        const response = await fetch('http://localhost:3000/user-management/sign-in', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            localStorage.setItem('token', result.token);
-            localStorage.setItem('nickName', result.nickName);
-            sseConnection(result.token);
-            loadPart("/connected");
-            handleConnection(true);
-        } else {
-            const loginError = document.getElementById("LoginError") as HTMLSpanElement;
-            loginError.textContent = result?.error ?? "An error occurred";
-            loginError.classList.remove("hidden");
-        }
-    });
-}
-
-async function profile(container: HTMLElement, nickName: HTMLElement, email: HTMLElement) {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            console.error('token missing');
-            return;
-        }
-        const response = await fetch('http://localhost:3000/user-management/getProfile', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token
-            }
-        })
-        const data = await response.json();
-        if (response.ok) {
-            nickName.innerText = data.nickName;
-            email.innerText = data.email;
-        }
-    }
-    catch (err) {
-        console.log(err)
-    }
-
-}
-
 export function validateRegister(result: { nickName: string; email: string; password: string}): void {
     console.log(result);
     const nickNameErrorMin = document.getElementById("nickNameError") as HTMLSpanElement;
@@ -381,28 +243,3 @@ export function validateRegister(result: { nickName: string; email: string; pass
     }
 }
 
-export async function sseConnection(token: string) {
-    const res = await fetch("http://localhost:3000/user-management/sse", {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'text/event-stream',
-            'Authorization': `Bearer ${token}`
-        }
-    })
-
-    const reader = res.body?.pipeThrough(new TextDecoderStream()).getReader() ?? null;
-    while (reader) {
-        const {value, done} = await reader.read();
-        if (done) break;
-        if (value.startsWith('retry: ')) continue;
-        const parse = JSON.parse(value?.replace('data: ', ''));
-        console.log(parse);
-        sseHandler(parse.event, parse.data);
-    }
-}
-
-function sseHandler(process: string, data: any ) {
-    if (process == "invite") {
-        console.log(data,  " et ", process);
-    }
-}
