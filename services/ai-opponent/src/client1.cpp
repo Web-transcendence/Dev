@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
-
+ 
 
 typedef websocketpp::client<websocketpp::config::asio_client> client;
 
@@ -30,6 +30,7 @@ int main( void ) {
 	try {
 		c.init_asio();
 		c.set_message_handler([](websocketpp::connection_hdl, client::message_ptr msg) {
+			std::cout << "Header: " << msg->get_header() << std::endl;
 			memcpy(_2, msg->get_payload().c_str(), sizeof(double)*4);
 			printDouble(_2, 4);
 		});

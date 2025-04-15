@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:15:27 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/11 09:37:14 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/15 18:04:31 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,10 @@
 # define TYPEDEFINITION_HPP
 # define UP 0
 # define DOWN 1
-# define IN_STATE 16
-# define N_LAYER_HIDDEN 1
+# define N_LAYER_HIDDEN 2
 # define N_NEURON_INPUT 16
-# define N_NEURON_OUTPUT 4
-# define N_NEURON_HIDDEN 25
+# define N_NEURON_OUTPUT 2
+# define N_NEURON_HIDDEN 250
 # include <vector>
 # include <cstring>
 
@@ -34,7 +33,7 @@ typedef struct s_exp {
 	double				reward;
 	std::vector<double>	nextState;
 	bool				done;
-	s_exp() : state(IN_STATE, 0.0), reward(0.), nextState(IN_STATE, 0.0), done(false) {}
+	s_exp() : state(N_NEURON_INPUT, 0.0), reward(0.), nextState(N_NEURON_INPUT, 0.0), done(false) {}
 }	t_exp;
 
 typedef struct  s_tuple {

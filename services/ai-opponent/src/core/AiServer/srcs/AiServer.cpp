@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/14 09:34:01 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/15 16:08:17 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ void	AiServer::on_close(websocketpp::connection_hdl hdl) {
 }
 
 void	AiServer::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
+	std::cout << "Header: " << msg->get_header() << std::endl;
 	memcpy(_1, msg->get_payload().c_str(), sizeof(double)*16);
 	auto	input = std::vector<double>(_1, _1+16);
 	auto	oQNet = this->_QNet.feedForward(input);

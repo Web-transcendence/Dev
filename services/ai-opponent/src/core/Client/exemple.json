@@ -1,0 +1,15 @@
+From GameServer to Client & From Client to AiServer:
+{
+	"ID": "Game",
+	"Data": [x,x,x]
+}
+From AiServer to Client:
+{
+	"ID": "AI",
+	"Data": [x,x,x]
+}
+Form Client to GameServer:
+{
+	"ID": "Client AI",
+	"arrow": "Press Up"
+}
