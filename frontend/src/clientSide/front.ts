@@ -1,3 +1,7 @@
+import {register} from "./user.js"
+
+
+
 interface Window {
     CredentialResponse: (response: any) => void;
 }
@@ -67,7 +71,7 @@ function getAvatar() {
 }
 
 
-function handleConnection(input: boolean) {
+export function handleConnection(input: boolean) {
     const connect = document.getElementById('connect');
     const profile = document.getElementById('profile');
     if (input && profile && connect) {
@@ -119,7 +123,7 @@ function navigate(event: MouseEvent, path: string): void {
     loadPart(path);
 }
 
-async function loadPart(page: string): Promise<void> {
+export async function loadPart(page: string): Promise<void> {
     window.history.pushState({}, "", page);
     try {
         await insert_tag(`part${page}`);
@@ -293,29 +297,7 @@ function activateGoogle(page: string) {
     }
 }
 
-function register(button: HTMLElement): void {
-    button.addEventListener("click", async () => {
-        const myForm = document.getElementById("myForm") as HTMLFormElement;
-        const formData = new FormData(myForm);
-        const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>);
-        const response = await fetch('http://localhost:3000/user-management/sign-up', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        const result = await response.json();
-        if (result.token) {
-            localStorage.setItem('token', result.token);
-            sseConnection(result.token);
-            loadPart("/connected");
-            handleConnection(true);
-        } else {
-            validateRegister(result.json);
-        }
-    });
-}
+
 
 function login(button: HTMLElement): void {
     button.addEventListener("click", async () => {
@@ -371,7 +353,7 @@ async function profile(container: HTMLElement, nickName: HTMLElement, email: HTM
 
 }
 
-function validateRegister(result: { nickName: string; email: string; password: string}): void {
+export function validateRegister(result: { nickName: string; email: string; password: string}): void {
     console.log(result);
     const nickNameErrorMin = document.getElementById("nickNameError") as HTMLSpanElement;
     const emailError = document.getElementById("emailError") as HTMLSpanElement;
@@ -399,7 +381,7 @@ function validateRegister(result: { nickName: string; email: string; password: s
     }
 }
 
-async function sseConnection(token: string) {
+export async function sseConnection(token: string) {
     const res = await fetch("http://localhost:3000/user-management/sse", {
         method: 'GET',
         headers: {
