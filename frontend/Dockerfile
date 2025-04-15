@@ -18,6 +18,8 @@ RUN openssl req -x509 -newkey rsa:4096 -nodes  \
 
 COPY --chown=app:app *.json .
 COPY --chown=app:app src/*.ts src/
+COPY --chown=app:app src/serverSide/*.ts src/serverSide/
+COPY --chown=app:app src/clientSide/*.ts src/clientSide/
 COPY --chown=app:app public/ public/
 
 

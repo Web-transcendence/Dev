@@ -8,8 +8,8 @@ import {readFileSync} from "node:fs";
 
 const httpsOptions = {
     https: {
-        key: readFileSync(join(import.meta.dirname, '../secure/key.pem')),      // Private key
-        cert: readFileSync(join(import.meta.dirname, '../secure/cert.pem'))     // Certificate
+        key: readFileSync(join(import.meta.dirname, '../../secure/key.pem')),      // Private key
+        cert: readFileSync(join(import.meta.dirname, '../../secure/cert.pem'))     // Certificate
     },
     logger: true
 };
@@ -17,12 +17,13 @@ const httpsOptions = {
 const fastify = Fastify(httpsOptions)
 
 fastify.register(fastifyStatic, {
-    root: join(import.meta.dirname, "..", "public"),
+    root: join(import.meta.dirname, "..", "..", "public"),
     prefix: "/static/"
 })
 
 fastify.get("/*", (req, res) => { // Route pour la page d'accueil
     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
+    console.log(join(import.meta.dirname, "..", "..", "public"))
     const readFile = readFileSync(pagePath, 'utf8');
     res.status(202).type('text/html').send(readFile);
 });
