@@ -3,23 +3,23 @@ import {User} from "./User.js";
 
 export class tournament {
 
-    creatorId: string;
-    private participantId: string[];
+    creatorId: number;
+    private participantId: number[];
     private status: 'waiting' | 'started';
     private result;
 
-    constructor(creatorId: string) {
+    constructor(creatorId: number) {
         this.creatorId = creatorId;
         this.participantId = [this.creatorId];
         this.status = 'waiting';
         this.result = {};
     }
 
-    hasParticipant(userId: string): boolean {
+    hasParticipant(userId: number): boolean {
         return this.participantId.includes(userId);
     }
 
-    addParticipant(participantId: string): boolean {
+    addParticipant(participantId: number): boolean {
         if (this.status === 'started')
             return false;
 
@@ -30,7 +30,7 @@ export class tournament {
         return true
     }
 
-    getData(): {creatorId: string,creatorNickName: string, participantCount: number, status: string} {
+    getData(): {creatorId: number, creatorNickName: string, participantCount: number, status: string} {
         const user = new User(this.creatorId);
         const data = {
             creatorId: this.creatorId,
@@ -41,11 +41,11 @@ export class tournament {
         return data;
     }
 
-    quit(id: string): void {
+    quit(id: number): void {
         this.participantId.filter(participantId => participantId !== id);
     }
 
-    async bracketHandler(bracket: string[]): Promise<string> {
+    async bracketHandler(bracket: number[]): Promise<number> {
         if (bracket.length === 2) {
             //await startMatch(bracket[0], bracket[1]);
             console.log(`Match entre ${bracket[0]} et ${bracket[1]}`);
@@ -81,7 +81,7 @@ export class tournament {
 
         const winner = await this.bracketHandler(arr);
         console.log(`${winner} is the winner`);
-        return {code: 200, message: winner};
+        return {code: 200, message: winner.toString()};
     }
 
 

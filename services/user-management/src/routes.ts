@@ -5,6 +5,7 @@ import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify";
 import {connectedUsers, tournamentSessions} from "./api.js"
 import {EventMessage} from "fastify-sse-v2";
 import {tournament} from "./tournament.js";
+import {number} from "zod";
 
 
 
@@ -58,7 +59,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.get("/2faInit", async (req: FastifyRequest, res: FastifyReply) => {
         try {
-            const id = req.headers.id as string;
+            const id: number = number(req.headers.id);
             if (!id)
                 throw "cannot recover id";
             const user = new User(id);
@@ -81,7 +82,7 @@ export default async function userRoutes(app: FastifyInstance) {
             if (!secret)
                 return res.status(454).send({error: "All information are required !"});
 
-            const id = req.headers.id as string;
+            const id: number = number(req.headers.id);
             if (!id)
                 throw new Error("cannot recover id");
             const user = new User(id);
@@ -96,7 +97,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.get('/getProfile', async (req, res) => {
         try {
-            const id = req.headers.id as string;
+            const id: number = number(req.headers.id);
             if (!id)
                 throw "cannot recover id";
             const user = new User(id);
@@ -119,7 +120,7 @@ export default async function userRoutes(app: FastifyInstance) {
             if (!friendNickName)
                 return res.status(454).send({error: "All information are required !"});
 
-            const id = req.headers.id as string;
+            const id: number = number(req.headers.id);
             if (!id)
                 throw new Error("cannot recover id");
             const user = new User(id);
@@ -133,7 +134,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.get('/friendList', (req: FastifyRequest, res: FastifyReply) => {
         try {
-            const id = req.headers.id as string;
+            const id: number = number(req.headers.id);
             if (!id)
                 throw "cannot recover id";
 
@@ -156,7 +157,7 @@ export default async function userRoutes(app: FastifyInstance) {
             if (!friendNickName)
                 return res.status(454).send({error: "All information are required !"});
 
-            const id = req.headers.id as string;
+            const id: number = number(req.headers.id);
             if (!id)
                 throw "cannot recover id";
 
@@ -173,7 +174,7 @@ export default async function userRoutes(app: FastifyInstance) {
     app.post('/createTournament', (req: FastifyRequest, res: FastifyReply) => {
         try
         {
-            const id = req.headers.id as string;
+            const id: number = number(req.headers.id);
             if (!id)
                 throw "cannot recover id";
 
@@ -200,13 +201,13 @@ export default async function userRoutes(app: FastifyInstance) {
             if (!friendNickName)
                 return res.status(454).send({error: "All information are required !"});
 
-            const id = req.headers.id as string;
+            const id: number = number(req.headers.id);
             if (!id)
                 throw "cannot recover id";
 
             new User(id);
 
-            const idToJoin: string | null = User.getIdbyNickName(friendNickName) as string | null;
+            const idToJoin: number | undefined = User.getIdbyNickName(friendNickName);
             if (!idToJoin)
                 return res.status(404).send({error : "this user doesn't exist"})
 
@@ -222,7 +223,7 @@ export default async function userRoutes(app: FastifyInstance) {
     })
 
     app.get('/getTournamentList', (req: FastifyRequest, res: FastifyReply) => {
-        const tournamentList: {creatorId: string, participantCount: number, status: string}[] = [];
+        const tournamentList: {creatorId: number, participantCount: number, status: string}[] = [];
 
         for (const [id, tournament] of tournamentSessions)
             tournamentList.push(tournament.getData());
@@ -231,7 +232,7 @@ export default async function userRoutes(app: FastifyInstance) {
     })
 
     app.post('/quitTournament', (req: FastifyRequest, res: FastifyReply) => {
-        const id = req.headers.id as string;
+        const id: number = number(req.headers.id);
         if (!id)
             throw "cannot recover id";
 
@@ -245,7 +246,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.post('/launchTournament', async (req: FastifyRequest, res: FastifyReply) => {
         try {
-            const id = req.headers.id as string;
+            const id: number = number(req.headers.id);
             if (!id)
                 throw "cannot recover id";
 
@@ -269,10 +270,10 @@ export default async function userRoutes(app: FastifyInstance) {
      *      the response can call the method .sse to send data in this format : {data: JSON.stringify({ event: string, data: any })}
      */
     app.get('/sse', async function (req, res) {
-        const userId = req.headers.id as string;
-        if (!userId)
+        const id: number = number(req.headers.id);
+        if (!id)
             return res.status(500).send({error: "Server error: Id not found"});
-        connectedUsers.set(userId, res);
+        connectedUsers.set(id, res);
         const message: EventMessage = { event: "initiation", data: "Some message" }
         res.sse({data: JSON.stringify(message)});
     });

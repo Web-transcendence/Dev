@@ -5,8 +5,13 @@ import {connectedUsers, tournamentSessions} from "./api.js";
 import speakeasy, {GeneratedSecret} from "speakeasy";
 import QRCode from "qrcode";
 import {tournament} from "./tournament.js";
+import {number} from "zod";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
+
+interface UserData {
+    id?: number;
+}
 
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
@@ -31,9 +36,9 @@ Client_db.exec(`
 `);
 
 export class User {
-    id: string;
+    id: number;
 
-    constructor(id: string) {
+    constructor(id: number) {
         this.id = id;
 
         if (!Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(this.id)) {
@@ -41,11 +46,11 @@ export class User {
         }
     }
 
-    static getIdbyNickName(nickName: string): string | null {
-        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: string};
-        if (!userData)
-            return null;
-        return userData.id.toString();
+    static getIdbyNickName(nickName: string): number | undefined {
+        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined;
+        if (userData)
+            return userData.id;
+        return undefined;
     }
 
     /**
@@ -73,11 +78,9 @@ export class User {
         if (res.changes === 0) {
             throw new Error(`User not inserted`);
         }
-        const id : number | bigint = res.lastInsertRowid
-        const stringId: string = id.toString();
-
+        const id : number = number(res.lastInsertRowid)
         console.log("new user added");
-        return {success: true, result: this.makeToken(stringId)};
+        return {success: true, result: this.makeToken(id)};
     }
 
 
@@ -90,7 +93,7 @@ export class User {
      * @return JWT on success
      */
     static async login(nickName: string, password: string): Promise<{code: number, result: string}> {
-        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: string};
+        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined;
         if (!userData)
             return {code: 409, result: "this nickName doesn't exist"};
 
@@ -113,13 +116,13 @@ export class User {
         return (await bcrypt.compare(password, userData.password))
     }
 
-    private static makeToken(id: string): string {
+    private static makeToken(id: number): string {
         const token = jwt.sign({id: id}, 'secret_key', {expiresIn: '1h'})
         return (token);
     }
 
     async generateSecretKey() :Promise<{ code: number, result: string }> {
-        const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id)as { secret_key: string } | undefined;
+        const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined;
         if (!data)
             throw new Error(`Database failed`);
         if (data.secret_key)
@@ -178,7 +181,7 @@ export class User {
      * @return a status for the client
      */
     addFriend(nickName: string): {code: number, message: string} {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number};
+        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined;
         if (!friendId)
             return {code: 409, message: "this nickName doesn't exist"};
 
@@ -204,7 +207,7 @@ export class User {
      * @param nickName
      */
     removeFriend(nickName: string): {code: number, message: string} {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number};
+        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined;
         if (!friendId)
             return {code: 409, message: "this nickName doesn't exist"};
 
@@ -240,7 +243,7 @@ export class User {
     }
 
     getNickNameById(id: number): string {
-        const userData = Client_db.prepare("SELECT nickName FROM Client WHERE id = ?").get(id) as {nickName: string};
+        const userData = Client_db.prepare("SELECT nickName FROM Client WHERE id = ?").get(id) as {nickName: string} | undefined;
         if (!userData)
             throw new Error('Database failed');
         if (!userData.nickName) {
