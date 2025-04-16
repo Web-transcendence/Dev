@@ -1,5 +1,6 @@
 import {tournamentSessions} from "./api.js"
 import {User} from "./User.js"
+import {ConflictError} from "./error.js";
 
 export class tournament {
 
