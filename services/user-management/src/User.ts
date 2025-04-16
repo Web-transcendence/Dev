@@ -1,16 +1,18 @@
-import Database from "better-sqlite3";
-import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken';
-import {connectedUsers, tournamentSessions} from "./api.js";
-import speakeasy, {GeneratedSecret} from "speakeasy";
-import QRCode from "qrcode";
-import {tournament} from "./tournament.js";
-import {number} from "zod";
+import Database from "better-sqlite3"
+import bcrypt from "bcrypt"
+import jwt from 'jsonwebtoken'
+import {connectedUsers, tournamentSessions} from "./api.js"
+import speakeasy, {GeneratedSecret} from "speakeasy"
+import QRCode from "qrcode"
+import {tournament} from "./tournament.js"
+import {number} from "zod"
+import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
+import {type} from "node:os";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
 interface UserData {
-    id?: number;
+    id?: number
 }
 
 Client_db.exec(`
@@ -22,7 +24,7 @@ Client_db.exec(`
         google_id INTEGER,
         secret_key TEXT DEFAULT NULL
     )
-`);
+`)
 
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS FriendList (
@@ -33,24 +35,24 @@ Client_db.exec(`
         FOREIGN KEY (userA_id) REFERENCES Client(id) ON DELETE CASCADE,
         FOREIGN KEY (userB_id) REFERENCES Client(id) ON DELETE CASCADE
     )
-`);
+`)
 
 export class User {
-    id: number;
+    id: number
 
     constructor(id: number) {
-        this.id = id;
-
+        this.id = id
+        console.log(id,typeof(id))
         if (!Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(this.id)) {
-            throw new Error(`${this.id} not found`);
+            throw new ServerError(`Client not found`, 404)
         }
     }
 
-    static getIdbyNickName(nickName: string): number | undefined {
-        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined;
-        if (userData)
-            return userData.id;
-        return undefined;
+    static getIdbyNickName(nickName: string): number {
+        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined
+        if (!userData)
+            throw new DataBaseError(`id not found for nickName: ${nickName}`, 404)
+        return userData.id
     }
 
     /**
@@ -63,24 +65,22 @@ export class User {
      * @param password
      * @return boolean about status and if it success the JWT
      */
-    static async addClient(nickName: string, email: string, password: string): Promise<{success: boolean, result: string}> {
-        if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(nickName)) {
-            return {success: false, result: 'nickName'};
-        }
-        if (Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(email)) {
-            return {success: false, result: 'email'};
-        }
+    static async addClient(nickName: string, email: string, password: string): Promise<string> {
+        if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(nickName))
+            throw new ConflictError(`${nickName} is already taken`)
+        if (Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(email))
+            throw new ConflictError(`${nickName} is already taken`)
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword: string = await bcrypt.hash(password, 10)
 
         const res = Client_db.prepare("INSERT INTO Client (nickName, email, password) VALUES (?, ?, ?)")
-            .run(nickName, email, hashedPassword);
-        if (res.changes === 0) {
-            throw new Error(`User not inserted`);
-        }
+            .run(nickName, email, hashedPassword)
+        if (res.changes === 0)
+            throw new DataBaseError(`client couldn't be inserted`, 500)
+
         const id : number = number(res.lastInsertRowid)
-        console.log("new user added");
-        return {success: true, result: this.makeToken(id)};
+
+        return this.makeToken(id)
     }
 
 
@@ -92,16 +92,14 @@ export class User {
      * @param password
      * @return JWT on success
      */
-    static async login(nickName: string, password: string): Promise<{code: number, result: string}> {
-        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined;
-        if (!userData)
-            return {code: 409, result: "this nickName doesn't exist"};
+    static async login(nickName: string, password: string): Promise<string> {
+        const id: number = this.getIdbyNickName(nickName)
 
-        const client = new User(userData.id)
+        const client = new User(id)
 
         if (!await client.isPasswordValid(password))
-            return {code: 401, result: "invalid password"};
-        return {code: 201, result: User.makeToken(client.id)}
+            throw new UnauthorizedError(`bad password`)
+        return User.makeToken(client.id)
     }
 
     /** recover the hashed password from the db and use bcrypt tu compare with the one given.
@@ -109,67 +107,65 @@ export class User {
      * @param password
      */
     async isPasswordValid(password: string): Promise<boolean> {
-        const userData = Client_db.prepare("SELECT password FROM Client WHERE id = ?").get(this.id) as { password: string } | undefined;
-        if (!userData) {
-            throw new Error(`Database Error: cannot find password from ${this.id}`);
-        }
-        return (await bcrypt.compare(password, userData.password))
+        const userData = Client_db.prepare("SELECT password FROM Client WHERE id = ?").get(this.id) as { password: string } | undefined
+        if (!userData)
+            throw new DataBaseError(`User with ID ${this.id} not found, which should not happen`, 500)
+
+        return await bcrypt.compare(password, userData.password)
     }
 
     private static makeToken(id: number): string {
         const token = jwt.sign({id: id}, 'secret_key', {expiresIn: '1h'})
-        return (token);
+        return (token)
     }
 
-    async generateSecretKey() :Promise<{ code: number, result: string }> {
-        const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined;
+    async generateSecretKey(): Promise<string> {
+        const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined
         if (!data)
-            throw new Error(`Database failed`);
+            throw new DataBaseError(`User with ID ${this.id} not found, which should not happen`, 500)
         if (data.secret_key)
-            return {code: 409, result: "secret_key already exists"};
+            throw new ConflictError(`secret key is already made`)
 
-        const secret:GeneratedSecret = speakeasy.generateSecret();
+        const secret:GeneratedSecret = speakeasy.generateSecret()
+
         if (!secret || !secret.otpauth_url)
-            return {code: 500, result: "speakeasy failed to generate secret"};
+            throw new ServerError(`speakeasy failed to create a secret key`, 500)
 
-        Client_db.prepare("UPDATE Client set secret_key = ? where id = ?").run(secret.base32, this.id);
+        Client_db.prepare("UPDATE Client set secret_key = ? where id = ?").run(secret.base32, this.id)
 
-        const dataURL = await QRCode.toDataURL(secret.otpauth_url);
-
-        return {code: 200, result: dataURL};
+        return await QRCode.toDataURL(secret.otpauth_url)
     }
 
-    verify(token: string): {code: number, result: string} {
-        const secret = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined;
+    verify(token: string) {
+        const secret = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined
         if (!secret)
-            return {code: 500, result: "dataBase failed to Select secret_key"};
+            throw new DataBaseError(`secret key not found for id: ${this.id}`, 500)
         if (!secret.secret_key)
-            return {code: 409, result: "2fa isn't activated"};
+            throw new ConflictError("2fa isn't activated")
 
         const verified = speakeasy.totp.verify({
             secret: secret.secret_key,
             encoding: 'base32',
             token: token,
             window: 1
-        });
+        })
         if (!verified)
-            return {code: 401, result: "wrong code for authentification"};
-        return {code: 200, result: "valid code for authentification"};
+            throw new UnauthorizedError(`invalid secret key for 2fa`)
     }
 
     getProfile(): { nickName: string, email: string } {
-        const userData = Client_db.prepare("SELECT nickName, email FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string } | undefined;
+        const userData = Client_db.prepare("SELECT nickName, email FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string } | undefined
         if (!userData) {
-            throw new Error(`Database Error: cannot find data from ${this.id}`);
+            throw new DataBaseError(`User with ID ${this.id} not found, which should not happen`, 500)
         }
-        return {nickName: userData.nickName, email: userData.email};
+        return {nickName: userData.nickName, email: userData.email}
     }
 
     sendNotification() {
-        const res = connectedUsers.get(this.id);
+        const res = connectedUsers.get(this.id)
         if (!res)
-            return console.log("Server error: res not found in connectedUsers");
-        res.sse({data: JSON.stringify({event: "invite", data: "teeest"})});
+            return console.log("Server error: res not found in connectedUsers")
+        res.sse({data: JSON.stringify({event: "invite", data: "teeest"})})
     }
 
 
@@ -180,25 +176,25 @@ export class User {
      * @param nickName
      * @return a status for the client
      */
-    addFriend(nickName: string): {code: number, message: string} {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined;
+    addFriend(nickName: string): string {
+        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined
         if (!friendId)
-            return {code: 409, message: "this nickName doesn't exist"};
+            throw new DataBaseError(`id not found for this friend nickName: ${nickName}`, 404)
 
-        const checkStatus = Client_db.prepare("SELECT status FROM FriendList WHERE userA_id = ? AND userB_id = ?").get(friendId.id, this.id) as {status: string};
+        const checkStatus = Client_db.prepare("SELECT status FROM FriendList WHERE userA_id = ? AND userB_id = ?").get(friendId.id, this.id) as {status: string}
         if (checkStatus?.status == 'accepted')
-            return {code: 409, message: "Friend already added"};
+            throw new ConflictError(`This friend is already in friendList`)
 
         else if (checkStatus?.status == 'pending') {
-            Client_db.prepare(`UPDATE FriendList SET status = 'accepted' WHERE userA_id = ? AND userB_id = ?`).run(friendId.id, this.id);
-            return {code: 201, message: "Friend invitation accepted"};
+            Client_db.prepare(`UPDATE FriendList SET status = 'accepted' WHERE userA_id = ? AND userB_id = ?`).run(friendId.id, this.id)
+            return `Friend invitation accepted`
         }
 
-        const res = Client_db.prepare(`INSERT OR IGNORE INTO FriendList (userA_id, userB_id, status) VALUES (?, ?, ?)`).run(this.id, friendId.id, 'pending');
+        const res = Client_db.prepare(`INSERT OR IGNORE INTO FriendList (userA_id, userB_id, status) VALUES (?, ?, ?)`).run(this.id, friendId.id, 'pending')
         if (res.changes === 0)
-            return {code: 409, message: "Friend invitation already sent"};
+            throw new ConflictError(`Friend invitation already sent`)
 
-        return {code: 201, message: `friend invitation sent successfully`};
+        return `Friend invitation sent successfully`
     }
 
     /**
@@ -206,15 +202,14 @@ export class User {
      *
      * @param nickName
      */
-    removeFriend(nickName: string): {code: number, message: string} {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined;
+    removeFriend(nickName: string) {
+        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined
         if (!friendId)
-            return {code: 409, message: "this nickName doesn't exist"};
+            throw new DataBaseError(`id not found for this friend nickName: ${nickName}`, 404)
 
-        const checkStatus = Client_db.prepare("DELETE FROM FriendList WHERE (userA_id = ? AND userB_id = ?) OR (userB_id = ? AND userA_id = ?)").run(friendId.id, this.id, friendId.id, this.id);
+        const checkStatus = Client_db.prepare("DELETE FROM FriendList WHERE (userA_id = ? AND userB_id = ?) OR (userB_id = ? AND userA_id = ?)").run(friendId.id, this.id, friendId.id, this.id)
         if (!checkStatus.changes)
-            return {code: 409, message: "This user isn't your friendList"};
-        return {code: 201, message: "Friend removed"};
+            throw new ConflictError(`This user isn't in your friendList`)
     }
 
     /**
@@ -226,43 +221,40 @@ export class User {
      * @return an object with three array of id. One for each type of friend.
      */
     getFriendList(): {acceptedNickName: string[], pendingNickName: string[], receivedNickName: string[]} {
-        const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[];
-        const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[];
-        const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[];
+        const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[]
+        const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[]
+        const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[]
 
-        const acceptedIds = accepted.map(row => row.userA_id ?? row.userB_id).filter(id => id !== undefined);
-        const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined);
-        const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined);
+        const acceptedIds = accepted.map(row => row.userA_id ?? row.userB_id).filter(id => id !== undefined)
+        const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined)
+        const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined)
 
-        const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row));
-        const pendingNickName = pendingIds.map(row => this.getNickNameById(row));
-        const receivedNickName = receivedIds.map(row => this.getNickNameById(row));
+        const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row))
+        const pendingNickName = pendingIds.map(row => this.getNickNameById(row))
+        const receivedNickName = receivedIds.map(row => this.getNickNameById(row))
 
 
-        return {acceptedNickName, pendingNickName, receivedNickName};
+        return {acceptedNickName, pendingNickName, receivedNickName}
     }
 
     getNickNameById(id: number): string {
-        const userData = Client_db.prepare("SELECT nickName FROM Client WHERE id = ?").get(id) as {nickName: string} | undefined;
+        const userData = Client_db.prepare("SELECT nickName FROM Client WHERE id = ?").get(id) as {nickName: string} | undefined
         if (!userData)
-            throw new Error('Database failed');
-        if (!userData.nickName) {
-            throw new Error(`${id} not found`);
-        }
-        return (userData.nickName);
+            throw new DataBaseError(`nickName not found for id ${id}`, 500)
+        return (userData.nickName)
     }
 
-    createTournament(): tournament | null {
+    createTournament(): tournament{
         for (const [id, tournament] of tournamentSessions)
             if (tournament.hasParticipant(this.id))
-                return null;
-        return new tournament(this.id);
+                throw new ConflictError(`this user is already in a tournament`)
+        return new tournament(this.id)
     }
 
     getActualTournament(): tournament | null {
         for (const [id, tournament] of tournamentSessions)
             if (tournament.hasParticipant(this.id))
-                return tournament;
+                return tournament
         return null
     }
 }
