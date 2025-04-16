@@ -68,7 +68,6 @@ export async function profile(/*container: HTMLElement, */nickName: HTMLElement,
             }
         })
         const data = await response.json();
-        console.log(data);
         if (response.ok) {
             nickName.innerText = data.nickName;
             email.innerText = data.email;
