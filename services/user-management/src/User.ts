@@ -193,7 +193,7 @@ export class User {
         const res = Client_db.prepare(`INSERT OR IGNORE INTO FriendList (userA_id, userB_id, status) VALUES (?, ?, ?)`).run(this.id, friendId.id, 'pending')
         if (res.changes === 0)
             throw new ConflictError(`Friend invitation already sent`)
-
+        this.notifyUser(nickName, 'friendInvitation');
         return `Friend invitation sent successfully`
     }
 
@@ -221,6 +221,8 @@ export class User {
      * @return an object with three array of id. One for each type of friend.
      */
     getFriendList(): {acceptedNickName: string[], pendingNickName: string[], receivedNickName: string[]} {
+        this.logConnectedUser()
+
         const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[]
         const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[]
         const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[]
@@ -256,5 +258,22 @@ export class User {
             if (tournament.hasParticipant(this.id))
                 return tournament
         return null
+    }
+
+    notifyUser(nickName: string, event: string): void {
+        const userId: number = User.getIdbyNickName(nickName);
+
+        const connection = connectedUsers.get(userId);
+        if (!connection)
+            throw new ConflictError(`this user isn't connected`)
+        const data = {event: event, nickName: nickName}
+        connection.sse({data: JSON.stringify(data)})
+    }
+
+    logConnectedUser() {
+        const connected = []
+        for (const [id, user] of connectedUsers)
+            connected.push(id)
+        console.log(connected);
     }
 }
