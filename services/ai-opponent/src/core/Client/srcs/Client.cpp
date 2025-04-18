@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/15 22:23:28 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/18 17:50:11 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,14 +27,14 @@ Client::Client(std::string const & urlGame) {
 	this->c.init_asio();
 	this->c.set_message_handler([this](websocketpp::connection_hdl hdl, client::message_ptr msg){this->on_message(hdl, msg);});
 	websocketpp::lib::error_code	ec;
-	this->aiServer = c.get_connection("ws://localhost:9002", ec);
-	this->gameServer = c.get_connection(urlGame, ec);
+	this->aiServer = this->c.get_connection("ws://localhost:9002", ec);
+	this->gameServer = this->c.get_connection(urlGame, ec);
 	if (ec) {
 		std::cout << "Error: " << ec.message() << std::endl;
 		throw std::exception();
 	}
-	c.connect(this->aiServer);
-	c.connect(this->gameServer);
+	this->c.connect(this->aiServer);
+	this->c.connect(this->gameServer);
 	return ;
 }
 
@@ -43,7 +43,6 @@ Client::~Client( void ) {
 }
 
 void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
-	auto	data = nlohmann::json::parse(msg->get_payload());
 	auto	data = nlohmann::json::parse(msg->get_payload());
 	if (data["ID"] == "Game")
 		this->aiServer->send(msg);
@@ -62,7 +61,7 @@ void	Client::on_message_aiServer(nlohmann::json_abi_v3_12_0::json data) {
 		ss >> *it;
 	}
 	std::stringstream	ssKey;
-	// definir l input grace a la plus grande valeur contenue dans output
+	// definir l input grace a la plus grande valeur contenue dans output dans un format json (voir avec ben)
 	this->gameServer->send(ssKey.str());
 	return ;
 }

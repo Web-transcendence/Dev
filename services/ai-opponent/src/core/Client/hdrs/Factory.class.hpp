@@ -6,22 +6,55 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:47:28 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/15 14:54:28 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/18 19:27:32 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FACTORY_CLASS_HPP
 # define FACTORY_CLASS_HPP
 
+#define MAX_CLIENTS 50
+
+#include <websocketpp/config/asio_no_tls_client.hpp>
+#include <websocketpp/client.hpp>
+
+#include "../../third-party/json/json.hpp"
+
+#include <vector>
+#include <memory>
+#include <string>
+#include <thread>
 #include <map>
+
+
+typedef websocketpp::client<websocketpp::config::asio_client>	client;
+typedef std::shared_ptr<websocketpp::connection<websocketpp::config::asio_client>>	server_ptr;
+
+class Client;
 
 class Factory {
 public:
-	Factory( void );
+	Factory(std::string const & serverWs);
 	~Factory( void );
 
+	void	run( void );
+
 private:
-	std::map<>;
+	Factory( void ) {}
+	
+	void	on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);
+
+	void	createGame(std::string const & ws);
+	void	deleteGame(std::string const & ws);
+
+	client		myFactory;
+	server_ptr	gameServer;
+	
+
+	std::map<std::string, std::shared_ptr>	_connectedClients;
+	
+	std::mutex	ccMutex;
+	std::mutex	sendMutex;
 }; 
 
 #endif

@@ -13,3 +13,14 @@ Form Client to GameServer:
 	"ID": "Client AI",
 	"arrow": "Press Up"
 }
+From GameServer to Factory:
+{
+	"ID": "Game",
+	"state" : "start" or "stop",
+	"ws": "GameUrl"
+}
+From Factory to GameServer:
+{
+	"ID": "Factory",
+	"state": "OK" or "NOK",
+}

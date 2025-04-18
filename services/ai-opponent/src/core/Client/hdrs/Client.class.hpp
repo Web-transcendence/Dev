@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:46:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/15 20:30:50 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/18 18:52:40 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,17 +28,17 @@ public:
 	Client(std::string const & urlGame);
 	~Client( void );
 
+	void	stop( void );
+	void	run( void );
 private:
 	Client( void );
 	
 	void	on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);
 	void	on_message_aiServer(nlohmann::json_abi_v3_12_0::json data);
 	void	on_message_gameServer(nlohmann::json_abi_v3_12_0::json data);
-
+	
 	void	loop( void );
 	
-	void	run( void );
-	void	stop( void );
 	
 	client	c;
 
