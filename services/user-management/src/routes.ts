@@ -51,7 +51,7 @@ export default async function userRoutes(app: FastifyInstance) {
                 throw new InputError(`Empty user data`)
 
             const token = await User.login(nickName, password)
-            return res.status(200).send({token: token})
+            return res.status(200).send({token: token, nickName: nickName})
         }
         catch(err) {
             if (err instanceof MyError) {
@@ -154,6 +154,7 @@ export default async function userRoutes(app: FastifyInstance) {
             return res.status(200).send({message: result})
         }
         catch(err) {
+            console.log('ddddddddddddddddddd')
             if (err instanceof MyError) {
                 console.error(err.message)
                 return res.status(err.code).send({error: err.message})
@@ -168,10 +169,8 @@ export default async function userRoutes(app: FastifyInstance) {
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
-
             const user = new User(id)
             const result = user.getFriendList()
-
             return res.status(200).send(result)
         }
         catch(err) {

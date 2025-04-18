@@ -6,13 +6,8 @@ import speakeasy, {GeneratedSecret} from "speakeasy"
 import QRCode from "qrcode"
 import {tournament} from "./tournament.js"
 import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
-import {type} from "node:os";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
-
-interface UserData {
-    id?: number
-}
 
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
@@ -41,7 +36,6 @@ export class User {
 
     constructor(id: number) {
         this.id = id
-        console.log(id,typeof(id))
         if (!Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(this.id)) {
             throw new ServerError(`Client not found`, 404)
         }

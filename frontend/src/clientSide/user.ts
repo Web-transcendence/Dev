@@ -46,9 +46,9 @@ export function login(button: HTMLElement): void {
                 return await loadPart("/2fa");
             }
             localStorage.setItem('token', data.token);
-            await sseConnection(data.token);
             await loadPart("/connected");
             handleConnection(true);
+            await sseConnection(data.token);
         } else {
             const errorData = await response.json();
             const loginError = document.getElementById("LoginError") as HTMLSpanElement;
@@ -83,7 +83,7 @@ export async function profile(/*container: HTMLElement, */nickName: HTMLElement,
     }
 }
 
-export async function init2fa(): Promise<string> {
+export async function init2fa(): Promise<string | undefined> {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -148,6 +148,7 @@ export async function addFriend(friendNickName: string): Promise<boolean> {
         return true;
     } catch (error) {
         console.error(error);
+        return false;
     }
 }
 
@@ -171,13 +172,14 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
         return true;
     } catch (error) {
         console.error(error);
+        return false
     }
 }
 
 export async function getFriendList(): Promise<string[] | undefined> {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/user-management/addFriend', {
+        const response = await fetch('http://localhost:3000/user-management/friendList', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

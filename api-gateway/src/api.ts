@@ -27,8 +27,8 @@ app.register(cors, {
 })
 
 async function authentificate (req: FastifyRequest, reply: FastifyReply) {
-    if (req.url === "/user-management/sign-up" || req.url === "/user-management/sign-in" || req.url === "/user-management/auth/google" || "/user-management/2faVerify")
-        return ;
+    if (req.url === "/user-management/login" || req.url === "/user-management/register" || req.url === "/user-management/auth/google" || req.url === "/user-management/2faVerify")
+        return;
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader)
