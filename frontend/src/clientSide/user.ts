@@ -210,3 +210,85 @@ export function getAvatar() {
         avatarImg.src = avatar;
     }
 }
+
+export async function createTournament() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/user-management/createTournament', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error(error.error);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export async function joinTournament() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/user-management/joinTournament', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error(error.error);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export async function getTournamentList(): Promise<string[] | undefined> {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/user-management/getTournamentList', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            console.error(error.error);
+            return undefined;
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export async function launchTournament() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/user-management/launchTournament', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error(error.error);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
