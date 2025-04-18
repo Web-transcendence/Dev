@@ -5,7 +5,6 @@ import {connectedUsers, tournamentSessions} from "./api.js"
 import speakeasy, {GeneratedSecret} from "speakeasy"
 import QRCode from "qrcode"
 import {tournament} from "./tournament.js"
-import {number} from "zod"
 import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
 import {type} from "node:os";
 
@@ -78,7 +77,7 @@ export class User {
         if (res.changes === 0)
             throw new DataBaseError(`client couldn't be inserted`, 500)
 
-        const id : number = number(res.lastInsertRowid)
+        const id : number = Number(res.lastInsertRowid)
 
         return this.makeToken(id)
     }
@@ -99,6 +98,12 @@ export class User {
 
         if (!await client.isPasswordValid(password))
             throw new UnauthorizedError(`bad password`)
+
+        const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(id) as { secret_key: string } | undefined
+        if (!data)
+            throw new DataBaseError(`User with ID ${id} not found, which should not happen`, 500)
+        if (data.secret_key)
+            return ''
         return User.makeToken(client.id)
     }
 
@@ -136,7 +141,7 @@ export class User {
         return await QRCode.toDataURL(secret.otpauth_url)
     }
 
-    verify(token: string) {
+    verify(token: string): string {
         const secret = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined
         if (!secret)
             throw new DataBaseError(`secret key not found for id: ${this.id}`, 500)
@@ -151,6 +156,7 @@ export class User {
         })
         if (!verified)
             throw new UnauthorizedError(`invalid secret key for 2fa`)
+        return User.makeToken(this.id)
     }
 
     getProfile(): { nickName: string, email: string } {

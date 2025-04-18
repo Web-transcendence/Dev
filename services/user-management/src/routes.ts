@@ -12,7 +12,7 @@ import {ConflictError, InputError, MyError, ServerError} from "./error.js";
 
 export default async function userRoutes(app: FastifyInstance) {
 
-    app.post('/sign-up', async (req, res) => {
+    app.post('/register', async (req, res) => {
         try {
             const zod_result = Schema.signUpSchema.safeParse(req.body)
             if (!zod_result.success)
@@ -37,7 +37,7 @@ export default async function userRoutes(app: FastifyInstance) {
     })
 
 
-    app.post('/sign-in', async (req: FastifyRequest, res: FastifyReply) => {
+    app.post('/login', async (req: FastifyRequest, res: FastifyReply) => {
         try {
             const zod_result = Schema.signInSchema.safeParse(req.body)
             if (!zod_result.success)
@@ -51,8 +51,7 @@ export default async function userRoutes(app: FastifyInstance) {
                 throw new InputError(`Empty user data`)
 
             const token = await User.login(nickName, password)
-
-            return res.status(200).send({token: token, redirect: "post/login"})
+            return res.status(200).send({token: token})
         }
         catch(err) {
             if (err instanceof MyError) {
@@ -90,19 +89,20 @@ export default async function userRoutes(app: FastifyInstance) {
             const zod_result = Schema.verifySchema.safeParse(req.body)
             if (!zod_result.success)
                 throw new InputError(`Cannot parse the input`)
-            let secret = sanitizeHtml(zod_result.data.secret)
-            if (!secret)
-                throw new InputError(`empty secret for 2fa`)
+            let {secret, nickName} = {
+                secret : sanitizeHtml(zod_result.data.secret),
+                nickName: sanitizeHtml(zod_result.data.nickName),
+            }
+            if (!secret || nickName)
+                throw new InputError(`empty userData for 2fa`)
 
-            const id: number = Number(req.headers.id)
-            if (!id)
-                throw new ServerError(`cannot parse id, which should not happen`, 500)
+            const id = User.getIdbyNickName(nickName)
 
             const user = new User(id)
 
-            user.verify(secret)
+            const jwt = user.verify(secret)
 
-            return res.status(200).send()
+            return res.status(200).send({token: jwt, nickName: nickName})
         }
         catch(err) {
             if (err instanceof MyError) {
