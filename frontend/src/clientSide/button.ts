@@ -1,4 +1,4 @@
-import {addFriend, login, profile, register} from "./user.js";
+import {addFriend, getFriendList, login, profile, register} from "./user.js";
 import {connected, handleConnection, navigate} from "./front.js";
 
 
@@ -6,7 +6,8 @@ const mapButton : {[key: string] : () => void} = {
     "/connect" : connectBtn,
     "/login": loginBtn,
     "/profile": profileBtn,
-    "/logout": logoutBtn
+    "/logout": logoutBtn,
+    "/editProfile" : editProfileBtn
 }
 
 export function activateBtn(page: string) {
@@ -47,10 +48,15 @@ function profileBtn() {
     // const container = document.getElementById('content') as HTMLElement;
     if (email && nickName)
         profile(/*container,*/ nickName, email);
+    const editProfileBtn = document.getElementById("editProfileButton") as HTMLButtonElement;
     const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
     if (addFriendBtn && addFriendIpt) {
         addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
+    }
+
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener("click", async () => console.log(await getFriendList()));
     }
 }
 
@@ -64,4 +70,8 @@ function logoutBtn() {
     const nickName = document.getElementById("nickName") as HTMLSpanElement;
     if (nickName)
         nickName.textContent = '';
+}
+
+function editProfileBtn() {
+
 }

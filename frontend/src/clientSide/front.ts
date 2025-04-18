@@ -146,7 +146,7 @@ async function insert_tag(url: string): Promise<void>{
     if (html.includes(container.innerHTML))
         return;
     container.innerHTML = '';
-    afterInsert(url, container);
+    afterInsert(url/*, container*/);
     newElement.innerHTML = html;
     container.appendChild(newElement);
 }
