@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:47:28 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/18 19:27:32 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/20 00:44:07 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <queue>
 #include <map>
 
 
@@ -47,11 +48,15 @@ private:
 	void	createGame(std::string const & ws);
 	void	deleteGame(std::string const & ws);
 
+	void	settlingMessage(unsigned int const sizePool);
+
 	client		myFactory;
 	server_ptr	gameServer;
 	
+	std::mutex						_mMutex;
+	std::queue<client::message_ptr>	_messages;
 
-	std::map<std::string, std::shared_ptr>	_connectedClients;
+	std::map<std::string, std::shared_ptr<Client>>	_connectedClients;
 	
 	std::mutex	ccMutex;
 	std::mutex	sendMutex;

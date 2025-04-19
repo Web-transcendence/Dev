@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/18 17:50:11 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/20 00:06:00 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,10 @@
 
 #include "TypeDefinition.hpp"
 
-#include <chrono>
 #include <sstream>
 #include <exception>
+#include <ratio>
+#include <ctime>
 
 char	_1[sizeof(double)*N_NEURON_INPUT]; //place holder input
 double	_2[sizeof(double)*N_NEURON_OUTPUT]; //place holder output
@@ -67,14 +68,15 @@ void	Client::on_message_aiServer(nlohmann::json_abi_v3_12_0::json data) {
 }
 
 void	Client::on_message_gameServer(nlohmann::json_abi_v3_12_0::json data) {
-	unsigned int	idx = 0;
+	unsigned int		idx = 0;
+	std::vector<double>	temp(N_NEURON_INPUT);
+
+	for (auto it = temp.begin(); it != temp.end(); it++, idx++)
+		*it = data["Data"][idx];
 	cgMutex.lock();
-	for (auto it = this->currentGameState.begin(); it != this->currentGameState.end(); it++, idx++) {
-		std::stringstream	ss;
-		ss << data["Data"][idx];
-		ss >> *it;
-	}
+	memcpy(this->currentGameState.data(), temp.data(), sizeof(double)*N_NEURON_INPUT);
 	cgMutex.unlock();
+	this->t1 = std::chrono::steady_clock::now();
 	return ;
 }
 
@@ -86,8 +88,31 @@ void	Client::loop( void ) {
 		cgMutex.unlock();
 		this->aiServer->send(_1, sizeof(double)*N_NEURON_INPUT);
 		std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+		if (!checkTime()) {
+			this->c.stop();
+			this->active.store(false);
+			break ;
+		}
 	}
+	return ;
 }
 
-void	Client::run( void ) {this->c.run();}
+bool	Client::checkTime( void ) {
+	auto	t2 = std::chrono::steady_clock::now();
+	auto	timeSpan = duration_cast<duration<double>>(t2 - this->t1.load());
+	if (timeSpan.count() >= 3.0)
+		return false;
+	return true;
+}
+
+bool	Client::getActive( void ) {return this->active.load();}
+
+void	Client::run( void ) {
+	this->active.store(true);
+	std::thread	t([this](){this->c.run();});
+	t.detach();
+	this->loop();
+	return ;
+}
+
 void	Client::stop( void ) {this->c.stop();}

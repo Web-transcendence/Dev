@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:46:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/18 18:52:40 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/19 23:42:45 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@
 #include "../../third-party/json/json.hpp"
 
 #include <vector>
+#include <atomic>
+#include <thread>
+#include <chrono>
 
 typedef websocketpp::client<websocketpp::config::asio_client>	client;
 typedef std::shared_ptr<websocketpp::connection<websocketpp::config::asio_client>>	server_ptr;
@@ -30,6 +33,9 @@ public:
 
 	void	stop( void );
 	void	run( void );
+
+	bool	getActive( void );
+
 private:
 	Client( void );
 	
@@ -39,7 +45,8 @@ private:
 	
 	void	loop( void );
 	
-	
+	bool	checkTime( void );
+
 	client	c;
 
 	server_ptr	aiServer;
@@ -47,6 +54,10 @@ private:
 
 	std::mutex			cgMutex;
 	std::vector<double>	currentGameState;
+
+	std::atomic<bool>	active;
+
+	std::atomic<std::chrono::steady_clock::time_point>	t1;
 };
 
 

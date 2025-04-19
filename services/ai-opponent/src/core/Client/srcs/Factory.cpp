@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/18 19:28:46 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/20 01:10:43 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,18 +31,38 @@ Factory::~Factory( void ) {
 	return ;
 }
 
-void	Factory::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
-	auto	data = nlohmann::json::parse(msg->get_payload());
-	
-	if (data["ID"] != "Game")
-		throw std::exception(); // unrecognized token
-	if (data["state"] == "start")
-		this->createGame(data["ws"]);
-	else if (data["state"] == "stop")
-		this->deleteGame(data["ws"]);
-	else
-		throw std::exception(); // unrecognized token
+void	Factory::run( void ) {
+	while (true) {
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		this->_mMutex.lock();
+		unsigned int const	sizeMessagesPool = this->_messages.size();
+		this->_mMutex.unlock();
+		if (!sizeMessagesPool)
+			continue;
+		try {
+			this->settlingMessage(sizeMessagesPool);
+		} catch(std::exception & e) {
+			std::cout << "Error: " << e.what() << std::endl;
+		}
+	}
+	return ;
+}
 
+void	Factory::settlingMessage(unsigned int const sizePool) {
+	for (unsigned int settled = 0; settled < sizePool; settled++) {
+		this->_mMutex.lock();
+		auto	data = nlohmann::json::parse(this->_messages.front());
+		this->_messages.pop();
+		this->_mMutex.unlock();
+		if (data["ID"] != "Game")
+			throw std::exception(); // unrecognized token
+		if (data["state"] == "start")
+			this->createGame(data["ws"]);
+		else if (data["state"] == "stop")
+			this->deleteGame(data["ws"]);
+		else
+			throw std::exception();
+	}
 }
 
 void	Factory::createGame(std::string const & ws) {
@@ -50,16 +70,12 @@ void	Factory::createGame(std::string const & ws) {
 
 	j["ID"] = "Factory";
 	try {
-		this->ccMutex.lock();
 		if (this->_connectedClients.size() == MAX_CLIENTS)
 			throw std::exception();
-		this->ccMutex.unlock();
 		auto	c = std::make_shared<Client>(ws);
-		this->ccMutex.lock();
 		if (this->_connectedClients[ws])
 			throw std::exception(); // duplicate ws
 		this->_connectedClients[ws] = c;
-		this->ccMutex.unlock();
 		std::thread	t([c]() {c->run();});
 		t.detach();
 		j["state"] = "OK";
@@ -67,15 +83,24 @@ void	Factory::createGame(std::string const & ws) {
 		std::cout << e.what() << std::endl; // instantiation failed
 		j["state"] = "NOK";
 	}
-	this->sendMutex.lock();
 	this->gameServer->send(j.dump());
-	this->sendMutex.unlock();
-}
-
-
-void	Factory::run( void ) {
-	while (true) {
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	}
 	return ;
 }
+
+void	Factory::deleteGame(std::string const & ws) {
+	auto	currentClient = this->_connectedClients.find(ws);
+	if (currentClient == this->_connectedClients.end())
+		throw std::exception(); // client not found
+	if (!currentClient->second->getActive())
+		this->_connectedClients.erase(currentClient); // voir avec ben le handle de la connection/ deco peut etre different
+	return ;
+}
+
+void	Factory::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
+	// auto	data = nlohmann::json::parse(msg->get_payload());
+	
+	this->_mMutex.lock();
+	this->_messages.push(msg);
+	this->_mMutex.unlock();
+}
+
