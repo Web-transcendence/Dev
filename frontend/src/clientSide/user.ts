@@ -197,36 +197,62 @@ export async function getFriendList(): Promise<string[] | undefined> {
     }
 }
 
-const toBase64 = file => new Promise((resolve, reject) => {
+const toBase64 = (file: any) => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
 });
 
-export async function setAvatar(target) {
+export async function setAvatar(target: any) {
     try {
         if (target.files && target.files.length > 0) {
             const file: File = target.files[0];
+            console.log(file.size);
             const base64File = await toBase64(file);
-            console.log(base64File);
+
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:3000/user-management/updatePicture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization': 'Bearer ' + token,
+                },
+                body: JSON.stringify({pictureURL: base64File})
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error(error.error);
+            }
         }
     } catch (err) {
         console.log(err);
     }
 }
 
-export function getAvatar() {
-    if (!connected)
-        return;
+export async function getAvatar() {
     const avatarImg = document.getElementById('avatar') as HTMLImageElement;
     const avatar = localStorage.getItem("avatar");
-    if (!avatar) {
-        console.log("No Avatar");
-        avatarImg.src = '../login.png';
-    } else {
-        console.log("Avatar Found");
-        avatarImg.src = avatar;
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/user-management/getPicture', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            console.error(error.error);
+            return undefined;
+        }
+        const img = await response.json();
+        console.log(img.url)
+        avatarImg.src = img.url;
+    } catch (error) {
+        console.error(error);
     }
 }
 
@@ -310,4 +336,5 @@ export async function launchTournament() {
         console.error(error);
     }
 }
+
 

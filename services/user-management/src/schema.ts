@@ -17,9 +17,9 @@ export const verifySchema = z.object({
 })
 
 export const pictureSchema = z.object({
-    picture: z.string().regex(
-        /^data:image\/png;base64/,
-        'String must start with "data:image/png;base64"'
+    pictureURL: z.string().regex(
+        /^data:image\/jpeg;base64/,
+        'String must start with "data:image/jpeg;base64"'
     )
 })
 

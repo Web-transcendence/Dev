@@ -171,20 +171,20 @@ export class User {
         res.sse({data: JSON.stringify({event: "invite", data: "teeest"})})
     }
 
-    updatePictureProfile(pictureURL: string): {code: number, message: string} {
+    updatePictureProfile(pictureURL: string) {
         const change = Client_db.prepare(`UPDATE Client SET pictureProfile = ? WHERE id = ?`).run(pictureURL, this.id);
         if (!change || !change.changes)
-            throw new Error(`Database Error: cannot update pictureProfile changes for ${this.id}`);
-        return {code: 200, message: "picture updated"};
+            throw new DataBaseError(`cannot upload the picture in the db`, 500)
     }
 
-    getPictureProfile(): {code: number, message: string} {
-        const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`).get(this.id) as {base64Picture: string};
+    getPictureProfile(): string {
+        const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`).get(this.id) as {pictureProfile: string} | undefined;
         if (!userData)
-            throw new Error(`Database Failed`);
-        if (!userData.base64Picture)
-            return {code: 200, message: BASE64_UNDEFINED_PICTURES};
-        return {code: 200, message: userData.base64Picture};
+            throw new DataBaseError(`should not happen`, 500)
+        console.log(userData)
+        if (!userData.pictureProfile)
+            return '';
+        return userData.pictureProfile;
     }
 
     /**
