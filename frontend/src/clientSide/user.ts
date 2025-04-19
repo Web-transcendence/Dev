@@ -197,6 +197,25 @@ export async function getFriendList(): Promise<string[] | undefined> {
     }
 }
 
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+});
+
+export async function setAvatar(target) {
+    try {
+        if (target.files && target.files.length > 0) {
+            const file: File = target.files[0];
+            const base64File = await toBase64(file);
+            console.log(base64File);
+        }
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 export function getAvatar() {
     if (!connected)
         return;
