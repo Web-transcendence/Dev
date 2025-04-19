@@ -16,6 +16,13 @@ export const verifySchema = z.object({
     nickName: z.string().min(3, "Minimum 3 caracteres")
 })
 
+export const pictureSchema = z.object({
+    picture: z.string().regex(
+        /^data:image\/png;base64/,
+        'String must start with "data:image/png;base64"'
+    )
+})
+
 export const signUpSchema = z.object({
     nickName: z.string().min(3, "Minimum 3 caracteres"),
     email: z.string().email("Invalid email"),
