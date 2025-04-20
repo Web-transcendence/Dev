@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/20 00:06:00 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/20 16:27:51 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,14 @@ Client::~Client( void ) {
 void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
 	auto	data = nlohmann::json::parse(msg->get_payload());
 	if (data["ID"] == "Game")
-		this->aiServer->send(msg);
+		this->on_message_gameServer(data); // pb ? 
 	else if (data["ID"] == "AI")
 		this->on_message_aiServer(data);
+	(void)hdl;
 	return ;
 }
 
-void	Client::on_message_aiServer(nlohmann::json_abi_v3_12_0::json data) {
+void	Client::on_message_aiServer(nlohmann::json const & data) {
 	unsigned int		idx = 0;
 	std::vector<double>	output(N_NEURON_OUTPUT);
 
@@ -67,7 +68,7 @@ void	Client::on_message_aiServer(nlohmann::json_abi_v3_12_0::json data) {
 	return ;
 }
 
-void	Client::on_message_gameServer(nlohmann::json_abi_v3_12_0::json data) {
+void	Client::on_message_gameServer(nlohmann::json const & data) {
 	unsigned int		idx = 0;
 	std::vector<double>	temp(N_NEURON_INPUT);
 
@@ -99,7 +100,7 @@ void	Client::loop( void ) {
 
 bool	Client::checkTime( void ) {
 	auto	t2 = std::chrono::steady_clock::now();
-	auto	timeSpan = duration_cast<duration<double>>(t2 - this->t1.load());
+	auto	timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - this->t1.load());
 	if (timeSpan.count() >= 3.0)
 		return false;
 	return true;

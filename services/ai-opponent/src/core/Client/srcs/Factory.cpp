@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/20 01:10:43 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/20 16:28:07 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ void	Factory::run( void ) {
 void	Factory::settlingMessage(unsigned int const sizePool) {
 	for (unsigned int settled = 0; settled < sizePool; settled++) {
 		this->_mMutex.lock();
-		auto	data = nlohmann::json::parse(this->_messages.front());
+		auto	data = nlohmann::json::parse(this->_messages.front()->get_payload());
 		this->_messages.pop();
 		this->_mMutex.unlock();
 		if (data["ID"] != "Game")
@@ -99,6 +99,7 @@ void	Factory::deleteGame(std::string const & ws) {
 void	Factory::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
 	// auto	data = nlohmann::json::parse(msg->get_payload());
 	
+	(void)hdl;
 	this->_mMutex.lock();
 	this->_messages.push(msg);
 	this->_mMutex.unlock();
