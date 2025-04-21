@@ -8,8 +8,8 @@
     "strict": true,
     "skipLibCheck": true,
     "outDir": "public/dist",
-    "rootDir": "src",
-    "moduleResolution": "nodenext",
+    "rootDir": "src/clientSide",
     "lib": ["dom", "ESNext"]
   },
+  "include": ["src/clientSide/**/*"]
 }
