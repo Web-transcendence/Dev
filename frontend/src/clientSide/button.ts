@@ -1,4 +1,4 @@
-import {addFriend, getFriendList, login, profile, register} from "./user.js";
+import {addFriend, getFriendList, login, profile, friendList, register} from "./user.js";
 import {connected, handleConnection, navigate} from "./front.js";
 
 
@@ -46,8 +46,10 @@ function profileBtn() {
     const nickName = document.getElementById("profileNickName")!;
     const email = document.getElementById("profileEmail")!;
     // const container = document.getElementById('content') as HTMLElement;
-    if (email && nickName)
+    if (email && nickName) {
         profile(/*container,*/ nickName, email);
+        friendList();
+    }
     const editProfileBtn = document.getElementById("editProfileButton") as HTMLButtonElement;
     const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;

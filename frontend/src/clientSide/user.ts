@@ -58,6 +58,34 @@ export function login(button: HTMLElement): void {
     });
 }
 
+type FriendList = {
+    acceptedNickName: string[];
+    pendingNickName: string[];
+    receivedNickName: string[];
+};
+
+export async function friendList() {
+    const friendlist = await getFriendList() as FriendList;
+    if (!friendlist)
+        console.log("friendlist is undefined");
+    else {
+        for (friendlist.acceptedNickName) {
+            // add name in html that goes in the friendlist in profile section
+            // <div class=" flex items-center w-full content-start bg-transparent">
+            // <img src="../login.png" class="w-10 h-10 rounded-full " />
+            // <strong class="text-gray-300 ml-2">Debra Houston</strong>
+            // </div>
+        }
+            console.log("ACCEPTED", friendlist.acceptedNickName);
+        if (friendlist.pendingNickName)
+            console.log("ACCEPTED", friendlist.pendingNickName);
+        if (friendlist.receivedNickName)
+            console.log("ACCEPTED", friendlist.receivedNickName);
+        // console.log(friendlist);
+    }
+
+}
+
 export async function profile(/*container: HTMLElement, */nickName: HTMLElement, email: HTMLElement) {
     try {
         const token = localStorage.getItem('token');
@@ -176,7 +204,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
     }
 }
 
-export async function getFriendList(): Promise<string[] | undefined> {
+export async function getFriendList(): Promise<FriendList> {
     try {
         const token = localStorage.getItem('token');
         const response = await fetch('http://localhost:3000/user-management/friendList', {

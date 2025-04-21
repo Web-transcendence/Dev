@@ -20,22 +20,22 @@ export async function googleAuth(request: FastifyRequest, reply: FastifyReply):P
         }
         console.log('User ID:', userId);
         console.log('Email:', payload.email);
-        console.log('Name:', payload.name);
+        console.log('Name:', payload.given_name);
         console.log('Profile Picture URL:', payload.picture);
-
+        console.log('ALLL :', payload);
         if (Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(payload.email))
             console.log('Email Already Register:', payload.email);
         else {
             const res = Client_db.prepare("INSERT INTO Client (nickName, email, password, google_id) VALUES (?, ?, ?, ?)")
-                .run(payload.name, payload.email, 'NOTGIVEN', userId);
+                .run(payload.given_name, payload.email, 'NOTGIVEN', userId);
             console.log('New Email:', payload.email);
         }
         const rows = Client_db.prepare(`SELECT * FROM Client`).all();
         console.table(rows);
         const userData = Client_db.prepare("SELECT id FROM Client WHERE email = ?").get(payload.email) as {id: string};
 
-        const token = jwt.sign({ id: userData.id, name: payload.name, email: payload.email, avatar: payload.picture, userId: payload.sub }, 'secret_key', { expiresIn: '1h' });
-        return reply.send({token, valid: true, nickName: payload.name, avatar: payload.picture});
+        const token = jwt.sign({ id: userData.id, name: payload.given_name, email: payload.email, avatar: payload.picture, userId: payload.sub }, 'secret_key', { expiresIn: '1h' });
+        return reply.send({token, valid: true, nickName: payload.given_name, avatar: payload.picture});
     } catch (error) {
         console.log('Error verifying Google token:', error);
         reply.status(400).send({ valid: false, error: 'Invalid token' });
