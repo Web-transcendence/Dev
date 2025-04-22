@@ -1,4 +1,4 @@
-From GameServer to Client & From Client to AiServer:
+From GameServer to Client:
 {
 	"ID": "Game",
 	"Data": [x,x,x]
@@ -19,7 +19,7 @@ From GameServer to Factory:
 	"state" : "start" or "stop",
 	"ws": "GameUrl"
 }
-From Factory to GameServer:
+From Factory to GameServer: deprecated
 {
 	"ID": "Factory",
 	"state": "OK" or "NOK",

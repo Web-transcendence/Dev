@@ -3,3 +3,5 @@ sudo apt install libwebsocketpp-dev
 idea:
 	In client, no info from the server during three seconds the client/thread
 	suicide
+
+Delete place holders (cause data race)
