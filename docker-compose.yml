@@ -29,8 +29,6 @@ services:
       - "4000:4000"
     depends_on:
       - api-gateway
-    volumes:
-      - profilePicture:/app/public/profilePicture
     restart: unless-stopped
     develop:
       watch:
@@ -42,7 +40,6 @@ services:
           target: /app/public/
           ignore:
             - app/public/dist/*.js
-            - app/public/profilePicture
         - action: rebuild
           path: ./frontend/package.json
           target: app/
@@ -123,12 +120,3 @@ networks:
   transcendence:
     name: transcendence
     driver: bridge
-
-volumes:
-  profilePicture:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: frontend/public/profilePicture
-
