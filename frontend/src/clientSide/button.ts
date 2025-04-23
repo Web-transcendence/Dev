@@ -1,4 +1,4 @@
-import {addFriend, getFriendList, login, profile, register} from "./user.js";
+import {addFriend, getAvatar, getFriendList, login, profile, register, setAvatar} from "./user.js";
 import {connected, handleConnection, navigate} from "./front.js";
 
 
@@ -11,15 +11,9 @@ const mapButton : {[key: string] : () => void} = {
 }
 
 export function activateBtn(page: string) {
-    const Ping = document.getElementById("pongConnected") as HTMLButtonElement;
-    if (Ping)
-        Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
-    const Home = document.getElementById('home')  as HTMLButtonElement;
-    if (Home)
-        Home.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
-    const loginBtn = document.getElementById("loginButton")  as HTMLButtonElement;
-    if (loginBtn)
-        loginBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
+    document.getElementById("pongConnected")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
+    document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
+    document.getElementById("loginButton")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
     const logoutBtn = document.getElementById('logout')  as HTMLButtonElement;
     if (logoutBtn && connected)
         logoutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
@@ -34,9 +28,7 @@ function connectBtn() {
 }
 
 function loginBtn() {
-    const connect = document.getElementById('connectPageBtn') as HTMLButtonElement;
-    if (connect)
-        connect.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+    document.getElementById('connectPageBtn')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
     const button = document.getElementById("loginButton") as HTMLButtonElement;
     if (button)
         login(button);
@@ -54,9 +46,13 @@ function profileBtn() {
     if (addFriendBtn && addFriendIpt) {
         addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
     }
+    document.getElementById("profilePicture")?.addEventListener("change", async (event: Event) => {
+        const target = event.target as HTMLInputElement
+        await setAvatar(target)
+    });
 
     if (editProfileBtn) {
-        editProfileBtn.addEventListener("click", async () => console.log(await getFriendList()));
+        editProfileBtn.addEventListener("click", async () => console.log(await getAvatar()));
     }
 }
 

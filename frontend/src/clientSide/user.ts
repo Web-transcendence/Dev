@@ -197,17 +197,65 @@ export async function getFriendList(): Promise<string[] | undefined> {
     }
 }
 
-export function getAvatar() {
-    if (!connected)
-        return;
+const toBase64 = (file: any) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+});
+
+export async function setAvatar(target: HTMLInputElement) {
+    try {
+        if (target.files && target.files[0]) {
+            const file: File = target.files[0];
+            console.log(file.size);
+            const base64File = await toBase64(file);
+
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:3000/user-management/updatePicture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization': 'Bearer ' + token,
+                },
+                body: JSON.stringify({pictureURL: base64File})
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error(error.error);
+            }
+        }
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+export async function getAvatar() {
     const avatarImg = document.getElementById('avatar') as HTMLImageElement;
     const avatar = localStorage.getItem("avatar");
-    if (!avatar) {
-        console.log("No Avatar");
-        avatarImg.src = '../login.png';
-    } else {
-        console.log("Avatar Found");
-        avatarImg.src = avatar;
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/user-management/getPicture', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            console.error(error.error);
+            return undefined;
+        }
+        const img = await response.json();
+        if (img.url)
+            avatarImg.src = img.url;
+        else
+            avatarImg.src = '../login.png';
+
+    } catch (error) {
+        console.error(error);
     }
 }
 
@@ -291,4 +339,5 @@ export async function launchTournament() {
         console.error(error);
     }
 }
+
 

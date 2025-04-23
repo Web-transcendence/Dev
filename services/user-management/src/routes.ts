@@ -346,4 +346,50 @@ export default async function userRoutes(app: FastifyInstance) {
         res.sse({data: JSON.stringify(message)})
     })
 
+    app.post('/updatePicture', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const zod_result = Schema.pictureSchema.safeParse(req.body);
+            if (!zod_result.success)
+                throw new InputError(`Cannot parse the input`)
+            let pictureURL = sanitizeHtml(zod_result.data.pictureURL);
+            if (!pictureURL)
+                throw new InputError(`empty pictureURL`)
+
+            const id = Number(req.headers.id);
+            if (!id)
+                throw new ServerError(`cannot parse id, which should not happen`, 500)
+
+            const user = new User(id);
+
+            user.updatePictureProfile(pictureURL);
+            return res.status(200).send();
+        } catch(err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send(err)
+        }
+    })
+
+    app.get('/getPicture', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const id = Number(req.headers.id);
+            if (!id)
+                throw new ServerError(`cannot parse id, which should not happen`, 500)
+
+            const user = new User(id);
+            const result = user.getPictureProfile();
+
+            return res.status(200).send({url: result});
+        } catch(err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send(err)
+        }
+    })
 }
