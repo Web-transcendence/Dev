@@ -55,6 +55,7 @@ function profileBtn() {
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
     if (addFriendBtn && addFriendIpt) {
         addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
+        // friendList();
     }
 
     if (editProfileBtn) {

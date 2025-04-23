@@ -20,6 +20,7 @@ export function register(button: HTMLElement): void {
             loadPart("/connected");
             handleConnection(true);
         } else {
+            console.log(result);
             validateRegister(result.json);
         }
     });
@@ -66,24 +67,72 @@ type FriendList = {
 
 export async function friendList() {
     const friendlist = await getFriendList() as FriendList;
-    if (!friendlist)
+    const noFriend = document.getElementById("noFriend") as HTMLHeadingElement;
+    console.log("ACCEPTED", friendlist.acceptedNickName);
+    if (!friendlist || !friendlist.acceptedNickName.length) {
+        if (noFriend)
+            noFriend.classList.remove("hidden");
         console.log("friendlist is undefined");
-    else {
-        for (friendlist.acceptedNickName) {
-            // add name in html that goes in the friendlist in profile section
-            // <div class=" flex items-center w-full content-start bg-transparent">
-            // <img src="../login.png" class="w-10 h-10 rounded-full " />
-            // <strong class="text-gray-300 ml-2">Debra Houston</strong>
-            // </div>
-        }
-            console.log("ACCEPTED", friendlist.acceptedNickName);
-        if (friendlist.pendingNickName)
-            console.log("ACCEPTED", friendlist.pendingNickName);
-        if (friendlist.receivedNickName)
-            console.log("ACCEPTED", friendlist.receivedNickName);
-        // console.log(friendlist);
     }
-
+    else {
+        if (noFriend)
+            noFriend.classList.add("hidden");
+        const targetDiv = document.getElementById("InsertFriendList");
+            if (!targetDiv)
+                return ;
+            targetDiv.innerHTML = '';
+            for (let i = 0 ; friendlist.acceptedNickName[i] != null; i++) {
+                const myHtml = `<div class="flex items-center w-full content-start bg-transparent">
+                <img src="../login.png" class="w-10 h-10 rounded-full " />
+                <strong class="text-gray-300 ml-2">` + friendlist.acceptedNickName[i] + `</strong>
+                </div>`;
+                targetDiv.insertAdjacentHTML('beforeend', myHtml);
+            }
+    }
+    const noPending = document.getElementById("noPending") as HTMLHeadingElement;
+    console.log("PENDING", friendlist.pendingNickName);
+    if (!friendlist || !friendlist.pendingNickName.length) {
+        if (noPending)
+            noPending.classList.remove("hidden");
+        console.log("friendlist or pending is undefined");
+    }
+    else {
+        if (noPending)
+            noPending.classList.add("hidden");
+        const pendingDiv = document.getElementById("InsertPendingList");
+        if (!pendingDiv)
+            return ;
+        pendingDiv.innerHTML = '';
+        for (let i = 0 ; friendlist.pendingNickName[i] != null; i++) {
+            const myHtml = `<div class="flex items-center w-full content-start bg-transparent">
+            <img src="../login.png" class="w-10 h-10 rounded-full " />
+            <strong class="text-gray-300 ml-2">` + friendlist.pendingNickName[i] + `</strong>
+            </div>`;
+            pendingDiv.insertAdjacentHTML('beforeend', myHtml);
+        }
+    }
+    const noReceived = document.getElementById("noReceived") as HTMLHeadingElement;
+    console.log("RECEIVED", friendlist.receivedNickName);
+    if (!friendlist || !friendlist.receivedNickName.length) {
+        if (noReceived)
+            noReceived.classList.remove("hidden");
+        console.log("friendlist or received is undefined");
+    }
+    else {
+        if (noReceived)
+            noReceived.classList.add("hidden");
+        const receivedDiv = document.getElementById("InsertReceivedList");
+        if (!receivedDiv)
+            return ;
+        receivedDiv.innerHTML = '';
+        for (let i = 0 ; friendlist.receivedNickName[i] != null; i++) {
+            const myHtml = `<div class="flex items-center w-full content-start bg-transparent">
+            <img src="../login.png" class="w-10 h-10 rounded-full " />
+            <strong class="text-gray-300 ml-2">` + friendlist.receivedNickName[i] + `</strong>
+            </div>`;
+            receivedDiv.insertAdjacentHTML('beforeend', myHtml);
+        }
+    }
 }
 
 export async function profile(/*container: HTMLElement, */nickName: HTMLElement, email: HTMLElement) {
