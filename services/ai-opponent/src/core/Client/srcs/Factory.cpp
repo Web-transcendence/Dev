@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/20 16:28:07 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/23 15:58:13 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ Factory::~Factory( void ) {
 }
 
 void	Factory::run( void ) {
+	std::thread	t([this](){this->myFactory.run();});
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		this->_mMutex.lock();
@@ -45,6 +46,7 @@ void	Factory::run( void ) {
 			std::cout << "Error: " << e.what() << std::endl;
 		}
 	}
+	this->myFactory.stop();
 	return ;
 }
 
@@ -66,9 +68,6 @@ void	Factory::settlingMessage(unsigned int const sizePool) {
 }
 
 void	Factory::createGame(std::string const & ws) {
-	nlohmann::json	j;
-
-	j["ID"] = "Factory";
 	try {
 		if (this->_connectedClients.size() == MAX_CLIENTS)
 			throw std::exception();
@@ -78,12 +77,9 @@ void	Factory::createGame(std::string const & ws) {
 		this->_connectedClients[ws] = c;
 		std::thread	t([c]() {c->run();});
 		t.detach();
-		j["state"] = "OK";
 	} catch (std::exception const & e) {
 		std::cout << e.what() << std::endl; // instantiation failed
-		j["state"] = "NOK";
 	}
-	this->gameServer->send(j.dump());
 	return ;
 }
 

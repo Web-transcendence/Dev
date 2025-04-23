@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:12:37 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/22 19:17:34 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/23 14:32:38 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <chrono>
 
 int	main( void ) {
-	Server	myServer(16016, "Game Center");
+	Server	myServer(8080, "Game Center");
 	Game	game1(16019, "Game1");
 	Game	game2(16020, "Game2");
 

@@ -11,7 +11,7 @@ From AiServer to Client:
 Form Client to GameServer:
 {
 	"ID": "Client AI",
-	"arrow": "Press Up"
+	"Arrow": "Press Up"
 }
 From GameServer to Factory:
 {

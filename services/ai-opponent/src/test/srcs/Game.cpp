@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 17:55:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/22 19:25:19 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/23 15:44:38 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ Game::Game(uint16_t port, std::string const & name) {
 	this->myServer.listen(port);
 	this->myServer.start_accept();
 	std::stringstream	ss;
-	ss << "htpp://localhost:" << port;
+	ss << "ws://127.0.0.1:" << port;
 	this->ws = ss.str();
 	this->connected.store(false);
 	std::cout << this->nameServer << " open on: " << this->ws << std::endl;
@@ -45,7 +45,7 @@ void	Game::on_close(websocketpp::connection_hdl hdl) {
 void	Game::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
 	auto	data = nlohmann::json::parse(msg->get_payload());
 
-	std::cout << this->nameServer << " receveived: " << data["arrow"] << std::endl;
+	std::cout << this->nameServer << " receveived: " << data["Arrow"] << std::endl;
 }
 
 void	Game::stateSendLoop(int const runtime) {

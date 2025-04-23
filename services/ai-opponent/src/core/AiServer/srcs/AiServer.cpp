@@ -6,13 +6,14 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/22 15:45:07 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/23 15:59:26 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "AiServer.class.hpp"
 
 #include "Network.class.hpp"
+#include "../../third-party/json/json.hpp"
 
 #include <iostream>
 #include <string>
@@ -60,7 +61,9 @@ void	AiServer::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
 	memcpy(_1, msg->get_payload().c_str(), sizeof(double)*16);
 	auto	input = std::vector<double>(_1, _1+16);
 	auto	oQNet = this->_QNet.feedForward(input);
-	memcpy(_2, oQNet.data(), sizeof(double)*4);
-	this->_myServer.send(hdl, _2, websocketpp::frame::opcode::binary);
+	nlohmann::json	j;
+	j["ID"] = "AI";
+	j["Data"] = oQNet;
+	this->_myServer.send(hdl, j.dump(), websocketpp::frame::opcode::text);
 	return ;
 }

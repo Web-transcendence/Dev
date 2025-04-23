@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:34:19 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/22 19:25:32 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/23 15:07:02 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ Server::Server(uint16_t port, std::string const & name) {
 	this->myServer.listen(port);
 	this->myServer.start_accept();
 	std::stringstream	ss;
-	ss << "http://localhost:" << port;
+	ss << "ws://127.0.0.1:" << port;
 	this->ws = ss.str();
 	this->hdlFactory = NULL;
 	this->connected.store(false);
@@ -57,7 +57,7 @@ void	Server::request(std::string ws) {
 	j["ID"] = "Game";
 	j["state"] = "start";
 	j["ws"] = ws;
-	this->myServer.send(this->hdlFactory, ws, websocketpp::frame::opcode::text);
+	this->myServer.send(this->hdlFactory, j.dump(), websocketpp::frame::opcode::text);
 	return ;
 }
 

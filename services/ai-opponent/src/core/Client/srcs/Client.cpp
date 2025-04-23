@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/20 16:27:51 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/23 15:57:13 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,9 +62,11 @@ void	Client::on_message_aiServer(nlohmann::json const & data) {
 		ss << data["Data"][idx];
 		ss >> *it;
 	}
-	std::stringstream	ssKey;
+	nlohmann::json	j;
+	j["ID"] = "Client AI";
+	j["Arrow"] = "UP";
 	// definir l input grace a la plus grande valeur contenue dans output dans un format json (voir avec ben)
-	this->gameServer->send(ssKey.str());
+	this->gameServer->send(j.dump());
 	return ;
 }
 
