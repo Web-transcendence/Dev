@@ -199,14 +199,14 @@ export async function getFriendList(): Promise<string[] | undefined> {
 
 const toBase64 = (file: any) => new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
+    reader.onload = (e) => resolve(reader.result);
     reader.onerror = reject;
+    reader.readAsDataURL(file);
 });
 
-export async function setAvatar(target: any) {
+export async function setAvatar(target: HTMLInputElement) {
     try {
-        if (target.files && target.files.length > 0) {
+        if (target.files && target.files[0]) {
             const file: File = target.files[0];
             console.log(file.size);
             const base64File = await toBase64(file);
@@ -249,8 +249,11 @@ export async function getAvatar() {
             return undefined;
         }
         const img = await response.json();
-        console.log(img.url)
-        avatarImg.src = img.url;
+        if (img.url)
+            avatarImg.src = img.url;
+        else
+            avatarImg.src = '../login.png';
+
     } catch (error) {
         console.error(error);
     }

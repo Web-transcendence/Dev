@@ -46,7 +46,10 @@ function profileBtn() {
     if (addFriendBtn && addFriendIpt) {
         addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
     }
-    document.getElementById("profilePicture")?.addEventListener("change", async (event) => await setAvatar(event.target));
+    document.getElementById("profilePicture")?.addEventListener("change", async (event: Event) => {
+        const target = event.target as HTMLInputElement
+        await setAvatar(target)
+    });
 
     if (editProfileBtn) {
         editProfileBtn.addEventListener("click", async () => console.log(await getAvatar()));
