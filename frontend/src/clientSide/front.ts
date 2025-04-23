@@ -32,6 +32,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const Ping = document.getElementById("pong");
     if (Ping)
         Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
+    const towerDefense = document.getElementById("towerDefense");
+    if (towerDefense) {
+        console.log("Tower Defense:");
+        towerDefense.addEventListener("click", (event: MouseEvent) => navigate(event, "/towerDefense"));
+    }
     loadPart("/home");
 });
 
@@ -161,6 +166,18 @@ function afterInsert(url: string,/* container: HTMLElement*/): void {
         }
     } else {
         const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
+        if (existingScript)
+            existingScript.remove();
+    }
+    console.log("afterInsert url :", url);
+    if (url === "part/towerDefense") {
+        if (!document.querySelector('script[src="/static/dist/td.js"]')) {
+            const script = document.createElement('script');
+            script.src = "/static/dist/td.js";
+            document.body.appendChild(script);
+        }
+    } else {
+        const existingScript = document.querySelector('script[src="/static/dist/td.js"]');
         if (existingScript)
             existingScript.remove();
     }

@@ -82,6 +82,24 @@ services:
           path: ./services/match-server/package.json
           target: app/
 
+  tower-defense:
+    container_name: tower-defense
+    build:
+      context: services/tower-defense/
+    networks:
+      - transcendence
+    ports:
+      - "2246:2246"
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/tower-defense/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/tower-defense/package.json
+          target: app/
+
 #  ai-opponent:
 #    container_name: ai-opponent
 #    build:

@@ -62,6 +62,11 @@ export async function routes(fastify: FastifyInstance) {
         const tag = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(tag)
     })
+    fastify.get('/part/towerDefense', function (req, reply) {
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "towerDefense.html");
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag)
+    })
     // FAV ICON
     fastify.get('/favicon.ico', function (req, reply) {
         try {
@@ -102,36 +107,36 @@ export async function routes(fastify: FastifyInstance) {
         reply.type('text/html').send(tag);
     })
     // Png For Pong
-    fastify.get('/assets/ballup.png', function (req, reply) {
+    fastify.get('/assets/pong/ballup.png', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "ballup.png");
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "pong/ballup.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {
             reply.code(404).send("Fichier ballup non trouvé");
         }
     });
-    fastify.get('/assets/bardown.png', function (req, reply) {
+    fastify.get('/assets/pong/bardown.png', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "bardown.png");
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "pong/bardown.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {
             reply.code(404).send("Fichier bardown non trouvé");
         }
     });
-    fastify.get('/assets/barup.png', function (req, reply) {
+    fastify.get('/assets/pong/barup.png', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "barup.png");
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "pong/barup.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {
             reply.code(404).send("Fichier barup non trouvé");
         }
     });
-    fastify.get('/assets/pong.png', function (req, reply) {
+    fastify.get('/assets/pong/pong.png', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "pong.png");
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "pong/pong.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {
@@ -145,6 +150,16 @@ export async function routes(fastify: FastifyInstance) {
             reply.type('img/ico').send(tag)
         } catch (error) {
             reply.code(404).send("Fichier docker_compose non trouvé");
+        }
+    });
+    fastify.get('/assets/tower-defense/:filename', function (req, reply) {
+        try {
+            const { filename } = req.params;
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, 'tower-defense', filename);
+            const file = readFileSync(frontPath);
+            reply.code(224).type('image/png').send(file);
+        } catch (error) {
+            reply.code(404).send(`Fichier ${req.params.filename} non trouvé`);
         }
     });
 }

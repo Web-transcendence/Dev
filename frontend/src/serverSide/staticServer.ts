@@ -21,6 +21,14 @@ fastify.register(fastifyStatic, {
     prefix: "/static/"
 })
 
+fastify.register(async function (instance) {
+    instance.register(fastifyStatic, {
+        root: join(import.meta.dirname, env.TRANS_ASSETS_PATH),
+        prefix: "/tower-defense/",
+        decorateReply: false, // 👈 empêche le conflit de sendFile
+    });
+});
+
 fastify.get("/*", (req, res) => { // Route pour la page d'accueil
     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
     console.log(join(import.meta.dirname, "..", "..", "public"))
