@@ -72,6 +72,15 @@ export async function routes(fastify: FastifyInstance) {
             reply.code(404).send("Fichier non trouvé");
         }
     });
+    fastify.get('/thelogo.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "thelogo.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier non trouvé");
+        }
+    });
     fastify.get('/login.png', function (req, reply) {
         console.log("\n\nLOGIN\n\n");
         try {
