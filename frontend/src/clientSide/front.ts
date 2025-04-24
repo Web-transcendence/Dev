@@ -86,8 +86,10 @@ window.CredentialResponse = async (credit: { credential: string }) => {
         else {
             const reply = await response.json();
             if (reply.valid) {
-                if (reply.avatar)
+                if (reply.avatar) {
                     localStorage.setItem('avatar', reply.avatar);
+                    console.log("reply.avatar");
+                }
                 if (reply.token)
                     localStorage.setItem('token', reply.token);
                 loadPart("/connected");
@@ -145,6 +147,7 @@ async function insert_tag(url: string): Promise<void>{
     if (html.includes(container.innerHTML))
         return;
     container.innerHTML = '';
+    console.log("PRORATA");
     afterInsert(url/*, container*/);
     newElement.innerHTML = html;
     container.appendChild(newElement);
@@ -162,6 +165,18 @@ function afterInsert(url: string,/* container: HTMLElement*/): void {
         const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
         if (existingScript)
             existingScript.remove();
+    }
+    if (url === "part/profile") {
+        const changeAvatar = document.getElementById('avatarProfile') as HTMLImageElement;
+        const avatar = localStorage.getItem('avatar');
+        if (avatar && changeAvatar) {
+            changeAvatar.src = avatar;
+            console.log("Avatar Change Found");
+        }
+        if (!changeAvatar)
+            console.log(" CHANge Avatar NOT FOUND AT ALLLLLLLLLLL");
+        if (!avatar)
+            console.log(" Avatar Avatar NOT FOUND AT ALLLLLLLLLLL");
     }
 }
 
