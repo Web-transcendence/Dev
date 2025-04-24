@@ -25,6 +25,16 @@ export function activateBtn(page: string) {
         logoutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
     if (page in mapButton)
         mapButton[page]();
+    //navigation page
+    const pongMode = document.getElementById("pongMode") as HTMLButtonElement;
+    if (pongMode)
+        pongMode.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongMode"));
+    const tower = document.getElementById("tower") as HTMLButtonElement;
+    if (tower)
+        tower.addEventListener("click", (event: MouseEvent) => navigate(event, "/tower"));
+    const tournaments = document.getElementById("tournaments") as HTMLButtonElement;
+    if (tournaments)
+        tournaments.addEventListener("click", (event: MouseEvent) => navigate(event, "/tournaments"));
 }
 
 function connectBtn() {
