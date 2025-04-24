@@ -9,6 +9,8 @@ import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./er
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
+const BASE64_UNDEFINED_PICTURES = 'A DEFINIR' // attention !!
+
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,7 +18,8 @@ Client_db.exec(`
         email UNIQUE NOT NULL COLLATE NOCASE,
         password TEXT NOT NULL,
         google_id INTEGER,
-        secret_key TEXT DEFAULT NULL
+        secret_key TEXT DEFAULT NULL,
+        pictureProfile TEXT DEFAULT NULL
     )
 `)
 
@@ -168,6 +171,21 @@ export class User {
         res.sse({data: JSON.stringify({event: "invite", data: "teeest"})})
     }
 
+    updatePictureProfile(pictureURL: string) {
+        const change = Client_db.prepare(`UPDATE Client SET pictureProfile = ? WHERE id = ?`).run(pictureURL, this.id);
+        if (!change || !change.changes)
+            throw new DataBaseError(`cannot upload the picture in the db`, 500)
+    }
+
+    getPictureProfile(): string {
+        const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`).get(this.id) as {pictureProfile: string} | undefined;
+        if (!userData)
+            throw new DataBaseError(`should not happen`, 500)
+        console.log(userData)
+        if (!userData.pictureProfile)
+            return '';
+        return userData.pictureProfile;
+    }
 
     /**
      * recover the id of the friend, check his friendship status in db, if it doesn't exist it add with status = pending,
