@@ -59,80 +59,154 @@ export function login(button: HTMLElement): void {
     });
 }
 
+export interface Person {
+    name: string;
+    // email: string;
+    imageUrl: string;
+}
+
 type FriendList = {
     acceptedNickName: string[];
     pendingNickName: string[];
     receivedNickName: string[];
 };
 
-export async function friendList() {
-    const friendlist = await getFriendList() as FriendList;
-    const noFriend = document.getElementById("noFriend") as HTMLHeadingElement;
-    console.log("ACCEPTED", friendlist.acceptedNickName);
-    if (!friendlist || !friendlist.acceptedNickName.length) {
-        if (noFriend)
-            noFriend.classList.remove("hidden");
-        console.log("friendlist is undefined");
-    }
-    else {
-        if (noFriend)
-            noFriend.classList.add("hidden");
-        const targetDiv = document.getElementById("InsertFriendList");
-            if (!targetDiv)
-                return ;
-            targetDiv.innerHTML = '';
-            for (let i = 0 ; friendlist.acceptedNickName[i] != null; i++) {
-                const myHtml = `<div class="flex items-center w-full content-start bg-transparent">
-                <img src="../login.png" class="w-10 h-10 rounded-full " />
-                <strong class="text-gray-300 ml-2">` + friendlist.acceptedNickName[i] + `</strong>
-                </div>`;
-                targetDiv.insertAdjacentHTML('beforeend', myHtml);
+export async function friendList(): Promise<void> {
+    try {
+        const friendlist = await getFriendList() as FriendList;
+        console.log("RECEIVED", friendlist.receivedNickName);
+        console.log("PENDING", friendlist.pendingNickName);
+        console.log("ACCEPTED", friendlist.acceptedNickName);
+        const noFriend = document.getElementById("noFriend") as HTMLHeadingElement;
+        if (!friendlist || !friendlist.receivedNickName.length) {
+            if (noFriend)
+                noFriend.classList.remove("hidden");
+            console.log("friendlist is undefined");
+        } else {
+            const receivedPeople: Person[] = friendlist.receivedNickName.map(nickname => ({
+                name: nickname,
+                imageUrl: '../images/login.png'
+            }));
+            const receivedList = document.getElementById("receivedList");
+            const receivedTemplate = document.getElementById("receivedTemplate") as HTMLTemplateElement;
+
+            if (receivedList && receivedTemplate) {
+                receivedList.innerHTML = '';
+                receivedPeople.forEach(person => {
+                    const clone = receivedTemplate.content.cloneNode(true) as HTMLElement;
+                    const img = clone.querySelector("img")!;
+                    const name = clone.querySelector(".name")!;
+
+                    img.src = person.imageUrl;
+                    img.alt = person.name;
+                    name.textContent = person.name;
+
+                    receivedList.appendChild(clone);
+                });
             }
-    }
-    const noPending = document.getElementById("noPending") as HTMLHeadingElement;
-    console.log("PENDING", friendlist.pendingNickName);
-    if (!friendlist || !friendlist.pendingNickName.length) {
-        if (noPending)
-            noPending.classList.remove("hidden");
-        console.log("friendlist or pending is undefined");
-    }
-    else {
-        if (noPending)
-            noPending.classList.add("hidden");
-        const pendingDiv = document.getElementById("InsertPendingList");
-        if (!pendingDiv)
-            return ;
-        pendingDiv.innerHTML = '';
-        for (let i = 0 ; friendlist.pendingNickName[i] != null; i++) {
-            const myHtml = `<div class="flex items-center w-full content-start bg-transparent">
-            <img src="../login.png" class="w-10 h-10 rounded-full " />
-            <strong class="text-gray-300 ml-2">` + friendlist.pendingNickName[i] + `</strong>
-            </div>`;
-            pendingDiv.insertAdjacentHTML('beforeend', myHtml);
         }
-    }
-    const noReceived = document.getElementById("noReceived") as HTMLHeadingElement;
-    console.log("RECEIVED", friendlist.receivedNickName);
-    if (!friendlist || !friendlist.receivedNickName.length) {
-        if (noReceived)
-            noReceived.classList.remove("hidden");
-        console.log("friendlist or received is undefined");
-    }
-    else {
-        if (noReceived)
-            noReceived.classList.add("hidden");
-        const receivedDiv = document.getElementById("InsertReceivedList");
-        if (!receivedDiv)
-            return ;
-        receivedDiv.innerHTML = '';
-        for (let i = 0 ; friendlist.receivedNickName[i] != null; i++) {
-            const myHtml = `<div class="flex items-center w-full content-start bg-transparent">
-            <img src="../login.png" class="w-10 h-10 rounded-full " />
-            <strong class="text-gray-300 ml-2">` + friendlist.receivedNickName[i] + `</strong>
-            </div>`;
-            receivedDiv.insertAdjacentHTML('beforeend', myHtml);
+        if (!friendlist || !friendlist.pendingNickName.length) {
+            if (noFriend)
+                noFriend.classList.remove("hidden");
+            console.log("friendlist is undefined");
+        } else {
+            const requestPeople: Person[] = friendlist.pendingNickName.map(nickname => ({
+                name: nickname,
+                imageUrl: '../images/login.png'
+            }));
+            const requestList = document.getElementById("requestList");
+            const requestTemplate = document.getElementById("requestTemplate") as HTMLTemplateElement;
+
+            if (requestList && requestTemplate) {
+                requestList.innerHTML = '';
+                requestPeople.forEach(person => {
+                    const clone = requestTemplate.content.cloneNode(true) as HTMLElement;
+                    const img = clone.querySelector("img")!;
+                    const name = clone.querySelector(".name")!;
+
+                    img.src = person.imageUrl;
+                    img.alt = person.name;
+                    name.textContent = person.name;
+
+                    requestList.appendChild(clone);
+                });
+            }
         }
+        if (!friendlist || !friendlist.acceptedNickName.length) {
+            if (noFriend)
+                noFriend.classList.remove("hidden");
+            console.log("friendlist is undefined");
+        } else {
+            const acceptedPeople: Person[] = friendlist.acceptedNickName.map(nickname => ({
+                name: nickname,
+                imageUrl: '../images/login.png'
+            }));
+            const acceptedList = document.getElementById("acceptedList");
+            const acceptedTemplate = document.getElementById("acceptedTemplate") as HTMLTemplateElement;
+
+            if (acceptedList && acceptedTemplate) {
+                acceptedList.innerHTML = '';
+                acceptedPeople.forEach(person => {
+                    const clone = acceptedTemplate.content.cloneNode(true) as HTMLElement;
+                    const img = clone.querySelector("img")!;
+                    const name = clone.querySelector(".name")!;
+
+                    img.src = person.imageUrl;
+                    img.alt = person.name;
+                    name.textContent = person.name;
+
+                    acceptedList.appendChild(clone);
+                });
+            }
+        }
+    } catch (err) {
+        console.error("Erreur dans friendList():", err);
     }
+}
+    // const noPending = document.getElementById("noPending") as HTMLHeadingElement;
+    // console.log("PENDING", friendlist.pendingNickName);
+    // if (!friendlist || !friendlist.pendingNickName.length) {
+    //     if (noPending)
+    //         noPending.classList.remove("hidden");
+    //     console.log("friendlist or pending is undefined");
+    // }
+    // else {
+    //     if (noPending)
+    //         noPending.classList.add("hidden");
+    //     const pendingDiv = document.getElementById("InsertPendingList");
+    //     if (!pendingDiv)
+    //         return ;
+    //     pendingDiv.innerHTML = '';
+    //     for (let i = 0 ; friendlist.pendingNickName[i] != null; i++) {
+    //         const myHtml = `<div class="flex items-center w-full content-start bg-transparent">
+    //         <img src="../images/login.png" class="w-10 h-10 rounded-full " />
+    //         <strong class="text-gray-300 ml-2">` + friendlist.pendingNickName[i] + `</strong>
+    //         </div>`;
+    //         pendingDiv.insertAdjacentHTML('beforeend', myHtml);
+    //     }
+    // }
+    // const noReceived = document.getElementById("noReceived") as HTMLHeadingElement;
+    // console.log("RECEIVED", friendlist.receivedNickName);
+    // if (!friendlist || !friendlist.receivedNickName.length) {
+    //     if (noReceived)
+    //         noReceived.classList.remove("hidden");
+    //     console.log("friendlist or received is undefined");
+    // }
+    // else {
+    //     if (noReceived)
+    //         noReceived.classList.add("hidden");
+    //     const receivedDiv = document.getElementById("InsertReceivedList");
+    //     if (!receivedDiv)
+    //         return ;
+    //     receivedDiv.innerHTML = '';
+    //     for (let i = 0 ; friendlist.receivedNickName[i] != null; i++) {
+    //         const myHtml = `<div class="flex items-center w-full content-start bg-transparent">
+    //         <img src="../images/login.png" class="w-10 h-10 rounded-full " />
+    //         <strong class="text-gray-300 ml-2">` + friendlist.receivedNickName[i] + `</strong>
+    //         </div>`;
+    //         receivedDiv.insertAdjacentHTML('beforeend', myHtml);
+    //     }
+    // }
 }
 
 export async function profile(/*container: HTMLElement, */nickName: HTMLElement, email: HTMLElement) {
@@ -286,7 +360,7 @@ export function getAvatar() {
     const avatar = localStorage.getItem("avatar");
     if (!avatar) {
         console.log("No Avatar");
-        avatarImg.src = '../login.png';
+        avatarImg.src = '../images/login.png';
     } else {
         console.log("Avatar Found");
         avatarImg.src = avatar;

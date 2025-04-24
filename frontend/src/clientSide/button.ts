@@ -95,7 +95,7 @@ function logoutBtn() {
     localStorage.removeItem('token');
     const avatar = document.getElementById("avatar") as HTMLImageElement;
     if (avatar)
-        avatar.src = "../logout.png";
+        avatar.src = "../images/logout.png";
     const nickName = document.getElementById("nickName") as HTMLSpanElement;
     if (nickName)
         nickName.textContent = '';

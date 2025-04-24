@@ -63,37 +63,27 @@ export async function routes(fastify: FastifyInstance) {
         reply.type('text/html').send(tag)
     })
     // FAV ICON
-    fastify.get('/favicon.ico', function (req, reply) {
+    fastify.get('/images/favicon.ico', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "favicon.ico");
+            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "favicon.ico");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {
             reply.code(404).send("Fichier non trouvé");
         }
     });
-    fastify.get('/thelogo.png', function (req, reply) {
+    fastify.get('/images/login.png', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "thelogo.png");
+            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "login.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {
             reply.code(404).send("Fichier non trouvé");
         }
     });
-    fastify.get('/login.png', function (req, reply) {
-        console.log("\n\nLOGIN\n\n");
+    fastify.get('/images/logout.png', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "login.png");
-            const tag = readFileSync(frontPath);
-            reply.type('img/ico').send(tag)
-        } catch (error) {
-            reply.code(404).send("Fichier non trouvé");
-        }
-    });
-    fastify.get('/logout.png', function (req, reply) {
-        try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "logout.png");
+            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "logout.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {
@@ -172,27 +162,28 @@ export async function routes(fastify: FastifyInstance) {
             reply.code(404).send("Fichier docker_compose non trouvé");
         }
     });
-    fastify.get('/vsia.png', function (req, reply) {
+    //Menu mode pong
+    fastify.get('/images/vsia.png', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "vsia.png");
+            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "vsia.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {
             reply.code(404).send("Fichier vsia non trouvé");
         }
     });
-    fastify.get('/remote.png', function (req, reply) {
+    fastify.get('/images/remote.png', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "remote.png");
+            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "remote.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {
             reply.code(404).send("Fichier remote non trouvé");
         }
     });
-    fastify.get('/solo.png', function (req, reply) {
+    fastify.get('/images/solo.png', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "solo.png");
+            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "solo.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {
