@@ -110,6 +110,22 @@ export async function routes(fastify: FastifyInstance) {
         const tag = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(tag);
     })
+    //navigation bar, under page
+    fastify.get('/part/pongMode', function (req, reply) {
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "pongMode.html");
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag);
+    })
+    fastify.get('/part/tower', function (req, reply) {
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "tower.html");
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag);
+    })
+    fastify.get('/part/tournaments', function (req, reply) {
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "tournaments.html");
+        const tag = readFileSync(frontPath, 'utf8');
+        reply.type('text/html').send(tag);
+    })
     // Png For Pong
     fastify.get('/assets/ballup.png', function (req, reply) {
         try {
@@ -154,6 +170,33 @@ export async function routes(fastify: FastifyInstance) {
             reply.type('img/ico').send(tag)
         } catch (error) {
             reply.code(404).send("Fichier docker_compose non trouvé");
+        }
+    });
+    fastify.get('/vsia.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "vsia.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier vsia non trouvé");
+        }
+    });
+    fastify.get('/remote.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "remote.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier remote non trouvé");
+        }
+    });
+    fastify.get('/solo.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ICO_PATH, "solo.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier solo non trouvé");
         }
     });
 }
