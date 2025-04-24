@@ -1,12 +1,6 @@
 import {getAvatar} from "./user.js"
 import {activateBtn} from "./button.js";
 
-
-
-interface Window {
-    CredentialResponse: (response: any) => void;
-}
-
 export let connected = false;
 
 window.addEventListener("popstate", () => {
@@ -124,7 +118,12 @@ export async function loadPart(page: string): Promise<void> {
         console.error(error);
         const container = document.getElementById('content') as HTMLElement;
         container.innerHTML = '';
-        container.innerHTML = "<h2>404 - Page non trouvée</h2>";
+        container.innerHTML = `<div class="bg-gray-900 text-white font-mono flex items-center justify-center min-h-screen">
+        <div class="text-center space-y-6">
+        <span class="block text-9xl text-pink-500">404 - NOT FOUND</span>
+        <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
+        </div>
+        </div>`;
     }
 }
 

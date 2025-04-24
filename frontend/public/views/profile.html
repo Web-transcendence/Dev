@@ -32,15 +32,22 @@
 
             <div class="border-t border-gray-300 my-4"></div>
 
-            <!-- Section Liste d'Amis -->
-            <div class="rounded-lg shadow-md flex w-full">
-                <!-- Liste des amis -->
-                <ul id="friendList" class="space-y-2">
-                    <h2 id="noFriend" class="text-sm font-bold text-gray-300 text-center m-4 hidden">Empty</h2>
-                    <div id="InsertFriendList" class="space-y-2 content-between gap-4">
-                    </div>
+            <li class="rounded-lg shadow-md flex w-full">
+                <ul id="acceptedList" role="list" class="space-y-2">
+                    <h2 class="text-sm font-bold text-gray-300 text-center m-4">Empty</h2>
                 </ul>
-            </div>
+
+                <template id="acceptedTemplate">
+                    <li class="flex py-4 first:pt-0 last:pb-0 items-center justify-between">
+                        <div class="flex items-center">
+                            <img class="h-10 w-10 rounded-full" />
+                            <div class="ml-3 overflow-hidden">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
+                            </div>
+                        </div>
+                    </li>
+                </template>
+            </li>
             <div class="absolute bottom-0 ">
                 <div class=" flex justify-center items-center max-w-md">
                     <input id="friendNameIpt" type="text" placeholder="Name"
@@ -58,13 +65,22 @@
 
             <div class="border-t border-gray-300 my-4"></div>
 
-            <div class="rounded-lg shadow-md flex w-full">
-                <h2 id="noPending" class="text-sm font-bold text-gray-300 m-4 hidden">Empty</h2>
-                <ul id="pendingList" class="space-y-2">
-                    <div id="InsertPendingList" class="space-y-2.5   content-between gap-4">
-                    </div>
+            <li class="rounded-lg shadow-md flex w-full">
+                <ul id="requestList" role="list" class="space-y-2">
+                    <h2 class="text-sm font-bold text-gray-300 text-center m-4">Empty</h2>
                 </ul>
-            </div>
+
+                <template id="requestTemplate">
+                    <li class="flex py-4 first:pt-0 last:pb-0 items-center justify-between">
+                        <div class="flex items-center">
+                            <img class="h-10 w-10 rounded-full" />
+                            <div class="ml-3 overflow-hidden">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
+                            </div>
+                        </div>
+                    </li>
+                </template>
+            </li>
         </div>
 
         <div class="relative w-full bg-gray-700 shadow-lg rounded-lg p-8 overflow-hidden ">
@@ -72,41 +88,43 @@
 
             <div class="border-t border-gray-300 my-4"></div>
 
-            <!-- Section Liste d'Amis -->
-            <div class="rounded-lg shadow-md flex w-full">
-                <!-- Liste des amis -->
-    <!--                <h2 id="noReceived" class="text-sm font-bold text-gray-300 text-center m-4 hidden">Empty</h2>-->
-                <ul id="receivedList" class="space-y-2">
-                    <div id="InsertReceivedList" class=" content-between gap-4">
-                        <div class="flex items-center w-full content-start bg-transparent">
-                            <div class="flex items-center flex-grow">
-                                <img src="../login.png" class="w-10 h-10 rounded-full" />
-                                <strong class="text-gray-300 ml-2 truncate">test</strong>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button
-                                        class="group relative m-4 w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none">
-                                    <!-- Coche -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 opacity-25 group-hover:opacity-100 transition-opacity duration-200"
-                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </button>
-                                <!-- Bouton refuser -->
-                                <button
-                                        class="float-right group relative m-4 w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none">
-                                    <!-- Croix -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 opacity-25 group-hover:opacity-100 transition-opacity duration-200"
-                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
+            <li class="rounded-lg flex w-full">
+        <!--                <h2 id="noReceived" class="text-sm font-bold text-gray-300 text-center m-4 hidden">Empty</h2>-->
+                <ul id="receivedList" role="list" class="space-y-2"></ul>
+
+                <template id="receivedTemplate">
+                    <li class="flex py-4 first:pt-0 last:pb-0 items-center justify-between">
+                        <div class="flex items-center">
+                            <img class="h-10 w-10 rounded-full" />
+                            <div class="ml-3 overflow-hidden">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
                             </div>
                         </div>
-                    </div>
-                </ul>
-            </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="flex space-x-2">
+                            <button
+                                    class="group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none accept-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="w-5 h-5 opacity-25 group-hover:opacity-100 transition-opacity duration-200"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </button>
+                            <button
+                                    class="group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none decline-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="w-5 h-5 opacity-25 group-hover:opacity-100 transition-opacity duration-200"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </li>
+                </template>
+            </li>
         </div>
+
 
         <div class="relative w-full bg-gray-700 shadow-lg items-center rounded-lg p-8 pb-40 overflow-hidden">
             <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">Avatar</h1>
@@ -114,7 +132,7 @@
             <div class="border-t border-gray-300 my-4"></div>
 
             <div class="flex flex-col items-center justify-center">
-                <img src="../login.png" alt="avatarProfile" class="h-3/4 w-3/4 p-4 rounded-full">
+                <img src="../images/login.png" alt="avatarProfile" class="aspect-auto p-4 rounded-full">
                 <button id="editAvatar" class="absolute bottom-0 mb-4 px-4 py-2 bg-yellow-400 text-white rounded-full shadow-md hover:bg-yellow-600 transition transform hover:scale-105">
                     Change Avatar
                 </button>
@@ -148,25 +166,8 @@
     <div class="border-t border-gray-300 my-6"></div>
 
     <div class="text-center">
-        <button id="home" class="bg-gray-500 text-white px-5 py-2 rounded-full shadow-md hover:bg-gray-600 transition transform hover:scale-105">
-            Back to Home
-        </button>
-
         <button id="logout" class="bg-pink-500 text-white px-5 py-2 rounded-full shadow-md hover:bg-pink-600 transition transform hover:scale-105">
             Logout
         </button>
     </div>
 </div>
-
-<!--<ul role="list">-->
-<!--    {#each people as person}-->
-<!--    &lt;!&ndash; Remove top/bottom padding when first/last child &ndash;&gt;-->
-<!--    <li class="flex py-4 first:pt-0 last:pb-0">-->
-<!--        <img class="h-10 w-10 rounded-full" src={person.imageUrl} alt="" />-->
-<!--        <div class="ml-3 overflow-hidden">-->
-<!--            <p class="text-sm font-medium text-gray-900 dark:text-white">{person.name}</p>-->
-<!--            <p class="truncate text-sm text-gray-500 dark:text-gray-400">{person.email}</p>-->
-<!--        </div>-->
-<!--    </li>-->
-<!--    {/each}-->
-<!--</ul>-->
