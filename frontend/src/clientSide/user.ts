@@ -58,6 +58,111 @@ export function login(button: HTMLElement): void {
     });
 }
 
+export interface Person {
+    name: string;
+    // email: string;
+    imageUrl: string;
+}
+
+type FriendList = {
+    acceptedNickName: string[];
+    pendingNickName: string[];
+    receivedNickName: string[];
+};
+
+export async function friendList(): Promise<void> {
+    try {
+        const friendlist = await getFriendList() as FriendList;
+        console.log("RECEIVED", friendlist.receivedNickName);
+        console.log("PENDING", friendlist.pendingNickName);
+        console.log("ACCEPTED", friendlist.acceptedNickName);
+        const noFriend = document.getElementById("noFriend") as HTMLHeadingElement;
+        if (!friendlist || !friendlist.receivedNickName.length) {
+            if (noFriend)
+                noFriend.classList.remove("hidden");
+            console.log("friendlist is undefined");
+        } else {
+            const receivedPeople: Person[] = friendlist.receivedNickName.map(nickname => ({
+                name: nickname,
+                imageUrl: '../images/login.png'
+            }));
+            const receivedList = document.getElementById("receivedList");
+            const receivedTemplate = document.getElementById("receivedTemplate") as HTMLTemplateElement;
+
+            if (receivedList && receivedTemplate) {
+                receivedList.innerHTML = '';
+                receivedPeople.forEach(person => {
+                    const clone = receivedTemplate.content.cloneNode(true) as HTMLElement;
+                    const img = clone.querySelector("img")!;
+                    const name = clone.querySelector(".name")!;
+
+                    img.src = person.imageUrl;
+                    img.alt = person.name;
+                    name.textContent = person.name;
+
+                    receivedList.appendChild(clone);
+                });
+            }
+        }
+        if (!friendlist || !friendlist.pendingNickName.length) {
+            if (noFriend)
+                noFriend.classList.remove("hidden");
+            console.log("friendlist is undefined");
+        } else {
+            const requestPeople: Person[] = friendlist.pendingNickName.map(nickname => ({
+                name: nickname,
+                imageUrl: '../images/login.png'
+            }));
+            const requestList = document.getElementById("requestList");
+            const requestTemplate = document.getElementById("requestTemplate") as HTMLTemplateElement;
+
+            if (requestList && requestTemplate) {
+                requestList.innerHTML = '';
+                requestPeople.forEach(person => {
+                    const clone = requestTemplate.content.cloneNode(true) as HTMLElement;
+                    const img = clone.querySelector("img")!;
+                    const name = clone.querySelector(".name")!;
+
+                    img.src = person.imageUrl;
+                    img.alt = person.name;
+                    name.textContent = person.name;
+
+                    requestList.appendChild(clone);
+                });
+            }
+        }
+        if (!friendlist || !friendlist.acceptedNickName.length) {
+            if (noFriend)
+                noFriend.classList.remove("hidden");
+            console.log("friendlist is undefined");
+        } else {
+            const acceptedPeople: Person[] = friendlist.acceptedNickName.map(nickname => ({
+                name: nickname,
+                imageUrl: '../images/login.png'
+            }));
+            const acceptedList = document.getElementById("acceptedList");
+            const acceptedTemplate = document.getElementById("acceptedTemplate") as HTMLTemplateElement;
+
+            if (acceptedList && acceptedTemplate) {
+                acceptedList.innerHTML = '';
+                acceptedPeople.forEach(person => {
+                    const clone = acceptedTemplate.content.cloneNode(true) as HTMLElement;
+                    const img = clone.querySelector("img")!;
+                    const name = clone.querySelector(".name")!;
+
+                    img.src = person.imageUrl;
+                    img.alt = person.name;
+                    name.textContent = person.name;
+
+                    acceptedList.appendChild(clone);
+                });
+            }
+        }
+    } catch (err) {
+        console.error("Erreur dans friendList():", err);
+    }
+}
+
 export async function profile(/*container: HTMLElement, */nickName: HTMLElement, email: HTMLElement) {
     try {
         const token = localStorage.getItem('token');
@@ -139,7 +244,10 @@ export async function addFriend(friendNickName: string): Promise<boolean> {
             },
             body: JSON.stringify({friendNickName: friendNickName})
         });
-
+        //Clear input after use
+        const input = document.getElementById('friendNameIpt') as HTMLInputElement;
+        input.value = '';
+        input.focus();
         if (!response.ok) {
             const error = await response.json();
             console.error(error.error);
@@ -176,7 +284,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
     }
 }
 
-export async function getFriendList(): Promise<string[] | undefined> {
+export async function getFriendList(): Promise<FriendList | undefined> {
     try {
         const token = localStorage.getItem('token');
         const response = await fetch('http://localhost:3000/user-management/friendList', {
@@ -339,5 +447,3 @@ export async function launchTournament() {
         console.error(error);
     }
 }
-
-
