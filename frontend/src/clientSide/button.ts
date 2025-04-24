@@ -1,4 +1,4 @@
-import {addFriend, getFriendList, login, profile, friendList, register} from "./user.js";
+import {addFriend, getFriendList, login, profile, friendList, register, init2fa} from "./user.js";
 import {connected, handleConnection, navigate} from "./front.js";
 
 
@@ -54,8 +54,24 @@ function profileBtn() {
     const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
     if (addFriendBtn && addFriendIpt) {
+        console.log("addFriendIptaddFriendIpt");
         addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
-        // friendList();
+        friendList();
+    }
+    const initfa = document.getElementById("initfa") as HTMLButtonElement;
+    if (initfa) {
+        console.log("initfa");
+        initfa.addEventListener("click", () => {
+            init2fa()
+                .then(result => {
+                    console.log("2FA initialized:", result);
+                    const insertQrcode = document.getElementById("insertQrcode") as HTMLButtonElement;
+                    insertQrcode.innerHTML = `<img src="../` + result + `" alt="avatarProfile" class="h-3/4 w-3/4 p-4 rounded-full">`;
+                })
+                .catch(error => {
+                    console.error("Error initializing 2FA:", error);
+                });
+        });
     }
 
     if (editProfileBtn) {

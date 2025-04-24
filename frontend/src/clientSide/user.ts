@@ -174,8 +174,10 @@ export async function init2fa(): Promise<string | undefined> {
                 'authorization': 'Bearer ' + token
             }
         })
-        if (response.ok)
+        if (response.ok) {
+            console.log(response.ok);
             return await response.json();
+        }
         const errorData =  await response.json();
         console.error(errorData);
         return undefined;
@@ -216,7 +218,10 @@ export async function addFriend(friendNickName: string): Promise<boolean> {
             },
             body: JSON.stringify({friendNickName: friendNickName})
         });
-
+        //Clear input after use
+        const input = document.getElementById('friendNameIpt') as HTMLInputElement;
+        input.value = '';
+        input.focus();
         if (!response.ok) {
             const error = await response.json();
             console.error(error.error);
@@ -253,7 +258,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
     }
 }
 
-export async function getFriendList(): Promise<FriendList> {
+export async function getFriendList(): Promise<FriendList | undefined> {
     try {
         const token = localStorage.getItem('token');
         const response = await fetch('http://localhost:3000/user-management/friendList', {
