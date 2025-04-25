@@ -1,4 +1,4 @@
-import {connected, handleConnection, loadPart, validateRegister} from "./front.js";
+import {handleConnection, loadPart, validateRegister} from "./front.js";
 import {sseConnection} from "./serverSentEvent.js"
 
 export function register(button: HTMLElement): void {
@@ -204,8 +204,7 @@ export async function init2fa(): Promise<string | any> {
         })
         if (response.ok)
             return await response.text();
-        const errorData =  await response.json();
-        return errorData;
+        return await response.json();
     } catch (err) {
         console.error(err)
     }
@@ -306,7 +305,7 @@ export async function getFriendList(): Promise<FriendList | undefined> {
 
 const toBase64 = (file: any) => new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => resolve(reader.result);
+    reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
     reader.readAsDataURL(file);
 });
@@ -364,25 +363,6 @@ export async function getAvatar() {
     }
 }
 
-export async function createTournament() {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/user-management/createTournament', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
-            },
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            console.error(error.error);
-        }
-    } catch (error) {
-        console.error(error);
-    }
-}
 
 export async function joinTournament() {
     try {

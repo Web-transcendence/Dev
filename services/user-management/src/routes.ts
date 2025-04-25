@@ -4,7 +4,6 @@ import {User} from "./User.js"
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
 import {connectedUsers, tournamentSessions} from "./api.js"
 import {EventMessage} from "fastify-sse-v2"
-import {tournament} from "./tournament.js"
 import {ConflictError, InputError, MyError, ServerError} from "./error.js";
 
 
@@ -29,10 +28,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -56,10 +55,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -77,10 +76,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -107,10 +106,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -128,10 +127,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.log(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -156,10 +155,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -175,10 +174,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -203,10 +202,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -228,7 +227,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const tournament = tournamentSessions.get(idTournament)
             if (!tournament)
-                throw new ConflictError(`there is no tournament with this id`)
+                throw new ConflictError(`there is no tournament with this id`, 'internal error system')
 
             tournament.addParticipant(id)
 
@@ -237,10 +236,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -263,7 +262,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const tournament = user.getActualTournament()
             if (!tournament)
-                throw new ConflictError(`this user isn't in tournament actually`)
+                throw new ConflictError(`this user isn't in tournament actually`, 'internal error system')
 
             tournament.quit(id)
 
@@ -272,10 +271,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -289,7 +288,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const tournament = tournamentSessions.get(id)
             if (!tournament)
-                throw new ConflictError(`there is no tournament with this id`)
+                throw new ConflictError(`there is no tournament with this id`, 'internal error system')
 
             const result = await tournament.launch()
 
@@ -298,10 +297,10 @@ export default async function userRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -347,7 +346,7 @@ export default async function userRoutes(app: FastifyInstance) {
                 return res.status(err.code).send({error: err.message})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 
@@ -367,7 +366,7 @@ export default async function userRoutes(app: FastifyInstance) {
                 return res.status(err.code).send({error: err.message})
             }
             console.error(err)
-            return res.status(500).send(err)
+            return res.status(500).send()
         }
     })
 

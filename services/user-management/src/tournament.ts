@@ -1,5 +1,4 @@
 import {tournamentSessions} from "./api.js"
-import {User} from "./User.js"
 import {ConflictError, ServerError} from "./error.js";
 
 export class tournament {
@@ -25,24 +24,23 @@ export class tournament {
 
     addParticipant(participantId: number) {
         if (this.status === 'started')
-            throw new ConflictError(`this tournament has already started`)
+            throw new ConflictError(`this tournament has already started`, `This tournament is already started`)
         if (this.participantId.length >= this.maxPlayer)
-            throw new ConflictError(`maxPlayer has already is reached`)
+            throw new ConflictError(`maxPlayer has already is reached`, `This tournament is full`)
 
         for (const [id, tournament] of tournamentSessions)
             if (tournament.hasParticipant(participantId))
-                throw new ConflictError(`this user has already another tournament`)
+                throw new ConflictError(`this user has already another tournament`, `internal error system`)
 
         this.participantId.push(participantId)
     }
 
     getData(): {maxPlayer: number, participantCount: number, status: string} {
-        const data = {
+        return {
             maxPlayer: this.maxPlayer,
             participantCount: this.participantId.length,
-            status : this.status,
+            status: this.status,
         }
-        return data
     }
 
     quit(id: number): void {
@@ -73,9 +71,9 @@ export class tournament {
 
     async launch(): Promise<string> {
         if (this.status === 'started')
-            throw new ConflictError(`this tournament has already started`)
+            throw new ConflictError(`this tournament has already started`, `internal error system`)
         if (this.participantId.length !== this.maxPlayer)
-            throw new ConflictError(`participant have to be 4, 8, 16 or 32`)
+            throw new ConflictError(`participant have to be 4, 8, 16 or 32`, `internal error system`)
 
         const arr = [...this.participantId]
         for (let i = arr.length - 1; i > 0; i--) {
@@ -88,8 +86,6 @@ export class tournament {
 
         return winner.toString()
     }
-
-
 }
 
 
