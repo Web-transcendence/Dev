@@ -78,6 +78,10 @@ function profileBtn() {
                 img.classList.add("h-3/4", "w-3/4", "p-4", "rounded-lg");
                 insertQrcode.innerHTML = "";
                 insertQrcode.appendChild(img);
+                const label = document.getElementById("codeFaInput");
+                if (label) {
+                    label.classList.remove("sr-only");
+                }
             }
         });
     }
