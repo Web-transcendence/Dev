@@ -1,4 +1,4 @@
-import {addFriend, getAvatar, getFriendList, login, profile, register, setAvatar} from "./user.js";
+import {addFriend, getAvatar, getFriendList, login, profile, register, setAvatar, verify2fa} from "./user.js";
 import { friendList, init2fa} from "./user.js";
 import {connected, handleConnection, navigate} from "./front.js";
 
@@ -30,6 +30,12 @@ export function activateBtn(page: string) {
     const tournaments = document.getElementById("tournaments") as HTMLButtonElement;
     if (tournaments)
         tournaments.addEventListener("click", (event: MouseEvent) => navigate(event, "/tournaments"));
+    document.getElementById('editAvatar')?.addEventListener("change", async (event: Event)=> {
+        const target = event.target as HTMLInputElement;
+        await setAvatar(target);
+        }
+    );
+
 }
 
 function connectBtn() {
@@ -79,9 +85,15 @@ function profileBtn() {
                 insertQrcode.innerHTML = "";
                 insertQrcode.appendChild(img);
                 const label = document.getElementById("codeFaInput");
-                if (label) {
+                if (label)
                     label.classList.remove("sr-only");
-                }
+                const input = document.getElementById("inputVerify") as HTMLInputElement;
+
+                input.addEventListener("keydown", async (event :KeyboardEvent) => {
+                    if (event.key === "Enter") {
+                        verify2fa(input.value)
+                    }
+                })
             }
         });
     }

@@ -186,6 +186,7 @@ function afterInsert(url: string,/* container: HTMLElement*/): void {
         if (!avatar)
             console.log(" Avatar Avatar NOT FOUND AT ALLLLLLLLLLL");
     }
+    getAvatar();
 }
 
 

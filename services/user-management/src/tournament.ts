@@ -9,7 +9,7 @@ export class tournament {
     maxPlayer: number
 
     constructor(maxPlayer: number) {
-        if (maxPlayer in [4, 8, 16, 32])
+        if ([4, 8, 16, 32].includes(maxPlayer))
             this.maxPlayer = maxPlayer
         else
             throw new ServerError(`cannot create a tournament with ${maxPlayer} player`, 500)

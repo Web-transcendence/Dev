@@ -67,7 +67,7 @@ export default async function userRoutes(app: FastifyInstance) {
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
-
+            console.log(id)
             const user = new User(id)
 
             const QRCode = await user.generateSecretKey()
@@ -85,17 +85,21 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.post("/2faVerify", (req: FastifyRequest, res: FastifyReply) => {
         try {
+            let id;
             const zod_result = Schema.verifySchema.safeParse(req.body)
-            if (!zod_result.success)
+            if (!zod_result.success) {
+                console.log(zod_result.error)
                 throw new InputError(`Cannot parse the input`)
+            }
             let {secret, nickName} = {
                 secret : sanitizeHtml(zod_result.data.secret),
                 nickName: sanitizeHtml(zod_result.data.nickName),
             }
-            if (!secret || nickName)
-                throw new InputError(`empty userData for 2fa`)
-
-            const id = User.getIdbyNickName(nickName)
+            console.log(secret, nickName, id)
+            // if (!secret || (!nickName && !id))
+            //     throw new InputError(`empty userData for 2fa`)
+            if (!id)
+                id = User.getIdbyNickName(nickName)
 
             const user = new User(id)
 

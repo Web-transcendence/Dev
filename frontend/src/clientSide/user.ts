@@ -214,7 +214,7 @@ export async function verify2fa(secret: string): Promise<void> {
     try {
         const nickName = localStorage.getItem('nickname');
         const response = await fetch('http://localhost:3000/user-management/2faVerify', {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -325,11 +325,12 @@ export async function setAvatar(target: HTMLInputElement) {
                 },
                 body: JSON.stringify({pictureURL: base64File})
             });
-
             if (!response.ok) {
                 const error = await response.json();
                 console.error(error.error);
             }
+            else
+                localStorage.setItem('avatar', base64File);
         }
     } catch (err) {
         console.log(err);
@@ -353,8 +354,10 @@ export async function getAvatar() {
             return undefined;
         }
         const img = await response.json();
-        if (img.url)
+        if (img.url) {
             avatarImg.src = img.url;
+            localStorage.setItem('avatar', avatarImg.src);
+        }
         else
             avatarImg.src = '../images/login.png';
 

@@ -25,7 +25,7 @@ Client_db.exec(`
         google_id INTEGER,
         secret_key TEXT DEFAULT NULL,
         pictureProfile TEXT DEFAULT NULL,
-        2fa BOOLEAN DEFAULT NULL
+        activated2fa BOOLEAN DEFAULT NULL
     )
 `)
 
@@ -102,7 +102,7 @@ export class User {
         if (!await client.isPasswordValid(password))
             throw new UnauthorizedError(`bad password`, 'wrong password')
 
-        const data = Client_db.prepare("SELECT 2fa FROM Client WHERE id = ?").get(id) as { activated2fa: boolean } | undefined
+        const data = Client_db.prepare("SELECT activated2fa FROM Client WHERE id = ?").get(id) as { activated2fa: boolean } | undefined
         if (!data)
             throw new DataBaseError(`User with ID ${id} not found`, `internal error system`, 500)
         if (data.activated2fa)
@@ -166,7 +166,7 @@ export class User {
         })
         if (!verified)
             throw new UnauthorizedError(`invalid secret key for 2fa`, 'bad 2fa code')
-        Client_db.prepare(`UPDATE Client SET 2fa = ? WHERE id = ?`).run(1, this.id)
+        Client_db.prepare(`UPDATE Client SET activated2fa = ? WHERE id = ?`).run(1, this.id)
         return User.makeToken(this.id)
     }
 
