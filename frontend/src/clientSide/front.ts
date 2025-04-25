@@ -1,12 +1,6 @@
 import {getAvatar} from "./user.js"
 import {activateBtn} from "./button.js";
 
-
-
-interface Window {
-    CredentialResponse: (response: any) => void;
-}
-
 export let connected = false;
 
 window.addEventListener("popstate", () => {
@@ -69,6 +63,8 @@ export function handleConnection(input: boolean) {
         profile.classList.remove('hidden');
         profile.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
     } else if (profile && connect) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('avatar');
         console.log("handleConnecton connect")
         connect.classList.remove('hidden');
         profile.classList.add('hidden');
@@ -92,8 +88,10 @@ window.CredentialResponse = async (credit: { credential: string }) => {
         else {
             const reply = await response.json();
             if (reply.valid) {
-                if (reply.avatar)
+                if (reply.avatar) {
                     localStorage.setItem('avatar', reply.avatar);
+                    console.log("reply.avatar");
+                }
                 if (reply.token)
                     localStorage.setItem('token', reply.token);
                 loadPart("/connected");
@@ -107,7 +105,13 @@ window.CredentialResponse = async (credit: { credential: string }) => {
     }
 }
 
-export function navigate(event: MouseEvent, path: string): void {
+export async function navigate(event: MouseEvent, path: string): Promise<void> {
+    handleConnection(await checkForTocken());
+    console.log("Navigating back", path, connected);
+    if (!connected && path == "/profile") {
+        console.log("Got user");
+        path = "/connect";
+    }
     event.preventDefault();
     loadPart(path);
 }
@@ -124,7 +128,12 @@ export async function loadPart(page: string): Promise<void> {
         console.error(error);
         const container = document.getElementById('content') as HTMLElement;
         container.innerHTML = '';
-        container.innerHTML = "<h2>404 - Page non trouvée</h2>";
+        container.innerHTML = `<div class="bg-gray-900 text-white font-mono flex items-center justify-center min-h-screen">
+        <div class="text-center space-y-6">
+        <span class="block text-9xl text-pink-500">404 - NOT FOUND</span>
+        <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
+        </div>
+        </div>`;
     }
 }
 
@@ -146,6 +155,7 @@ async function insert_tag(url: string): Promise<void>{
     if (html.includes(container.innerHTML))
         return;
     container.innerHTML = '';
+    console.log("PRORATA");
     afterInsert(url/*, container*/);
     newElement.innerHTML = html;
     container.appendChild(newElement);
@@ -163,6 +173,18 @@ function afterInsert(url: string,/* container: HTMLElement*/): void {
         const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
         if (existingScript)
             existingScript.remove();
+    }
+    if (url === "part/profile") {
+        const changeAvatar = document.getElementById('avatarProfile') as HTMLImageElement;
+        const avatar = localStorage.getItem('avatar');
+        if (avatar && changeAvatar) {
+            changeAvatar.src = avatar;
+            console.log("Avatar Change Found");
+        }
+        if (!changeAvatar)
+            console.log(" CHANge Avatar NOT FOUND AT ALLLLLLLLLLL");
+        if (!avatar)
+            console.log(" Avatar Avatar NOT FOUND AT ALLLLLLLLLLL");
     }
 }
 

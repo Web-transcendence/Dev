@@ -11,6 +11,12 @@ export const Client_db = new Database('client.db')  // Importation correcte de s
 
 const BASE64_UNDEFINED_PICTURES = 'A DEFINIR' // attention !!
 
+type FriendList = {
+    acceptedNickName: string[];
+    pendingNickName: string[];
+    receivedNickName: string[];
+};
+
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -238,24 +244,24 @@ export class User {
      *
      * @return an object with three array of id. One for each type of friend.
      */
-    getFriendList(): {acceptedNickName: string[], pendingNickName: string[], receivedNickName: string[]} {
-        this.logConnectedUser()
+        getFriendList(): FriendList {
+            this.logConnectedUser()
 
-        const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[]
-        const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[]
-        const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[]
+            const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[]
+            const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[]
+            const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[]
 
-        const acceptedIds = accepted.map(row => row.userA_id ?? row.userB_id).filter(id => id !== undefined)
-        const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined)
-        const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined)
+            const acceptedIds = accepted.map(row => row.userA_id ?? row.userB_id).filter(id => id !== undefined)
+            const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined)
+            const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined)
 
-        const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row))
-        const pendingNickName = pendingIds.map(row => this.getNickNameById(row))
-        const receivedNickName = receivedIds.map(row => this.getNickNameById(row))
+            const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row))
+            const pendingNickName = pendingIds.map(row => this.getNickNameById(row))
+            const receivedNickName = receivedIds.map(row => this.getNickNameById(row))
 
 
-        return {acceptedNickName, pendingNickName, receivedNickName}
-    }
+            return {acceptedNickName, pendingNickName, receivedNickName}
+        }
 
     getNickNameById(id: number): string {
         const userData = Client_db.prepare("SELECT nickName FROM Client WHERE id = ?").get(id) as {nickName: string} | undefined
