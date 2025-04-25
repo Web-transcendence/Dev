@@ -233,7 +233,6 @@ export async function setAvatar(target: HTMLInputElement) {
 
 export async function getAvatar() {
     const avatarImg = document.getElementById('avatar') as HTMLImageElement;
-    const avatar = localStorage.getItem("avatar");
     try {
         const token = localStorage.getItem('token');
         const response = await fetch('http://localhost:3000/user-management/getPicture', {

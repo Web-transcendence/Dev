@@ -181,7 +181,7 @@ export class User {
         const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`).get(this.id) as {pictureProfile: string} | undefined;
         if (!userData)
             throw new DataBaseError(`should not happen`, 500)
-        console.log(userData)
+        this.notifyUser('testb', 'invite')
         if (!userData.pictureProfile)
             return '';
         return userData.pictureProfile;

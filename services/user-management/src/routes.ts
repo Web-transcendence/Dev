@@ -154,7 +154,6 @@ export default async function userRoutes(app: FastifyInstance) {
             return res.status(200).send({message: result})
         }
         catch(err) {
-            console.log('ddddddddddddddddddd')
             if (err instanceof MyError) {
                 console.error(err.message)
                 return res.status(err.code).send({error: err.message})
@@ -344,6 +343,15 @@ export default async function userRoutes(app: FastifyInstance) {
         connectedUsers.set(id, res)
         const message: EventMessage = { event: "initiation", data: "Some message" }
         res.sse({data: JSON.stringify(message)})
+
+        let timer = 0;
+        const time = setInterval(() => {
+            timer ++;
+            console.log(timer)
+            const message: EventMessage = { event: "initiation", data: "Some message" }
+            res.sse({data: JSON.stringify(message)})
+        }, 15000)
+
     })
 
     app.post('/updatePicture', (req: FastifyRequest, res: FastifyReply) => {
@@ -391,5 +399,9 @@ export default async function userRoutes(app: FastifyInstance) {
             console.error(err)
             return res.status(500).send(err)
         }
+    })
+
+    app.get('/test', (req: FastifyRequest, res: FastifyReply) => {
+
     })
 }
