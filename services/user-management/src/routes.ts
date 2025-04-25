@@ -344,10 +344,7 @@ export default async function userRoutes(app: FastifyInstance) {
         const message: EventMessage = { event: "initiation", data: "Some message" }
         res.sse({data: JSON.stringify(message)})
 
-        let timer = 0;
-        const time = setInterval(() => {
-            timer ++;
-            console.log(timer)
+        setInterval(() => {
             const message: EventMessage = { event: "initiation", data: "Some message" }
             res.sse({data: JSON.stringify(message)})
         }, 15000)
@@ -401,7 +398,5 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
-    app.get('/test', (req: FastifyRequest, res: FastifyReply) => {
 
-    })
 }
