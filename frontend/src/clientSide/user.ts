@@ -1,4 +1,4 @@
-import {connected, handleConnection, loadPart, validateRegister} from "./front.js";
+import {handleConnection, loadPart, validateRegister} from "./front.js";
 import {sseConnection} from "./serverSentEvent.js"
 
 export function register(button: HTMLElement): void {
@@ -204,8 +204,7 @@ export async function init2fa(): Promise<string | any> {
         })
         if (response.ok)
             return await response.text();
-        const errorData =  await response.json();
-        return errorData;
+        return await response.json();
     } catch (err) {
         console.error(err)
     }
