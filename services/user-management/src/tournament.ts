@@ -1,17 +1,20 @@
 import {tournamentSessions} from "./api.js"
 import {User} from "./User.js"
-import {ConflictError} from "./error.js";
+import {ConflictError, ServerError} from "./error.js";
 
 export class tournament {
 
-    creatorId: number
     private participantId: number[]
     private status: 'waiting' | 'started'
     private result
+    maxPlayer: number
 
-    constructor(creatorId: number) {
-        this.creatorId = creatorId
-        this.participantId = [this.creatorId]
+    constructor(maxPlayer: number) {
+        if (maxPlayer in [4, 8, 16, 32])
+            this.maxPlayer = maxPlayer
+        else
+            throw new ServerError(`cannot create a tournament with ${maxPlayer} player`, 500)
+        this.participantId = []
         this.status = 'waiting'
         this.result = {}
     }
@@ -23,6 +26,8 @@ export class tournament {
     addParticipant(participantId: number) {
         if (this.status === 'started')
             throw new ConflictError(`this tournament has already started`)
+        if (this.participantId.length >= this.maxPlayer)
+            throw new ConflictError(`maxPlayer has already is reached`)
 
         for (const [id, tournament] of tournamentSessions)
             if (tournament.hasParticipant(participantId))
@@ -31,11 +36,9 @@ export class tournament {
         this.participantId.push(participantId)
     }
 
-    getData(): {creatorId: number, creatorNickName: string, participantCount: number, status: string} {
-        const user = new User(this.creatorId)
+    getData(): {maxPlayer: number, participantCount: number, status: string} {
         const data = {
-            creatorId: this.creatorId,
-            creatorNickName: user.getProfile().nickName,
+            maxPlayer: this.maxPlayer,
             participantCount: this.participantId.length,
             status : this.status,
         }
@@ -71,7 +74,7 @@ export class tournament {
     async launch(): Promise<string> {
         if (this.status === 'started')
             throw new ConflictError(`this tournament has already started`)
-        if (![4, 8, 16, 32].includes(this.participantId.length))
+        if (this.participantId.length !== this.maxPlayer)
             throw new ConflictError(`participant have to be 4, 8, 16 or 32`)
 
         const arr = [...this.participantId]

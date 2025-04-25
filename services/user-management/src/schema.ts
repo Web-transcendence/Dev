@@ -8,6 +8,9 @@ export const manageFriendSchema = z.object({
     friendNickName: z.string().min(3, "Minimum 3 caracteres")
 })
 
+export const tournamentIdSchema = z.object({
+    tournamentId: z.number()
+})
 
 export const verifySchema = z.object({
     secret: z.string().regex(/^\d{6}$/, {

@@ -211,39 +211,14 @@ export default async function userRoutes(app: FastifyInstance) {
     })
 
 
-    app.post('/createTournament', (req: FastifyRequest, res: FastifyReply) => {
-        try
-        {
-            const id: number = Number(req.headers.id)
-            if (!id)
-                throw new ServerError(`cannot parse id, which should not happen`, 500)
-
-            const user = new User(id)
-
-            const tournament = user.createTournament()
-
-            tournamentSessions.set(id, tournament)
-
-            return res.status(200).send()
-        }
-        catch(err) {
-            if (err instanceof MyError) {
-                console.error(err.message)
-                return res.status(err.code).send({error: err.message})
-            }
-            console.error(err)
-            return res.status(500).send(err)
-        }
-    })
-
     app.post('/joinTournament', (req: FastifyRequest, res: FastifyReply) => {
         try {
-            const zod_result = Schema.manageFriendSchema.safeParse(req.body)
+            const zod_result = Schema.tournamentIdSchema.safeParse(req.body)
             if (!zod_result.success)
                 throw new InputError(`Cannot parse the input`)
-            let friendNickName = sanitizeHtml(zod_result.data.friendNickName)
-            if (!friendNickName)
-                throw new InputError(`Empty nickname to add in a tournament`)
+            let idTournament = Number(sanitizeHtml(zod_result.data.tournamentId))
+            if (!idTournament)
+                throw new InputError(`Empty tournament input`)
 
             const id: number = Number(req.headers.id)
             if (!id)
@@ -251,9 +226,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             new User(id)
 
-            const idToJoin: number= User.getIdbyNickName(friendNickName)
-
-            const tournament = tournamentSessions.get(idToJoin)
+            const tournament = tournamentSessions.get(idTournament)
             if (!tournament)
                 throw new ConflictError(`there is no tournament with this id`)
 
@@ -272,7 +245,7 @@ export default async function userRoutes(app: FastifyInstance) {
     })
 
     app.get('/getTournamentList', (req: FastifyRequest, res: FastifyReply) => {
-        const tournamentList: {creatorId: number, participantCount: number, status: string}[] = []
+        const tournamentList: {maxPlayer: number, participantCount: number, status: string}[] = []
 
         for (const [id, tournament] of tournamentSessions)
             tournamentList.push(tournament.getData())

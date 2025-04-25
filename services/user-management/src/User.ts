@@ -270,13 +270,6 @@ export class User {
         return (userData.nickName)
     }
 
-    createTournament(): tournament{
-        for (const [id, tournament] of tournamentSessions)
-            if (tournament.hasParticipant(this.id))
-                throw new ConflictError(`this user is already in a tournament`)
-        return new tournament(this.id)
-    }
-
     getActualTournament(): tournament | null {
         for (const [id, tournament] of tournamentSessions)
             if (tournament.hasParticipant(this.id))
