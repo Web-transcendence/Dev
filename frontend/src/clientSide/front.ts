@@ -63,6 +63,8 @@ export function handleConnection(input: boolean) {
         profile.classList.remove('hidden');
         profile.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
     } else if (profile && connect) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('avatar');
         console.log("handleConnecton connect")
         connect.classList.remove('hidden');
         profile.classList.add('hidden');
@@ -103,7 +105,13 @@ window.CredentialResponse = async (credit: { credential: string }) => {
     }
 }
 
-export function navigate(event: MouseEvent, path: string): void {
+export async function navigate(event: MouseEvent, path: string): Promise<void> {
+    handleConnection(await checkForTocken());
+    console.log("Navigating back", path, connected);
+    if (!connected && path == "/profile") {
+        console.log("Got user");
+        path = "/connect";
+    }
     event.preventDefault();
     loadPart(path);
 }

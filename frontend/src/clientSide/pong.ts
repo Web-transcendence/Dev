@@ -5,6 +5,7 @@ let connect: boolean = true;
 function resizeCanvas() {
     // Récupère la taille du conteneur
     const container = document.getElementById("canvasContainer");
+    if (!container) return ; // BEN ATTENTION
     const width = container.clientWidth;
     const height = width * (2 / 3); // Respecte le ratio 3:2
 

@@ -188,7 +188,7 @@ export async function profile(/*container: HTMLElement, */nickName: HTMLElement,
     }
 }
 
-export async function init2fa(): Promise<string | undefined> {
+export async function init2fa(): Promise<string | any> {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -203,10 +203,9 @@ export async function init2fa(): Promise<string | undefined> {
             }
         })
         if (response.ok)
-            return await response.json();
+            return await response.text();
         const errorData =  await response.json();
-        console.error(errorData);
-        return undefined;
+        return errorData;
     } catch (err) {
         console.error(err)
     }
@@ -316,7 +315,6 @@ export async function setAvatar(target: HTMLInputElement) {
     try {
         if (target.files && target.files[0]) {
             const file: File = target.files[0];
-            console.log(file.size);
             const base64File = await toBase64(file);
 
             const token = localStorage.getItem('token');
@@ -360,7 +358,7 @@ export async function getAvatar() {
         if (img.url)
             avatarImg.src = img.url;
         else
-            avatarImg.src = '../login.png';
+            avatarImg.src = '../images/login.png';
 
     } catch (error) {
         console.error(error);

@@ -64,16 +64,21 @@ function profileBtn() {
     const initfa = document.getElementById("initfa") as HTMLButtonElement;
     if (initfa) {
         console.log("initfa");
-        initfa.addEventListener("click", () => {
-            init2fa()
-                .then(result => {
-                    console.log("2FA initialized:", result);
-                    const insertQrcode = document.getElementById("insertQrcode") as HTMLButtonElement;
-                    insertQrcode.innerHTML = `<img src="../` + result + `" alt="avatarProfile" class="h-3/4 w-3/4 p-4 rounded-full">`;
-                })
-                .catch(error => {
-                    console.error("Error initializing 2FA:", error);
-                });
+        initfa.addEventListener("click", async () => {
+            const qrcode = await init2fa();
+            if (qrcode == undefined) {
+                console.log("ErrorDisplay: qrcode not found!");
+                return;
+            }
+            console.log("2FA initialized:", qrcode);
+            const insertQrcode = document.getElementById("insertQrcode");
+            if (insertQrcode) {
+                const img = document.createElement("img");
+                img.src = qrcode;
+                img.classList.add("h-3/4", "w-3/4", "p-4", "rounded-lg");
+                insertQrcode.innerHTML = "";
+                insertQrcode.appendChild(img);
+            }
         });
     }
     document.getElementById("profilePicture")?.addEventListener("change", async (event: Event) => {
