@@ -6,17 +6,15 @@
 
 ◦ Minor module: Use a framework or a toolkit to build the frontend.🟩
 
-◦ Minor module: Use a database for the backend.
-🟩
+◦ Minor module: Use a database for the backend.🟩
+
 ~~◦ Major module: Store the score of a tournament in the Blockchain.~~
+
 ### • User Management
 
 ◦ Major module: Standard user management, authentication, users across tournaments.🟥
 
-
-??? 
-~~◦ Major module: Implementing a remote authentication.~~
-???
+◦ Major module: Implementing a remote authentication.🟩
 
 
 ### • Gameplay and user experience
@@ -30,10 +28,7 @@
 ◦ Minor module: Game Customization Options.🟪
 
 
-??? 
-
-◦ Major module: Live chat.
-??? 
+~~◦ Major module: Live chat.~~
 
 
 ### • AI-Algo
@@ -48,7 +43,7 @@
 
 ~~◦ Minor module: GDPR Compliance Options with User Anonymization, Local Data Management, and Account Deletion.~~
 
-~~◦ Major module: Implement Two-Factor Authentication (2FA) and JWT.~~🟩
+◦ Major module: Implement Two-Factor Authentication (2FA) and JWT.🟩
 
 ### • Devops
 
@@ -75,9 +70,7 @@
 
 ### • Server-Side Pong
 
-??? 
-◦ Major module: Replacing Basic Pong with Server-Side Pong and Implementing an API.
-??? ⬛🟪
+◦ Major module: Replacing Basic Pong with Server-Side Pong and Implementing an API.⬛🟪
 
 
 ~~◦ Major module: Enabling Pong Gameplay via CLI against Web Users with API Integration.~~
