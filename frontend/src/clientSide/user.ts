@@ -48,6 +48,7 @@ export function login(button: HTMLElement): void {
             localStorage.setItem('token', data.token)
             await loadPart("/connected")
             handleConnection(true)
+            getAvatar();
             await sseConnection(data.token)
         } else {
             const errorData = await response.json()
@@ -315,6 +316,7 @@ export async function setAvatar(target: HTMLInputElement) {
     try {
         if (target.files && target.files[0]) {
             const file: File = target.files[0]
+            console.log(typeof(await toBase64(file)))
             const base64File: string = await toBase64(file) as string
 
             const token = localStorage.getItem('token')
@@ -330,17 +332,27 @@ export async function setAvatar(target: HTMLInputElement) {
                 const error = await response.json()
                 console.error(error.error)
             }
-            else
+            else {
                 localStorage.setItem('avatar', base64File)
+                updateAvatar('avatarProfile', base64File);
+                updateAvatar('avatar', base64File);
+            }
         }
     } catch (err) {
         console.error(err)
     }
 }
 
+// @ts-ignore
 export async function getAvatar() {
-    const avatarImg = document.getElementById('avatar') as HTMLImageElement
     try {
+        const avatarImg = document.getElementById('avatar') as HTMLImageElement
+        const avatar = localStorage.getItem('avatar')
+        if (avatar) {
+            avatarImg.src = avatar
+            return ;
+        }
+
         const token = localStorage.getItem('token')
         const response = await fetch('http://localhost:3000/user-management/getPicture', {
             method: 'GET',
@@ -352,7 +364,7 @@ export async function getAvatar() {
         if (!response.ok) {
             const error = await response.json()
             console.error(error.error)
-            return undefined
+            return ;
         }
         const img = await response.json()
         if (img.url) {
@@ -367,6 +379,14 @@ export async function getAvatar() {
     }
 }
 
+export const updateAvatar = (id: string, src: string) => {
+    const img = document.getElementById(id) as HTMLImageElement | null;
+    if (img) {
+        img.src = src;
+    } else {
+        console.warn(`Element with id '${id}' not found.`);
+    }
+};
 
 export async function joinTournament() {
     try {

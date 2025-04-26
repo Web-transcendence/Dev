@@ -28,10 +28,14 @@ function loginBtn() {
     document.getElementById('connectPageBtn')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
     const button = document.getElementById("loginButton") as HTMLButtonElement;
     if (button)
-        login(button);
+        login(button)
 }
 
 function profileBtn() {
+    const avatarImg = document.getElementById('avatarProfile') as HTMLImageElement
+    const avatar = localStorage.getItem('avatar')
+    if (avatar)
+        avatarImg.src = avatar
     const nickName = document.getElementById("profileNickName")!;
     const email = document.getElementById("profileEmail")!;
     if (email && nickName) {
@@ -75,7 +79,7 @@ function profileBtn() {
             }
         });
     }
-    document.getElementById("avatar")?.addEventListener("change", async (event: Event) => {
+    document.getElementById("inputAvatar")?.addEventListener("change", async (event: Event) => {
         const target = event.target as HTMLInputElement
         await setAvatar(target)
     });

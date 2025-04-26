@@ -1,4 +1,4 @@
-import {getAvatar} from "./user.js"
+import {getAvatar, setAvatar} from "./user.js"
 import {activateBtn} from "./button.js";
 
 export let connected = false;
@@ -8,8 +8,7 @@ window.addEventListener("popstate", () => {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // Constant button on the Single Page Application
-    constantButton();
+    constantButton(); // Constant button on the Single Page Application
     // For Client Connection
     if (await checkForTocken()) {
         getAvatar();
@@ -17,9 +16,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     else
         handleConnection(false);
-    const Ping = document.getElementById("pong");
-    if (Ping)
-        Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
     loadPart("/home");
 });
 
@@ -48,7 +44,6 @@ function constantButton() {
     //Duo Button
     document.getElementById('connect')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
     document.getElementById('profile')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
-
     //navigation page
     document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
     document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongMode"));
@@ -57,6 +52,8 @@ function constantButton() {
     // Footer
     document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     document.getElementById("contact")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
+    //Pong
+    document.getElementById("pong")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 }
 
 
@@ -89,13 +86,15 @@ window.CredentialResponse = async (credit: { credential: string }) => {
         else {
             const reply = await response.json();
             if (reply.valid) {
-                if (reply.avatar) {
-                    localStorage.setItem('avatar', reply.avatar);
-                }
+                if (reply.avatar)
+                    // setAvatar(reply.avatar);
                 if (reply.token)
-                    localStorage.setItem('token', reply.token);
+                    localStorage.setItem('token', reply.token)
+                if (reply.nickName)
+                    localStorage.setItem('nickName', reply.nickName)
                 loadPart("/connected");
                 handleConnection(true);
+
             }
         }
     }
@@ -166,13 +165,6 @@ function afterInsert(url: string,/* container: HTMLElement*/): void {
         const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
         if (existingScript)
             existingScript.remove();
-    }
-    if (url === "part/profile") {
-        const changeAvatar = document.getElementById('avatarProfile') as HTMLImageElement;
-        const avatar = localStorage.getItem('avatar');
-        if (avatar && changeAvatar) {
-            changeAvatar.src = avatar;
-        }
     }
 }
 
