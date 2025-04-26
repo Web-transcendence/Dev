@@ -8,37 +8,17 @@ const mapButton : {[key: string] : () => void} = {
     "/login": loginBtn,
     "/profile": profileBtn,
     "/logout": logoutBtn,
-    "/editProfile" : editProfileBtn
+    "/editProfile" : editProfileBtn,
+    "/2fa" : factor
 }
 
 export function activateBtn(page: string) {
-    document.getElementById("pongConnected")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
-    document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
-    document.getElementById("loginButton")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
-    const logoutBtn = document.getElementById('logout')  as HTMLButtonElement;
-    if (logoutBtn && connected)
-        logoutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
     if (page in mapButton)
         mapButton[page]();
-    //navigation page
-    const pongMode = document.getElementById("pongMode") as HTMLButtonElement;
-    if (pongMode)
-        pongMode.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongMode"));
-    const tower = document.getElementById("tower") as HTMLButtonElement;
-    if (tower)
-        tower.addEventListener("click", (event: MouseEvent) => navigate(event, "/tower"));
-    const tournaments = document.getElementById("tournaments") as HTMLButtonElement;
-    if (tournaments)
-        tournaments.addEventListener("click", (event: MouseEvent) => navigate(event, "/tournaments"));
-    document.getElementById('editAvatar')?.addEventListener("change", async (event: Event)=> {
-        const target = event.target as HTMLInputElement;
-        await setAvatar(target);
-        }
-    );
-
 }
 
 function connectBtn() {
+    document.getElementById("loginButton")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
     const button = document.getElementById("registerButton") as HTMLButtonElement;
     if (button)
         register(button);
@@ -54,29 +34,27 @@ function loginBtn() {
 function profileBtn() {
     const nickName = document.getElementById("profileNickName")!;
     const email = document.getElementById("profileEmail")!;
-    // const container = document.getElementById('content') as HTMLElement;
     if (email && nickName) {
-        profile(/*container,*/ nickName, email);
+        profile(nickName, email);
         friendList();
     }
-    const editProfileBtn = document.getElementById("editProfileButton") as HTMLButtonElement;
+    const logoutBtn = document.getElementById('logout')  as HTMLButtonElement;
+    if (logoutBtn && connected)
+        logoutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
     const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
     if (addFriendBtn && addFriendIpt) {
-        console.log("addFriendIptaddFriendIpt");
         addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
         friendList();
     }
     const initfa = document.getElementById("initfa") as HTMLButtonElement;
     if (initfa) {
-        console.log("initfa");
         initfa.addEventListener("click", async () => {
             const qrcode = await init2fa();
             if (qrcode == undefined) {
                 console.log("ErrorDisplay: qrcode not found!");
                 return;
             }
-            console.log("2FA initialized:", qrcode);
             const insertQrcode = document.getElementById("insertQrcode");
             if (insertQrcode) {
                 const img = document.createElement("img");
@@ -97,14 +75,10 @@ function profileBtn() {
             }
         });
     }
-    document.getElementById("profilePicture")?.addEventListener("change", async (event: Event) => {
+    document.getElementById("avatar")?.addEventListener("change", async (event: Event) => {
         const target = event.target as HTMLInputElement
         await setAvatar(target)
     });
-
-    if (editProfileBtn) {
-        editProfileBtn.addEventListener("click", async () => console.log(await getAvatar()));
-    }
 }
 
 function logoutBtn() {
@@ -120,5 +94,18 @@ function logoutBtn() {
 }
 
 function editProfileBtn() {
+    document.getElementById('editAvatar')?.addEventListener("change", async (event: Event)=> {
+            const target = event.target as HTMLInputElement;
+            await setAvatar(target);
+        }
+    );
+}
 
+function factor() {
+    const input = document.getElementById("inputVerify") as HTMLInputElement;
+
+    input.addEventListener("keydown", async (event :KeyboardEvent) => {
+        if (event.key === "Enter")
+            verify2fa(input.value)
+    })
 }

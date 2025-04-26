@@ -11,7 +11,6 @@ const httpsOptions = {
         key: readFileSync(join(import.meta.dirname, '../../secure/key.pem')),      // Private key
         cert: readFileSync(join(import.meta.dirname, '../../secure/cert.pem'))     // Certificate
     },
-    logger: true
 };
 
 const fastify = Fastify(httpsOptions)

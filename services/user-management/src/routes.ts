@@ -23,7 +23,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const token = await User.addClient(nickName, email, password)
 
-            return res.status(201).send({token: token, redirect: "post/login"})
+            return res.status(201).send({token: token, nickName: nickName, redirect: "post/login"})
         }
         catch(err) {
             if (err instanceof MyError) {
@@ -85,7 +85,6 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.post("/2faVerify", (req: FastifyRequest, res: FastifyReply) => {
         try {
-            let id;
             const zod_result = Schema.verifySchema.safeParse(req.body)
             if (!zod_result.success) {
                 console.log(zod_result.error)
@@ -95,16 +94,13 @@ export default async function userRoutes(app: FastifyInstance) {
                 secret : sanitizeHtml(zod_result.data.secret),
                 nickName: sanitizeHtml(zod_result.data.nickName),
             }
-            console.log(secret, nickName, id)
-            // if (!secret || (!nickName && !id))
-            //     throw new InputError(`empty userData for 2fa`)
-            if (!id)
-                id = User.getIdbyNickName(nickName)
+            if (!secret || !nickName)
+                throw new InputError(`empty userData for 2fa`)
+            const id = User.getIdbyNickName(nickName)
 
             const user = new User(id)
 
             const jwt = user.verify(secret)
-
             return res.status(200).send({token: jwt, nickName: nickName})
         }
         catch(err) {

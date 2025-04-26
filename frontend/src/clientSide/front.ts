@@ -4,18 +4,12 @@ import {activateBtn} from "./button.js";
 export let connected = false;
 
 window.addEventListener("popstate", () => {
-    console.log("Navigating back:", window.location.pathname);
     loadPart(window.location.pathname);
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
     // Constant button on the Single Page Application
-    const aboutBtn = document.getElementById("about")!;
-    const contactBtn = document.getElementById("contact")!;
-
-    aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
-    contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
-
+    constantButton();
     // For Client Connection
     if (await checkForTocken()) {
         getAvatar();
@@ -41,7 +35,6 @@ async function checkForTocken(): Promise<boolean>  {
         });
         if (!response.ok) {
             const error = await response.json();
-            console.log("token checker", error.message);
             return false;
         }
         return true;
@@ -51,24 +44,32 @@ async function checkForTocken(): Promise<boolean>  {
     }
 }
 
+function constantButton() {
+    //Duo Button
+    document.getElementById('connect')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+    document.getElementById('profile')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
 
+    //navigation page
+    document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
+    document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongMode"));
+    document.getElementById("tower")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tower"));
+    document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tournaments"));
+    // Footer
+    document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
+    document.getElementById("contact")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
+}
 
 
 export function handleConnection(input: boolean) {
-    const connect = document.getElementById('connect');
-    const profile = document.getElementById('profile');
-    if (input && profile && connect) {
-        console.log("handleConnecton profile")
-        connect.classList.add('hidden');
-        profile.classList.remove('hidden');
-        profile.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
-    } else if (profile && connect) {
+    if (input) {
+        document.getElementById('connect')?.classList.add('hidden');
+        document.getElementById('profile')?.classList.remove('hidden');
+    } else {
         localStorage.removeItem('token');
         localStorage.removeItem('avatar');
-        console.log("handleConnecton connect")
-        connect.classList.remove('hidden');
-        profile.classList.add('hidden');
-        connect.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+        localStorage.removeItem('nickName');
+        document.getElementById('connect')?.classList.remove('hidden');
+        document.getElementById('profile')?.classList.add('hidden');
     }
     connected = input;
 }
@@ -90,14 +91,12 @@ window.CredentialResponse = async (credit: { credential: string }) => {
             if (reply.valid) {
                 if (reply.avatar) {
                     localStorage.setItem('avatar', reply.avatar);
-                    console.log("reply.avatar");
                 }
                 if (reply.token)
                     localStorage.setItem('token', reply.token);
                 loadPart("/connected");
                 handleConnection(true);
             }
-            console.log('Success:', reply);
         }
     }
     catch(error) {
@@ -107,9 +106,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 
 export async function navigate(event: MouseEvent, path: string): Promise<void> {
     handleConnection(await checkForTocken());
-    console.log("Navigating back", path, connected);
     if (!connected && path == "/profile") {
-        console.log("Got user");
         path = "/connect";
     }
     event.preventDefault();
@@ -120,9 +117,7 @@ export async function loadPart(page: string): Promise<void> {
     window.history.pushState({}, "", page);
     try {
         await insert_tag(`part${page}`);
-        console.log(`loadPart: ${page}`);
         activateBtn(page);
-        getAvatar();
         activateGoogle(page);
     } catch (error) {
         console.error(error);
@@ -155,14 +150,12 @@ async function insert_tag(url: string): Promise<void>{
     if (html.includes(container.innerHTML))
         return;
     container.innerHTML = '';
-    console.log("PRORATA");
     afterInsert(url/*, container*/);
     newElement.innerHTML = html;
     container.appendChild(newElement);
 }
 
 function afterInsert(url: string,/* container: HTMLElement*/): void {
-    console.log("afterInsert url :", url);
     if (url === "part/pong") {
         if (!document.querySelector('script[src="/static/dist/pong.js"]')) {
             const script = document.createElement('script');
@@ -179,24 +172,16 @@ function afterInsert(url: string,/* container: HTMLElement*/): void {
         const avatar = localStorage.getItem('avatar');
         if (avatar && changeAvatar) {
             changeAvatar.src = avatar;
-            console.log("Avatar Change Found");
         }
-        if (!changeAvatar)
-            console.log(" CHANge Avatar NOT FOUND AT ALLLLLLLLLLL");
-        if (!avatar)
-            console.log(" Avatar Avatar NOT FOUND AT ALLLLLLLLLLL");
     }
-    getAvatar();
 }
 
 
 function activateGoogle(page: string) {
-    console.log("activateGoogle", page);
     const container = document.getElementById('content') as HTMLElement;
     if (page === "/login" || page === "/connect") {
         const googleID = document.getElementById('googleidentityservice');
         if (!googleID) {
-            console.log("afterInsert ADD googleID");
             const script = document.createElement('script');
             script.src = "https://accounts.google.com/gsi/client";
             script.async = true;
@@ -207,16 +192,13 @@ function activateGoogle(page: string) {
             const googleID = document.getElementById('googleidentityservice');
             const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
             if (googlemeta) {
-                console.log("afterInsert first REMOVE googlemeta");
                 googlemeta.remove();
             }
             if (googleID) {
-                console.log("afterInsert first REMOVE googleID");
                 googleID.remove();
             }
             const googleIP = document.getElementById('googleidentityservice');
             if (!googleIP) {
-                console.log("afterInsert just removed ADD googleID");
                 const script = document.createElement('script');
                 script.src = "https://accounts.google.com/gsi/client";
                 script.async = true;
@@ -227,19 +209,14 @@ function activateGoogle(page: string) {
     }
     const googleID = document.getElementById('googleidentityservice');
     const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
-    if (googlemeta) {
-        console.log("afterInsert second REMOVE googlemeta");
+    if (googlemeta)
         googlemeta.remove();
-    }
-    if (googleID) {
-        console.log("afterInsert second REMOVE googleID");
+    if (googleID)
         googleID.remove();
-    }
 }
 
 
 export function validateRegister(result: { nickName: string; email: string; password: string}): void {
-    console.log(result);
     const nickNameErrorMin = document.getElementById("nickNameError") as HTMLSpanElement;
     const emailError = document.getElementById("emailError") as HTMLSpanElement;
     const passwordError = document.getElementById("passwordError") as HTMLSpanElement;

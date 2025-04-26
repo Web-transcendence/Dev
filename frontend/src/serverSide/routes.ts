@@ -90,7 +90,7 @@ export async function routes(fastify: FastifyInstance) {
             reply.code(404).send("Fichier non trouvé");
         }
     });
-    fastify.get('/part/factor', function (req, reply) {
+    fastify.get('/part/2fa', function (req, reply) {
         const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "factor.html");
         const tag = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(tag);
