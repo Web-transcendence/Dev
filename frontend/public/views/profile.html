@@ -40,7 +40,7 @@
                 <template id="acceptedTemplate">
                     <li class="flex py-4 first:pt-0 last:pb-0 items-center justify-between">
                         <div class="flex items-center">
-                            <img class="h-10 w-10 rounded-full" />
+                            <img class="h-10 w-10 rounded-full" src="../images/login.png" alt="Avatar"/>
                             <div class="ml-3 overflow-hidden">
                                 <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
                             </div>
@@ -48,14 +48,16 @@
                     </li>
                 </template>
             </li>
-            <div class="absolute bottom-0 ">
-                <div class=" flex justify-center items-center max-w-md">
-                    <input id="friendNameIpt" type="text" placeholder="Name"
-                           class=" left-0 w-1/3 mb-4 px-4 py-2 rounded-l-full shadow-md transition transform hover:scale-105 bg-white text-black" />
-                    <button id="friendNameBtn"
-                            class=" right-0 w-1/3 btn-primary">
-                        Add
-                    </button>
+            <div class="flex flex-col items-center justify-center">
+                <div class="absolute bottom-0 ">
+                    <div class=" flex justify-center items-center max-w-md">
+                        <label for="friendNameIpt"></label><input id="friendNameIpt" type="text" placeholder="Name"
+                                                                  class=" left-0 w-1/3 mb-4 px-4 py-2 rounded-l-full shadow-md transition transform hover:scale-105 bg-white text-black" />
+                        <button id="friendNameBtn"
+                                class=" right-0 rounded-l-none btn-primary">
+                            Add
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -73,7 +75,7 @@
                 <template id="requestTemplate">
                     <li class="flex py-4 first:pt-0 last:pb-0 items-center justify-between">
                         <div class="flex items-center">
-                            <img class="h-10 w-10 rounded-full" />
+                            <img class="h-10 w-10 rounded-full"  alt="Avatar" src="../images/login.png"/>
                             <div class="ml-3 overflow-hidden">
                                 <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
                             </div>
@@ -96,7 +98,7 @@
                 <template id="receivedTemplate">
                     <li class="flex w-full justify-between items-center">
                         <div class="flex items-center">
-                            <img class="h-10 w-10 rounded-full" />
+                            <img class="h-10 w-10 rounded-full"  alt="Avatar" src="../images/login.png"/>
                             <div class="ml-3 overflow-hidden">
                                 <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
                             </div>
@@ -133,11 +135,11 @@
             <div class="border-t border-gray-300 my-4"></div>
 
             <div class="flex flex-col items-center justify-center">
-                <img id="avatarProfile" src="../images/login.png" alt="" class="aspect-auto p-4 rounded-full">
+                <img id="avatarProfile" src="../images/login.png" alt="Avatar" class="aspect-auto p-4 rounded-full">
             </div>
 
             <div class="flex flex-col items-center justify-center">
-                <div class="absolute bottom-0 mb-4 flex ">
+                <div class="absolute bottom-0 flex ">
                     <label for="inputAvatar"
                            class="btn-primary"
                     >Change Avatar</label>
