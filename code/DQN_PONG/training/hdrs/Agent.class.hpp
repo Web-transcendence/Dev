@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 13:50:34 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/27 11:43:53 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ public:
 	void	genQNet(std::vector<unsigned int> const & sizes, t_actFunc hidden, t_actFunc output);
 	void	genTNet(std::vector<unsigned int> const & sizes, t_actFunc hidden, t_actFunc output);
 	void	genExpReplay(unsigned int const max, unsigned int const min);
+
+	void	saveNetwork( void );
 	
 private:
 	Agent( void );
@@ -54,16 +56,12 @@ private:
 
 	ExpReplay*		_xp;
 
-	std::vector<std::vector<double>>	_QMatrix;
-	
 	int const		_maxEpTraining;
 	int const		_maxActions;
 	double const	_learningRate;
 	double const	_discount;
 	double const	_explorationRate;
 	double const	_explorationDecay;
-
-	int				_goalTraining;
 };
 
 #endif

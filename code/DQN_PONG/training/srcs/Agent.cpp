@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 13:50:24 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/27 11:43:59 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,6 @@ void	Agent::train( void ) {
 	double 				exploRate = this->_explorationRate;
 	std::vector<double>	recordReward;
 	
-	if (!this->_goalTraining)
-		return ;
 	for (int iEp = 0; iEp < this->_maxEpTraining; iEp++) {
 		double	totalReward = 0.0;
 		this->_env->reset();
@@ -82,10 +80,6 @@ void	Agent::train( void ) {
 
 void	Agent::test( void ) {
 	
-	if (!this->_goalTraining) {
-		std::cout << "=== IMPOSSIBLE ===" << std::endl;
-		return ;
-	}
 	for (int iAct = 0; iAct < this->_maxActions; iAct++) {
 		t_exp	experience;
 		experience.state = this->_env->_state;
@@ -131,7 +125,7 @@ void	Agent::batchTrain(unsigned int const batchSize) {
 
 void	Agent::getAction(t_exp * exp, double exploRate) const {
 	if (this->randDouble() < exploRate)
-		exp->action = this->randInt() % NUM_ACTION;
+		exp->action = this->randInt() % OUTPUT_SIZE;
 	else {
 		auto	output = this->_QNet->feedForward(exp->state);
 		exp->action = std::distance(output->begin(), std::max_element(output->begin(), output->end()));
@@ -164,15 +158,9 @@ void	Agent::genExpReplay(unsigned int const min, unsigned int const max) {
 	return ;
 }
 
-void	Agent::stateToVector(t_state const & src, std::vector<double>& dest) {
-	if (dest.size() != IN_STATE)
-		throw std::exception();
-	std::memcpy(dest.data(), &src, sizeof(t_state));
-	return ;
-}
-
-void	Agent::vectorToState(std::vector<double> const & src, t_state const & dest) {
-	
+void	Agent::saveNetwork( void ) {
+	this->_QNet->printNetworkToJson("weights.json");
+	return ;	
 }
 
 int	Agent::randInt( void ) const {
