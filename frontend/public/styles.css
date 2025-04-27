@@ -1,5 +1,11 @@
 @import "../node_modules/tailwindcss";
 
+@layer components {
+    .btn-primary {
+        @apply px-4 py-2 bg-yellow-400 text-white rounded-full shadow-md hover:bg-yellow-600 hover:skew-3 transition transform hover:scale-105 cursor-pointer;
+    }
+}
+
 #canvasContainer {
     width: 80vw; /* 80% de la largeur de la fenêtre */
     max-width: 1200px;
