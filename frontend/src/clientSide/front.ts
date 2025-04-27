@@ -65,6 +65,7 @@ export function handleConnection(input: boolean) {
         localStorage.removeItem('token');
         localStorage.removeItem('avatar');
         localStorage.removeItem('nickName');
+        localStorage.removeItem('factor');
         document.getElementById('connect')?.classList.remove('hidden');
         document.getElementById('profile')?.classList.add('hidden');
     }
@@ -94,7 +95,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                     localStorage.setItem('nickName', reply.nickName)
                 loadPart("/connected");
                 handleConnection(true);
-
+                getAvatar();
             }
         }
     }

@@ -220,7 +220,7 @@ export async function verify2fa(secret: string) {
             localStorage.setItem('token', result.token)
             loadPart('/home')
             handleConnection(true)
-            //Add hidden factor 2fa
+            localStorage.setItem('factor', 'true') //Add hidden factor 2fa
         }
         else {
             const errorData = await response.json()
