@@ -65,7 +65,7 @@ export async function routes(fastify: FastifyInstance) {
     // FAV ICON
     fastify.get('/images/favicon.ico', function (req, reply) {
         try {
-            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "favicon.ico");
+            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "nobglogo.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {

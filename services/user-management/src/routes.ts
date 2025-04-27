@@ -13,6 +13,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.post('/register', async (req, res) => {
         try {
+            console.log('sssssssssssssssssssssss')
             const zod_result = Schema.signUpSchema.safeParse(req.body)
             if (!zod_result.success)
                 throw new InputError(`Cannot parse the input`)
