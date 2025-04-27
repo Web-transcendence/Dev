@@ -1,4 +1,4 @@
-import {getAvatar, setAvatar} from "./user.js"
+import {getAvatar} from "./user.js"
 import {activateBtn} from "./button.js";
 
 export let connected = false;
@@ -31,6 +31,7 @@ async function checkForTocken(): Promise<boolean>  {
         });
         if (!response.ok) {
             const error = await response.json();
+            console.error(error)
             return false;
         }
         return true;
