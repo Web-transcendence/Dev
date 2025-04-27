@@ -26,7 +26,6 @@ app.register(cors, {
 })
 
 async function authentificate (req: FastifyRequest, reply: FastifyReply) {
-    console.log(req.url)
     if (req.url === "/user-management/login" || req.url === "/user-management/register" || req.url === "/user-management/auth/google" || req.url === "/user-management/2faVerify")
         return;
     try {
@@ -56,16 +55,13 @@ app.get('/authJWT', (req: FastifyRequest, res: FastifyReply) => {
 app.register(httpProxy, {
     upstream: 'wss://match-server:4443/ws',
     prefix: '/match-server',
-    http2: false,
     websocket: true,
-    preHandler: authentificate
 });
 
 app.register(httpProxy, {
     upstream: 'http://user-management:5000',
     prefix: '/user-management',
     http2: false,
-    websocket: true,
     preHandler: authentificate
 });
 

@@ -2,6 +2,16 @@ import Fastify from 'fastify';
 import fastifyWebsocket from '@fastify/websocket';
 import { WebSocket } from "ws";
 import { z } from "zod";
+import {readFileSync} from "node:fs";
+import {join} from "node:path";
+
+const httpsOptions = {
+    https: {
+        key: readFileSync(join(import.meta.dirname, '../secure/key.pem')),      // Private key
+        cert: readFileSync(join(import.meta.dirname, '../secure/cert.pem'))     // Certificate
+    }
+};
+
 
 const inputSchema = z.object({ state: z.string(), key: z.string() });
 
@@ -418,13 +428,7 @@ function joinRoom(player: Player) {
     timerCheck(rooms[i].players[0].game, rooms[i].players[1].game);
 }
 
-const fastify = Fastify({
-    // https: {
-    //     key: fs.readFileSync('./secure/key.pem'),
-    //     cert: fs.readFileSync('./secure/cert.pem'),
-    // },
-    logger: true
-});
+const fastify = Fastify(httpsOptions);
 
 fastify.register(fastifyWebsocket);
 
