@@ -528,10 +528,10 @@ function drawEndScreen() {
         ctxTd.fillStyle = "#17b645";
         ctxTd.strokeText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
         ctxTd.fillText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
-        ctxTd.font = `${tile / 4}px 'Press Start 2P'`;
-        ctxTd.lineWidth = tile * 0.05;
-        ctxTd.strokeText("Opponent disconnected", canvasTd.width * 0.5, canvasTd.height * 0.7);
-        ctxTd.fillText("Opponent disconnected", canvasTd.width * 0.5, canvasTd.height * 0.7);
+        ctxTd.font = `${tile / 2}px 'Press Start 2P'`;
+        ctxTd.lineWidth = tile * 0.1;
+        ctxTd.strokeText("Opponent disconnected", canvasTd.width * 0.5, canvasTd.height * 0.6);
+        ctxTd.fillText("Opponent disconnected", canvasTd.width * 0.5, canvasTd.height * 0.6);
     } else if (player1.hp > player2.hp) {
         ctxTd.fillStyle = "#17b645";
         ctxTd.strokeText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
