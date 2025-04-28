@@ -1,4 +1,5 @@
-import {handleConnection, loadPart, validateRegister} from "./front.js"
+import {handleConnection} from "./front.js"
+import {loadPart} from "./insert.js"
 import {sseConnection} from "./serverSentEvent.js"
 
 export function register(button: HTMLElement): void {
@@ -21,7 +22,7 @@ export function register(button: HTMLElement): void {
             loadPart("/connected")
             handleConnection(true)
         } else {
-            validateRegister(result.json)
+            console.log("ErrorDisplay : nickname, email or password are not respecting my authority")
         }
     })
 }

@@ -1,4 +1,4 @@
-import {addFriend, getAvatar, getFriendList, login, profile, register, setAvatar, verify2fa} from "./user.js";
+import {addFriend, login, profile, register, setAvatar, verify2fa} from "./user.js";
 import { friendList, init2fa} from "./user.js";
 import {connected, handleConnection, navigate} from "./front.js";
 
