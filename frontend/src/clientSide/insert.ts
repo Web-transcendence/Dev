@@ -2,41 +2,33 @@ import {activateBtn} from "./button.js";
 
 export async function loadPart(page: string) {
     window.history.pushState({}, "", page);
+    localStorage.setItem("path", page);
     try {
         await insertTag(`part${page}`);
+        insertScript(page);
         activateBtn(page);
         activateGoogle(page);
-        insertScript(page);
     } catch (error) {
         console.error(error);
         const container = document.getElementById('content') as HTMLElement;
         container.innerHTML = '';
-        container.innerHTML = `<div class="bg-gray-900 text-white font-mono flex items-center justify-center min-h-screen">
-        <div class="text-center space-y-6">
-        <span class="block text-9xl text-pink-500">404 - NOT FOUND</span>
-        <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
-        </div>
-        </div>`;
+        document.getElementById('notFound')?.classList.remove('hidden');
     }
 }
 
 export async function insertTag(url: string): Promise<void>{
     const container = document.getElementById('content') as HTMLElement;
-    if (url === "part/pong") {
-        const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
-        if (existingScript)
-            return ;
-    }
     const res = await fetch(url);
     const newElement = document.createElement('div');
     newElement.className = 'tag';
     if (!res.ok)
         throw Error("Page not found: element missing.");
     const html = await res.text();
-    if (container.innerHTML.includes(html))
+    if (container.innerHTML.includes(html)) {
+        console.log("sortie 1")
         return;
-    if (html.includes(container.innerHTML))
-        return;
+    }
+    document.getElementById('notFound')?.classList.add('hidden');
     container.innerHTML = '';
     newElement.innerHTML = html;
     container.appendChild(newElement);

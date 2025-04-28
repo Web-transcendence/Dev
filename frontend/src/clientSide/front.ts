@@ -4,6 +4,7 @@ import {loadPart} from './insert.js';
 export let connected = false;
 
 window.addEventListener("popstate", () => {
+    console.log("popstate");
     loadPart(window.location.pathname)
 });
 
@@ -16,13 +17,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     else
         handleConnection(false);
-    await loadPart("/home");
-    const towerDefense = document.getElementById("towerDefense");
-    if (towerDefense) {
-        console.log("Tower Defense:");
-        towerDefense.addEventListener("click", (event: MouseEvent) => navigate(event, "/towerDefense"));
-    }
-    loadPart("/home");
+    const path = localStorage.getItem('path');
+    if (path) loadPart(path)
+    else loadPart("/home")
 });
 
 async function checkForToken(): Promise<boolean>  {
@@ -60,13 +57,11 @@ function constantButton() {
     //navigation page
     document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
     document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongMode"));
-    document.getElementById("tower")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tower"));
+    document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tower"));
     document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tournaments"));
     // Footer
     document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
     document.getElementById("contact")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
-    //Pong
-    document.getElementById("pong")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 }
 
 
