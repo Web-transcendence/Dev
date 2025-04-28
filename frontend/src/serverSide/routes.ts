@@ -112,7 +112,7 @@ export async function routes(fastify: FastifyInstance) {
         reply.type('text/html').send(tag);
     })
     fastify.get('/part/tower', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "tower.html");
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "towerDefense.html");
         const tag = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(tag);
     })
