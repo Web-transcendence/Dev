@@ -16,6 +16,10 @@
     .add-blur {
         @apply backdrop-blur-sm p-4 rounded-full;
     }
+    .box-mode {
+        @apply relative bg-gray-800 rounded-xl shadow-lg
+        p-0 overflow-hidden transform transition-transform duration-300 hover:scale-105 ;
+    }
 }
 
 #canvasContainer {

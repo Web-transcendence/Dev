@@ -9,7 +9,8 @@ const mapButton : {[key: string] : () => void} = {
     "/profile": profileBtn,
     "/logout": logoutBtn,
     "/editProfile" : editProfileBtn,
-    "/2fa" : factor
+    "/2fa" : factor,
+    "/pongMode" : pongMode
 }
 
 export function activateBtn(page: string) {
@@ -112,4 +113,8 @@ function factor() {
         if (event.key === "Enter")
             verify2fa(input.value)
     })
+}
+
+function pongMode() {
+    document.getElementById("pong")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
 }
