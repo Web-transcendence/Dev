@@ -11,54 +11,70 @@
     <link href="/static/output.css" rel="stylesheet">
   </head>
 
-  <body class="bg-gray-900 text-white min-h-screen flex flex-col" style="font-family: 'Press Start 2P', cursive;">
+  <body class="text-white min-h-screen flex flex-col" style="font-family: 'Press Start 2P', cursive;">
+        <div id="tsparticles"></div>
+     <div id="app" class="flex-1 mt-15">
+         <nav class="fixed top-0 z-20 left-0 p-4 flex justify-between items-center w-full bg-transparent">
 
-     <div id="app" class="flex-1">
-       <nav class="fixed top-0 z-20 left-0 bg-gray-800 p-4 flex justify-between items-center w-full bg-transparent">
+             <div class="flex items-center add-blur">
+                 <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
 
-         <div class="flex items-center add-blur">
-           <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
-              <img src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
-              <p class="text-center text-xl hidden md:block"> TABG. </p>
-           </button>
+                     <img src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
+
+                     <p class="text-center text-xl hidden md:block"> TABG. </p>
+
+                 </button>
+             </div>
+             <div class="flex space-x-8 items-center add-blur">
+
+                 <button id="pongMode" class="btn-line">Pong</button>
+
+                 <button id="towerDefense" class="btn-line">Tower-Defense</button>
+
+                 <button id="tournaments" class="btn-line">Tournaments</button>
+
+             </div>
+             <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group add-blur">
+
+                 <div class="relative group">
+                     <img id="avatar" src="../images/logout.png" alt="Avatar" class="relative h-10 w-10 rounded-full z-50">
+                     <button id="profile" class="hidden btn-slide">
+
+                         Profil
+
+                     </button>
+                     <button id="connect" class="btn-slide">
+
+                         Connect
+
+                     </button>
+
+                 </div>
+
+             </div>
+         </nav>
+
+         <div id="content" class="h-full w-full flex flex-grow justify-center mt-8 rounded-lg shadow-lg *:w-full">
+
+
+         </div>
+         <div id="notFound" class="hidden flextext-white font-mono items-center justify-center min-h-screen">
+
+             <div class="text-center space-y-6">
+
+                 <span class="block text-9xl text-pink-500">404 - NOT FOUND</span>
+
+                 <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
+
+             </div>
+
          </div>
 
-         <div class="flex space-x-8 items-center add-blur">
-           <button id="pongMode" class="btn-line">Pong</button>
-           <button id="towerDefense" class="btn-line">Tower-Defense</button>
-           <button id="tournaments" class="btn-line">Tournaments</button>
-         </div>
-
-         <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group add-blur">
-           <div class="relative group">
-
-             <img id="avatar" src="../images/logout.png" alt="Avatar" class="relative h-10 w-10 rounded-full z-50">
-
-             <button id="profile" class="hidden btn-slide">
-               Profil
-             </button>
-
-             <button id="connect" class="btn-slide">
-               Connect
-             </button>
-           </div>
-         </div>
-       </nav>
      </div>
 
-     <div class="border-t border-gray-900 mb-9"></div>
 
-     <div id="content" class="h-full w-full flex flex-grow justify-center mt-8 rounded-lg shadow-lg *:w-full">
 
-     </div>
-
-     <div id="notFound" class="hidden bg-gray-900 text-white font-mono flex items-center justify-center min-h-screen">
-         <div class="text-center space-y-6">
-             <span class="block text-9xl text-pink-500">404 - NOT FOUND</span>
-             <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
-         </div>
-     </div>
-     <footer class="bg-linear-to-t from-gray-700 to-gray-900 text-white text-center rounded-t-lg p-4 flex justify-between items-center">
+     <footer class="bg-transparent text-white text-center rounded-t-lg p-4 flex justify-between items-center">
        <img id="bottom-img" src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
        <div class="flex space-x-8 items-center">
          <span id="bottom-text" class="text-lg font-bold"></span>
@@ -67,7 +83,11 @@
        </div>
      </footer>
 
+     <script type="module" id="pongScript" src="/static/dist/pong.js" defer ></script>
+     <script type="module" id="tdScript" src="/static/dist/td.js" defer ></script>
+     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
      <script type="module" src="/static/dist/front.js"></script>
+
 
   </body>
 </html>

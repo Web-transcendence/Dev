@@ -1,6 +1,8 @@
 import {getAvatar} from './user.js'
 import {loadPart} from './insert.js';
 
+declare const tsParticles: any;
+
 export let connected = false;
 
 window.addEventListener("popstate", () => {
@@ -20,6 +22,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     const path = localStorage.getItem('path');
     if (path) loadPart(path)
     else loadPart("/home")
+});
+
+tsParticles.load("tsparticles", {
+    fullScreen: { enable: false },
+    particles: {
+        number: { value: 100 },
+        size: { value: 3 },
+        move: { enable: true, speed: 1 },
+        opacity: { value: 0.5 },
+        color: { value: "#ffffff" },
+    },
+    background: {
+        color: "#000000"
+    }
 });
 
 async function checkForToken(): Promise<boolean>  {
