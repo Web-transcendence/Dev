@@ -17,13 +17,12 @@ function isSelected(i: number) {
 
 function dots() {
     if (frame % 120 < 30)
-        return ("");
-    if (frame % 120 < 60)
         return (".");
-    if (frame % 120 < 90)
+    if (frame % 120 < 60)
         return ("..");
-    if (frame % 120 < 120)
+    if (frame % 120 < 90)
         return ("...");
+    return ("");
 }
 
 function drawMenu() {
@@ -525,7 +524,15 @@ function drawEndScreen() {
     ctxTd.lineWidth = tile * 0.2;
     ctxTd.font = `${tile}px 'Press Start 2P'`;
     ctxTd.textAlign = "center"
-    if (player1.hp > player2.hp) {
+    if (gameTd.state === 2.5) {
+        ctxTd.fillStyle = "#17b645";
+        ctxTd.strokeText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
+        ctxTd.fillText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
+        ctxTd.font = `${tile / 4}px 'Press Start 2P'`;
+        ctxTd.lineWidth = tile * 0.05;
+        ctxTd.strokeText("Opponent disconnected", canvasTd.width * 0.5, canvasTd.height * 0.7);
+        ctxTd.fillText("Opponent disconnected", canvasTd.width * 0.5, canvasTd.height * 0.7);
+    } else if (player1.hp > player2.hp) {
         ctxTd.fillStyle = "#17b645";
         ctxTd.strokeText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
         ctxTd.fillText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
@@ -552,6 +559,7 @@ function mainLoopTd() {
             drawGameTd();
             break;
         case 2:
+        case 2.5:
             drawEndScreen();
             break;
         default:
@@ -642,6 +650,9 @@ socketTd.onmessage = function (event) {
             id = data.id;
             console.log("User ID: ", id);
             break;
+        case "Disconnected":
+            gameTd.state = 2.5;
+            break ;
         default:
             console.warn("Unknown type received:", data);
     }

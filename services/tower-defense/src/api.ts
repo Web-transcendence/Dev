@@ -5,6 +5,7 @@ import { z } from "zod";
 import path from "path";
 import * as fs from 'fs';
 import { fileURLToPath } from "url";
+import {clearInterval} from "node:timers";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -431,6 +432,31 @@ function mainLoop (player1: Player, player2: Player, game: Game) {
         setTimeout(() => mainLoop(player1, player2, game), 100);
 }
 
+function checkRoom(room: RoomTd, intervalId: ReturnType<typeof setInterval>, game: Game) {
+    if (room.players.length !== 2) {
+        game.state = 2;
+        clearInterval(intervalId);
+        room.players.forEach(player => {
+            player.ws.send(JSON.stringify({ class: "Disconnected" }))
+        });
+        return ;
+    }
+    setTimeout(() => checkRoom(room, intervalId, game), 100);
+}
+
+function leaveRoom(userId: number) {
+    for (let i = 0 ; i < roomsTd.length; i++) {
+        for (let j = 0; j < roomsTd[i].players.length; j++) {
+            if (roomsTd[i].players[j].id === userId) {
+                roomsTd[i].players.splice(j, 1);
+                console.log("player id: ", userId, " left room ", roomsTd[i].id);
+                return ;
+            }
+        }
+    }
+    console.log("Player has not joined a room yet.")
+}
+
 function joinRoomTd(player: Player) {
     let id: number = -1;
     let i : number = 0;
@@ -453,15 +479,20 @@ function joinRoomTd(player: Player) {
             clearInterval(intervalId);
             return;
         }
-        roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[0]));
-        roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[1]));
-        roomsTd[i].players[0].ws.send(JSON.stringify(game));
-        roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[1]));
-        roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[0]));
-        roomsTd[i].players[1].ws.send(JSON.stringify(game));
+        if (roomsTd[i].players[0]) {
+            roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[0]));
+            roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[1]));
+            roomsTd[i].players[0].ws.send(JSON.stringify(game));
+        }
+        if (roomsTd[i].players[1]) {
+            roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[1]));
+            roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[0]));
+            roomsTd[i].players[1].ws.send(JSON.stringify(game));
+        }
     }, 10);
     game.state = 1;
     mainLoop(roomsTd[i].players[0], roomsTd[i].players[1], game);
+    checkRoom(roomsTd[i], intervalId, game);
 }
 
 fastify.register(fastifyWebsocket);
@@ -517,7 +548,7 @@ fastify.register(async function (fastify) {
         });
 
         socket.on("close", () => {
-            //clearInterval(intervalId);
+            leaveRoom(userId);
             console.log("Client disconnected");
         });
     });
