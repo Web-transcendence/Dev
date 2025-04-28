@@ -216,6 +216,7 @@ const nmap = Math.floor(Math.random() * 5);
 let allTowers : Tower[] = [];
 let selected : number[] = [];
 let rdmhover = false;
+let id: number;
 
 function timeTostring(timer: number) {
     const minutes = Math.floor(timer / 60);
@@ -572,54 +573,59 @@ socketTd.onmessage = function (event) {
                 gameTd.state = 2
             gameTd.boss = data.boss;
             break;
-        case "Player 1":
-            player1.hp = data.hp;
-            player1.mana = data.mana;
-            player1.cost = data.cost;
-            player1.enemies.splice(0, player1.enemies.length);
-            data.enemies.forEach((enemy: Enemy) => {
-                if (enemy)
-                    player1.enemies.push(new Enemy(enemy.type, enemy.hp, enemy.pos));
-            });
-            player1.deck.splice(0, player1.deck.length);
-            data.deck.forEach((tower: Tower) => {
-                player1.deck.push(new Tower(tower.type, tower.speed, tower.damages, tower.area, tower.effect, tower.level));
-            });
-            for (i = player1.board.length; i < data.board.length; i++) {
-                board = data.board[i];
-                player1.board.push(new Board(board.pos, new Tower(board.tower.type, board.tower.speed, board.tower.damages, board.tower.area, board.tower.effect, board.tower.level)));
+        case "Player":
+            if (data.id === id) {
+                player1.hp = data.hp;
+                player1.mana = data.mana;
+                player1.cost = data.cost;
+                player1.enemies.splice(0, player1.enemies.length);
+                data.enemies.forEach((enemy: Enemy) => {
+                    if (enemy)
+                        player1.enemies.push(new Enemy(enemy.type, enemy.hp, enemy.pos));
+                });
+                player1.deck.splice(0, player1.deck.length);
+                data.deck.forEach((tower: Tower) => {
+                    player1.deck.push(new Tower(tower.type, tower.speed, tower.damages, tower.area, tower.effect, tower.level));
+                });
+                for (i = player1.board.length; i < data.board.length; i++) {
+                    board = data.board[i];
+                    player1.board.push(new Board(board.pos, new Tower(board.tower.type, board.tower.speed, board.tower.damages, board.tower.area, board.tower.effect, board.tower.level)));
+                }
+                player1.bullets.splice(0, player1.bullets.length);
+                data.bullets.forEach((bullet: Bullet) => {
+                    if (bullet)
+                        player1.bullets.push(new Bullet(bullet.type, bullet.rank, bullet.pos, bullet.target, bullet.travel));
+                });
+            } else {
+                player2.hp = data.hp;
+                player2.mana = data.mana;
+                player2.cost = data.cost;
+                player2.enemies.splice(0, player2.enemies.length);
+                data.enemies.forEach((enemy: Enemy) => {
+                    if (enemy)
+                        player2.enemies.push(new Enemy(enemy.type, enemy.hp, enemy.pos));
+                });
+                player2.deck.splice(0, player2.deck.length);
+                data.deck.forEach((tower: Tower) => {
+                    player2.deck.push(new Tower(tower.type, tower.speed, tower.damages, tower.area, tower.effect, tower.level));
+                });
+                for (i = player2.board.length; i < data.board.length; i++) {
+                    board = data.board[i];
+                    player2.board.push(new Board(board.pos, new Tower(board.tower.type, board.tower.speed, board.tower.damages, board.tower.area, board.tower.effect, board.tower.level)));
+                }
+                player2.bullets.splice(0, player2.bullets.length);
+                data.bullets.forEach((bullet: Bullet) => {
+                    if (bullet)
+                        player2.bullets.push(new Bullet(bullet.type, bullet.rank, bullet.pos, bullet.target, bullet.travel));
+                });
             }
-            player1.bullets.splice(0, player1.bullets.length);
-            data.bullets.forEach((bullet: Bullet) => {
-                if (bullet)
-                    player1.bullets.push(new Bullet(bullet.type, bullet.rank, bullet.pos, bullet.target, bullet.travel));
-            });
-            break;
-        case "Player 2":
-            player2.hp = data.hp;
-            player2.mana = data.mana;
-            player2.cost = data.cost;
-            player2.enemies.splice(0, player2.enemies.length);
-            data.enemies.forEach((enemy: Enemy) => {
-                if (enemy)
-                    player2.enemies.push(new Enemy(enemy.type, enemy.hp, enemy.pos));
-            });
-            player2.deck.splice(0, player2.deck.length);
-            data.deck.forEach((tower: Tower) => {
-                player2.deck.push(new Tower(tower.type, tower.speed, tower.damages, tower.area, tower.effect, tower.level));
-            });
-            for (i = player2.board.length; i < data.board.length; i++) {
-                board = data.board[i];
-                player2.board.push(new Board(board.pos, new Tower(board.tower.type, board.tower.speed, board.tower.damages, board.tower.area, board.tower.effect, board.tower.level)));
-            }
-            player2.bullets.splice(0, player2.bullets.length);
-            data.bullets.forEach((bullet: Bullet) => {
-                if (bullet)
-                    player2.bullets.push(new Bullet(bullet.type, bullet.rank, bullet.pos, bullet.target, bullet.travel));
-            });
             break;
         case "Tower":
             allTowers.push(new Tower(data.type, data.speed, data.damages, data.area, data.effect, data.level));
+            break;
+        case "id":
+            id = data.id;
+            console.log("User ID: ", id);
             break;
         default:
             console.warn("Unknown type received:", data);

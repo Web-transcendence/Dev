@@ -70,7 +70,7 @@ class Timer {
 }
 
 class Player {
-    name: string;
+    id: number;
     hp: number = 3;
     mana: number = 180;
     cost: number = 50;
@@ -78,8 +78,8 @@ class Player {
     deck: Tower[] = [];
     board: Board[] = [];
     bullets: Bullet[] = [];
-    constructor(name: string) {
-        this.name = name;
+    constructor(id: number) {
+        this.id = id;
         for (let i = 0; i < 5; i++) {
             this.deck.push(allTowers[i].clone());
         }
@@ -98,7 +98,7 @@ class Player {
     }
     spawnTower() {
         if (this.mana < this.cost || this.board.length >= 20) {
-            console.log(`${this.name}: Mana insufficient or board full`);
+            console.log(`${this.id}: Mana insufficient or board full`);
             return ;
         }
         this.mana -= this.cost;
@@ -113,7 +113,7 @@ class Player {
         const newTower = this.deck[type].clone();
         newTower.startAttack(this, pos);
         this.board.push(new Board(pos, newTower));
-        console.log(`${this.name}: Tower ${this.deck[type].type} spawned at position ${pos}`);
+        console.log(`${this.id}: Tower ${this.deck[type].type} spawned at position ${pos}`);
     }
     upTowerRank(tower: number) {
         if (this.mana >= 100 * Math.pow(2, this.deck[tower].level) && this.deck[tower].level < 4) {
@@ -122,7 +122,7 @@ class Player {
         }
     }
     toJSON() {
-        return {class: this.name, hp: this.hp, mana: this.mana, cost: this.cost, enemies: this.enemies, deck: this.deck, board: this.board, bullets: this.bullets};
+        return {class: "Player", id: this.id, hp: this.hp, mana: this.mana, cost: this.cost, enemies: this.enemies, deck: this.deck, board: this.board, bullets: this.bullets};
     }
 }
 
@@ -232,8 +232,18 @@ function loadEnemies(filePath: string): Enemy[][] {
     ));
 }
 
+function generateId() {
+    let newId: number;
+    do {
+        newId = Math.floor(Math.random() * 10000);
+    } while (ids.has(newId));
+    ids.add(newId);
+    return newId;
+}
+
 const enemies: Enemy[][] = loadEnemies(path.join(__dirname, "../resources/enemies.json"));
 const allTowers: Tower[] = loadTowers(path.join(__dirname, "../resources/towers.json"));
+const ids = new Set<number>();
 
 function checkGameOver(player1: Player, player2: Player, game: Game) {
     if (player1.hp <= 0 || player2.hp <= 0) {
@@ -414,8 +424,10 @@ fastify.register(fastifyWebsocket);
 fastify.register(async function (fastify) {
     fastify.get('/ws', {websocket: true}, (socket, req) => {
         console.log("Client connected");
-        let player1 = new Player("Player 1");
-        let player2 = new Player("Player 2");
+        const userId = generateId();
+        socket.send(JSON.stringify({class: "id", id: userId}));
+        let player1 = new Player(userId);
+        let player2 = new Player(0);
         let game = new Game(new Timer(0, 4));
 
         allTowers.forEach((tower: Tower) => {
