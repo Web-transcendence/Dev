@@ -1,4 +1,4 @@
-import {getAvatar, setAvatar} from "./user.js"
+import {getAvatar} from "./user.js"
 import {activateBtn} from "./button.js";
 
 export let connected = false;
@@ -16,6 +16,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     else
         handleConnection(false);
+    const towerDefense = document.getElementById("towerDefense");
+    if (towerDefense) {
+        console.log("Tower Defense:");
+        towerDefense.addEventListener("click", (event: MouseEvent) => navigate(event, "/towerDefense"));
+    }
     loadPart("/home");
 });
 
@@ -150,12 +155,12 @@ async function insert_tag(url: string): Promise<void>{
     if (html.includes(container.innerHTML))
         return;
     container.innerHTML = '';
-    afterInsert(url/*, container*/);
+    afterInsert(url);
     newElement.innerHTML = html;
     container.appendChild(newElement);
 }
 
-function afterInsert(url: string,/* container: HTMLElement*/): void {
+function afterInsert(url: string): void {
     if (url === "part/pong") {
         if (!document.querySelector('script[src="/static/dist/pong.js"]')) {
             const script = document.createElement('script');
@@ -164,6 +169,17 @@ function afterInsert(url: string,/* container: HTMLElement*/): void {
         }
     } else {
         const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
+        if (existingScript)
+            existingScript.remove();
+    }
+    if (url === "part/towerDefense") {
+        if (!document.querySelector('script[src="/static/dist/td.js"]')) {
+            const script = document.createElement('script');
+            script.src = "/static/dist/td.js";
+            document.body.appendChild(script);
+        }
+    } else {
+        const existingScript = document.querySelector('script[src="/static/dist/td.js"]');
         if (existingScript)
             existingScript.remove();
     }
