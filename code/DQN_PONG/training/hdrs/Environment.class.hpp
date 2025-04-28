@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:41:48 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/27 13:55:48 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/28 01:33:11 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define ENVIRONMENT_CLASS_HPP
 # define WIDTH 1200
 # define HEIGHT 800
+# define DS_R 20
 # include "TypeDefinition.hpp"
 # include <vector>
 # include <string>
@@ -43,16 +44,24 @@ public:
 	Environment(unsigned int const maxStep);
 	~Environment( void );
 
-	void			action(s_exp * exp);
+	void					action(s_exp * exp);
 
-	void			reset( void );
+	void					reset( void );
 	
+	std::array<double,6>				getState( void );
+	std::vector<double>*	getStateVector(std::array<double,6> const & act, std::array<double,6> const & old);
+
 private:
 
-	void	norAngle(void);
 	void	moovePaddle(int const action);
-	double	mooveBall(void);
+	void	mooveBall(t_exp * exp);
 
+	void	norAngle(void);
+	int		checkCollision(double oldX, double oldY);
+	void	bounceAngle(t_paddle & paddle, std::string const & side);
+
+	void	lineDrag(std::vector<std::vector<double>> & simulation, std::array<int, 2> actxy, std::array<int, 2> oldxy);
+	void	paddle(std::vector<std::vector<double>> & simulation, std::array<int, 2> pxy);
 
 	int		randInt(void) const;
 	double	randDouble(void) const;

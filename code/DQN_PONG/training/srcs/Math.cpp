@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:09:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/01 10:55:41 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/28 02:09:18 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,6 +230,18 @@ std::vector<std::vector<double>>*	Math::transpose2D(std::vector<std::vector<doub
 			}
 			*i = *it_in;
 			++it_in;
+		}
+	}
+	return res;
+}
+
+std::vector<double>*	Math::flatten2D(std::vector<std::vector<double>> const & base) {
+	auto	res = new std::vector<double>(base.size() * base.front().size());
+	auto	it_res = res->begin();
+
+	for (auto it_b = base.begin(); it_b != base.end(); it_b++) {
+		for (auto it_in = (*it_b).begin(); it_in != (*it_b).end(); it_in++, it_res++) {
+			*it_res = *it_in;
 		}
 	}
 	return res;

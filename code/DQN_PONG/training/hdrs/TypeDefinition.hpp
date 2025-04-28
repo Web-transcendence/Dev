@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:15:27 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/27 11:23:58 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/28 01:36:48 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # define DOWN 1
 # define NOTHING 2
 # include <vector>
+# include <array>
 # include <cstring>
 
 using ptrFuncV = std::vector<double>*(*)(std::vector<double> const &);
@@ -27,19 +28,18 @@ typedef	enum e_actFunc {SIGMOIDs, RELU, LEAKYRELU, TANH, STEP} t_actFunc;
 typedef enum e_mode {TRAIN, TEST} t_mode;
 
 typedef struct s_exp {
-	std::vector<double>	state;
-	int					action;	
-	double				reward;
-	std::vector<double>	nextState;
-	bool				done;
+	std::array<double, 6>	state;
+	int						action;	
+	double					reward;
+	std::array<double, 6>	nextState;
+	std::array<double, 6>	prevState;
+	bool					done;
 	s_exp() : reward(0.), done(false) {}
 }	t_exp;
 
 typedef struct  s_tuple {
-    std::vector<double> input;
-    std::vector<double> expectedOutput;
-
-	s_tuple() : input(INPUT_SIZE, 0.0),  expectedOutput(OUTPUT_SIZE, 0.0) {}
+    std::vector<double>* input;
+    std::vector<double>* expectedOutput;
 }      t_tuple;
 
 #endif

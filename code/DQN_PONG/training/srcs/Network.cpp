@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 13:19:07 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/28 01:52:05 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ Network::~Network( void ) {
 }
 
 void    Network::SDG(t_tuple* trainingData, double const eta) {
-	this->backprop(trainingData->input, trainingData->expectedOutput);
+	this->backprop(*trainingData->input, *trainingData->expectedOutput);
 	this->updateNabla_b();
 	this->updateNabla_w();
 	this->updateWeight(eta, 1.);
@@ -119,7 +119,7 @@ void	Network::backprop(std::vector<double>& input, std::vector<double>& expected
 
 void	Network::updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta) {
 	for (auto it_mb = miniBatch.begin(); it_mb != miniBatch.end(); it_mb++) {
-		this->backprop((*it_mb)->input, (*it_mb)->expectedOutput);
+		this->backprop(*(*it_mb)->input, *(*it_mb)->expectedOutput);
 		this->updateNabla_b();
 		this->updateNabla_w();
 	}
@@ -144,9 +144,9 @@ int     Network::evaluate(std::vector<t_tuple*>& test_data) {
 	int	correct = 0;
 
 	for (auto it_td = test_data.begin(); it_td != test_data.end(); it_td++) {
-		auto output = this->feedForward((*it_td)->input);
+		auto output = this->feedForward(*(*it_td)->input);
 		int numOutput = std::distance(output->begin(), std::max_element(output->begin(), output->end()));
-		int	numExpected = std::distance((*it_td)->expectedOutput.begin(), std::max_element((*it_td)->expectedOutput.begin(), (*it_td)->expectedOutput.end()));
+		int	numExpected = std::distance((*it_td)->expectedOutput->begin(), std::max_element((*it_td)->expectedOutput->begin(), (*it_td)->expectedOutput->end()));
 		if (numExpected == numOutput)
 			++correct;
 		delete output;

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 09:50:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/01 10:09:19 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/28 01:22:13 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ namespace Math {
 	// TRANSPOSITION FUNCTIONS
 	std::vector<std::vector<double>>*	transpose1D(std::vector<double> const & base);
 	std::vector<std::vector<double>>*	transpose2D(std::vector<std::vector<double>> const & base);
+	std::vector<double>*				flatten2D(std::vector<std::vector<double>> const & base);
 
 	// DEBUG
 	template<typename T>

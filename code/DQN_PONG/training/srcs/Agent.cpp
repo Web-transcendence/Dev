@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/27 11:43:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/28 02:10:05 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,9 +50,12 @@ void	Agent::train( void ) {
 	for (int iEp = 0; iEp < this->_maxEpTraining; iEp++) {
 		double	totalReward = 0.0;
 		this->_env->reset();
+		std::array<double,6>	prevState = this->_env->getState();
 		for (int iAct = 0; iAct < this->_maxActions; iAct++) {
 			auto	experience = new t_exp;
-			experience->state = this->_env->_state;
+			experience->prevState = prevState;
+			experience->state = this->_env->getState();
+			prevState = this->_env->getState();
 			this->getAction(experience, exploRate);
 			this->_env->action(experience);
 			totalReward += experience->reward;
@@ -62,8 +65,6 @@ void	Agent::train( void ) {
 				if (experience->reward) {this->TNetUpdate();}
 				break ;
 			}
-			this->_env->_done = experience->done;
-			this->_env->_state = experience->nextState;
 		}
 		if (exploRate - this->_explorationDecay > 0.0001)
 			exploRate -= this->_explorationDecay;
@@ -78,25 +79,25 @@ void	Agent::train( void ) {
 	return ;
 }
 
-void	Agent::test( void ) {
+// void	Agent::test( void ) {
 	
-	for (int iAct = 0; iAct < this->_maxActions; iAct++) {
-		t_exp	experience;
-		experience.state = this->_env->_state;
-		auto	output = this->_QNet->feedForward(this->_env->_state);
-		experience.action = std::distance(output->begin(), std::max_element(output->begin(), output->end()));
-		this->_env->action(&experience);
-		this->_env->_state = experience.nextState;
-		if (experience.done)
-			break ;
-		delete output;
-	}
-	if (this->_env->_myMap[this->_env->getUIntState(this->_env->_state)] == 'G')
-		std::cout << "=== SUCESS ===" << std::endl;
-	else
-		std::cout << "=== FAIL ===" << std::endl;
-	return ;
-}
+// 	for (int iAct = 0; iAct < this->_maxActions; iAct++) {
+// 		t_exp	experience;
+// 		experience.state = this->_env->_state;
+// 		auto	output = this->_QNet->feedForward(this->_env->_state);
+// 		experience.action = std::distance(output->begin(), std::max_element(output->begin(), output->end()));
+// 		this->_env->action(&experience);
+// 		this->_env->_state = experience.nextState;
+// 		if (experience.done)
+// 			break ;
+// 		delete output;
+// 	}
+// 	if (this->_env->_myMap[this->_env->getUIntState(this->_env->_state)] == 'G')
+// 		std::cout << "=== SUCESS ===" << std::endl;
+// 	else
+// 		std::cout << "=== FAIL ===" << std::endl;
+// 	return ;
+// }
 
 
 void	Agent::batchTrain(unsigned int const batchSize) {
@@ -105,19 +106,23 @@ void	Agent::batchTrain(unsigned int const batchSize) {
 	auto	batches = this->_xp->getBatch(batchSize);
 	t_tuple	training;
 	for (auto it_b = batches->begin(); it_b != batches->end(); it_b++) {
-		auto			oQNetState = this->_QNet->feedForward((*it_b)->state);
-		auto			oTNet = this->_TNet->feedForward((*it_b)->nextState);
-		auto			adjusted = std::vector<double>(*oQNetState);
+		auto			input = this->_env->getStateVector((*it_b)->state, (*it_b)->prevState);
+		auto			nextInput = this->_env->getStateVector((*it_b)->nextState, (*it_b)->state);
+		auto			oQNet = this->_QNet->feedForward(*input);
+		auto			oTNet = this->_TNet->feedForward(*nextInput);
+		auto			adjusted = std::vector<double>(*oQNet);
 		unsigned int	act = (*it_b)->action;
 		unsigned int	actNext = std::distance(oTNet->begin(), std::max_element(oTNet->begin(), oTNet->end()));
 		adjusted.at(act) = (*it_b)->reward; 
 		if ((*it_b)->done == false) 
 		adjusted.at(act) += this->_discount*(oTNet->at(actNext));
-		training.input = (*it_b)->state;
-		training.expectedOutput = adjusted;
+		training.input = input;
+		training.expectedOutput = &adjusted;
 		this->_QNet->SDG(&training, 0.05);
 		delete oTNet;
-		delete oQNetState;
+		delete oQNet;
+		delete input;
+		delete nextInput;
 	}
 	delete batches;
 	return ;
@@ -127,8 +132,10 @@ void	Agent::getAction(t_exp * exp, double exploRate) const {
 	if (this->randDouble() < exploRate)
 		exp->action = this->randInt() % OUTPUT_SIZE;
 	else {
-		auto	output = this->_QNet->feedForward(exp->state);
+		auto	input = this->_env->getStateVector(exp->state, exp->prevState);
+		auto	output = this->_QNet->feedForward(*input);
 		exp->action = std::distance(output->begin(), std::max_element(output->begin(), output->end()));
+		delete input;
 		delete output;
 	}
 	return ;
