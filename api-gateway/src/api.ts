@@ -7,18 +7,17 @@ import {join} from "node:path";
 
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 //
-// const httpsOptions = {
-//     https: {
-//         key: readFileSync(join(import.meta.dirname, '../secure/key.pem')),      // Private key
-//         cert: readFileSync(join(import.meta.dirname, '../secure/cert.pem'))     // Certificate
-//     },
-//     logger: true
-// };
+const httpsOptions = {
+    https: {
+        key: readFileSync(join(import.meta.dirname, '../secure/key.pem')),      // Private key
+        cert: readFileSync(join(import.meta.dirname, '../secure/cert.pem'))     // Certificate
+    }
+};
 
 
 const SECRET_KEY = /*process.env.SECRET_KEY || */ "secret_key";
 
-const app = Fastify();
+const app = Fastify(httpsOptions);
 
 
 app.register(cors, {
@@ -27,6 +26,7 @@ app.register(cors, {
 })
 
 async function authentificate (req: FastifyRequest, reply: FastifyReply) {
+    console.log(req.url)
     if (req.url === "/user-management/login" || req.url === "/user-management/register" || req.url === "/user-management/auth/google" || req.url === "/user-management/2faVerify")
         return;
     try {
@@ -54,9 +54,18 @@ app.get('/authJWT', (req: FastifyRequest, res: FastifyReply) => {
 })
 
 app.register(httpProxy, {
+    upstream: 'wss://match-server:4443/ws',
+    prefix: '/match-server',
+    http2: false,
+    websocket: true,
+    preHandler: authentificate
+});
+
+app.register(httpProxy, {
     upstream: 'http://user-management:5000',
     prefix: '/user-management',
     http2: false,
+    websocket: true,
     preHandler: authentificate
 });
 
@@ -65,5 +74,5 @@ app.listen({port: 3000, host: '0.0.0.0'}, (err, adrr) => {
         console.error(err);
         process.exit(1);
     }
-    console.log(`server running on ${adrr}`);
+    console.log(`server running on ${adrr}, ${join(import.meta.dirname, '../secure/cert.pem')}`);
 });

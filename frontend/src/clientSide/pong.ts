@@ -241,7 +241,7 @@ function gameLoop () {
 gameLoop();
 
 try {
-    const socket = new WebSocket("http://localhost:4443/ws");
+    const socket = new WebSocket(`wss://${window.location.hostname}:4443/ws`);
     socket.addEventListener("open", (event) => {
         console.log("Connected");
     })

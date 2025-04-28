@@ -4,18 +4,19 @@ import {activateBtn} from "./button.js";
 export let connected = false;
 
 window.addEventListener("popstate", () => {
-    loadPart(window.location.pathname);
+    loadPart(window.location.pathname)
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
     constantButton(); // Constant button on the Single Page Application
     // For Client Connection
-    if (await checkForTocken()) {
-        getAvatar();
+    if (await checkForToken()) {
+        await getAvatar();
         handleConnection(true);
     }
     else
         handleConnection(false);
+    await loadPart("/home");
     const towerDefense = document.getElementById("towerDefense");
     if (towerDefense) {
         console.log("Tower Defense:");
@@ -24,10 +25,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadPart("/home");
 });
 
-async function checkForTocken(): Promise<boolean>  {
+async function checkForToken(): Promise<boolean>  {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/authJWT', {
+        const response = await fetch(`https://${window.location.hostname}:3000/authJWT`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -36,6 +37,7 @@ async function checkForTocken(): Promise<boolean>  {
         });
         if (!response.ok) {
             const error = await response.json();
+            console.error(error)
             return false;
         }
         return true;
@@ -49,6 +51,13 @@ function constantButton() {
     //Duo Button
     document.getElementById('connect')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
     document.getElementById('profile')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
+
+    document.getElementById('avatar').addEventListener('click', () => {
+        if (connected)
+            document.getElementById('connect')?.click();
+        else
+            document.getElementById('profile')?.click();
+    });
     //navigation page
     document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
     document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongMode"));
@@ -80,7 +89,7 @@ export function handleConnection(input: boolean) {
 // @ts-ignore
 window.CredentialResponse = async (credit: { credential: string }) => {
     try {
-        const response = await fetch('http://localhost:3000/user-management/auth/google', {
+        const response = await fetch(`https://${window.location.hostname}:3000/user-management/auth/google`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -98,9 +107,9 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                     localStorage.setItem('token', reply.token)
                 if (reply.nickName)
                     localStorage.setItem('nickName', reply.nickName)
-                loadPart("/connected");
+                await loadPart("/connected");
                 handleConnection(true);
-                getAvatar();
+                await getAvatar();
             }
         }
     }
@@ -110,15 +119,15 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 }
 
 export async function navigate(event: MouseEvent, path: string): Promise<void> {
-    handleConnection(await checkForTocken());
+    handleConnection(await checkForToken());
     if (!connected && path == "/profile") {
         path = "/connect";
     }
     event.preventDefault();
-    loadPart(path);
+    await loadPart(path);
 }
 
-export async function loadPart(page: string): Promise<void> {
+export async function loadPart(page: string) {
     window.history.pushState({}, "", page);
     try {
         await insert_tag(`part${page}`);
