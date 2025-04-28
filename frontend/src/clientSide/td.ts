@@ -15,6 +15,17 @@ function isSelected(i: number) {
     return ("#eaeaea");
 }
 
+function dots() {
+    if (frame % 120 < 30)
+        return ("");
+    if (frame % 120 < 60)
+        return (".");
+    if (frame % 120 < 90)
+        return ("..");
+    if (frame % 120 < 120)
+        return ("...");
+}
+
 function drawMenu() {
     // Background
     ctxTd.drawImage(assetsTd.getImage("main")!, 0, 0, canvasTd.width, canvasTd.height);
@@ -54,11 +65,14 @@ function drawMenu() {
     // Start button
     ctxTd.textAlign = "center";
     ctxTd.font = `${tile / 4.2}px 'Press Start 2P'`;
-    if (selected.length === 5) {
+    if (gameTd.state === 0.5) {
+        drawRawButton(canvasTd.width * 0.5, canvasTd.height * 0.9, canvasTd.width * 0.26, canvasTd.height * 0.1, "#b329d1");
+        ctxTd.fillText("Waiting for opponent", canvasTd.width * 0.5, canvasTd.height * 0.91, canvasTd.width * 0.22);
+        ctxTd.fillText(dots(), canvasTd.width * 0.5, canvasTd.height * 0.935);
+    } else if (selected.length === 5) {
         drawRawButton(canvasTd.width * 0.5, canvasTd.height * 0.9, canvasTd.width * 0.26, canvasTd.height * 0.1, "#b329d1");
         ctxTd.fillText("Click to start", canvasTd.width * 0.5, canvasTd.height * 0.91, canvasTd.width * 0.22);
-    }
-    else {
+    } else {
         drawRawButton(canvasTd.width * 0.5, canvasTd.height * 0.9, canvasTd.width * 0.26, canvasTd.height * 0.1, "#eaeaea");
         ctxTd.fillText("Select 5 rocks", canvasTd.width * 0.5, canvasTd.height * 0.91, canvasTd.width * 0.22);
     }
@@ -399,9 +413,7 @@ function drawButtons() {
     ctxTd.textAlign = "center";
     // addTower
     ctxTd.drawImage(assetsTd.getImage("addTower")!, tile * 6.5 - 35, canvasTd.height - tile * 0.75 - 35, 70, 70);
-    ctxTd.drawImage(assetsTd.getImage("addTower")!, tile * 8.5 - 35, canvasTd.height - tile * 0.75 - 35, 70, 70);
     ctxTd.fillText(player1.cost.toString(), tile * 6.5, canvasTd.height - tile * 0.75 + 22);
-    ctxTd.fillText(player2.cost.toString(), tile * 8.5, canvasTd.height - tile * 0.75 + 22);
     // stats
     drawRawButton(tile * 5.5, canvasTd.height - tile * 0.75, tile * 0.9, tile * 0.9, "#0096ff");
     ctxTd.drawImage(assetsTd.getImage("mana")!, tile * 5.35, canvasTd.height - tile * 1.05, tile * 0.3, tile * 0.3);
@@ -533,6 +545,7 @@ function drawEndScreen() {
 function mainLoopTd() {
     switch (gameTd.state) {
         case 0:
+        case 0.5:
             drawMenu();
             break;
         case 1:
@@ -569,6 +582,8 @@ socketTd.onmessage = function (event) {
             gameTd.level = data.level;
             gameTd.timer = data.timer;
             gameTd.start = data.start;
+            if (data.state === 1 && gameTd.state === 0.5)
+                gameTd.state = 1;
             if (data.state === 2)
                 gameTd.state = 2
             gameTd.boss = data.boss;
@@ -658,7 +673,7 @@ canvasTd.addEventListener("click", (event: MouseEvent) => {
             }
             if (selected.length === 5 && x >= 0.37 * canvasTd.width && x < 0.63 * canvasTd.width && y >= 0.85 * canvasTd.height && y < 0.95 * canvasTd.height) {
                 socketTd.send(JSON.stringify({event: "towerInit", t1: selected[0], t2: selected[1], t3: selected[2], t4: selected[3], t5: selected[4]}));
-                gameTd.state = 1;
+                gameTd.state = 0.5;
             }
             if (x >= 0.63 * canvasTd.width && x < 0.66 * canvasTd.width && y >= 0.87 * canvasTd.height && y < 0.93 * canvasTd.height) {
                 selected.splice(0, selected.length);
@@ -676,11 +691,6 @@ canvasTd.addEventListener("click", (event: MouseEvent) => {
                 else if (x >= tile * 6 && x < tile * 7) {
                     socketTd.send(JSON.stringify({event: "click", player: 1, button: 5}));
                 }
-                else if (x >= tile * 8 && x < tile * 9) {
-                    socketTd.send(JSON.stringify({event: "click", player: 2, button: 5}));
-                }
-                else if (x >= tile * 10 && x < canvasTd.width)
-                    socketTd.send(JSON.stringify({event: "click", player: 2, button: Math.floor(x / tile) - 10}));
             }
             break;
         default:

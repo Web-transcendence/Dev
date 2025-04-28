@@ -71,6 +71,7 @@ class Timer {
 
 class Player {
     id: number;
+    ws: WebSocket;
     hp: number = 3;
     mana: number = 180;
     cost: number = 50;
@@ -78,8 +79,9 @@ class Player {
     deck: Tower[] = [];
     board: Board[] = [];
     bullets: Bullet[] = [];
-    constructor(id: number) {
+    constructor(id: number, ws: WebSocket) {
         this.id = id;
+        this.ws = ws;
         for (let i = 0; i < 5; i++) {
             this.deck.push(allTowers[i].clone());
         }
@@ -218,6 +220,15 @@ class Enemy {
     }
 }
 
+class RoomTd {
+    id: number;
+    players: Player[] = [];
+    constructor (id: number, player: Player) {
+        this.id = id;
+        this.players.push(player);
+    }
+}
+
 function loadTowers(filePath: string): Tower[] {
     const data = fs.readFileSync(filePath, 'utf-8');
     const rawTowers = JSON.parse(data);
@@ -244,6 +255,7 @@ function generateId() {
 const enemies: Enemy[][] = loadEnemies(path.join(__dirname, "../resources/enemies.json"));
 const allTowers: Tower[] = loadTowers(path.join(__dirname, "../resources/towers.json"));
 const ids = new Set<number>();
+const roomsTd: RoomTd[] = [];
 
 function checkGameOver(player1: Player, player2: Player, game: Game) {
     if (player1.hp <= 0 || player2.hp <= 0) {
@@ -419,6 +431,39 @@ function mainLoop (player1: Player, player2: Player, game: Game) {
         setTimeout(() => mainLoop(player1, player2, game), 100);
 }
 
+function joinRoomTd(player: Player) {
+    let id: number = -1;
+    let i : number = 0;
+    for (; i < roomsTd.length; i++) {
+        if (roomsTd[i].players.length === 1) {
+            roomsTd[i].players.push(player);
+            id = roomsTd[i].id;
+            break ;
+        }
+    }
+    if (id === -1) {
+        let room = new RoomTd(roomsTd.length, player);
+        roomsTd.push(room);
+        return ;
+    }
+    let game = new Game(new Timer(0, 4));
+    const intervalId = setInterval(() => {
+        let i = roomsTd.findIndex(room => room.id === id);
+        if (i === -1) {
+            clearInterval(intervalId);
+            return;
+        }
+        roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[0]));
+        roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[1]));
+        roomsTd[i].players[0].ws.send(JSON.stringify(game));
+        roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[1]));
+        roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[0]));
+        roomsTd[i].players[1].ws.send(JSON.stringify(game));
+    }, 10);
+    game.state = 1;
+    mainLoop(roomsTd[i].players[0], roomsTd[i].players[1], game);
+}
+
 fastify.register(fastifyWebsocket);
 
 fastify.register(async function (fastify) {
@@ -426,10 +471,7 @@ fastify.register(async function (fastify) {
         console.log("Client connected");
         const userId = generateId();
         socket.send(JSON.stringify({class: "id", id: userId}));
-        let player1 = new Player(userId);
-        let player2 = new Player(0);
-        let game = new Game(new Timer(0, 4));
-
+        let player = new Player(userId, socket);
         allTowers.forEach((tower: Tower) => {
             socket.send(JSON.stringify(tower));
         });
@@ -441,7 +483,6 @@ fastify.register(async function (fastify) {
                     console.log(error);
                     return;
                 }
-                const player = data.player === 1 ? player1 : player2;
                 switch (data.button) {
                     case 5:
                         player.spawnTower();
@@ -454,8 +495,7 @@ fastify.register(async function (fastify) {
                         player.upTowerRank(data.button);
                         break;
                     case -2:
-                        player1.mana += 100;
-                        player2.mana += 100;
+                        player.mana += 100;
                         break;
                     default:
                         break;
@@ -466,25 +506,18 @@ fastify.register(async function (fastify) {
                     console.log(error);
                     return;
                 }
-                player1.deck.splice(0, player1.deck.length);
-                player1.deck.push(allTowers[data.t1].clone());
-                player1.deck.push(allTowers[data.t2].clone());
-                player1.deck.push(allTowers[data.t3].clone());
-                player1.deck.push(allTowers[data.t4].clone());
-                player1.deck.push(allTowers[data.t5].clone());
-                game.state = 1;
+                player.deck.splice(0, player.deck.length);
+                player.deck.push(allTowers[data.t1].clone());
+                player.deck.push(allTowers[data.t2].clone());
+                player.deck.push(allTowers[data.t3].clone());
+                player.deck.push(allTowers[data.t4].clone());
+                player.deck.push(allTowers[data.t5].clone());
+                joinRoomTd(player);
             }
         });
 
-        const intervalId = setInterval(() => {
-            socket.send(JSON.stringify(player1));
-            socket.send(JSON.stringify(player2));
-            socket.send(JSON.stringify(game));
-        }, 10);
-        mainLoop(player1, player2, game);
-
         socket.on("close", () => {
-            clearInterval(intervalId);
+            //clearInterval(intervalId);
             console.log("Client disconnected");
         });
     });
