@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Agent.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/28 22:07:45 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/29 17:25:41 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,10 +48,11 @@ void	Agent::train( void ) {
 	std::vector<double>	recordReward;
 	
 	for (int iEp = 0; iEp < this->_maxEpTraining; iEp++) {
+		std::vector<double>	recordStep;
 		double	totalReward = 0.0;
 		this->_env->reset();
 		std::array<double,6>	prevState = this->_env->getState();
-		for (int iAct = 0; iAct < this->_maxActions; iAct++) {
+		for (int iAct = 0; ; iAct++) {
 			auto	experience = new t_exp;
 			experience->prevState = prevState;
 			experience->state = this->_env->getState();
@@ -61,43 +62,45 @@ void	Agent::train( void ) {
 			totalReward += experience->reward;
 			this->_xp->add(experience);
 			this->batchTrain(16);
+			if (!(iAct % 25) && iAct) {this->TNetUpdate();}
 			if (experience->done) {
-				if (experience->reward) {this->TNetUpdate();}
+				recordStep.push_back(iAct);
 				break ;
 			}
 		}
+		if (totalReward > 20) {this->TNetUpdate();}
 		if (exploRate - this->_explorationDecay > 0.0001)
 			exploRate -= this->_explorationDecay;
 		recordReward.push_back(totalReward);
-		this->_QNet->displayProgress(iEp % 10, 10);
-		if (!(iEp % 10) && iEp) {
+		this->_QNet->displayProgress(iEp % 100, 100);
+		if (!(iEp % 100) && iEp) {
 			double averageReward = std::accumulate(recordReward.begin(),recordReward.end(),0.0) / static_cast<double>(recordReward.size());
+			double averageStep = std::accumulate(recordStep.begin(),recordStep.end(),0.0) / static_cast<double>(recordStep.size());
 			recordReward.clear();
-			std::cout<<"epoch: "<<iEp-100<<" to "<<this->_maxEpTraining<<", average reward: "<<averageReward<<", exploration: "<<exploRate<<std::endl;  
+			std::cout<<"epoch: "<<iEp-100<<" to "<<this->_maxEpTraining<<", average reward: "<<averageReward<<", average steps: "<<averageStep<<", exploration: "<<exploRate<<std::endl;
+			// if (averageReward > 25)
+			// 	break ;
 		}
 	}
+	this->_QNet->printNetworkToJson("weights.json");
 	return ;
 }
 
-// void	Agent::test( void ) {
+void	Agent::test( void ) {
 	
-// 	for (int iAct = 0; iAct < this->_maxActions; iAct++) {
-// 		t_exp	experience;
-// 		experience.state = this->_env->_state;
-// 		auto	output = this->_QNet->feedForward(this->_env->_state);
-// 		experience.action = std::distance(output->begin(), std::max_element(output->begin(), output->end()));
-// 		this->_env->action(&experience);
-// 		this->_env->_state = experience.nextState;
-// 		if (experience.done)
-// 			break ;
-// 		delete output;
-// 	}
-// 	if (this->_env->_myMap[this->_env->getUIntState(this->_env->_state)] == 'G')
-// 		std::cout << "=== SUCESS ===" << std::endl;
-// 	else
-// 		std::cout << "=== FAIL ===" << std::endl;
-// 	return ;
-// }
+	std::array<double,6>	prevState = this->_env->getState();
+	for (int iAct = 0; iAct < this->_maxActions; iAct++) {
+		t_exp	experience;
+		experience.state = this->_env->getState();
+		this->getAction(&experience, 0.0);
+		this->_env->action(&experience);
+    	this->_env->displayState(experience.state, prevState);
+		prevState = experience.state;
+		if (experience.done)
+			break ;
+	}
+	return ;
+}
 
 
 void	Agent::batchTrain(unsigned int const batchSize) {

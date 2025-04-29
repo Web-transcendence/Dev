@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Environment.class.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:41:48 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/28 18:00:55 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/29 14:32:12 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ public:
 private:
 
 	void	moovePaddle(int const action);
+	void	moovelPaddle(void);
 	void	mooveBall(t_exp * exp);
 
 	void	norAngle(void);

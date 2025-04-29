@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Environment.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/29 01:11:22 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/29 16:37:31 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,8 @@ void	Environment::moovePaddle(int const action) {
 	else if (action == 1)
 		this->rPaddle.y += this->rPaddle.s;
 	
-	this->lPaddle.y += (this->randDouble() > 0.5 ? 1 : -1) * this->lPaddle.s * 0.5;
+	this->moovelPaddle();
+	// this->lPaddle.y += (this->randDouble() > 0.5 ? 1 : -1) * this->lPaddle.s * 0.5;
 	
 	if (this->rPaddle.y < 0.5 * this->rPaddle.h)
 		this->rPaddle.y = 0.5 * this->rPaddle.h;
@@ -59,6 +60,27 @@ void	Environment::moovePaddle(int const action) {
 	else if (this->lPaddle.y > HEIGHT - this->lPaddle.h * 0.5)
 		this->lPaddle.y = HEIGHT - 0.5 * this->lPaddle.h;
 	return ;
+}
+
+void	Environment::moovelPaddle( void ) {
+	// Distance entre la position actuelle du centre de la raquette et la balle
+	double diff = ball.y - lPaddle.y;
+
+	// Seuil pour éviter les micro-ajustements
+	double tolerance = 10.0;
+
+	if (std::abs(diff) > tolerance) {
+		double direction = (diff > 0) ? 1.0 : -1.0;
+
+		// Mouvement avec une vitesse légèrement réduite pour rester battable
+		lPaddle.y += direction * lPaddle.s * 0.7;
+
+		// Clip aux bords
+		// if (lPaddle.y < 0.5 * lPaddle.h)
+		// 	lPaddle.y = 0.5 * lPaddle.h;
+		// else if (lPaddle.y > HEIGHT - 0.5 * lPaddle.h)
+		// 	lPaddle.y = HEIGHT - 0.5 * lPaddle.h;
+	}
 }
 
 void	Environment::mooveBall(t_exp * exp) {
@@ -75,7 +97,7 @@ void	Environment::mooveBall(t_exp * exp) {
         bounceAngle(rPaddle, "right");
         ball.x = oldX + cos(ball.a) * (sqrt(pow(ball.y - oldY, 2) + pow(ball.x - oldX, 2)));
         ball.y = oldY + sin(ball.a) * (sqrt(pow(ball.y - oldY, 2) + pow(ball.x - oldX, 2)));
-        // exp->reward += 0.25;
+        exp->reward = 1.;
     } else if (collision == 2) {
         oldY =  oldY - tan(ball.a) * (lPaddle.x + (0.5 * lPaddle.w) - oldX);
         oldX = lPaddle.x + (0.5 * lPaddle.w);
@@ -85,12 +107,11 @@ void	Environment::mooveBall(t_exp * exp) {
     }
     if (ball.x > WIDTH) {
         exp->done = true;
-        // exp->reward += -1.;
 		return ;
     }
     else if (ball.x < 0) {
         exp->done = true;
-        exp->reward = 1.;
+        exp->reward = 20.;
 		return ;
     }
     // if (ball.x > WIDTH) {
@@ -145,7 +166,7 @@ int		Environment::checkCollision(double oldX, double oldY) {
 
 void	Environment::bounceAngle(t_paddle & paddle, std::string const & side) {
     double const ratio = (ball.y - paddle.y) / (paddle.h / 2);
-    ball.s = ball.is + 0.5 * ball.is * abs(ratio);
+    ball.s = ball.is + 0.5 * ball.is * std::abs(ratio);
     ball.a = M_PI * 0.25 * ratio;
     if (side == "right")
         ball.a = M_PI - ball.a;

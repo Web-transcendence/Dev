@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Network.class.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 12:24:10 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/29 14:24:06 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ private:
     void    updateNabla_b( void );
 
     int const                   _num_layers;
-    std::vector<unsigned int>&  _sizes;
+    std::vector<unsigned int>	_sizes;
     std::vector<Layer*>         _layers;
 
 friend class Agent;
