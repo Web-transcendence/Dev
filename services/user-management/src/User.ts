@@ -1,20 +1,14 @@
 import Database from "better-sqlite3"
 import bcrypt from "bcrypt"
 import jwt from 'jsonwebtoken'
-import {connectedUsers, tournamentSessions} from "./api.js"
+import {connectedUsers} from "./api.js"
 import speakeasy, {GeneratedSecret} from "speakeasy"
 import QRCode from "qrcode"
-import {tournament} from "./tournament.js"
 import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
 
-type FriendList = {
-    acceptedNickName: string[];
-    pendingNickName: string[];
-    receivedNickName: string[];
-};
 
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
@@ -29,16 +23,6 @@ Client_db.exec(`
     )
 `)
 
-Client_db.exec(`
-    CREATE TABLE IF NOT EXISTS FriendList (
-        userA_id INTEGER NOT NULL,
-        userB_id INTEGER NOT NULL,
-        status TEXT check(status IN ('pending', 'accepted')) DEFAULT ('pending'),
-        PRIMARY KEY (userA_id, userB_id),
-        FOREIGN KEY (userA_id) REFERENCES Client(id) ON DELETE CASCADE,
-        FOREIGN KEY (userB_id) REFERENCES Client(id) ON DELETE CASCADE
-    )
-`)
 
 export class User {
     id: number
@@ -50,12 +34,7 @@ export class User {
         }
     }
 
-    static getIdbyNickName(nickName: string): number {
-        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined
-        if (!userData)
-            throw new DataBaseError(`id not found for nickName: ${nickName}`, `This nickname doesn't exist`, 404)
-        return userData.id
-    }
+
 
     /**
      * check if nickName and email aren't in the db, hash the password
@@ -207,81 +186,20 @@ export class User {
      * @param nickName
      * @return a status for the client
      */
-    addFriend(nickName: string): string {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined
-        if (!friendId)
-            throw new DataBaseError(`id not found for this friend nickName: ${nickName}`, `This nickname doesn't exist`, 404)
 
-        const checkStatus = Client_db.prepare("SELECT status FROM FriendList WHERE userA_id = ? AND userB_id = ?").get(friendId.id, this.id) as {status: string}
-        if (checkStatus?.status == 'accepted')
-            throw new ConflictError(`This friend is already in friendList`, `This nickname is already in your friendlist`)
 
-        else if (checkStatus?.status == 'pending') {
-            Client_db.prepare(`UPDATE FriendList SET status = 'accepted' WHERE userA_id = ? AND userB_id = ?`).run(friendId.id, this.id)
-            return `Friend invitation accepted`
-        }
-
-        const res = Client_db.prepare(`INSERT OR IGNORE INTO FriendList (userA_id, userB_id, status) VALUES (?, ?, ?)`).run(this.id, friendId.id, 'pending')
-        if (res.changes === 0)
-            throw new ConflictError(`Friend invitation already sent`, `You already send an invitation to this nickname`)
-        this.notifyUser(nickName, 'friendInvitation');
-        return `Friend invitation sent successfully`
+    static getIdbyNickName(nickName: string): number {
+        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined
+        if (!userData)
+            throw new DataBaseError(`id not found for nickName: ${nickName}`, `This nickname doesn't exist`, 404)
+        return userData.id
     }
-
-    /**
-     * recover the id of the client, remove it. if there wasn't friend nothing happens (checkstatus.changes set to 0)
-     *
-     * @param nickName
-     */
-    removeFriend(nickName: string) {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined
-        if (!friendId)
-            throw new DataBaseError(`id not found for this friend nickName: ${nickName}`, `This nickname isn't in your friendlist`, 404)
-
-        const checkStatus = Client_db.prepare("DELETE FROM FriendList WHERE (userA_id = ? AND userB_id = ?) OR (userB_id = ? AND userA_id = ?)").run(friendId.id, this.id, friendId.id, this.id)
-        if (!checkStatus.changes)
-            throw new ConflictError(`This user isn't in your friendList`, `internal error system`)
-    }
-
-    /**
-     * recover friend by status:
-     *      - accepted when each of them accepted the friendship
-     *      - pending when the user is waiting the friend to accept
-     *      - received when the user received an invitation by another user and he didn't accept yet
-     *
-     * @return an object with three array of id. One for each type of friend.
-     */
-        getFriendList(): FriendList {
-            this.logConnectedUser()
-
-            const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[]
-            const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[]
-            const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[]
-
-            const acceptedIds = accepted.map(row => row.userA_id ?? row.userB_id).filter(id => id !== undefined)
-            const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined)
-            const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined)
-
-            const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row))
-            const pendingNickName = pendingIds.map(row => this.getNickNameById(row))
-            const receivedNickName = receivedIds.map(row => this.getNickNameById(row))
-
-
-            return {acceptedNickName, pendingNickName, receivedNickName}
-        }
 
     getNickNameById(id: number): string {
         const userData = Client_db.prepare("SELECT nickName FROM Client WHERE id = ?").get(id) as {nickName: string} | undefined
         if (!userData)
             throw new DataBaseError(`nickName not found for id ${id}`, 'internal error system', 500)
         return (userData.nickName)
-    }
-
-    getActualTournament(): tournament | null {
-        for (const [id, tournament] of tournamentSessions)
-            if (tournament.hasParticipant(this.id))
-                return tournament
-        return null
     }
 
     notifyUser(nickName: string, event: string): void {

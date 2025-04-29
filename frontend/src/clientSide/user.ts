@@ -61,53 +61,53 @@ export function login(button: HTMLElement): void {
 }
 
 export interface Person {
-    name: string
+    id: number,
     // email: string
     imageUrl: string
 }
 
 type FriendList = {
-    acceptedNickName: string[]
-    pendingNickName: string[]
-    receivedNickName: string[]
+    acceptedIds: number[]
+    pendingIds: number[]
+    receivedIds: number[]
 }
 
 export async function friendList() {
     try {
         const friendlist = await getFriendList() as FriendList
         const noFriend = document.getElementById("noFriend") as HTMLHeadingElement
-        if (!friendlist || !friendlist.receivedNickName.length) {
+        // if (!friendlist || !friendlist.receivedNickName.length) {
+        //     if (noFriend)
+        //         noFriend.classList.remove("hidden")
+        // } else {
+        //     const receivedPeople: Person[] = friendlist.receivedNickName.map(nickname => ({
+        //         name: nickname,
+        //         imageUrl: '../images/login.png'
+        //     }))
+        //     const receivedList = document.getElementById("receivedList")
+        //     const receivedTemplate = document.getElementById("receivedTemplate") as HTMLTemplateElement
+        //
+        //     if (receivedList && receivedTemplate) {
+        //         receivedList.innerHTML = ''
+        //         receivedPeople.forEach(person => {
+        //             const clone = receivedTemplate.content.cloneNode(true) as HTMLElement
+        //             const img = clone.querySelector("img")!
+        //             const name = clone.querySelector(".name")!
+        //
+        //             img.src = person.imageUrl
+        //             img.alt = person.name
+        //             name.textContent = person.name
+        //
+        //             receivedList.appendChild(clone)
+        //         })
+        //     }
+        // }
+        if (!friendlist || !friendlist.pendingIds.length) {
             if (noFriend)
                 noFriend.classList.remove("hidden")
         } else {
-            const receivedPeople: Person[] = friendlist.receivedNickName.map(nickname => ({
-                name: nickname,
-                imageUrl: '../images/login.png'
-            }))
-            const receivedList = document.getElementById("receivedList")
-            const receivedTemplate = document.getElementById("receivedTemplate") as HTMLTemplateElement
-
-            if (receivedList && receivedTemplate) {
-                receivedList.innerHTML = ''
-                receivedPeople.forEach(person => {
-                    const clone = receivedTemplate.content.cloneNode(true) as HTMLElement
-                    const img = clone.querySelector("img")!
-                    const name = clone.querySelector(".name")!
-
-                    img.src = person.imageUrl
-                    img.alt = person.name
-                    name.textContent = person.name
-
-                    receivedList.appendChild(clone)
-                })
-            }
-        }
-        if (!friendlist || !friendlist.pendingNickName.length) {
-            if (noFriend)
-                noFriend.classList.remove("hidden")
-        } else {
-            const requestPeople: Person[] = friendlist.pendingNickName.map(nickname => ({
-                name: nickname,
+            const requestPeople: Person[] = friendlist.pendingIds.map(id => ({
+                id: id,
                 imageUrl: '../images/login.png'
             }))
             const requestList = document.getElementById("requestList")
@@ -121,39 +121,38 @@ export async function friendList() {
                     const name = clone.querySelector(".name")!
 
                     img.src = person.imageUrl
-                    img.alt = person.name
-                    name.textContent = person.name
+                    name.textContent = person.id.toString()
 
                     requestList.appendChild(clone)
                 })
             }
         }
-        if (!friendlist || !friendlist.acceptedNickName.length) {
-            if (noFriend)
-                noFriend.classList.remove("hidden")
-        } else {
-            const acceptedPeople: Person[] = friendlist.acceptedNickName.map(nickname => ({
-                name: nickname,
-                imageUrl: '../images/login.png'
-            }))
-            const acceptedList = document.getElementById("acceptedList")
-            const acceptedTemplate = document.getElementById("acceptedTemplate") as HTMLTemplateElement
-
-            if (acceptedList && acceptedTemplate) {
-                acceptedList.innerHTML = ''
-                acceptedPeople.forEach(person => {
-                    const clone = acceptedTemplate.content.cloneNode(true) as HTMLElement
-                    const img = clone.querySelector("img")!
-                    const name = clone.querySelector(".name")!
-
-                    img.src = person.imageUrl
-                    img.alt = person.name
-                    name.textContent = person.name
-
-                    acceptedList.appendChild(clone)
-                })
-            }
-        }
+        // if (!friendlist || !friendlist.acceptedNickName.length) {
+        //     if (noFriend)
+        //         noFriend.classList.remove("hidden")
+        // } else {
+        //     const acceptedPeople: Person[] = friendlist.acceptedNickName.map(nickname => ({
+        //         name: nickname,
+        //         imageUrl: '../images/login.png'
+        //     }))
+        //     const acceptedList = document.getElementById("acceptedList")
+        //     const acceptedTemplate = document.getElementById("acceptedTemplate") as HTMLTemplateElement
+        //
+        //     if (acceptedList && acceptedTemplate) {
+        //         acceptedList.innerHTML = ''
+        //         acceptedPeople.forEach(person => {
+        //             const clone = acceptedTemplate.content.cloneNode(true) as HTMLElement
+        //             const img = clone.querySelector("img")!
+        //             const name = clone.querySelector(".name")!
+        //
+        //             img.src = person.imageUrl
+        //             img.alt = person.name
+        //             name.textContent = person.name
+        //
+        //             acceptedList.appendChild(clone)
+        //         })
+        //     }
+        // }
     } catch (err) {
         console.error("Erreur dans friendList():", err)
     }
@@ -236,7 +235,7 @@ export async function verify2fa(secret: string) {
 export async function addFriend(friendNickName: string) {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`/user-management/addFriend`, {
+        const response = await fetch(`/social/add`, {
            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -263,7 +262,7 @@ export async function addFriend(friendNickName: string) {
 export async function removeFriend(friendNickName: string): Promise<boolean> {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`/user-management/removeFriend`, {
+        const response = await fetch(`/social/remove`, {
         method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -287,7 +286,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
 export async function getFriendList(): Promise<FriendList | undefined> {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:4000/user-management/friendList`, {
+        const response = await fetch(`/social/List`, {
            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -321,7 +320,7 @@ export async function setAvatar(target: HTMLInputElement) {
             const base64File: string = await toBase64(file) as string
 
             const token = localStorage.getItem('token')
-            const response = await fetch(`https://${window.location.hostname}:4000/user-management/updatePicture`, {
+            const response = await fetch(`/user-management/updatePicture`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -355,7 +354,7 @@ export async function getAvatar() {
         }
 
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:4000/user-management/getPicture`, {
+        const response = await fetch(`/user-management/getPicture`, {
            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -392,7 +391,7 @@ export const updateAvatar = (id: string, src: string) => {
 export async function joinTournament() {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:4000/user-management/joinTournament`, {
+        const response = await fetch(`/tournament/join`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -412,7 +411,7 @@ export async function joinTournament() {
 export async function getTournamentList(): Promise<string[] | undefined> {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:4000/user-management/getTournamentLis`, {
+        const response = await fetch(`/tournament/getList`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -433,7 +432,7 @@ export async function getTournamentList(): Promise<string[] | undefined> {
 export async function launchTournament() {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:4000/user-management/launchTournament`, {
+        const response = await fetch(`/tournament/launch`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

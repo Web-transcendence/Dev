@@ -35,10 +35,10 @@ export class tournament {
         this.participantId.push(participantId)
     }
 
-    getData(): {maxPlayer: number, participantCount: number, status: string} {
+    getData(): {participants: number[], maxPlayer: number, status: string} {
         return {
+            participants: this.participantId,
             maxPlayer: this.maxPlayer,
-            participantCount: this.participantId.length,
             status: this.status,
         }
     }

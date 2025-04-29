@@ -77,6 +77,20 @@ app.register(httpProxy, {
     preHandler: authentificate
 });
 
+app.register(httpProxy, {
+    upstream: 'http://social:6000',
+    prefix: '/social',
+    http2: false,
+    preHandler: authentificate
+});
+
+app.register(httpProxy, {
+    upstream: 'http://tournament:6000',
+    prefix: '/tournament',
+    http2: false,
+    preHandler: authentificate
+});
+
 app.register(async function (instance) {
     instance.register(fastifyStatic, {
         root: join(import.meta.dirname, env.TRANS_ASSETS_PATH),
