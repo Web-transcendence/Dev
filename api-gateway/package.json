@@ -3,8 +3,8 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "start": "tsx ./src/api.ts",
-    "dev": "tsx watch --include \"./src/*\" src/api.ts"
+    "start": "tsx ../frontend/src/serverSide/api.ts",
+    "dev": "tsx watch --include \"./src/*\" ../frontend/src/serverSide/api.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.0.0",

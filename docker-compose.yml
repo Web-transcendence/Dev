@@ -1,22 +1,22 @@
 services:
 
-  api-gateway:
-    container_name: api-gateway
-    build:
-      context: api-gateway/
-    networks:
-      - transcendence
-    ports:
-      - "3000:3000"         #DEV
-    restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ./api-gateway/src/
-          target: /app/src/
-        - action: rebuild
-          path: ./api-gateway/package.json
-          target: app/
+#  api-gateway:
+#    container_name: api-gateway
+#    build:
+#      context: api-gateway/
+#    networks:
+#      - transcendence
+#    ports:
+#      - "3000:3000"         #DEV
+#    restart: unless-stopped
+#    develop:
+#      watch:
+#        - action: sync
+#          path: ./api-gateway/src/
+#          target: /app/src/
+#        - action: rebuild
+#          path: ./api-gateway/package.json
+#          target: app/
 
 
   frontend:
@@ -27,8 +27,8 @@ services:
       - transcendence
     ports:
       - "4000:4000"
-    depends_on:
-      - api-gateway
+#    depends_on:
+#      - api-gateway
     restart: unless-stopped
     develop:
       watch:
@@ -52,8 +52,8 @@ services:
       - transcendence
     ports:
       - "5000:5000"         #DEV
-    depends_on:
-      - api-gateway
+#    depends_on:
+#      - api-gateway
     restart: unless-stopped
     develop:
       watch:

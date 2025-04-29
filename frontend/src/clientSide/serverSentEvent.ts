@@ -3,7 +3,7 @@
 
 
 export async function sseConnection(token: string) {
-    const res = await fetch(`https://${window.location.pathname}:3000/user-management/sse`, {
+    const res = await fetch(`/user-management/sse`, {
         method: 'GET',
         headers: {
             'Content-Type': 'text/event-stream',

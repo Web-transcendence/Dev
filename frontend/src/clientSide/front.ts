@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function checkForTocken(): Promise<boolean>  {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`https://${window.location.hostname}:3000/authJWT`, {
+        const response = await fetch(`/authJWT`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export function handleConnection(input: boolean) {
 // @ts-ignore
 window.CredentialResponse = async (credit: { credential: string }) => {
     try {
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/auth/google`, {
+        const response = await fetch(`/user-management/auth/google`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
