@@ -100,8 +100,8 @@ export async function routes(fastify: FastifyInstance) {
         const tag = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(tag);
     })
-    fastify.get('/part/pong', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "pong.html");
+    fastify.get('/part/pongRemote', function (req, reply) {
+        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "pongRemote.html");
         const tag = readFileSync(frontPath, 'utf8');
         reply.type('text/html').send(tag);
     })

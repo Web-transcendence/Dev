@@ -116,5 +116,5 @@ function factor() {
 }
 
 function pongMode() {
-    document.getElementById("pong")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
+    document.getElementById("pongRemote")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongRemote"));
 }

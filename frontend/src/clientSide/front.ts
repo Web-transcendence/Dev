@@ -2,6 +2,7 @@ import {getAvatar} from './user.js'
 import {loadPart} from './insert.js';
 
 declare const tsParticles: any;
+declare const AOS: any;
 
 export let connected = false;
 
@@ -12,6 +13,11 @@ window.addEventListener("popstate", () => {
 
 document.addEventListener("DOMContentLoaded", async () => {
     constantButton(); // Constant button on the Single Page Application
+    // animate slides on scroll
+    AOS.init({
+        once: true,
+        duration: 800,
+    });
     // For Client Connection
     if (await checkForToken()) {
         await getAvatar();

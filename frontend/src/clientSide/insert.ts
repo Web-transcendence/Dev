@@ -75,7 +75,7 @@ export function activateGoogle(page: string) {
 
 export function insertScript(page: string): void {
     const scripts: Record<string, string> = {
-        "/pong": "/static/dist/pong.js",
+        "/pongRemote": "/static/dist/pong.js",
         "/tower": "/static/dist/td.js",
     };
 
