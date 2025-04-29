@@ -1,0 +1,22 @@
+{
+  "name": "user-management",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "tsx ./src/api.ts",
+    "dev": "tsx watch --include \"./src/*\" ./src/api.ts"
+  },
+  "dependencies": {
+    "fastify": "^5.2.1",
+    "node-fetch": "^3.3.2",
+    "sanitize-html": "^2.14.0",
+    "undici": "^7.8.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@types/sanitize-html": "^2.13.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

@@ -81,6 +81,42 @@ services:
           path: ./services/tower-defense/package.json
           target: app/
 
+  social:
+    container_name: social
+    build:
+      context: services/social/
+    networks:
+      - transcendence
+    ports:
+      - "6000:6000"
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/social/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/social/package.json
+          target: app/
+
+  tournament:
+    container_name: tournament
+    build:
+      context: services/tournament/
+    networks:
+      - transcendence
+    ports:
+      - "7000:7000"
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/tournament/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/tournament/package.json
+          target: app/
+
 #  ai-opponent:
 #    container_name: ai-opponent
 #    build:

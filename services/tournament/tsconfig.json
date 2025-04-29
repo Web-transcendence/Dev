@@ -9,6 +9,7 @@
     "skipLibCheck": true,
     "outDir": "dist",
     "moduleResolution": "nodenext",
-    "lib": ["ESNext"]
+    "lib": ["ESNext"],
+    "types": ["node", "undici"]
   },
 }
