@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 const fastify = Fastify({ logger: true });
 const inputSchema = z.object({ player: z.number(), button: z.number() });
 const towerSchema = z.object({ t1: z.number(), t2: z.number(), t3: z.number(), t4: z.number(), t5: z.number() });
-
+const initSchema = z.object({ nick: z.string(), room: z.number() });
 class Game {
     level: number = 0;
     timer: Timer;
@@ -71,7 +71,7 @@ class Timer {
 }
 
 class Player {
-    id: number;
+    name: string;
     ws: WebSocket;
     hp: number = 3;
     mana: number = 180;
@@ -80,8 +80,8 @@ class Player {
     deck: Tower[] = [];
     board: Board[] = [];
     bullets: Bullet[] = [];
-    constructor(id: number, ws: WebSocket) {
-        this.id = id;
+    constructor(name: string, ws: WebSocket) {
+        this.name = name;
         this.ws = ws;
         for (let i = 0; i < 5; i++) {
             this.deck.push(allTowers[i].clone());
@@ -101,7 +101,7 @@ class Player {
     }
     spawnTower() {
         if (this.mana < this.cost || this.board.length >= 20) {
-            console.log(`${this.id}: Mana insufficient or board full`);
+            console.log(`${this.name}: Mana insufficient or board full`);
             return ;
         }
         this.mana -= this.cost;
@@ -116,7 +116,7 @@ class Player {
         const newTower = this.deck[type].clone();
         newTower.startAttack(this, pos);
         this.board.push(new Board(pos, newTower));
-        console.log(`${this.id}: Tower ${this.deck[type].type} spawned at position ${pos}`);
+        console.log(`${this.name}: Tower ${this.deck[type].type} spawned at position ${pos}`);
     }
     upTowerRank(tower: number) {
         if (this.mana >= 100 * Math.pow(2, this.deck[tower].level) && this.deck[tower].level < 4) {
@@ -125,7 +125,7 @@ class Player {
         }
     }
     toJSON() {
-        return {class: "Player", id: this.id, hp: this.hp, mana: this.mana, cost: this.cost, enemies: this.enemies, deck: this.deck, board: this.board, bullets: this.bullets};
+        return {class: "Player", name: this.name, hp: this.hp, mana: this.mana, cost: this.cost, enemies: this.enemies, deck: this.deck, board: this.board, bullets: this.bullets};
     }
 }
 
@@ -437,40 +437,58 @@ function checkRoom(room: RoomTd, intervalId: ReturnType<typeof setInterval>, gam
         game.state = 2;
         clearInterval(intervalId);
         room.players.forEach(player => {
-            player.ws.send(JSON.stringify({ class: "Disconnected" }))
+            player.ws.send(JSON.stringify({ class: "Disconnected" }));
+            player.ws.close();
         });
         return ;
     }
     setTimeout(() => checkRoom(room, intervalId, game), 100);
 }
 
-function leaveRoom(userId: number) {
+function leaveRoom(socket: WebSocket) {
     for (let i = 0 ; i < roomsTd.length; i++) {
         for (let j = 0; j < roomsTd[i].players.length; j++) {
-            if (roomsTd[i].players[j].id === userId) {
+            if (roomsTd[i].players[j].ws === socket) {
+                console.log("player: ", roomsTd[i].players[j].name, " left room ", roomsTd[i].id);
                 roomsTd[i].players.splice(j, 1);
-                console.log("player id: ", userId, " left room ", roomsTd[i].id);
+                if (roomsTd[i].players.length === 0) {
+                    roomsTd.splice(i, 1);
+                }
                 return ;
             }
         }
     }
-    console.log("Player has not joined a room yet.")
+    console.log("Player has not joined a room yet.");
 }
 
-function joinRoomTd(player: Player) {
+function joinRoomTd(player: Player, roomId: number) {
     let id: number = -1;
     let i : number = 0;
-    for (; i < roomsTd.length; i++) {
-        if (roomsTd[i].players.length === 1) {
-            roomsTd[i].players.push(player);
-            id = roomsTd[i].id;
-            break ;
+    if (roomId !== -1) { // Joining a defined room (invite or tournaments)
+        for (; i < roomsTd.length; i++) {
+            if (roomsTd[i].id === roomId && roomsTd[i].players.length === 1) {
+                roomsTd[i].players.push(player);
+                break;
+            }
         }
-    }
-    if (id === -1) {
-        let room = new RoomTd(roomsTd.length, player);
-        roomsTd.push(room);
-        return ;
+        if (id === -1) {
+            let room = new RoomTd(roomId, player);
+            roomsTd.push(room);
+            return;
+        }
+    } else { // Basic random matchmaking
+        for (; i < roomsTd.length; i++) {
+            if (roomsTd[i].players.length === 1) {
+                roomsTd[i].players.push(player);
+                id = roomsTd[i].id;
+                break;
+            }
+        }
+        if (id === -1) {
+            let room = new RoomTd(roomsTd.length, player);
+            roomsTd.push(room);
+            return;
+        }
     }
     let game = new Game(new Timer(0, 4));
     const intervalId = setInterval(() => {
@@ -500,15 +518,25 @@ fastify.register(fastifyWebsocket);
 fastify.register(async function (fastify) {
     fastify.get('/ws', {websocket: true}, (socket, req) => {
         console.log("Client connected");
-        const userId = generateId();
-        socket.send(JSON.stringify({class: "id", id: userId}));
-        let player = new Player(userId, socket);
+        let init = false;
+        let room: number = -1;
+        let player = new Player("Default", socket);
         allTowers.forEach((tower: Tower) => {
             socket.send(JSON.stringify(tower));
         });
         socket.on("message", (message) => {
             const msg = JSON.parse(message.toString());
-            if (msg.event === "click" || msg.event === "keyDown") {
+            if (!init && msg.event === "socketInit") {
+                const {data, success, error} = initSchema.safeParse(JSON.parse(message.toString()));
+                if (!success || !data) {
+                    console.log(error);
+                    return;
+                }
+                player.name = data.nick;
+                if (data.room)
+                    room = data.room;
+                init = true;
+            } else if (init && msg.event === "click" || msg.event === "keyDown") {
                 const {data, success, error} = inputSchema.safeParse(msg);
                 if (!success || !data) {
                     console.log(error);
@@ -531,7 +559,7 @@ fastify.register(async function (fastify) {
                     default:
                         break;
                 }
-            } else if (msg.event === "towerInit") {
+            } else if (init && msg.event === "towerInit") {
                 const {data, success, error} = towerSchema.safeParse(JSON.parse(message.toString()));
                 if (!success || !data) {
                     console.log(error);
@@ -543,12 +571,12 @@ fastify.register(async function (fastify) {
                 player.deck.push(allTowers[data.t3].clone());
                 player.deck.push(allTowers[data.t4].clone());
                 player.deck.push(allTowers[data.t5].clone());
-                joinRoomTd(player);
+                joinRoomTd(player, room);
             }
         });
 
         socket.on("close", () => {
-            leaveRoom(userId);
+            leaveRoom(socket);
             console.log("Client disconnected");
         });
     });
