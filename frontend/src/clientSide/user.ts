@@ -7,7 +7,7 @@ export function register(button: HTMLElement): void {
         const myForm = document.getElementById("myForm") as HTMLFormElement
         const formData = new FormData(myForm)
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>)
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/register`, {
+        const response = await fetch(`/user-management/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export function login(button: HTMLElement): void {
         const myForm = document.getElementById("myForm") as HTMLFormElement
         const formData = new FormData(myForm)
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>)
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/login`, {
+        const response = await fetch(`/user-management/login`, {
            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -166,7 +166,7 @@ export async function profile(nickName: HTMLElement, email: HTMLElement) {
             console.error('token missing')
             return
         }
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/getProfile`, {
+        const response = await fetch(`/user-management/getProfile`, {
         method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ export async function init2fa() {
             console.error('token missing')
             return
         }
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/2faInit`, {
+        const response = await fetch(`/user-management/2faInit`, {
            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ export async function init2fa() {
 export async function verify2fa(secret: string) {
     try {
         const nickName = localStorage.getItem('nickName')
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/2faVerify`, {
+        const response = await fetch(`/user-management/2faVerify`, {
         method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -236,7 +236,7 @@ export async function verify2fa(secret: string) {
 export async function addFriend(friendNickName: string) {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/addFriend`, {
+        const response = await fetch(`/user-management/addFriend`, {
            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -263,7 +263,7 @@ export async function addFriend(friendNickName: string) {
 export async function removeFriend(friendNickName: string): Promise<boolean> {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/removeFriend`, {
+        const response = await fetch(`/user-management/removeFriend`, {
         method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -287,7 +287,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
 export async function getFriendList(): Promise<FriendList | undefined> {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/friendList`, {
+        const response = await fetch(`https://${window.location.hostname}:4000/user-management/friendList`, {
            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -321,7 +321,7 @@ export async function setAvatar(target: HTMLInputElement) {
             const base64File: string = await toBase64(file) as string
 
             const token = localStorage.getItem('token')
-            const response = await fetch(`https://${window.location.hostname}:3000/user-management/updatePicture`, {
+            const response = await fetch(`https://${window.location.hostname}:4000/user-management/updatePicture`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -355,7 +355,7 @@ export async function getAvatar() {
         }
 
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/getPicture`, {
+        const response = await fetch(`https://${window.location.hostname}:4000/user-management/getPicture`, {
            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -392,7 +392,7 @@ export const updateAvatar = (id: string, src: string) => {
 export async function joinTournament() {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/joinTournament`, {
+        const response = await fetch(`https://${window.location.hostname}:4000/user-management/joinTournament`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -412,7 +412,7 @@ export async function joinTournament() {
 export async function getTournamentList(): Promise<string[] | undefined> {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/getTournamentLis`, {
+        const response = await fetch(`https://${window.location.hostname}:4000/user-management/getTournamentLis`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -433,7 +433,7 @@ export async function getTournamentList(): Promise<string[] | undefined> {
 export async function launchTournament() {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:3000/user-management/launchTournament`, {
+        const response = await fetch(`https://${window.location.hostname}:4000/user-management/launchTournament`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
