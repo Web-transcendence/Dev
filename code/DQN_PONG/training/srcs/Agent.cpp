@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/28 02:10:05 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/28 22:07:45 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,9 +69,9 @@ void	Agent::train( void ) {
 		if (exploRate - this->_explorationDecay > 0.0001)
 			exploRate -= this->_explorationDecay;
 		recordReward.push_back(totalReward);
-		this->_QNet->displayProgress(iEp % 100, 100);
-		if (!(iEp % 100) && iEp) {
-			double averageReward = std::accumulate(recordReward.begin(),recordReward.end(),0.0) / recordReward.size();
+		this->_QNet->displayProgress(iEp % 10, 10);
+		if (!(iEp % 10) && iEp) {
+			double averageReward = std::accumulate(recordReward.begin(),recordReward.end(),0.0) / static_cast<double>(recordReward.size());
 			recordReward.clear();
 			std::cout<<"epoch: "<<iEp-100<<" to "<<this->_maxEpTraining<<", average reward: "<<averageReward<<", exploration: "<<exploRate<<std::endl;  
 		}

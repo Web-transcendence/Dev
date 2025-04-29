@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/28 02:13:24 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/29 01:11:22 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,11 @@
 
 #include "TypeDefinition.hpp"
 #include "Math.namespace.hpp"
+#include <cmath>
 #include <random>
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
-#include <cmath>
 
 Environment::Environment(unsigned int const maxStep) : \
 	ball(std::array<double, 6>{WIDTH/2,HEIGHT,2,0,10,10}), \
@@ -30,16 +31,20 @@ Environment::Environment(unsigned int const maxStep) : \
 Environment::~Environment( void ) {}
 
 void	Environment::action(t_exp * exp) {
-	this->moovePaddle(exp->action);
-	this->mooveBall(exp);
+    int const   timeStamp = 5;
+    for (int lap = 0; lap < timeStamp && !exp->done; lap++) {
+        this->moovePaddle(exp->action);
+        this->mooveBall(exp);
+    }
+    // this->displayState(exp->state, exp->prevState);
 	exp->nextState = this->getState();
 	return ;
 }
 
 void	Environment::moovePaddle(int const action) {
-	if (action)
+	if (action == 0)
 		this->rPaddle.y -= this->rPaddle.s;
-	else if (action)
+	else if (action == 1)
 		this->rPaddle.y += this->rPaddle.s;
 	
 	this->lPaddle.y += (this->randDouble() > 0.5 ? 1 : -1) * this->lPaddle.s * 0.5;
@@ -70,6 +75,7 @@ void	Environment::mooveBall(t_exp * exp) {
         bounceAngle(rPaddle, "right");
         ball.x = oldX + cos(ball.a) * (sqrt(pow(ball.y - oldY, 2) + pow(ball.x - oldX, 2)));
         ball.y = oldY + sin(ball.a) * (sqrt(pow(ball.y - oldY, 2) + pow(ball.x - oldX, 2)));
+        // exp->reward += 0.25;
     } else if (collision == 2) {
         oldY =  oldY - tan(ball.a) * (lPaddle.x + (0.5 * lPaddle.w) - oldX);
         oldX = lPaddle.x + (0.5 * lPaddle.w);
@@ -79,7 +85,7 @@ void	Environment::mooveBall(t_exp * exp) {
     }
     if (ball.x > WIDTH) {
         exp->done = true;
-        exp->reward = -1.;
+        // exp->reward += -1.;
 		return ;
     }
     else if (ball.x < 0) {
@@ -90,9 +96,11 @@ void	Environment::mooveBall(t_exp * exp) {
     // if (ball.x > WIDTH) {
     //     ball.x = WIDTH - (ball.x - WIDTH);
     //     ball.a = M_PI - ball.a;
+    //     exp->reward = 0.;
     // } else if (ball.x < 0) {
     //     ball.x = -ball.x;
     //     ball.a = M_PI - ball.a;
+    //     exp->reward += 1.;
     // }
     if (ball.y > HEIGHT) {
         ball.y = HEIGHT - (ball.y - HEIGHT);
@@ -187,6 +195,10 @@ void	Environment::lineDrag(std::vector<std::vector<double>> & simulation, std::a
 	int				countValue = 0;
 	double			value = 1.;
 	while (diffX > 0) {
+        if (actxy[0] >= 60)
+            actxy[0] = 59;
+        if (actxy[0] < 0)
+            actxy[0] = 0;
 		simulation.at(actxy[1]).at(actxy[0]) = value;
 		if (countValue < valuePerRow) {
 			actxy[0] += direcX;
@@ -211,6 +223,36 @@ void	Environment::paddle(std::vector<std::vector<double>> & simulation, std::arr
 		--size;
 	}
 	return ;
+}
+
+void	Environment::displayState(std::array<double,6> const & act, std::array<double,6> const & old) {
+    auto        vec = std::vector<std::vector<double>>(HEIGHT/DS_R, std::vector<double>(WIDTH/DS_R));
+    const int   W = 60;
+
+	std::array<int, 2>	idx = {static_cast<int>(act[0]/DS_R), static_cast<int>(act[1]/DS_R)};
+	std::array<int, 2>	lastIdx = {static_cast<int>(old[0]/DS_R), static_cast<int>(old[1]/DS_R)};
+	lineDrag(vec, idx, lastIdx);
+	std::array<double, 4>	pCoord = {act[2], act[3], act[4], act[5]}; 
+	paddle(vec, std::array<int, 2>{static_cast<int>(pCoord[0]/DS_R), static_cast<int>(pCoord[1]/DS_R)});
+	paddle(vec, std::array<int, 2>{static_cast<int>(pCoord[2]/DS_R), static_cast<int>(pCoord[3]/DS_R)});
+	std::cout << "\033[H"; // remet le curseur en haut à gauche
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (i % W == 0 && i != 0)
+            std::cout << '\n';
+        std::cout << std::setw(3) << std::fixed << std::setprecision(1) << 0.0;
+    }
+    std::cout << "\033[H"; // remet le curseur en haut à gauche
+	for (auto it = vec.begin(); it != vec.end(); it++) {
+		for (auto it_in = (*it).begin(); it_in != (*it).end(); it_in++) {
+			if (*it_in != 0.)
+            	std::cout << "\033[31m"; // rouge
+        	else
+            	std::cout << "\033[0m";  // reset couleur
+        	std::cout << std::setw(3) << std::fixed << std::setprecision(1) << *it_in;
+		}
+		std::cout << '\n';
+	}
+    std::cout << "\033[0m" << std::flush; // reset couleur à la fin
 }
 
 int	Environment::randInt( void ) const {

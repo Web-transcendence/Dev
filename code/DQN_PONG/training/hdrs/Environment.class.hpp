@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:41:48 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/28 01:33:11 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/28 18:00:55 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,8 @@ private:
 
 	void	lineDrag(std::vector<std::vector<double>> & simulation, std::array<int, 2> actxy, std::array<int, 2> oldxy);
 	void	paddle(std::vector<std::vector<double>> & simulation, std::array<int, 2> pxy);
+
+	void	displayState(std::array<double,6> const & act, std::array<double,6> const & old);
 
 	int		randInt(void) const;
 	double	randDouble(void) const;
