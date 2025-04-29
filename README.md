@@ -36,7 +36,7 @@
 
 ◦ Major module: Introduce an AI Opponent.⬛
 
-~~◦ Minor module: User and Game Stats Dashboards⬛~~
+~~◦ Minor module: User and Game Stats Dashboards~~
 
 ### • Cybersecurity
 
