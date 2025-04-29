@@ -577,148 +577,147 @@ assetsTd.load().then(() => {
 
 // Communication with backend
 try {
-const socketTd = new WebSocket("http://localhost:2246/ws");
+    const socketTd = new WebSocket("http://localhost:2246/ws");
 
-socketTd.onopen = function () { return console.log("Connected to server"); };
+    socketTd.onopen = function () { return console.log("Connected to server"); };
 
-socketTd.onmessage = function (event) {
-    const data = JSON.parse(event.data);
-    let board: Board;
-    let i: number;
-    switch (data.class) {
-        case "Game":
-            gameTd.level = data.level;
-            gameTd.timer = data.timer;
-            gameTd.start = data.start;
-            if (data.state === 1 && gameTd.state === 0.5)
-                gameTd.state = 1;
-            if (data.state === 2)
-                gameTd.state = 2
-            gameTd.boss = data.boss;
-            break;
-        case "Player":
-            if (data.id === id) {
-                player1.hp = data.hp;
-                player1.mana = data.mana;
-                player1.cost = data.cost;
-                player1.enemies.splice(0, player1.enemies.length);
-                data.enemies.forEach((enemy: Enemy) => {
-                    if (enemy)
-                        player1.enemies.push(new Enemy(enemy.type, enemy.hp, enemy.pos));
-                });
-                player1.deck.splice(0, player1.deck.length);
-                data.deck.forEach((tower: Tower) => {
-                    player1.deck.push(new Tower(tower.type, tower.speed, tower.damages, tower.area, tower.effect, tower.level));
-                });
-                for (i = player1.board.length; i < data.board.length; i++) {
-                    board = data.board[i];
-                    player1.board.push(new Board(board.pos, new Tower(board.tower.type, board.tower.speed, board.tower.damages, board.tower.area, board.tower.effect, board.tower.level)));
+    socketTd.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        let board: Board;
+        let i: number;
+        switch (data.class) {
+            case "Game":
+                gameTd.level = data.level;
+                gameTd.timer = data.timer;
+                gameTd.start = data.start;
+                if (data.state === 1 && gameTd.state === 0.5)
+                    gameTd.state = 1;
+                if (data.state === 2)
+                    gameTd.state = 2
+                gameTd.boss = data.boss;
+                break;
+            case "Player":
+                if (data.id === id) {
+                    player1.hp = data.hp;
+                    player1.mana = data.mana;
+                    player1.cost = data.cost;
+                    player1.enemies.splice(0, player1.enemies.length);
+                    data.enemies.forEach((enemy: Enemy) => {
+                        if (enemy)
+                            player1.enemies.push(new Enemy(enemy.type, enemy.hp, enemy.pos));
+                    });
+                    player1.deck.splice(0, player1.deck.length);
+                    data.deck.forEach((tower: Tower) => {
+                        player1.deck.push(new Tower(tower.type, tower.speed, tower.damages, tower.area, tower.effect, tower.level));
+                    });
+                    for (i = player1.board.length; i < data.board.length; i++) {
+                        board = data.board[i];
+                        player1.board.push(new Board(board.pos, new Tower(board.tower.type, board.tower.speed, board.tower.damages, board.tower.area, board.tower.effect, board.tower.level)));
+                    }
+                    player1.bullets.splice(0, player1.bullets.length);
+                    data.bullets.forEach((bullet: Bullet) => {
+                        if (bullet)
+                            player1.bullets.push(new Bullet(bullet.type, bullet.rank, bullet.pos, bullet.target, bullet.travel));
+                    });
+                } else {
+                    player2.hp = data.hp;
+                    player2.mana = data.mana;
+                    player2.cost = data.cost;
+                    player2.enemies.splice(0, player2.enemies.length);
+                    data.enemies.forEach((enemy: Enemy) => {
+                        if (enemy)
+                            player2.enemies.push(new Enemy(enemy.type, enemy.hp, enemy.pos));
+                    });
+                    player2.deck.splice(0, player2.deck.length);
+                    data.deck.forEach((tower: Tower) => {
+                        player2.deck.push(new Tower(tower.type, tower.speed, tower.damages, tower.area, tower.effect, tower.level));
+                    });
+                    for (i = player2.board.length; i < data.board.length; i++) {
+                        board = data.board[i];
+                        player2.board.push(new Board(board.pos, new Tower(board.tower.type, board.tower.speed, board.tower.damages, board.tower.area, board.tower.effect, board.tower.level)));
+                    }
+                    player2.bullets.splice(0, player2.bullets.length);
+                    data.bullets.forEach((bullet: Bullet) => {
+                        if (bullet)
+                            player2.bullets.push(new Bullet(bullet.type, bullet.rank, bullet.pos, bullet.target, bullet.travel));
+                    });
                 }
-                player1.bullets.splice(0, player1.bullets.length);
-                data.bullets.forEach((bullet: Bullet) => {
-                    if (bullet)
-                        player1.bullets.push(new Bullet(bullet.type, bullet.rank, bullet.pos, bullet.target, bullet.travel));
-                });
-            } else {
-                player2.hp = data.hp;
-                player2.mana = data.mana;
-                player2.cost = data.cost;
-                player2.enemies.splice(0, player2.enemies.length);
-                data.enemies.forEach((enemy: Enemy) => {
-                    if (enemy)
-                        player2.enemies.push(new Enemy(enemy.type, enemy.hp, enemy.pos));
-                });
-                player2.deck.splice(0, player2.deck.length);
-                data.deck.forEach((tower: Tower) => {
-                    player2.deck.push(new Tower(tower.type, tower.speed, tower.damages, tower.area, tower.effect, tower.level));
-                });
-                for (i = player2.board.length; i < data.board.length; i++) {
-                    board = data.board[i];
-                    player2.board.push(new Board(board.pos, new Tower(board.tower.type, board.tower.speed, board.tower.damages, board.tower.area, board.tower.effect, board.tower.level)));
+                break;
+            case "Tower":
+                allTowers.push(new Tower(data.type, data.speed, data.damages, data.area, data.effect, data.level));
+                break;
+            case "id":
+                id = data.id;
+                console.log("User ID: ", id);
+                break;
+            case "Disconnected":
+                gameTd.state = 2.5;
+                break ;
+            default:
+                console.warn("Unknown type received:", data);
+        }
+    };
+
+    window.addEventListener("keydown", (event) => {
+        if (event.key === "b")
+            socketTd.send(JSON.stringify({event: "keyDown", player: 0, button: -2}));
+    });
+
+    canvasTd.addEventListener("click", (event: MouseEvent) => {
+        const rect = canvasTd.getBoundingClientRect();
+        const scaleX = canvasTd.width / rect.width;
+        const scaleY = canvasTd.height / rect.height;
+        const x = (event.clientX - rect.left) * scaleX;
+        const y = (event.clientY - rect.top) * scaleY;
+        switch (gameTd.state) {
+            case 0:
+                if (x >= 0.1 * canvasTd.width && x < canvasTd.width * 0.9 && y >= 0.46 * canvasTd.height && y < 0.78 * canvasTd.height) {
+                    const select = Math.floor((x - 0.1 * canvasTd.width) / (canvasTd.width * 0.16)) + 5 * Math.floor((y - 0.46 * canvasTd.height) / (canvasTd.height * 0.16));
+                    if (selected.includes(select)) {
+                        const index = selected.indexOf(select);
+                        if (index !== -1) {
+                            selected.splice(index, 1);
+                        }
+                    }
+                    else if (selected.length < 5)
+                        selected.push(select);
                 }
-                player2.bullets.splice(0, player2.bullets.length);
-                data.bullets.forEach((bullet: Bullet) => {
-                    if (bullet)
-                        player2.bullets.push(new Bullet(bullet.type, bullet.rank, bullet.pos, bullet.target, bullet.travel));
-                });
-            }
-            break;
-        case "Tower":
-            allTowers.push(new Tower(data.type, data.speed, data.damages, data.area, data.effect, data.level));
-            break;
-        case "id":
-            id = data.id;
-            console.log("User ID: ", id);
-            break;
-        case "Disconnected":
-            gameTd.state = 2.5;
-            break ;
-        default:
-            console.warn("Unknown type received:", data);
-    }
-};
-
-window.addEventListener("keydown", (event) => {
-    if (event.key === "b")
-        socketTd.send(JSON.stringify({event: "keyDown", player: 0, button: -2}));
-});
-
-canvasTd.addEventListener("click", (event: MouseEvent) => {
-    const rect = canvasTd.getBoundingClientRect();
-    const scaleX = canvasTd.width / rect.width;
-    const scaleY = canvasTd.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
-    switch (gameTd.state) {
-        case 0:
-            if (x >= 0.1 * canvasTd.width && x < canvasTd.width * 0.9 && y >= 0.46 * canvasTd.height && y < 0.78 * canvasTd.height) {
-                const select = Math.floor((x - 0.1 * canvasTd.width) / (canvasTd.width * 0.16)) + 5 * Math.floor((y - 0.46 * canvasTd.height) / (canvasTd.height * 0.16));
-                if (selected.includes(select)) {
-                    const index = selected.indexOf(select);
-                    if (index !== -1) {
-                        selected.splice(index, 1);
+                if (selected.length === 5 && x >= 0.37 * canvasTd.width && x < 0.63 * canvasTd.width && y >= 0.85 * canvasTd.height && y < 0.95 * canvasTd.height) {
+                    socketTd.send(JSON.stringify({event: "towerInit", t1: selected[0], t2: selected[1], t3: selected[2], t4: selected[3], t5: selected[4]}));
+                    gameTd.state = 0.5;
+                }
+                if (x >= 0.63 * canvasTd.width && x < 0.66 * canvasTd.width && y >= 0.87 * canvasTd.height && y < 0.93 * canvasTd.height) {
+                    selected.splice(0, selected.length);
+                    while (selected.length < 5) {
+                        const add = Math.floor(Math.random() * 10);
+                        if (!selected.includes(add))
+                            selected.push(add);
                     }
                 }
-                else if (selected.length < 5)
-                    selected.push(select);
-            }
-            if (selected.length === 5 && x >= 0.37 * canvasTd.width && x < 0.63 * canvasTd.width && y >= 0.85 * canvasTd.height && y < 0.95 * canvasTd.height) {
-                socketTd.send(JSON.stringify({event: "towerInit", t1: selected[0], t2: selected[1], t3: selected[2], t4: selected[3], t5: selected[4]}));
-                gameTd.state = 0.5;
-            }
-            if (x >= 0.63 * canvasTd.width && x < 0.66 * canvasTd.width && y >= 0.87 * canvasTd.height && y < 0.93 * canvasTd.height) {
-                selected.splice(0, selected.length);
-                while (selected.length < 5) {
-                    const add = Math.floor(Math.random() * 10);
-                    if (!selected.includes(add))
-                        selected.push(add);
+                break;
+            case 1:
+                if (y >= canvasTd.height - tile * 1.25 && y < canvasTd.height - tile * 0.25) {
+                    if (x >= 0 && x < tile * 5)
+                        socketTd.send(JSON.stringify({event: "click", player: 1, button: Math.floor(x / tile)}));
+                    else if (x >= tile * 6 && x < tile * 7) {
+                        socketTd.send(JSON.stringify({event: "click", player: 1, button: 5}));
+                    }
                 }
-            }
-            break;
-        case 1:
-            if (y >= canvasTd.height - tile * 1.25 && y < canvasTd.height - tile * 0.25) {
-                if (x >= 0 && x < tile * 5)
-                    socketTd.send(JSON.stringify({event: "click", player: 1, button: Math.floor(x / tile)}));
-                else if (x >= tile * 6 && x < tile * 7) {
-                    socketTd.send(JSON.stringify({event: "click", player: 1, button: 5}));
-                }
-            }
-            break;
-        default:
-            break;
-    }
-});
+                break;
+            default:
+                break;
+        }
+    });
 
-canvasTd.addEventListener("mousemove", (event) => {
-    const rect = canvasTd.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    canvasTd.addEventListener("mousemove", (event) => {
+        const rect = canvasTd.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
 
-    rdmhover = x >= 0.63 * canvasTd.width && x < 0.66 * canvasTd.width && y >= 0.87 * canvasTd.height && y < 0.93 * canvasTd.height;
-});
+        rdmhover = x >= 0.63 * canvasTd.width && x < 0.66 * canvasTd.width && y >= 0.87 * canvasTd.height && y < 0.93 * canvasTd.height;
+    });
 
-
-socketTd.onclose = function () { return console.log("Disconnected"); };
+    socketTd.onclose = function () { return console.log("Disconnected"); };
 }
 catch (error) {
     console.error("Unexpected error: ", error);
