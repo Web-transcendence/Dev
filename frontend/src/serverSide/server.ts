@@ -1,6 +1,6 @@
 import Fastify, {FastifyReply, FastifyRequest} from "fastify";
 import httpProxy from '@fastify/http-proxy';
-import cors from "@fastify/cors";
+// import cors from "@fastify/cors";
 import jwt, {JwtPayload} from 'jsonwebtoken';
 import {readFileSync} from "node:fs";
 import {join} from "node:path";
