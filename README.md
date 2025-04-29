@@ -25,6 +25,7 @@
 
 ◦ Major module: Add Another Game with User History and Matchmaking.🟪
 
+
 ◦ Minor module: Game Customization Options.🟪
 
 
@@ -35,7 +36,7 @@
 
 ◦ Major module: Introduce an AI Opponent.⬛
 
-◦ Minor module: User and Game Stats Dashboards⬛
+~~◦ Minor module: User and Game Stats Dashboards⬛~~
 
 ### • Cybersecurity
 
