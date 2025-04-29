@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "bw:front": "tsc -p tsconfig.front.json --watch",
-    "bw:back": "tsx watch src/serverSide/api.ts --tsconfig tsconfig.back.json",
+    "bw:back": "tsx watch src/serverSide/server.ts --tsconfig tsconfig.back.json",
     "test": "tsc src/clientSide/front.ts && tsc src/clientSide/pong.ts && npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css && tsx watch src/api.ts",
     "dev": "concurrently --kill-others \"npm run bw:front\" \"npm run bw:back\"  \"npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css --watch\" "
   },

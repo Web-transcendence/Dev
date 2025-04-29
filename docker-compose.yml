@@ -1,24 +1,5 @@
 services:
 
-#  api-gateway:
-#    container_name: api-gateway
-#    build:
-#      context: api-gateway/
-#    networks:
-#      - transcendence
-#    ports:
-#      - "3000:3000"         #DEV
-#    restart: unless-stopped
-#    develop:
-#      watch:
-#        - action: sync
-#          path: ./api-gateway/src/
-#          target: /app/src/
-#        - action: rebuild
-#          path: ./api-gateway/package.json
-#          target: app/
-
-
   frontend:
     container_name: frontend
     build:
@@ -97,23 +78,7 @@ services:
 #        - action: rebuild
 #          path: ./services/ai-opponent/package.json
 #          target: app/
-#
-#  live-chat:
-#    container_name: live-chat
-#    build:
-#      context: services/live-chat/
-#    networks:
-#      - transcendence
-#    restart: unless-stopped
-#    develop:
-#      watch:
-#        - action: sync
-#          path: ./services/live-chat/src/
-#          target: /app/src/
-#        - action: rebuild
-#          path: ./services/live-chat/package.json
-#          target: app/
-#
+
 
 
 networks:
