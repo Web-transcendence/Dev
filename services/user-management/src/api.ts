@@ -14,6 +14,16 @@ app.post('/auth/google', googleAuth);
 export const connectedUsers = new Map<number, FastifyReply>();
 
 export const tournamentSessions = new Map<number, tournament>();
+try {
+    tournamentSessions.set(4, new tournament(4))
+    tournamentSessions.set(8, new tournament(8))
+    tournamentSessions.set(16, new tournament(16))
+    tournamentSessions.set(32, new tournament(32))
+} catch (err) {
+    console.error(err);
+}
+
+
 
 app.listen({port: 5000, host: '0.0.0.0'}, (err, adrr) => {
     if (err) {

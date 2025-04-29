@@ -1,4 +1,4 @@
-const canvasTd = document.getElementById("gameCanvas") as HTMLCanvasElement;
+    const canvasTd = document.getElementById("gameCanvas") as HTMLCanvasElement;
 const ctxTd = canvasTd.getContext("2d")!;
 
 // Main menu and tower selection

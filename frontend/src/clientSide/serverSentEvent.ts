@@ -1,5 +1,9 @@
+
+
+
+
 export async function sseConnection(token: string) {
-    const res = await fetch("http://localhost:3000/user-management/sse", {
+    const res = await fetch(`/user-management/sse`, {
         method: 'GET',
         headers: {
             'Content-Type': 'text/event-stream',

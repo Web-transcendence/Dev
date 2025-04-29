@@ -3,6 +3,7 @@ import fastifyWebsocket from '@fastify/websocket';
 import { WebSocket } from "ws";
 import { z } from "zod";
 
+
 const inputSchema = z.object({ state: z.string(), key: z.string() });
 
 class Ball {
@@ -418,13 +419,7 @@ function joinRoom(player: Player) {
     timerCheck(rooms[i].players[0].game, rooms[i].players[1].game);
 }
 
-const fastify = Fastify({
-    // https: {
-    //     key: fs.readFileSync('./secure/key.pem'),
-    //     cert: fs.readFileSync('./secure/cert.pem'),
-    // },
-    logger: true
-});
+const fastify = Fastify();
 
 fastify.register(fastifyWebsocket);
 

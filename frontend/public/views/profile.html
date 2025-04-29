@@ -1,68 +1,198 @@
-<div class="flex gap-4 center-items text-white mb-4 container">
+<div class="grid place-items-center min-h-screen bg-gray-900 text-white px-4">
+    <div class="grid flex-col grid-cols-1 gap-14 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 content-center text-white m-4 container">
 
-    <div class="relative w-full bg-gray-900 shadow-lg rounded-lg p-8 pb-40 overflow-hidden">
-        <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">Your Profile</h1>
+        <div class="relative w-full bg-gray-700 shadow-lg rounded-lg p-8 pb-40 overflow-hidden">
+            <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">Your Profile</h1>
 
-        <div class="border-t border-gray-300 my-4"></div>
+            <div class="border-t border-gray-300 my-4"></div>
 
-        <div class="profile-details space-y-4">
-            <div class="insert-nickName">
-                <div id="profileNickName" class="text-gray-300 font-semibold truncate">loading ...</div>
-            </div>
+            <dl  class="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
+                <div class="insert-nickName">
+                    <dt class="mb-1 text-gray-500 md:text-lg dark:text-gray-400">Nick name</dt>
+                    <div id="profileNickName" class="text-gray-300 font-semibold truncate">loading ...</div>
+                </div>
 
-            <div class="insert-email">
-                <div id="profileEmail" class="text-gray-300 font-semibold truncate">loading ...</div>
-            </div>
+                <div class="insert-email">
+                    <dt class="mb-1 text-gray-500 md:text-lg dark:text-gray-400">Email address</dt>
+                    <div id="profileEmail" class="text-gray-300 font-semibold truncate">loading ...</div>
+                </div>
 
-            <div class="flex justify-center items-center">
-                <input type="file" id="profilePicture" name="profilePicture" accept="image/*">
-                <button id="editProfileButton" class="absolute bottom-0 mb-4 px-4 py-2 bg-yellow-400 text-white rounded-full shadow-md hover:bg-yellow-600 transition transform hover:scale-105">
-                    Edit Profile
-                </button>
-            </div>
+                <div class="flex justify-center items-center">
+                    <button id="editProfileButton" class="absolute bottom-0 btn-primary">
+                        Edit Profile
+                    </button>
+                </div>
+            </dl>
+
+            <div class="border-spacing-2 border-spacing-x-2 border-spacing-y-2 border-gray-300 my-6"></div>
         </div>
 
-        <div class="border-spacing-2 border-spacing-x-2 border-spacing-y-2 border-gray-300 my-6"></div>
-    </div>
+        <div class="relative w-full bg-gray-700 shadow-lg rounded-lg p-8 pb-40 overflow-hidden">
+            <h2 class="text-lg font-bold text-yellow-400 text-center mb-4">Friends</h2>
 
-    <div class="relative w-full bg-gray-900 shadow-lg rounded-lg p-8 overflow-hidden ">
-        <h2 class="text-lg font-bold text-yellow-400 text-center mb-4">Friends List</h2>
+            <div class="border-t border-gray-300 my-4"></div>
 
-        <div class="border-t border-gray-300 my-4"></div>
+            <li class="rounded-lg shadow-md flex w-full">
+                <ul id="acceptedList" role="list" class="space-y-2">
+                    <h2 class="text-sm font-bold text-gray-300 text-center m-4">Empty</h2>
+                </ul>
 
-        <!-- Section Liste d'Amis -->
-        <div class="rounded-lg shadow-md flex w-full">
-            <!-- Liste des amis -->
-            <ul id="friendList" class="space-y-2">
-                <h2 class="text-sm font-bold text-gray-300 text-center mb-4 hidden">You don't have friends :/</h2>
-
-                <div class=" content-between gap-4">
-                    <div>
-                        <div class=" flex items-center w-full content-start">
-                            <img src="../login.png" class="w-10 h-10 rounded-full " />
-                            <strong class="ml-2">Debra Houston</strong>
+                <template id="acceptedTemplate">
+                    <li class="flex py-4 first:pt-0 last:pb-0 items-center justify-between">
+                        <div class="flex items-center">
+                            <img class="h-10 w-10 rounded-full" src="../images/login.png" alt="Avatar"/>
+                            <div class="ml-3 overflow-hidden">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
+                            </div>
                         </div>
+                    </li>
+                </template>
+            </li>
+            <div class="flex flex-col items-center justify-center">
+                <div class="absolute bottom-0 ">
+                    <div class=" flex justify-center items-center max-w-md">
+                        <label for="friendNameIpt"></label><input id="friendNameIpt" type="text" placeholder="Name"
+                                                                  class=" left-0 w-1/3 mb-4 px-4 py-2 rounded-l-full shadow-md transition transform hover:scale-105 bg-white text-black" />
+                        <button id="friendNameBtn"
+                                class=" right-0 rounded-l-none btn-primary">
+                            Add
+                        </button>
                     </div>
                 </div>
-            </ul>
+            </div>
         </div>
 
-        <div class="flex justify-center items-center py-8">
-            <input id="friendNameIpt" type="text" placeholder="Name" class="rounded-full px-4 py-2 mb-4 absolute bottom-0 left-0 bg-white text-black">
-            <button id="friendNameBtn" class="px-4 py-2 absolute bottom-0 right-0 mb-4 bg-yellow-500 text-white rounded-r-full hover:bg-yellow-600 transition hover:scale-105">Add</button>
+        <div class="relative w-full bg-gray-700 shadow-lg rounded-lg p-8 overflow-hidden ">
+            <h2 class="text-lg font-bold text-yellow-400 text-center mb-4">Request</h2>
+
+            <div class="border-t border-gray-300 my-4"></div>
+
+            <li class="rounded-lg shadow-md flex w-full">
+                <ul id="requestList" role="list" class="space-y-2">
+                    <h2 class="text-sm font-bold text-gray-300 text-center m-4">Empty</h2>
+                </ul>
+
+                <template id="requestTemplate">
+                    <li class="flex py-4 first:pt-0 last:pb-0 items-center justify-between">
+                        <div class="flex items-center">
+                            <img class="h-10 w-10 rounded-full"  alt="Avatar" src="../images/login.png"/>
+                            <div class="ml-3 overflow-hidden">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
+                            </div>
+                        </div>
+                    </li>
+                </template>
+            </li>
         </div>
+
+        <div class="relative w-full bg-gray-700 shadow-lg rounded-lg p-8 overflow-hidden ">
+            <h2 class="text-lg font-bold text-yellow-400 text-center mb-4">Received</h2>
+
+            <div class="border-t border-gray-300 my-4"></div>
+
+            <li class="rounded-lg shadow-md flex w-full ">
+                <ul id="receivedList" role="list" class="p-2 space-y-2 flex w-full justify-between items-center">
+                    <h2 class="text-sm font-bold text-gray-300 text-center m-4">Empty</h2>
+                </ul>
+
+                <template id="receivedTemplate">
+                    <li class="flex w-full justify-between items-center">
+                        <div class="flex items-center">
+                            <img class="h-10 w-10 rounded-full"  alt="Avatar" src="../images/login.png"/>
+                            <div class="ml-3 overflow-hidden">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
+                            </div>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="flex space-x-2">
+                            <button
+                                    class="group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none accept-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="w-5 h-5 opacity-25 group-hover:opacity-100 transition-opacity duration-200"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </button>
+                            <button
+                                    class="group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none decline-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     class="w-5 h-5 opacity-25 group-hover:opacity-100 transition-opacity duration-200"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </li>
+                </template>
+            </li>
+        </div>
+
+
+        <div class="relative w-full bg-gray-700 shadow-lg items-center rounded-lg p-8 pb-40 overflow-hidden">
+            <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">Avatar</h1>
+
+            <div class="border-t border-gray-300 my-4"></div>
+
+            <div class="flex flex-col items-center justify-center">
+                <img id="avatarProfile" src="../images/login.png" alt="Avatar" class="aspect-auto p-4 rounded-full">
+            </div>
+
+            <div class="flex flex-col items-center justify-center">
+                <div class="absolute bottom-0 flex ">
+                    <label for="inputAvatar"
+                           class="btn-primary"
+                    >Change Avatar</label>
+                    <input id="inputAvatar"
+                           type="file"
+                           accept="image/*"
+                           class="hidden"
+                    />
+                </div>
+            </div>
+
+            <div class="border-spacing-2 border-spacing-x-2 border-spacing-y-2 border-gray-300 my-6"></div>
+        </div>
+
+
+        <div id="totalFactor" class="relative w-full bg-gray-700 shadow-lg rounded-lg p-8 pb-40 overflow-hidden">
+            <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">2FA</h1>
+
+            <div class="border-t border-gray-300 my-4"></div>
+            <p class="text-center text-sm indent-4"> Add an extra layer of protection to your account by enabling Two-Factor Authentication (2FA).
+                Once activated, you’ll need a verification code from your phone in addition to your password when logging in. </p>
+            <div id="insertQrcode" class="flex flex-col items-center justify-center">
+            </div>
+            <div class="flex flex-col items-center justify-center">
+            <button id="initfa" class="absolute bottom-0 btn-primary">
+                Activate 2FA
+            </button>
+            </div>
+            <label id="codeFaInput" class="sr-only flex flex-col items-center justify-center">
+                Code de vérification
+                <input id="inputVerify"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="\d{6}"
+                    maxlength="6"
+                    class="w-1/2 px-2 py-2 my-2 border border-gray-300 rounded-lg text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    placeholder="123456"
+                />
+            </label>
+            <dl  class="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
+
+            </dl>
+
+            <div class="border-spacing-2 border-spacing-x-2 border-spacing-y-2 border-gray-300 my-6"></div>
+        </div>
+
     </div>
 
-</div>
+    <div class="border-t border-gray-300 my-6"></div>
 
-<div class="border-t border-gray-300 my-6"></div>
-
-<div class="text-center">
-    <button id="home" class="bg-gray-500 text-white px-5 py-2 rounded-full shadow-md hover:bg-gray-600 transition transform hover:scale-105">
-        Back to Home
-    </button>
-
-    <button id="logout" class="bg-pink-500 text-white px-5 py-2 rounded-full shadow-md hover:bg-pink-600 transition transform hover:scale-105">
-        Logout
-    </button>
+    <div class="text-center">
+        <button id="logout" class="bg-pink-500 btn-primary">
+            Logout
+        </button>
+    </div>
 </div>

@@ -9,7 +9,12 @@ import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./er
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
-const BASE64_UNDEFINED_PICTURES = 'A DEFINIR' // attention !!
+
+type FriendList = {
+    acceptedNickName: string[];
+    pendingNickName: string[];
+    receivedNickName: string[];
+};
 
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
@@ -19,7 +24,8 @@ Client_db.exec(`
         password TEXT NOT NULL,
         google_id INTEGER,
         secret_key TEXT DEFAULT NULL,
-        pictureProfile TEXT DEFAULT NULL
+        pictureProfile TEXT DEFAULT NULL,
+        activated2fa BOOLEAN DEFAULT NULL
     )
 `)
 
@@ -47,7 +53,7 @@ export class User {
     static getIdbyNickName(nickName: string): number {
         const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined
         if (!userData)
-            throw new DataBaseError(`id not found for nickName: ${nickName}`, 404)
+            throw new DataBaseError(`id not found for nickName: ${nickName}`, `This nickname doesn't exist`, 404)
         return userData.id
     }
 
@@ -63,16 +69,16 @@ export class User {
      */
     static async addClient(nickName: string, email: string, password: string): Promise<string> {
         if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(nickName))
-            throw new ConflictError(`${nickName} is already taken`)
+            throw new ConflictError(`${nickName} is already taken`, `This nickname is already taken`)
         if (Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(email))
-            throw new ConflictError(`${nickName} is already taken`)
+            throw new ConflictError(`${email} is already taken`, `This email is already taken`)
 
         const hashedPassword: string = await bcrypt.hash(password, 10)
 
         const res = Client_db.prepare("INSERT INTO Client (nickName, email, password) VALUES (?, ?, ?)")
             .run(nickName, email, hashedPassword)
         if (res.changes === 0)
-            throw new DataBaseError(`client couldn't be inserted`, 500)
+            throw new DataBaseError(`client couldn't be inserted`, 'error 500 : internal error system', 500)
 
         const id : number = Number(res.lastInsertRowid)
 
@@ -94,12 +100,12 @@ export class User {
         const client = new User(id)
 
         if (!await client.isPasswordValid(password))
-            throw new UnauthorizedError(`bad password`)
+            throw new UnauthorizedError(`bad password`, 'wrong password')
 
-        const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(id) as { secret_key: string } | undefined
+        const data = Client_db.prepare("SELECT activated2fa FROM Client WHERE id = ?").get(id) as { activated2fa: boolean } | undefined
         if (!data)
-            throw new DataBaseError(`User with ID ${id} not found, which should not happen`, 500)
-        if (data.secret_key)
+            throw new DataBaseError(`User with ID ${id} not found`, `internal error system`, 500)
+        if (data.activated2fa)
             return ''
         return User.makeToken(client.id)
     }
@@ -111,7 +117,7 @@ export class User {
     async isPasswordValid(password: string): Promise<boolean> {
         const userData = Client_db.prepare("SELECT password FROM Client WHERE id = ?").get(this.id) as { password: string } | undefined
         if (!userData)
-            throw new DataBaseError(`User with ID ${this.id} not found, which should not happen`, 500)
+            throw new DataBaseError(`User with ID ${this.id} not found`, 'internal error system', 500)
 
         return await bcrypt.compare(password, userData.password)
     }
@@ -124,9 +130,16 @@ export class User {
     async generateSecretKey(): Promise<string> {
         const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined
         if (!data)
-            throw new DataBaseError(`User with ID ${this.id} not found, which should not happen`, 500)
-        if (data.secret_key)
-            throw new ConflictError(`secret key is already made`)
+            throw new DataBaseError(`User with ID ${this.id} not found`, 'internal error system', 500)
+        if (data.secret_key) {
+            const otpauthUrl = speakeasy.otpauthURL({
+                secret: data.secret_key,
+                label: 'transcendence',
+                issuer: 'master',
+                encoding: 'base32'
+            });
+            return await QRCode.toDataURL(otpauthUrl);
+        }
 
         const secret:GeneratedSecret = speakeasy.generateSecret()
 
@@ -141,9 +154,9 @@ export class User {
     verify(token: string): string {
         const secret = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined
         if (!secret)
-            throw new DataBaseError(`secret key not found for id: ${this.id}`, 500)
+            throw new DataBaseError(`secret key not found for id: ${this.id}`, 'internal error system', 500)
         if (!secret.secret_key)
-            throw new ConflictError("2fa isn't activated")
+            throw new ConflictError("2fa isn't activated", 'internal error system')
 
         const verified = speakeasy.totp.verify({
             secret: secret.secret_key,
@@ -152,14 +165,15 @@ export class User {
             window: 1
         })
         if (!verified)
-            throw new UnauthorizedError(`invalid secret key for 2fa`)
+            throw new UnauthorizedError(`invalid secret key for 2fa`, 'bad 2fa code')
+        Client_db.prepare(`UPDATE Client SET activated2fa = ? WHERE id = ?`).run(1, this.id)
         return User.makeToken(this.id)
     }
 
     getProfile(): { nickName: string, email: string } {
         const userData = Client_db.prepare("SELECT nickName, email FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string } | undefined
         if (!userData) {
-            throw new DataBaseError(`User with ID ${this.id} not found, which should not happen`, 500)
+            throw new DataBaseError(`User with ID ${this.id} not found`, `internal error system`, 500)
         }
         return {nickName: userData.nickName, email: userData.email}
     }
@@ -174,14 +188,13 @@ export class User {
     updatePictureProfile(pictureURL: string) {
         const change = Client_db.prepare(`UPDATE Client SET pictureProfile = ? WHERE id = ?`).run(pictureURL, this.id);
         if (!change || !change.changes)
-            throw new DataBaseError(`cannot upload the picture in the db`, 500)
+            throw new DataBaseError(`cannot upload the picture in the db`, 'error 500: internal error system', 500)
     }
 
     getPictureProfile(): string {
         const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`).get(this.id) as {pictureProfile: string} | undefined;
         if (!userData)
-            throw new DataBaseError(`should not happen`, 500)
-        console.log(userData)
+            throw new DataBaseError(`should not happen`, 'internal error system', 500)
         if (!userData.pictureProfile)
             return '';
         return userData.pictureProfile;
@@ -197,11 +210,11 @@ export class User {
     addFriend(nickName: string): string {
         const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined
         if (!friendId)
-            throw new DataBaseError(`id not found for this friend nickName: ${nickName}`, 404)
+            throw new DataBaseError(`id not found for this friend nickName: ${nickName}`, `This nickname doesn't exist`, 404)
 
         const checkStatus = Client_db.prepare("SELECT status FROM FriendList WHERE userA_id = ? AND userB_id = ?").get(friendId.id, this.id) as {status: string}
         if (checkStatus?.status == 'accepted')
-            throw new ConflictError(`This friend is already in friendList`)
+            throw new ConflictError(`This friend is already in friendList`, `This nickname is already in your friendlist`)
 
         else if (checkStatus?.status == 'pending') {
             Client_db.prepare(`UPDATE FriendList SET status = 'accepted' WHERE userA_id = ? AND userB_id = ?`).run(friendId.id, this.id)
@@ -210,7 +223,7 @@ export class User {
 
         const res = Client_db.prepare(`INSERT OR IGNORE INTO FriendList (userA_id, userB_id, status) VALUES (?, ?, ?)`).run(this.id, friendId.id, 'pending')
         if (res.changes === 0)
-            throw new ConflictError(`Friend invitation already sent`)
+            throw new ConflictError(`Friend invitation already sent`, `You already send an invitation to this nickname`)
         this.notifyUser(nickName, 'friendInvitation');
         return `Friend invitation sent successfully`
     }
@@ -223,11 +236,11 @@ export class User {
     removeFriend(nickName: string) {
         const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined
         if (!friendId)
-            throw new DataBaseError(`id not found for this friend nickName: ${nickName}`, 404)
+            throw new DataBaseError(`id not found for this friend nickName: ${nickName}`, `This nickname isn't in your friendlist`, 404)
 
         const checkStatus = Client_db.prepare("DELETE FROM FriendList WHERE (userA_id = ? AND userB_id = ?) OR (userB_id = ? AND userA_id = ?)").run(friendId.id, this.id, friendId.id, this.id)
         if (!checkStatus.changes)
-            throw new ConflictError(`This user isn't in your friendList`)
+            throw new ConflictError(`This user isn't in your friendList`, `internal error system`)
     }
 
     /**
@@ -238,37 +251,30 @@ export class User {
      *
      * @return an object with three array of id. One for each type of friend.
      */
-    getFriendList(): {acceptedNickName: string[], pendingNickName: string[], receivedNickName: string[]} {
-        this.logConnectedUser()
+        getFriendList(): FriendList {
+            this.logConnectedUser()
 
-        const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[]
-        const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[]
-        const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[]
+            const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[]
+            const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[]
+            const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[]
 
-        const acceptedIds = accepted.map(row => row.userA_id ?? row.userB_id).filter(id => id !== undefined)
-        const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined)
-        const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined)
+            const acceptedIds = accepted.map(row => row.userA_id ?? row.userB_id).filter(id => id !== undefined)
+            const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined)
+            const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined)
 
-        const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row))
-        const pendingNickName = pendingIds.map(row => this.getNickNameById(row))
-        const receivedNickName = receivedIds.map(row => this.getNickNameById(row))
+            const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row))
+            const pendingNickName = pendingIds.map(row => this.getNickNameById(row))
+            const receivedNickName = receivedIds.map(row => this.getNickNameById(row))
 
 
-        return {acceptedNickName, pendingNickName, receivedNickName}
-    }
+            return {acceptedNickName, pendingNickName, receivedNickName}
+        }
 
     getNickNameById(id: number): string {
         const userData = Client_db.prepare("SELECT nickName FROM Client WHERE id = ?").get(id) as {nickName: string} | undefined
         if (!userData)
-            throw new DataBaseError(`nickName not found for id ${id}`, 500)
+            throw new DataBaseError(`nickName not found for id ${id}`, 'internal error system', 500)
         return (userData.nickName)
-    }
-
-    createTournament(): tournament{
-        for (const [id, tournament] of tournamentSessions)
-            if (tournament.hasParticipant(this.id))
-                throw new ConflictError(`this user is already in a tournament`)
-        return new tournament(this.id)
     }
 
     getActualTournament(): tournament | null {
@@ -283,7 +289,7 @@ export class User {
 
         const connection = connectedUsers.get(userId);
         if (!connection)
-            throw new ConflictError(`this user isn't connected`)
+            throw new ConflictError(`this user isn't connected`, 'internal error system')
         const data = {event: event, nickName: nickName}
         connection.sse({data: JSON.stringify(data)})
     }

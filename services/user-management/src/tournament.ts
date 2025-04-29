@@ -1,17 +1,19 @@
 import {tournamentSessions} from "./api.js"
-import {User} from "./User.js"
-import {ConflictError} from "./error.js";
+import {ConflictError, ServerError} from "./error.js";
 
 export class tournament {
 
-    creatorId: number
     private participantId: number[]
     private status: 'waiting' | 'started'
     private result
+    maxPlayer: number
 
-    constructor(creatorId: number) {
-        this.creatorId = creatorId
-        this.participantId = [this.creatorId]
+    constructor(maxPlayer: number) {
+        if ([4, 8, 16, 32].includes(maxPlayer))
+            this.maxPlayer = maxPlayer
+        else
+            throw new ServerError(`cannot create a tournament with ${maxPlayer} player`, 500)
+        this.participantId = []
         this.status = 'waiting'
         this.result = {}
     }
@@ -22,24 +24,23 @@ export class tournament {
 
     addParticipant(participantId: number) {
         if (this.status === 'started')
-            throw new ConflictError(`this tournament has already started`)
+            throw new ConflictError(`this tournament has already started`, `This tournament is already started`)
+        if (this.participantId.length >= this.maxPlayer)
+            throw new ConflictError(`maxPlayer has already is reached`, `This tournament is full`)
 
         for (const [id, tournament] of tournamentSessions)
             if (tournament.hasParticipant(participantId))
-                throw new ConflictError(`this user has already another tournament`)
+                throw new ConflictError(`this user has already another tournament`, `internal error system`)
 
         this.participantId.push(participantId)
     }
 
-    getData(): {creatorId: number, creatorNickName: string, participantCount: number, status: string} {
-        const user = new User(this.creatorId)
-        const data = {
-            creatorId: this.creatorId,
-            creatorNickName: user.getProfile().nickName,
+    getData(): {maxPlayer: number, participantCount: number, status: string} {
+        return {
+            maxPlayer: this.maxPlayer,
             participantCount: this.participantId.length,
-            status : this.status,
+            status: this.status,
         }
-        return data
     }
 
     quit(id: number): void {
@@ -70,9 +71,9 @@ export class tournament {
 
     async launch(): Promise<string> {
         if (this.status === 'started')
-            throw new ConflictError(`this tournament has already started`)
-        if (![4, 8, 16, 32].includes(this.participantId.length))
-            throw new ConflictError(`participant have to be 4, 8, 16 or 32`)
+            throw new ConflictError(`this tournament has already started`, `internal error system`)
+        if (this.participantId.length !== this.maxPlayer)
+            throw new ConflictError(`participant have to be 4, 8, 16 or 32`, `internal error system`)
 
         const arr = [...this.participantId]
         for (let i = arr.length - 1; i > 0; i--) {
@@ -85,8 +86,6 @@ export class tournament {
 
         return winner.toString()
     }
-
-
 }
 
 

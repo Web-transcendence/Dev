@@ -1,49 +1,47 @@
-import {getAvatar} from "./user.js"
-import {activateBtn} from "./button.js";
+import {getAvatar} from './user.js'
+import {loadPart} from './insert.js';
 
-
-
-interface Window {
-    CredentialResponse: (response: any) => void;
-}
+declare const tsParticles: any;
 
 export let connected = false;
 
 window.addEventListener("popstate", () => {
-    console.log("Navigating back:", window.location.pathname);
-    loadPart(window.location.pathname);
+    console.log("popstate");
+    loadPart(window.location.pathname)
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // Constant button on the Single Page Application
-    const aboutBtn = document.getElementById("about")!;
-    const contactBtn = document.getElementById("contact")!;
-
-    aboutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
-    contactBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
-
+    constantButton(); // Constant button on the Single Page Application
     // For Client Connection
-    if (await checkForTocken()) {
-        getAvatar();
+    if (await checkForToken()) {
+        await getAvatar();
         handleConnection(true);
     }
     else
         handleConnection(false);
-    const Ping = document.getElementById("pong");
-    if (Ping)
-        Ping.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
-    const towerDefense = document.getElementById("towerDefense");
-    if (towerDefense) {
-        console.log("Tower Defense:");
-        towerDefense.addEventListener("click", (event: MouseEvent) => navigate(event, "/towerDefense"));
-    }
-    loadPart("/home");
+    const path = localStorage.getItem('path');
+    if (path) loadPart(path)
+    else loadPart("/home")
 });
 
-async function checkForTocken(): Promise<boolean>  {
+tsParticles.load("tsparticles", {
+    fullScreen: { enable: false },
+    particles: {
+        number: { value: 100 },
+        size: { value: 3 },
+        move: { enable: true, speed: 1 },
+        opacity: { value: 0.5 },
+        color: { value: "#ffffff" },
+    },
+    background: {
+        color: "#000000"
+    }
+});
+
+async function checkForToken(): Promise<boolean>  {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/authJWT', {
+        const response = await fetch(`/authJWT`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -52,7 +50,7 @@ async function checkForTocken(): Promise<boolean>  {
         });
         if (!response.ok) {
             const error = await response.json();
-            console.log("token checker", error.message);
+            console.error(error)
             return false;
         }
         return true;
@@ -62,22 +60,38 @@ async function checkForTocken(): Promise<boolean>  {
     }
 }
 
-
+function constantButton() {
+    //Duo Button
+    document.getElementById('connect')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+    document.getElementById('profile')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
+    document.getElementById('avatar')?.addEventListener('click', () => {
+        if (connected)
+            document.getElementById('connect')?.click();
+        else
+            document.getElementById('profile')?.click();
+    });
+    //navigation page
+    document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
+    document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongMode"));
+    document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tower"));
+    document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tournaments"));
+    // Footer
+    document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
+    document.getElementById("contact")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
+}
 
 
 export function handleConnection(input: boolean) {
-    const connect = document.getElementById('connect');
-    const profile = document.getElementById('profile');
-    if (input && profile && connect) {
-        console.log("handleConnecton profile")
-        connect.classList.add('hidden');
-        profile.classList.remove('hidden');
-        profile.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
-    } else if (profile && connect) {
-        console.log("handleConnecton connect")
-        connect.classList.remove('hidden');
-        profile.classList.add('hidden');
-        connect.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+    if (input) {
+        document.getElementById('connect')?.classList.add('hidden');
+        document.getElementById('profile')?.classList.remove('hidden');
+    } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('avatar');
+        localStorage.removeItem('nickName');
+        localStorage.removeItem('factor');
+        document.getElementById('connect')?.classList.remove('hidden');
+        document.getElementById('profile')?.classList.add('hidden');
     }
     connected = input;
 }
@@ -85,7 +99,7 @@ export function handleConnection(input: boolean) {
 // @ts-ignore
 window.CredentialResponse = async (credit: { credential: string }) => {
     try {
-        const response = await fetch('http://localhost:3000/user-management/auth/google', {
+        const response = await fetch(`/user-management/auth/google`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -98,13 +112,15 @@ window.CredentialResponse = async (credit: { credential: string }) => {
             const reply = await response.json();
             if (reply.valid) {
                 if (reply.avatar)
-                    localStorage.setItem('avatar', reply.avatar);
+                    // setAvatar(reply.avatar);
                 if (reply.token)
-                    localStorage.setItem('token', reply.token);
-                loadPart("/connected");
+                    localStorage.setItem('token', reply.token)
+                if (reply.nickName)
+                    localStorage.setItem('nickName', reply.nickName)
+                await loadPart("/connected");
                 handleConnection(true);
+                await getAvatar();
             }
-            console.log('Success:', reply);
         }
     }
     catch(error) {
@@ -112,151 +128,11 @@ window.CredentialResponse = async (credit: { credential: string }) => {
     }
 }
 
-export function navigate(event: MouseEvent, path: string): void {
+export async function navigate(event: MouseEvent, path: string): Promise<void> {
+    handleConnection(await checkForToken());
+    if (!connected && path == "/profile") {
+        path = "/connect";
+    }
     event.preventDefault();
-    loadPart(path);
+    await loadPart(path);
 }
-
-export async function loadPart(page: string): Promise<void> {
-    window.history.pushState({}, "", page);
-    try {
-        await insert_tag(`part${page}`);
-        console.log(`loadPart: ${page}`);
-        activateBtn(page);
-        getAvatar();
-        activateGoogle(page);
-    } catch (error) {
-        console.error(error);
-        const container = document.getElementById('content') as HTMLElement;
-        container.innerHTML = '';
-        container.innerHTML = "<h2>404 - Page non trouvée</h2>";
-    }
-}
-
-async function insert_tag(url: string): Promise<void>{
-    const container = document.getElementById('content') as HTMLElement;
-    if (url === "part/pong") {
-        const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
-        if (existingScript)
-            return ;
-    }
-    const res = await fetch(url);
-    const newElement = document.createElement('div');
-    newElement.className = 'tag';
-    if (!res.ok)
-        throw Error("Page not found: element missing.");
-    const html = await res.text();
-    if (container.innerHTML.includes(html))
-        return;
-    if (html.includes(container.innerHTML))
-        return;
-    container.innerHTML = '';
-    afterInsert(url/*, container*/);
-    newElement.innerHTML = html;
-    container.appendChild(newElement);
-}
-
-function afterInsert(url: string,/* container: HTMLElement*/): void {
-    console.log("afterInsert url :", url);
-    if (url === "part/pong") {
-        if (!document.querySelector('script[src="/static/dist/pong.js"]')) {
-            const script = document.createElement('script');
-            script.src = "/static/dist/pong.js";
-            document.body.appendChild(script);
-        }
-    } else {
-        const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
-        if (existingScript)
-            existingScript.remove();
-    }
-    console.log("afterInsert url :", url);
-    if (url === "part/towerDefense") {
-        if (!document.querySelector('script[src="/static/dist/td.js"]')) {
-            const script = document.createElement('script');
-            script.src = "/static/dist/td.js";
-            document.body.appendChild(script);
-        }
-    } else {
-        const existingScript = document.querySelector('script[src="/static/dist/td.js"]');
-        if (existingScript)
-            existingScript.remove();
-    }
-}
-
-
-function activateGoogle(page: string) {
-    console.log("activateGoogle", page);
-    const container = document.getElementById('content') as HTMLElement;
-    if (page === "/login" || page === "/connect") {
-        const googleID = document.getElementById('googleidentityservice');
-        if (!googleID) {
-            console.log("afterInsert ADD googleID");
-            const script = document.createElement('script');
-            script.src = "https://accounts.google.com/gsi/client";
-            script.async = true;
-            script.defer = true;
-            container.appendChild(script);
-        }
-        else {
-            const googleID = document.getElementById('googleidentityservice');
-            const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
-            if (googlemeta) {
-                console.log("afterInsert first REMOVE googlemeta");
-                googlemeta.remove();
-            }
-            if (googleID) {
-                console.log("afterInsert first REMOVE googleID");
-                googleID.remove();
-            }
-            const googleIP = document.getElementById('googleidentityservice');
-            if (!googleIP) {
-                console.log("afterInsert just removed ADD googleID");
-                const script = document.createElement('script');
-                script.src = "https://accounts.google.com/gsi/client";
-                script.async = true;
-                script.defer = true;
-                container.appendChild(script);
-            }
-        }
-    }
-    const googleID = document.getElementById('googleidentityservice');
-    const googlemeta = document.querySelector('meta[http-equiv="origin-trial"]');
-    if (googlemeta) {
-        console.log("afterInsert second REMOVE googlemeta");
-        googlemeta.remove();
-    }
-    if (googleID) {
-        console.log("afterInsert second REMOVE googleID");
-        googleID.remove();
-    }
-}
-
-
-export function validateRegister(result: { nickName: string; email: string; password: string}): void {
-    console.log(result);
-    const nickNameErrorMin = document.getElementById("nickNameError") as HTMLSpanElement;
-    const emailError = document.getElementById("emailError") as HTMLSpanElement;
-    const passwordError = document.getElementById("passwordError") as HTMLSpanElement;
-    if (result.nickName)
-        nickNameErrorMin.classList.remove("hidden");
-    else {
-        if (!nickNameErrorMin.classList.contains("hidden")) {
-            nickNameErrorMin.classList.add("hidden");
-        }
-    }
-    if (result.email)
-        emailError.classList.remove("hidden");
-    else {
-        if (!emailError.classList.contains("hidden")) {
-            emailError.classList.add("hidden");
-        }
-    }
-    if (result.password)
-        passwordError.classList.remove("hidden");
-    else {
-        if (!passwordError.classList.contains("hidden")) {
-            passwordError.classList.add("hidden");
-        }
-    }
-}
-
