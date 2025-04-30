@@ -6,7 +6,7 @@
 /*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:41:48 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/29 14:32:12 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/04/30 21:12:19 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,23 @@
 # define ENVIRONMENT_CLASS_HPP
 # define WIDTH 1200
 # define HEIGHT 800
-# define DS_R 20
+# define DS_R 40
+# define W WIDTH/DS_R
+# define H HEIGHT/DS_R
 # include "TypeDefinition.hpp"
 # include <vector>
 # include <string>
 # include <array>
+
+typedef struct s_gState {
+	double	bx;
+	double	by;
+	double	rPx;
+	double	rPy;
+	double	lPx;
+	double	lPy;
+	s_gState(std::array<double, 6> const & i) : bx(i[0]),by(i[1]),rPx(i[2]),rPy(i[3]),lPx(i[4]),lPy(i[5]) {}
+}	t_gState;
 
 typedef struct s_ball {
 	double	x;
@@ -48,10 +60,11 @@ public:
 
 	void					reset( void );
 	
-	std::array<double,6>				getState( void );
-	std::vector<double>*	getStateVector(std::array<double,6> const & act, std::array<double,6> const & old);
+	std::shared_ptr<std::vector<double>>	getState(void);
 
 private:
+
+	t_gState	getGameState( void );
 
 	void	moovePaddle(int const action);
 	void	moovelPaddle(void);
@@ -61,10 +74,11 @@ private:
 	int		checkCollision(double oldX, double oldY);
 	void	bounceAngle(t_paddle & paddle, std::string const & side);
 
-	void	lineDrag(std::vector<std::vector<double>> & simulation, std::array<int, 2> actxy, std::array<int, 2> oldxy);
-	void	paddle(std::vector<std::vector<double>> & simulation, std::array<int, 2> pxy);
+	void	drawBall(std::vector<double> & s, int x, int y, double num);
+	void	drawPaddle(std::vector<double> & s, int x, int y, int sizePaddle, double num);
 
-	void	displayState(std::array<double,6> const & act, std::array<double,6> const & old);
+
+	void	displayState(std::vector<double> const & vec);
 
 	int		randInt(void) const;
 	double	randDouble(void) const;
@@ -73,8 +87,8 @@ private:
 	t_paddle			rPaddle;
 	t_paddle			lPaddle;
 
-	std::vector<double>	_state;
-	bool				_done;
+	std::shared_ptr<std::vector<double>>	_state;
+	bool									_done;
 
 	unsigned int const	_maxEpStep;
 

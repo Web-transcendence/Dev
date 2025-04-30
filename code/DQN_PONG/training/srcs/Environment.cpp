@@ -6,7 +6,7 @@
 /*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/29 16:37:31 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/04/30 21:22:55 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,11 @@
 
 #include "TypeDefinition.hpp"
 #include "Math.namespace.hpp"
-#include <cmath>
-#include <random>
+#include <algorithm>
 #include <iostream>
 #include <iomanip>
-#include <algorithm>
+#include <random>
+#include <cmath>
 
 Environment::Environment(unsigned int const maxStep) : \
 	ball(std::array<double, 6>{WIDTH/2,HEIGHT,2,0,10,10}), \
@@ -31,13 +31,18 @@ Environment::Environment(unsigned int const maxStep) : \
 Environment::~Environment( void ) {}
 
 void	Environment::action(t_exp * exp) {
-    int const   timeStamp = 5;
-    for (int lap = 0; lap < timeStamp && !exp->done; lap++) {
+    int const   timeStamp = 6;
+	auto		state = std::make_shared<std::vector<double>>(std::vector<double>(INPUT_SIZE));
+    for (int lap = 0, num = 0.16; lap < timeStamp && !exp->done; lap++, num += 0.16) {
         this->moovePaddle(exp->action);
         this->mooveBall(exp);
+		auto	act = this->getGameState();
+		this->drawBall(*state, std::floor(act.bx/DS_R), std::floor(act.bx/DS_R), num);
+		this->drawPaddle(*state, std::floor(act.rPx/DS_R), std::floor(act.rPy/DS_R), 200, num);
+		this->drawPaddle(*state, std::floor(act.lPx/DS_R), std::floor(act.lPy/DS_R), 200, num);
     }
-    // this->displayState(exp->state, exp->prevState);
-	exp->nextState = this->getState();
+	exp->nextState = state;
+	this->_state = state;
 	return ;
 }
 
@@ -48,7 +53,6 @@ void	Environment::moovePaddle(int const action) {
 		this->rPaddle.y += this->rPaddle.s;
 	
 	this->moovelPaddle();
-	// this->lPaddle.y += (this->randDouble() > 0.5 ? 1 : -1) * this->lPaddle.s * 0.5;
 	
 	if (this->rPaddle.y < 0.5 * this->rPaddle.h)
 		this->rPaddle.y = 0.5 * this->rPaddle.h;
@@ -63,23 +67,13 @@ void	Environment::moovePaddle(int const action) {
 }
 
 void	Environment::moovelPaddle( void ) {
-	// Distance entre la position actuelle du centre de la raquette et la balle
 	double diff = ball.y - lPaddle.y;
 
-	// Seuil pour éviter les micro-ajustements
 	double tolerance = 10.0;
 
 	if (std::abs(diff) > tolerance) {
 		double direction = (diff > 0) ? 1.0 : -1.0;
-
-		// Mouvement avec une vitesse légèrement réduite pour rester battable
-		lPaddle.y += direction * lPaddle.s * 0.7;
-
-		// Clip aux bords
-		// if (lPaddle.y < 0.5 * lPaddle.h)
-		// 	lPaddle.y = 0.5 * lPaddle.h;
-		// else if (lPaddle.y > HEIGHT - 0.5 * lPaddle.h)
-		// 	lPaddle.y = HEIGHT - 0.5 * lPaddle.h;
+		lPaddle.y += direction * lPaddle.s * 0.4;
 	}
 }
 
@@ -107,11 +101,12 @@ void	Environment::mooveBall(t_exp * exp) {
     }
     if (ball.x > WIDTH) {
         exp->done = true;
+        exp->reward = -0.1;
 		return ;
     }
     else if (ball.x < 0) {
         exp->done = true;
-        exp->reward = 20.;
+        exp->reward = +0.5;
 		return ;
     }
     // if (ball.x > WIDTH) {
@@ -145,6 +140,11 @@ void	Environment::reset( void ) {
     this->ball.s = this->ball.is;
     this->lPaddle.y = 0.5 * HEIGHT;
     this->rPaddle.y = 0.5 * HEIGHT;
+	auto		state = std::make_shared<std::vector<double>>(std::vector<double>(INPUT_SIZE));
+	this->drawBall(*state, std::floor(this->ball.x/DS_R), std::floor(this->ball.x/DS_R), 1.0);
+	this->drawPaddle(*state, std::floor(this->rPaddle.x/DS_R), std::floor(this->rPaddle.y/DS_R), 200, 1.0);
+	this->drawPaddle(*state, std::floor(this->lPaddle.x/DS_R), std::floor(this->lPaddle.y/DS_R), 200, 1.0);
+	this->_state = state;
 	return ;
 }
 
@@ -184,78 +184,41 @@ void	Environment::norAngle( void ) {
 	return ;
 }
 
-std::array<double,6>    Environment::getState( void ) {
-    return std::array<double,6>{this->ball.x,\
+std::shared_ptr<std::vector<double>>	Environment::getState( void ) {
+	return	this->_state;
+}
+
+t_gState    Environment::getGameState( void ) {
+    return t_gState(std::array<double,6>{this->ball.x,\
                                 this->ball.y,\
                                 this->rPaddle.x,\
                                 this->rPaddle.y,\
-                                this->lPaddle.x,
-                                this->lPaddle.y};
+                                this->lPaddle.x,\
+                                this->lPaddle.y});
 }
 
-std::vector<double>*	Environment::getStateVector(std::array<double,6> const & act, std::array<double,6> const & old) {
-	auto state = std::vector<std::vector<double>>(HEIGHT/DS_R, std::vector<double>(WIDTH/DS_R));
-
-	std::array<int, 2>	idx = {static_cast<int>(act[0]/DS_R), static_cast<int>(act[1]/DS_R)};
-	std::array<int, 2>	lastIdx = {static_cast<int>(old[0]/DS_R), static_cast<int>(old[1]/DS_R)};
-	lineDrag(state, idx, lastIdx);
-	std::array<double, 4>	pCoord = {act[2], act[3], act[4], act[5]}; 
-	paddle(state, std::array<int, 2>{static_cast<int>(pCoord[0]/DS_R), static_cast<int>(pCoord[1]/DS_R)});
-	paddle(state, std::array<int, 2>{static_cast<int>(pCoord[2]/DS_R), static_cast<int>(pCoord[3]/DS_R)});
-    auto stateFlat = Math::flatten2D(state);
-	return stateFlat;
-}
-
-void	Environment::lineDrag(std::vector<std::vector<double>> & simulation, std::array<int, 2> actxy, std::array<int, 2> oldxy) {
-	int				diffX = std::abs(actxy[0] - oldxy[0]);
-	int const		diffY = std::abs(actxy[1] - oldxy[1]);
-	int const		direcX = actxy[0] < oldxy[0] ? 1 : -1;
-	int const		direcY = actxy[1] < oldxy[1] ? 1 : -1;
-	int	const		valuePerRow = diffY == 0 ? diffX : diffX / diffY;
-	double const	offset = 1. / diffX;
-	int				countValue = 0;
-	double			value = 1.;
-	while (diffX > 0) {
-        if (actxy[0] >= 60)
-            actxy[0] = 59;
-        if (actxy[0] < 0)
-            actxy[0] = 0;
-		simulation.at(actxy[1]).at(actxy[0]) = value;
-		if (countValue < valuePerRow) {
-			actxy[0] += direcX;
-			++countValue;
-		} else {
-			actxy[1] += direcY;
-			countValue = 0;
-		}
-		value -= offset;
-		--diffX;
-	}
+void	Environment::drawBall(std::vector<double> & s, int x, int y, double num) {
+	int i = y * W + x;
+	
+	if (i < 600 && i >= 0)
+		s.at(i) = num;
 	return ;
 }
 
-void	Environment::paddle(std::vector<std::vector<double>> & simulation, std::array<int, 2> pxy) {
-	int	size = this->rPaddle.h / DS_R; // si ya un probleme c est ici
+void	Environment::drawPaddle(std::vector<double> & s, int x, int y, int sizePaddle, double num) {
+	int	size = sizePaddle / DS_R;
+	int start = (y - (size / 2)) * W;
 	
-	pxy[1] -= size / 2;
-	while (size) {
-		simulation.at(pxy[1]).at(pxy[0]) = 0.5;
-		++pxy[1];
+	
+	while (size && start < 600 && start >= 0) {
+		s.at(start + x) = num;
+		start += W;
 		--size;
 	}
 	return ;
 }
 
-void	Environment::displayState(std::array<double,6> const & act, std::array<double,6> const & old) {
-    auto        vec = std::vector<std::vector<double>>(HEIGHT/DS_R, std::vector<double>(WIDTH/DS_R));
-    const int   W = 60;
-
-	std::array<int, 2>	idx = {static_cast<int>(act[0]/DS_R), static_cast<int>(act[1]/DS_R)};
-	std::array<int, 2>	lastIdx = {static_cast<int>(old[0]/DS_R), static_cast<int>(old[1]/DS_R)};
-	lineDrag(vec, idx, lastIdx);
-	std::array<double, 4>	pCoord = {act[2], act[3], act[4], act[5]}; 
-	paddle(vec, std::array<int, 2>{static_cast<int>(pCoord[0]/DS_R), static_cast<int>(pCoord[1]/DS_R)});
-	paddle(vec, std::array<int, 2>{static_cast<int>(pCoord[2]/DS_R), static_cast<int>(pCoord[3]/DS_R)});
+void	Environment::displayState(std::vector<double> const & vec) {
 	std::cout << "\033[H"; // remet le curseur en haut à gauche
     for (size_t i = 0; i < vec.size(); ++i) {
         if (i % W == 0 && i != 0)
@@ -263,13 +226,13 @@ void	Environment::displayState(std::array<double,6> const & act, std::array<doub
         std::cout << std::setw(3) << std::fixed << std::setprecision(1) << 0.0;
     }
     std::cout << "\033[H"; // remet le curseur en haut à gauche
-	for (auto it = vec.begin(); it != vec.end(); it++) {
-		for (auto it_in = (*it).begin(); it_in != (*it).end(); it_in++) {
-			if (*it_in != 0.)
+	for (auto it = vec.begin(); it != vec.end();) {
+		for (int count = 0; count < W; count++, it++) {
+			if (*it != 0.)
             	std::cout << "\033[31m"; // rouge
         	else
             	std::cout << "\033[0m";  // reset couleur
-        	std::cout << std::setw(3) << std::fixed << std::setprecision(1) << *it_in;
+        	std::cout << std::setw(3) << std::fixed << std::setprecision(1) << *it;
 		}
 		std::cout << '\n';
 	}

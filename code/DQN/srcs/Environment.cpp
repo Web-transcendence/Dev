@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Environment.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/04 13:36:37 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/04/30 17:44:24 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,9 @@ void	Environment::action(t_exp * exp) {
 	if (place == 'G' || place == 'H') {
 		exp->done = true;
 		if (place == 'G')
-			++exp->reward;
+			exp->reward += 1;
+		else
+			exp->reward -= 0.1;
 	}
 	exp->nextState.at(state) = 1.0;
 	return ;

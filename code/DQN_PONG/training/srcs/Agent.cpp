@@ -6,7 +6,7 @@
 /*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/29 17:25:41 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/04/30 21:34:57 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,18 +51,15 @@ void	Agent::train( void ) {
 		std::vector<double>	recordStep;
 		double	totalReward = 0.0;
 		this->_env->reset();
-		std::array<double,6>	prevState = this->_env->getState();
 		for (int iAct = 0; ; iAct++) {
 			auto	experience = new t_exp;
-			experience->prevState = prevState;
 			experience->state = this->_env->getState();
-			prevState = this->_env->getState();
 			this->getAction(experience, exploRate);
 			this->_env->action(experience);
 			totalReward += experience->reward;
 			this->_xp->add(experience);
 			this->batchTrain(16);
-			if (!(iAct % 25) && iAct) {this->TNetUpdate();}
+			if (experience->reward) {this->TNetUpdate();}
 			if (experience->done) {
 				recordStep.push_back(iAct);
 				break ;
@@ -78,8 +75,6 @@ void	Agent::train( void ) {
 			double averageStep = std::accumulate(recordStep.begin(),recordStep.end(),0.0) / static_cast<double>(recordStep.size());
 			recordReward.clear();
 			std::cout<<"epoch: "<<iEp-100<<" to "<<this->_maxEpTraining<<", average reward: "<<averageReward<<", average steps: "<<averageStep<<", exploration: "<<exploRate<<std::endl;
-			// if (averageReward > 25)
-			// 	break ;
 		}
 	}
 	this->_QNet->printNetworkToJson("weights.json");
@@ -87,21 +82,18 @@ void	Agent::train( void ) {
 }
 
 void	Agent::test( void ) {
-	
-	std::array<double,6>	prevState = this->_env->getState();
+	this->_env->reset();
 	for (int iAct = 0; iAct < this->_maxActions; iAct++) {
 		t_exp	experience;
 		experience.state = this->_env->getState();
 		this->getAction(&experience, 0.0);
 		this->_env->action(&experience);
-    	this->_env->displayState(experience.state, prevState);
-		prevState = experience.state;
+    	this->_env->displayState(*experience.state);
 		if (experience.done)
 			break ;
 	}
 	return ;
 }
-
 
 void	Agent::batchTrain(unsigned int const batchSize) {
  	if (this->_xp->getNum() < this->_xp->getMin())
@@ -109,23 +101,19 @@ void	Agent::batchTrain(unsigned int const batchSize) {
 	auto	batches = this->_xp->getBatch(batchSize);
 	t_tuple	training;
 	for (auto it_b = batches->begin(); it_b != batches->end(); it_b++) {
-		auto			input = this->_env->getStateVector((*it_b)->state, (*it_b)->prevState);
-		auto			nextInput = this->_env->getStateVector((*it_b)->nextState, (*it_b)->state);
-		auto			oQNet = this->_QNet->feedForward(*input);
-		auto			oTNet = this->_TNet->feedForward(*nextInput);
+		auto			oQNet = this->_QNet->feedForward(*(*it_b)->state);
+		auto			oTNet = this->_TNet->feedForward(*(*it_b)->nextState);
 		auto			adjusted = std::vector<double>(*oQNet);
 		unsigned int	act = (*it_b)->action;
 		unsigned int	actNext = std::distance(oTNet->begin(), std::max_element(oTNet->begin(), oTNet->end()));
 		adjusted.at(act) = (*it_b)->reward; 
 		if ((*it_b)->done == false) 
 		adjusted.at(act) += this->_discount*(oTNet->at(actNext));
-		training.input = input;
+		training.input = (*it_b)->state.get();
 		training.expectedOutput = &adjusted;
 		this->_QNet->SDG(&training, 0.05);
 		delete oTNet;
 		delete oQNet;
-		delete input;
-		delete nextInput;
 	}
 	delete batches;
 	return ;
@@ -135,10 +123,8 @@ void	Agent::getAction(t_exp * exp, double exploRate) const {
 	if (this->randDouble() < exploRate)
 		exp->action = this->randInt() % OUTPUT_SIZE;
 	else {
-		auto	input = this->_env->getStateVector(exp->state, exp->prevState);
-		auto	output = this->_QNet->feedForward(*input);
+		auto	output = this->_QNet->feedForward(*exp->state);
 		exp->action = std::distance(output->begin(), std::max_element(output->begin(), output->end()));
-		delete input;
 		delete output;
 	}
 	return ;
