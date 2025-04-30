@@ -1,8 +1,6 @@
 import {activateBtn} from "./button.js";
 
 export async function loadPart(page: string) {
-    window.history.pushState({}, "", page);
-    localStorage.setItem("path", page);
     try {
         await insertTag(`part${page}`);
         insertScript(page);
@@ -76,7 +74,7 @@ export function activateGoogle(page: string) {
 export function insertScript(page: string): void {
     const scripts: Record<string, string> = {
         "/pongRemote": "/static/dist/pong.js",
-        "/tower": "/static/dist/td.js",
+        "/towerRemote": "/static/dist/td.js",
     };
 
     const currentScriptSrc = scripts[page];

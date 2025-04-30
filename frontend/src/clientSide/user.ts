@@ -1,6 +1,7 @@
 import {handleConnection} from "./front.js"
 import {loadPart} from "./insert.js"
 import {sseConnection} from "./serverSentEvent.js"
+import {DispayNotification} from "./notificationHandler.js"
 
 export function register(button: HTMLElement): void {
     button.addEventListener("click", async () => {
@@ -23,6 +24,7 @@ export function register(button: HTMLElement): void {
             handleConnection(true)
         } else {
             console.log("ErrorDisplay : nickname, email or password are not respecting my authority")
+            DispayNotification('respecting my authority', { type: "error" });
         }
     })
 }

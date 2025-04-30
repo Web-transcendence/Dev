@@ -10,7 +10,8 @@ const mapButton : {[key: string] : () => void} = {
     "/logout": logoutBtn,
     "/editProfile" : editProfileBtn,
     "/2fa" : factor,
-    "/pongMode" : pongMode
+    "/pongMode" : pongMode,
+    "/towerMode" : towerMode
 }
 
 export function activateBtn(page: string) {
@@ -117,4 +118,8 @@ function factor() {
 
 function pongMode() {
     document.getElementById("pongRemote")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongRemote"));
+}
+
+function towerMode() {
+    document.getElementById("towerRemote")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/towerRemote"));
 }

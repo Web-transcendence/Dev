@@ -6,8 +6,9 @@ declare const AOS: any;
 
 export let connected = false;
 
-window.addEventListener("popstate", () => {
+window.addEventListener("popstate", (event) => {
     console.log("popstate");
+    console.log("state:", event.state);
     loadPart(window.location.pathname)
 });
 
@@ -19,7 +20,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         duration: 800,
     });
     // For Client Connection
-    if (await checkForToken()) {
+    const token = localStorage.getItem("token");
+    if (token && await checkForToken()) {
         await getAvatar();
         handleConnection(true);
     }
@@ -79,7 +81,7 @@ function constantButton() {
     //navigation page
     document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
     document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongMode"));
-    document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tower"));
+    document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/towerMode"));
     document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tournaments"));
     // Footer
     document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
@@ -135,10 +137,15 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 }
 
 export async function navigate(event: MouseEvent, path: string): Promise<void> {
+    event.preventDefault();
+
     handleConnection(await checkForToken());
     if (!connected && path == "/profile") {
         path = "/connect";
     }
-    event.preventDefault();
+
+    history.pushState({}, "", path);
+    localStorage.setItem("path", path);
+    console.log("pushState & setItem :", path);
     await loadPart(path);
 }

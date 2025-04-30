@@ -15,82 +15,76 @@
   </head>
 
   <body class="text-white min-h-screen flex flex-col" style="font-family: 'Press Start 2P', cursive;">
-        <div id="tsparticles"></div>
-     <div id="app" class="flex-1 mt-15">
-         <nav class="fixed top-0 z-20 left-0 p-4 flex justify-between items-center w-full bg-transparent">
+  <div id="tsparticles"></div>
+  <div id="app" class="flex-1 mt-15">
 
-             <div class="flex items-center add-blur">
-                 <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
+      <nav class="fixed top-0 z-20 left-0 p-4 flex justify-between items-center w-full bg-transparent">
 
-                     <img src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
+          <div class="flex items-center add-blur">
+              <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
+                  <img src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
+                  <p class="text-center text-xl hidden md:block"> TABG. </p>
+              </button>
+          </div>
 
-                     <p class="text-center text-xl hidden md:block"> TABG. </p>
+          <div class="flex space-x-8 items-center add-blur">
+              <button id="pongMode" class="btn-line">Pong</button>
+              <button id="towerDefense" class="btn-line">Tower-Defense</button>
+              <button id="tournaments" class="btn-line">Tournaments</button>
+          </div>
 
-                 </button>
-             </div>
-             <div class="flex space-x-8 items-center add-blur">
+          <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">
+              <div class="relative group">
+                  <img id="avatar" src="../images/logout.png" alt="Avatar" class="relative h-10 w-10 rounded-full z-50">
+                  <button id="profile" class="hidden btn-slide">
+                      Profil
+                  </button>
+                  <button id="connect" class="btn-slide">
+                      Connect
+                  </button>
+              </div>
+          </div>
+      </nav>
 
-                 <button id="pongMode" class="btn-line">Pong</button>
+      <div id="content" class="h-full w-full flex flex-grow justify-center mt-8 rounded-lg shadow-lg *:w-full">
 
-                 <button id="towerDefense" class="btn-line">Tower-Defense</button>
+      </div>
 
-                 <button id="tournaments" class="btn-line">Tournaments</button>
+      <div id="notFound" class="hidden flextext-white font-mono items-center justify-center min-h-screen">
+          <div class="text-center space-y-6">
+              <span class="block text-9xl text-pink-500">404 - NOT FOUND</span>
+              <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
+          </div>
+      </div>
+  </div>
 
-             </div>
-             <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group add-blur">
-
-                 <div class="relative group">
-                     <img id="avatar" src="../images/logout.png" alt="Avatar" class="relative h-10 w-10 rounded-full z-50">
-                     <button id="profile" class="hidden btn-slide">
-
-                         Profil
-
-                     </button>
-                     <button id="connect" class="btn-slide">
-
-                         Connect
-
-                     </button>
-
-                 </div>
-
-             </div>
-         </nav>
-
-         <div id="content" class="h-full w-full flex flex-grow justify-center mt-8 rounded-lg shadow-lg *:w-full">
-
-
-         </div>
-         <div id="notFound" class="hidden flextext-white font-mono items-center justify-center min-h-screen">
-
-             <div class="text-center space-y-6">
-
-                 <span class="block text-9xl text-pink-500">404 - NOT FOUND</span>
-
-                 <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
-
-             </div>
-
-         </div>
-
-     </div>
+  <div id="notificationBanner"
+       class="fixed top-35 right-[-100%] w-1/3 max-w-md p-4 rounded-l-lg shadow-lg text-white flex justify-between items-center gap-4 transition-all duration-500 z-50 hidden bg-gray-800">
+      <span id="notificationMessage" class="flex-1">Message</span>
+      <button id="notificationActionAccept"
+              class="bg-white text-gray-800 px-3 py-1 rounded hidden hover:bg-gray-200 transition">
+          Accept
+      </button>
+      <button id="notificationActionReject"
+              class="bg-white text-gray-800 px-3 py-1 rounded hidden hover:bg-gray-200 transition">
+          Reject
+      </button>
+  </div>
 
 
+  <footer class="bg-transparent text-white text-center rounded-t-lg p-4 flex justify-between items-center">
+      <img id="bottom-img" src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
+      <div class="flex space-x-8 items-center">
+          <span id="bottom-text" class="text-lg font-bold"></span>
+          <button id="about" class="btn-line">About Us</button>
+          <button id="contact" class="btn-line">Contact Us</button>
+      </div>
+  </footer>
 
-     <footer class="bg-transparent text-white text-center rounded-t-lg p-4 flex justify-between items-center">
-       <img id="bottom-img" src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
-       <div class="flex space-x-8 items-center">
-         <span id="bottom-text" class="text-lg font-bold"></span>
-           <button id="about" class="btn-line">About Us</button>
-           <button id="contact" class="btn-line">Contact Us</button>
-       </div>
-     </footer>
-
-     <script type="module" id="pongScript" src="/static/dist/pong.js" defer ></script>
-     <script type="module" id="tdScript" src="/static/dist/td.js" defer ></script>
-     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
-     <script type="module" src="/static/dist/front.js"></script>
-
+  <script type="module" id="pongScript" src="/static/dist/pong.js" defer ></script>
+  <script type="module" id="tdScript" src="/static/dist/td.js" defer ></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+  <script type="module" src="/static/dist/front.js"></script>
 
   </body>
 </html>
