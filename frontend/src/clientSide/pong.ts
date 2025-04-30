@@ -30,6 +30,7 @@ class Paddle {
 }
 
 class gameState {
+    ready: boolean = false;
     state: number = 0;
     start: boolean = false;
     score1: string = "0";
@@ -83,7 +84,6 @@ export function Pong(mode: string, room?: number) {
     const rPaddle = new Paddle("Player 2", canvas.width - 30, canvas.height / 2, 20, 200, "#fcc800");
     const asset = new Assets;
     let fSize: number;
-    let ready = false;
     let animFrame = 0;
     let animLoop = 1;
 
@@ -125,7 +125,7 @@ export function Pong(mode: string, room?: number) {
         ctx.font = `${fSize}px 'Press Start 2P'`;
         ctx.textAlign = "center"
         ctx.fillText("Pong Game", canvas.width * 0.5, canvas.height * 0.5);
-        if (!ready) {
+        if (!game.ready) {
             if (animFrame === 0 || animFrame === 1)
                 ctx.fillStyle = "#fcc800";
             else if (animFrame === 2 || animFrame === 3)
@@ -193,14 +193,20 @@ export function Pong(mode: string, room?: number) {
         fSize = Math.round(60 * ratio());
         ctx.font = `${fSize}px 'Press Start 2P'`;
         ctx.textAlign = "center";
-        if (game.score1 > game.score2)
+        if (game.state = 2.5) {
+            ctx.fillText("You Win", canvas.width * 0.5, canvas.height * 0.4);
+            fSize = Math.round(26 * ratio());
+            ctx.font = `${fSize}px 'Press Start 2P'`;
+            ctx.textAlign = "center";
+            ctx.fillText("Opponent disconnected", canvas.width * 0.5, canvas.height * 0.65);
+        } else if (game.score1 > game.score2)
             ctx.fillText("Player 1 Wins", canvas.width * 0.5, canvas.height * 0.4);
         else
             ctx.fillText("Player 2 Wins", canvas.width * 0.5, canvas.height * 0.4);
-        fSize = Math.round(26 * ratio());
-        ctx.font = `${fSize}px 'Press Start 2P'`;
-        ctx.textAlign = "center";
-        ctx.fillText("Press any key to restart game", canvas.width * 0.5, canvas.height * 0.65);
+        // fSize = Math.round(26 * ratio());
+        // ctx.font = `${fSize}px 'Press Start 2P'`;
+        // ctx.textAlign = "center";
+        // ctx.fillText("Press any key to restart game", canvas.width * 0.5, canvas.height * 0.65);
     }
 
     function drawHazard() {
@@ -244,6 +250,7 @@ export function Pong(mode: string, room?: number) {
                 mainLoop();
                 break;
             case 2:
+            case 2.5:
                 endScreen();
                 break;
         }
@@ -260,23 +267,17 @@ export function Pong(mode: string, room?: number) {
 
     try {
         const socket = new WebSocket(`match-server/ws`);
+        const keyUpHandler = createKeyUpHandler(socket);
+        const keyDownHandler = createKeyDownHandler(socket, game, mode);
         pongConnect = true;
         socket.onopen = function () {
             console.log("Connected to Pong server");
             socket.send(JSON.stringify({type: "socketInit", nick: nick, room: room}));
         };
 
-        window.addEventListener("keydown", (event) => {
-            if (ready === false) {
-                ready = true;
-                socket.send(JSON.stringify({type: "ready", mode: mode}));
-            }
-            socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
-        });
+        window.addEventListener("keydown", keyDownHandler);
 
-        window.addEventListener("keyup", (event) => {
-            socket.send(JSON.stringify({type: "input", key: event.key, state: "up"}));
-        });
+        window.addEventListener("keyup", keyUpHandler);
 
         socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
@@ -323,6 +324,10 @@ export function Pong(mode: string, room?: number) {
                         rPaddle.score = data.score;
                     }
                     break;
+                case "Disconnected":
+                    if (game.state !== 2)
+                        game.state = 2.5;
+                    break;
                 default:
                     console.warn("Unknown type received:", data);
             }
@@ -330,11 +335,29 @@ export function Pong(mode: string, room?: number) {
         gameLoop();
         connectionCheck(socket);
         socket.onclose = function () {
+            window.removeEventListener("keyup", keyUpHandler);
+            window.removeEventListener("keydown", keyDownHandler);
             return console.log("Disconnected from Pong server");
         };
     } catch (error) {
         console.error("Unexpected error: ", error);
     }
+}
+
+function createKeyUpHandler(socket: WebSocket) {
+    return function(event: KeyboardEvent) {
+        socket.send(JSON.stringify({ type: "input", key: event.key, state: "up" }));
+    };
+}
+
+function createKeyDownHandler(socket: WebSocket, game: gameState, mode: string) {
+    return function(event: KeyboardEvent) {
+        if (game.ready === false) {
+            game.ready = true;
+            socket.send(JSON.stringify({type: "ready", mode: mode}));
+        }
+        socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
+    };
 }
 
 export function pongStop() {

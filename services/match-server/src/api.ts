@@ -419,17 +419,16 @@ function soloMode(player: Player, solo: boolean) {
 }
 
 // Netcode
-function checkRoom(room: Room, intervalId: ReturnType<typeof setInterval>, game: gameState) {
+function checkRoom(room: Room, game: gameState) {
     if (room.players.length !== 2) {
         game.state = 2;
-        clearInterval(intervalId);
         room.players.forEach(player => {
-            player.ws.send(JSON.stringify({ class: "Disconnected" }));
+            player.ws.send(JSON.stringify({ type: "Disconnected" }));
             player.ws.close();
         });
         return ;
     }
-    setTimeout(() => checkRoom(room, intervalId, game), 100);
+    setTimeout(() => checkRoom(room, game), 100);
 }
 
 function leaveRoom(userId: number) {
@@ -439,6 +438,7 @@ function leaveRoom(userId: number) {
                 console.log("player: ", rooms[i].players[j].name, " with id: ", userId, " left room ", rooms[i].id);
                 rooms[i].players.splice(j, 1);
                 if (rooms[i].players.length === 0) {
+                    console.log("room: ", rooms[i].id, " has been cleaned.");
                     rooms.splice(i, 1);
                 }
                 return ;
@@ -489,14 +489,17 @@ function joinRoom(player: Player, roomId: number) {
             clearInterval(intervalId);
             return;
         }
-        rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[0].paddle));
-        rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[1].paddle));
-        rooms[i].players[0].ws.send(JSON.stringify(ball));
-        rooms[i].players[0].ws.send(JSON.stringify(game));
-        rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[0].paddle));
-        rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[1].paddle));
-        rooms[i].players[1].ws.send(JSON.stringify(ball));
-        rooms[i].players[1].ws.send(JSON.stringify(game));
+        if (rooms[i].players.length === 2) {
+            rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[0].paddle));
+            rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[1].paddle));
+            rooms[i].players[0].ws.send(JSON.stringify(ball));
+            rooms[i].players[0].ws.send(JSON.stringify(game));
+            rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[0].paddle));
+            rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[1].paddle));
+            rooms[i].players[1].ws.send(JSON.stringify(ball));
+            rooms[i].players[1].ws.send(JSON.stringify(game));
+        } else
+            clearInterval(intervalId);
     }, 10);
     game.state = 1;
     moveBall(ball, rooms[i].players[0].paddle, rooms[i].players[1].paddle, rooms[i].players[0].input, rooms[i].players[1].input, game);
