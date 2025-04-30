@@ -1,7 +1,8 @@
 import {addFriend, login, profile, register, setAvatar, verify2fa} from "./user.js";
 import { friendList, init2fa} from "./user.js";
 import {connected, handleConnection, navigate} from "./front.js";
-import {tdStop, TowerDefense} from "./td.js";
+import {TowerDefense} from "./td.js";
+import { Pong } from "./pong.js";
 
 
 const mapButton : {[key: string] : () => void} = {
@@ -12,6 +13,8 @@ const mapButton : {[key: string] : () => void} = {
     "/editProfile" : editProfileBtn,
     "/2fa" : factor,
     "/pongMode" : pongMode,
+    "/pongRemote" : pongRemote,
+    "/pongLocal" : pongLocal,
     "/tower" : tower
 }
 
@@ -118,11 +121,18 @@ function factor() {
 }
 
 function pongMode() {
-    document.getElementById("pong")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
+    document.getElementById("pongRemote")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongRemote"));
+    document.getElementById("pongLocal")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongLocal"));
 }
 
 function tower() {
-    tdStop()
-    console.log("prout");
     TowerDefense()
+}
+
+function pongLocal() {
+    Pong("local")
+}
+
+function pongRemote() {
+    Pong("remote")
 }

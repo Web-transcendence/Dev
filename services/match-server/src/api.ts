@@ -3,8 +3,9 @@ import fastifyWebsocket from '@fastify/websocket';
 import { WebSocket } from "ws";
 import { z } from "zod";
 
-
 const inputSchema = z.object({ state: z.string(), key: z.string() });
+const initSchema = z.object({ nick: z.string(), room: z.number() });
+const readySchema = z.object({ mode: z.string() });
 
 class Ball {
     x: number;
@@ -97,11 +98,13 @@ class Room {
 }
 
 class Player {
+    name: string = "Default";
+    id: number;
     ws: WebSocket;
     paddle: Paddle = new Paddle(0, 400, 20, 200, 10, "#fcc800");
     input: keyInput = new keyInput();
-    game: gameState = new gameState();
-    constructor(ws: WebSocket) {
+    constructor(id: number, ws: WebSocket) {
+        this.id = id;
         this.ws = ws;
     }
 }
@@ -135,41 +138,39 @@ class Timer {
 }
 
 let rooms: Room[] = [];
+const ids = new Set<number>();
 
-function inputHandler(key: string, state: string, input: keyInput, game: gameState) {
-    let upordown = false;
-    if (game.state === 1) {
-        if (state === "down")
-            upordown = true;
-        if (key === "w")
-            input.w = upordown;
-        if (key === "s")
-            input.s = upordown;
-        if (key === "ArrowUp")
-            input.arrowUp = upordown;
-        if (key === "ArrowDown")
-            input.arrowDown = upordown;
-    }
-    else if (state === "down")
-        game.state = 1;
+function generateId() {
+    let newId: number;
+    do {
+        newId = Math.floor(Math.random() * 10000);
+    } while (ids.has(newId));
+    ids.add(newId);
+    return (newId);
 }
 
-function resetInput(lInput: keyInput, rInput: keyInput) {
-    rInput.arrowUp = false;
-    rInput.arrowDown = false;
-    rInput.w = false;
-    rInput.arrowUp = false;
-    lInput.arrowUp = false;
-    lInput.arrowDown = false;
-    lInput.w = false;
-    lInput.arrowUp = false;
+function inputHandler(key: string, state: string, input: keyInput) {
+    let down = state === "down";
+    if (key === "w")
+        input.w = down;
+    if (key === "s")
+        input.s = down;
+    if (key === "ArrowUp")
+        input.arrowUp = down;
+    if (key === "ArrowDown")
+        input.arrowDown = down;
 }
 
-function resetGame(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, lGame: gameState, rGame: gameState, lInput: keyInput, rInput: keyInput) {
-    lGame.start = false;
-    rGame.start = false;
-    lGame.timer = new Timer (0, 2);
-    rGame.timer = new Timer (0, 2);
+function resetInput(Input: keyInput) {
+    Input.arrowUp = false;
+    Input.arrowDown = false;
+    Input.w = false;
+    Input.arrowUp = false;
+}
+
+function resetGame(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, game: gameState, lInput: keyInput, rInput: keyInput) {
+    game.start = false;
+    game.timer = new Timer (0, 2);
     if (ball.x < 0)
         ball.angle = Math.PI;
     else
@@ -180,19 +181,16 @@ function resetGame(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, lGame: gameStat
     ball.speed = ball.ispeed;
     lPaddle.y = 0.5 * 800;
     rPaddle.y = 0.5 * 800;
-    lGame.hazard.type = "Default";
-    rGame.hazard.type = "Default";
-    if (rPaddle.score === lGame.maxScore || lPaddle.score === lGame.maxScore) {
-        lGame.state = 2;
-        lGame.score1 = lPaddle.score;
-        lGame.score2 = rPaddle.score;
-        rGame.state = 2;
-        rGame.score1 = lPaddle.score;
-        rGame.score2 = rPaddle.score;
+    game.hazard.type = "Default";
+    if (rPaddle.score === game.maxScore || lPaddle.score === game.maxScore) {
+        game.state = 2;
+        game.score1 = lPaddle.score;
+        game.score2 = rPaddle.score;
         rPaddle.score = "0";
         lPaddle.score = "0";
     }
-    resetInput(lInput, rInput);
+    resetInput(lInput);
+    resetInput(rInput);
 }
 
 function norAngle(ball: Ball) {
@@ -227,8 +225,8 @@ function bounceAngle(ball: Ball, paddle: Paddle, side: string) {
     norAngle(ball);
 }
 
-function moveBall(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, lInput: keyInput, rInput: keyInput, lGame: gameState, rGame: gameState) {
-    if (lGame.start && rGame.start) {
+function moveBall(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, lInput: keyInput, rInput: keyInput, game: gameState) {
+    if (game.start) {
         let oldX = ball.x;
         let oldY = ball.y;
         let collision = 0;
@@ -249,20 +247,19 @@ function moveBall(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, lInput: keyInput
             ball.x = oldX + Math.cos(ball.angle) * (Math.sqrt(Math.pow(ball.y - oldY, 2) + Math.pow(ball.x - oldX, 2)));
             ball.y = oldY + Math.sin(ball.angle) * (Math.sqrt(Math.pow(ball.y - oldY, 2) + Math.pow(ball.x - oldX, 2)));
         }
-        if (ball.x > lGame.hazard.x - 37 && ball.x < lGame.hazard.x + 37) { // Hazard size is 50 but hitbox is 74 to cover ball radius
-            if (ball.y > lGame.hazard.y - 37 && ball.y < lGame.hazard.y + 37) {
-                hazardEffect(lGame, rGame, ball, lPaddle, rPaddle);
-                lGame.hazard.type = "Default";
-                rGame.hazard.type = "Default";
+        if (ball.x > game.hazard.x - 37 && ball.x < game.hazard.x + 37) { // Hazard size is 50 but hitbox is 74 to cover ball radius
+            if (ball.y > game.hazard.y - 37 && ball.y < game.hazard.y + 37) {
+                hazardEffect(game, ball, lPaddle, rPaddle);
+                game.hazard.type = "Default";
             }
         }
         if (ball.x > 1200) {
             lPaddle.score = String(Number(lPaddle.score) + 1);
-            resetGame(ball, lPaddle, rPaddle, lGame, rGame, lInput, rInput);
+            resetGame(ball, lPaddle, rPaddle, game, lInput, rInput);
         }
         if (ball.x < 0) {
             rPaddle.score = String(Number(rPaddle.score) + 1);
-            resetGame(ball, lPaddle, rPaddle, lGame, rGame, lInput, rInput);
+            resetGame(ball, lPaddle, rPaddle, game, lInput, rInput);
         }
         if (ball.y > 800) {
             ball.y = 800 - (ball.y - 800);
@@ -273,11 +270,33 @@ function moveBall(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, lInput: keyInput
         }
         norAngle(ball);
     }
-    setTimeout(() => moveBall(ball, lPaddle, rPaddle, lInput, rInput,  lGame, rGame), 10);
+    setTimeout(() => moveBall(ball, lPaddle, rPaddle, lInput, rInput,  game), 10);
 }
 
-function movePaddle(lInput: keyInput, rInput: keyInput, lPaddle: Paddle, rPaddle: Paddle, lGame: gameState, rGame: gameState) {
-    if (lGame.state === 1 && rGame.state === 1) {
+function movePaddleSolo(input: keyInput, lPaddle: Paddle, rPaddle: Paddle, game: gameState) {
+    if (game.state === 1) {
+        if (input.w)
+            lPaddle.y -= lPaddle.speed;
+        if (input.s)
+            lPaddle.y += lPaddle.speed;
+        if (input.arrowUp)
+            rPaddle.y -= rPaddle.speed;
+        if (input.arrowDown )
+            rPaddle.y += rPaddle.speed;
+        if (rPaddle.y < 0.5 * rPaddle.height)
+            rPaddle.y = 0.5 * rPaddle.height;
+        else if (rPaddle.y > 800 - rPaddle.height * 0.5)
+            rPaddle.y = 800 - 0.5 * rPaddle.height;
+        if (lPaddle.y < 0.5 * lPaddle.height)
+            lPaddle.y = 0.5 * lPaddle.height;
+        else if (lPaddle.y > 800 - lPaddle.height * 0.5)
+            lPaddle.y = 800 - 0.5 * lPaddle.height;
+    }
+    setTimeout(() => movePaddleSolo(input, lPaddle, rPaddle, game), 10);
+}
+
+function movePaddle(lInput: keyInput, rInput: keyInput, lPaddle: Paddle, rPaddle: Paddle, game: gameState) {
+    if (game.state === 1) {
         if (lInput.arrowUp || lInput.w)
             lPaddle.y -= lPaddle.speed;
         if (lInput.arrowDown || lInput.s)
@@ -295,15 +314,14 @@ function movePaddle(lInput: keyInput, rInput: keyInput, lPaddle: Paddle, rPaddle
         else if (lPaddle.y > 800 - lPaddle.height * 0.5)
             lPaddle.y = 800 - 0.5 * lPaddle.height;
     }
-    setTimeout(() => movePaddle(lInput, rInput, lPaddle, rPaddle, lGame, rGame), 10);
+    setTimeout(() => movePaddle(lInput, rInput, lPaddle, rPaddle, game), 10);
 }
 
-function moveHazard(lGame: gameState, rGame: gameState, ball: Ball) {
-    if (lGame.state === 1 && rGame.state === 1) {
-        lGame.hazard.y += lGame.hazard.speed;
-        rGame.hazard.y += rGame.hazard.speed;
+function moveHazard(game: gameState, ball: Ball) {
+    if (game.state === 1) {
+        game.hazard.y += game.hazard.speed;
     }
-    setTimeout(() => moveHazard(lGame, rGame, ball), 10);
+    setTimeout(() => moveHazard(game, ball), 10);
 }
 
 function resetHazard(lPaddle: Paddle, rPaddle: Paddle, ball: Ball) {
@@ -312,11 +330,11 @@ function resetHazard(lPaddle: Paddle, rPaddle: Paddle, ball: Ball) {
     ball.ispeed = ball.ospeed;
 }
 
-function hazardEffect(lGame: gameState, rGame: gameState, ball: Ball, lPaddle: Paddle, rPaddle: Paddle) {
+function hazardEffect(game: gameState, ball: Ball, lPaddle: Paddle, rPaddle: Paddle) {
     let left = true;
     if (ball.angle > Math.PI * 0.5 && ball.angle < Math.PI * 1.5)
         left = false;
-    switch (lGame.hazard.type) {
+    switch (game.hazard.type) {
         case "BallSpeedUp":
             ball.ospeed = ball.ispeed;
             ball.speed *= 1.5;
@@ -340,63 +358,131 @@ function hazardEffect(lGame: gameState, rGame: gameState, ball: Ball, lPaddle: P
     setTimeout(() => resetHazard(lPaddle, rPaddle, ball), 5000);
 }
 
-function hazardGenerator(lGame: gameState, rGame: gameState) {
-    if (lGame.start && rGame.start) {
+function hazardGenerator(game: gameState) {
+    if (game.start) {
         let type = Math.floor(Math.random() * 3);
         let rdm = Math.random();
         switch (type) {
             case 2 :
-                lGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BallSpeedUp");
-                rGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BallSpeedUp");
+                game.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BallSpeedUp");
                 break;
             case 1:
-                lGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BarSizeUp");
-                rGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BarSizeUp");
+                game.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BarSizeUp");
                 break;
             case 0:
-                lGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BarSizeDown");
-                rGame.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BarSizeDown");
+                game.hazard = new Hazard(450 + rdm * 300, 1 + Math.floor(rdm * 2), "BarSizeDown");
                 break;
             default:
                 break;
         }
     }
-    setTimeout(() => hazardGenerator(lGame, rGame), 10000);
+    setTimeout(() => hazardGenerator(game), 10000);
 }
 
-function timerCheck(lGame: gameState, rGame: gameState) {
-    if (lGame.state === 1 && rGame.state === 1) {
-        if (lGame.timer.timeLeft === 0 && rGame.timer.timeLeft === 0) {
-            lGame.start = true;
-            rGame.start = true;
-        }
-        else if (!lGame.timer.started && !rGame.timer.started) {
-            lGame.timer.start();
-            rGame.timer.start();
-        }
-
+function timerCheck(game: gameState) {
+    if (game.state === 1) {
+        if (game.timer.timeLeft === 0)
+            game.start = true;
+        else if (!game.timer.started)
+            game.timer.start();
     }
-    setTimeout(() => timerCheck(lGame, rGame), 1000);
+    setTimeout(() => timerCheck(game), 1000);
 }
 
-function joinRoom(player: Player) {
-    let id: number = -1;
-    let i : number = 0;
-    for (; i < rooms.length; i++) {
-        if (rooms[i].players.length === 1) {
-            player.paddle.x = 1200 - 30;
-            rooms[i].players.push(player);
-            id = rooms[i].id;
-            break ;
-        }
-    }
-    if (id === -1) {
-        player.paddle.x = 30;
-        let room = new Room(rooms.length, player);
-        rooms.push(room);
+function endSolo(intervalId: ReturnType<typeof setInterval>, game: gameState, solo: boolean) {
+    if (!solo) {
+        game.state = 2;
+        clearInterval(intervalId);
         return ;
     }
+    setTimeout(() => endSolo(intervalId, game, solo), 100);
+}
+
+function soloMode(player: Player, solo: boolean) {
     let ball = new Ball (1200 / 2, 800 / 2, 0, 8, 12, "#fcc800");
+    let game = new gameState();
+    let rPaddle = new Paddle(1170, 400, 20, 200, 10, "#fcc800");
+    player.paddle.x = 30
+    const intervalId = setInterval(() => {
+        player.ws.send(JSON.stringify(player.paddle));
+        player.ws.send(JSON.stringify(rPaddle));
+        player.ws.send(JSON.stringify(ball));
+        player.ws.send(JSON.stringify(game));
+    }, 10);
+    game.state = 1;
+    moveBall(ball, player.paddle, rPaddle, player.input, player.input, game);
+    movePaddleSolo(player.input, player.paddle, rPaddle, game);
+    moveHazard(game, ball);
+    hazardGenerator(game);
+    timerCheck(game);
+    endSolo(intervalId, game, solo);
+}
+
+// Netcode
+function checkRoom(room: Room, intervalId: ReturnType<typeof setInterval>, game: gameState) {
+    if (room.players.length !== 2) {
+        game.state = 2;
+        clearInterval(intervalId);
+        room.players.forEach(player => {
+            player.ws.send(JSON.stringify({ class: "Disconnected" }));
+            player.ws.close();
+        });
+        return ;
+    }
+    setTimeout(() => checkRoom(room, intervalId, game), 100);
+}
+
+function leaveRoom(userId: number) {
+    for (let i = 0 ; i < rooms.length; i++) {
+        for (let j = 0; j < rooms[i].players.length; j++) {
+            if (rooms[i].players[j].id === userId) {
+                console.log("player: ", rooms[i].players[j].name, " with id: ", userId, " left room ", rooms[i].id);
+                rooms[i].players.splice(j, 1);
+                if (rooms[i].players.length === 0) {
+                    rooms.splice(i, 1);
+                }
+                return ;
+            }
+        }
+    }
+    console.log("Player has not joined a room yet.");
+}
+
+function joinRoom(player: Player, roomId: number) {
+    let id: number = -1;
+    let i : number = 0;
+    if (roomId !== -1) { // Joining a defined room (invite or tournaments)
+        for (; i < rooms.length; i++) {
+            if (rooms[i].id === roomId && rooms[i].players.length === 1) {
+                player.paddle.x = 1200 - 30;
+                rooms[i].players.push(player);
+                break;
+            }
+        }
+        if (id === -1) {
+            player.paddle.x = 30;
+            let room = new Room(roomId, player);
+            rooms.push(room);
+            return;
+        }
+    } else { // Basic random matchmaking
+        for (; i < rooms.length; i++) {
+            if (rooms[i].players.length === 1) {
+                player.paddle.x = 1200 - 30;
+                rooms[i].players.push(player);
+                id = rooms[i].id;
+                break;
+            }
+        }
+        if (id === -1) {
+            player.paddle.x = 30;
+            let room = new Room(rooms.length, player);
+            rooms.push(room);
+            return;
+        }
+    }
+    let ball = new Ball (1200 / 2, 800 / 2, 0, 8, 12, "#fcc800");
+    let game = new gameState();
     const intervalId = setInterval(() => {
         let i = rooms.findIndex(room => room.id === id);
         if (i === -1) {
@@ -406,17 +492,19 @@ function joinRoom(player: Player) {
         rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[0].paddle));
         rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[1].paddle));
         rooms[i].players[0].ws.send(JSON.stringify(ball));
-        rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[0].game));
+        rooms[i].players[0].ws.send(JSON.stringify(game));
         rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[0].paddle));
         rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[1].paddle));
         rooms[i].players[1].ws.send(JSON.stringify(ball));
-        rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[1].game));
+        rooms[i].players[1].ws.send(JSON.stringify(game));
     }, 10);
-    moveBall(ball, rooms[i].players[0].paddle, rooms[i].players[1].paddle, rooms[i].players[0].input, rooms[i].players[1].input,  rooms[i].players[0].game, rooms[i].players[1].game);
-    movePaddle(rooms[i].players[0].input, rooms[i].players[1].input, rooms[i].players[0].paddle, rooms[i].players[1].paddle, rooms[i].players[0].game, rooms[i].players[1].game);
-    moveHazard(rooms[i].players[0].game, rooms[i].players[1].game, ball);
-    hazardGenerator(rooms[i].players[0].game, rooms[i].players[1].game);
-    timerCheck(rooms[i].players[0].game, rooms[i].players[1].game);
+    game.state = 1;
+    moveBall(ball, rooms[i].players[0].paddle, rooms[i].players[1].paddle, rooms[i].players[0].input, rooms[i].players[1].input, game);
+    movePaddle(rooms[i].players[0].input, rooms[i].players[1].input, rooms[i].players[0].paddle, rooms[i].players[1].paddle, game);
+    moveHazard(game, ball);
+    hazardGenerator(game);
+    timerCheck(game);
+    checkRoom(rooms[i], intervalId, game);
 }
 
 const fastify = Fastify();
@@ -426,19 +514,52 @@ fastify.register(fastifyWebsocket);
 fastify.register(async function (fastify) {
     fastify.get('/ws', { websocket: true }, (socket, req) => {
         console.log("Client connected");
-        let player = new Player(socket);
+        const userId = generateId();
+        const player = new Player(userId, socket);
+        let init = false;
+        let room = -1;
+        let solo: boolean;
         socket.on("message", (message) => {
-            const {data, success, error} = inputSchema.safeParse(JSON.parse(message.toString()));
-            if (!success || !data) {
-                console.error(error);
-                return ;
+            const msg = JSON.parse(message.toString());
+            if (!init && msg.type === "socketInit") {
+                const {data, success, error} = initSchema.safeParse(JSON.parse(message.toString()));
+                if (!success || !data) {
+                    console.error(error);
+                    return ;
+                }
+                player.name = data.nick;
+                if (data.room)
+                    room = msg.room;
+                init = true;
+            } else if (msg.type === "input") {
+                const {data, success, error} = inputSchema.safeParse(JSON.parse(message.toString()));
+                if (!success || !data) {
+                    console.error(error);
+                    return ;
+                }
+                resetInput(player.input);
+                inputHandler(data.key, data.state, player.input);
+            } else if (init && msg.type === "ready") {
+                const {data, success, error} = readySchema.safeParse(JSON.parse(message.toString()));
+                if (!success || !data) {
+                    console.error(error);
+                    return ;
+                }
+                console.log(data.mode);
+                if (data.mode === "remote")
+                    joinRoom(player, room);
+                else if (data.mode === "local") {
+                    solo = true;
+                    soloMode(player, solo);
+                }
             }
-            inputHandler(data.key, data.state, player.input, player.game);
         });
         socket.on("close", () => {
+            leaveRoom(userId);
+            solo = false;
             console.log("Client disconnected");
         });
-        joinRoom(player);
+
     });
 });
 

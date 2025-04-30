@@ -1,5 +1,6 @@
 import {activateBtn} from "./button.js";
 import {tdStop} from "./td.js";
+import {pongStop} from "./pong.js";
 
 export async function loadPart(page: string) {
     window.history.pushState({}, "", page);
@@ -98,4 +99,8 @@ export function insertScript(page: string): void {
     }
     if (page != "/tower")
         tdStop()
+    if (page != '/pongRemote')
+        pongStop()
+    if (page != '/pongLocal')
+        pongStop()
 }

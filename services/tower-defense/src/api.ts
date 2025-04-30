@@ -253,7 +253,7 @@ function generateId() {
         newId = Math.floor(Math.random() * 10000);
     } while (ids.has(newId));
     ids.add(newId);
-    return newId;
+    return (newId);
 }
 
 const enemies: Enemy[][] = loadEnemies(path.join(__dirname, "../resources/enemies.json"));
