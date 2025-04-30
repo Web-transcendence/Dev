@@ -166,11 +166,13 @@ export function TowerDefense(room?: number) {
     const allTowers: Tower[] = [];
     const selected: number[] = [];
     let rdmhover = false;
+    let id = -1;
 
     function getNick(): string {
         let nick = localStorage.getItem('nickName');
         if (!nick) {
             nick = `guest${Math.floor(Math.random() * 10000)}`;
+            localStorage.setItem('nickName', nick);
         }
         return (nick);
     }
@@ -632,7 +634,7 @@ export function TowerDefense(room?: number) {
                     gameTd.boss = data.boss;
                     break;
                 case "Player":
-                    if (data.name === nick) {
+                    if (data.id === id) {
                         player1.hp = data.hp;
                         player1.mana = data.mana;
                         player1.cost = data.cost;
@@ -686,15 +688,13 @@ export function TowerDefense(room?: number) {
                     if (gameTd.state !== 2)
                         gameTd.state = 2.5;
                     break;
+                case "Id":
+                    id = data.id;
+                    break;
                 default:
                     console.warn("Unknown type received:", data);
             }
         };
-
-        window.addEventListener("keydown", (event) => {
-            if (event.key === "b")
-                socketTd.send(JSON.stringify({event: "keyDown", player: 0, button: -2}));
-        });
 
         canvasTd.addEventListener("click", (event: MouseEvent) => {
             const rect = canvasTd.getBoundingClientRect();
