@@ -1,6 +1,7 @@
 import {addFriend, login, profile, register, setAvatar, verify2fa} from "./user.js";
 import { friendList, init2fa} from "./user.js";
 import {connected, handleConnection, navigate} from "./front.js";
+import {tdStop, TowerDefense} from "./td.js";
 
 
 const mapButton : {[key: string] : () => void} = {
@@ -10,7 +11,8 @@ const mapButton : {[key: string] : () => void} = {
     "/logout": logoutBtn,
     "/editProfile" : editProfileBtn,
     "/2fa" : factor,
-    "/pongMode" : pongMode
+    "/pongMode" : pongMode,
+    "/tower" : tower
 }
 
 export function activateBtn(page: string) {
@@ -117,4 +119,10 @@ function factor() {
 
 function pongMode() {
     document.getElementById("pong")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pong"));
+}
+
+function tower() {
+    tdStop()
+    console.log("prout");
+    TowerDefense()
 }
