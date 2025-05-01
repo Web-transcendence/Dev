@@ -7,6 +7,9 @@ import QRCode from "qrcode"
 import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
 import {EventMessage} from "fastify-sse-v2";
 import { FastifyReply, FastifyRequest } from "fastify"
+import {fetch} from 'undici'
+import {fetchAcceptedFriends} from "./utils.js";
+
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
@@ -204,14 +207,13 @@ export class User {
         return (userData.nickName)
     }
 
-    notifyUser(nickName: string, event: string): void {
-        const userId: number = User.getIdbyNickName(nickName);
-
-        const connection = connectedUsers.get(userId);
-        if (!connection)
-            throw new ConflictError(`this user isn't connected`, 'internal error system')
-        const data = {event: event, nickName: nickName}
-        connection.sse({data: JSON.stringify(data)})
+    notifyUser(ids: number[], event: string, data: any): void {
+        for (const id of ids) {
+            if (connectedUsers.has(id)) {
+                const connection = connectedUsers.get(id);
+                connection?.sse({data: JSON.stringify({event: event, data: data})})
+            }
+        }
     }
 
     ssehandler(req: FastifyRequest, res: FastifyReply): void {
@@ -226,7 +228,21 @@ export class User {
         req.raw.on('close', () => {
             clearInterval(interval)
             console.log('sse disconnected client = ' + this.id)
+            this.disconnect()
             connectedUsers.delete(this.id)
+        })
+    }
+
+    async disconnect(): void {
+        const friends = await fetchAcceptedFriends(this.id)
+        this.notifyUser(friends, 'disconnection', {id: this.id})
+
+        await fetch(`http://tournament:7000/quit`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'id': `${this.id}`
+            }
         })
     }
 }

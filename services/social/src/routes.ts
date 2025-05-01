@@ -51,7 +51,7 @@ export default async function socialRoutes(app: FastifyInstance) {
         }
     })
 
-    app.get('/List', async (req: FastifyRequest, res: FastifyReply) => {
+    app.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
         try {
             const id: number = Number(req.headers.id)
             if (!id)

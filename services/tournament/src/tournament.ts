@@ -1,5 +1,6 @@
 import {tournamentSessions} from "./api.js"
 import {ConflictError, ServerError} from "./error.js";
+import {fetchNotifyUser} from "./utils.js";
 
 export class tournament {
 
@@ -22,7 +23,7 @@ export class tournament {
         return this.participantId.includes(userId)
     }
 
-    addParticipant(participantId: number) {
+    async addParticipant(participantId: number) {
         if (this.status === 'started')
             throw new ConflictError(`this tournament has already started`, `This tournament is already started`)
         if (this.participantId.length >= this.maxPlayer)
@@ -32,6 +33,7 @@ export class tournament {
             if (tournament.hasParticipant(participantId))
                 throw new ConflictError(`this user has already another tournament`, `internal error system`)
 
+        await fetchNotifyUser(this.participantId, 'joinTournament', participantId)
         this.participantId.push(participantId)
     }
 
@@ -43,8 +45,17 @@ export class tournament {
         }
     }
 
-    quit(id: number): void {
-        this.participantId.filter(participantId => participantId !== id)
+    async quit(id: number){
+        if (this.status === 'started') {
+            console.log(`un joueur qui quitte une partie en cours n'est pas gere`)
+            //fetch match-server
+        }
+        else {
+            this.participantId.filter(participantId => participantId !== id)
+            await fetchNotifyUser(this.participantId, 'quitTournament', {id: id})
+        }
+
+
     }
 
     async bracketHandler(bracket: number[]): Promise<number> {

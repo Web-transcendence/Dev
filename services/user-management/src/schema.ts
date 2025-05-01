@@ -47,4 +47,17 @@ export const signInSchema = z.object({
     password: z.string().min(6, "Minimum 6 caracteres"),
 });
 
+export const notifySchema = z.object({
+    ids: z.array(z.string()).transform((arr: string[]) =>
+        arr.map((idStr: string) => {
+            const num = Number(idStr);
+            if (isNaN(num)) throw new Error(`Invalid number: ${idStr}`);
+            return num;
+        })
+    ),
+    event: z.string().transform((val) => {
+        
+    })
+})
+
 export * from "./schema.js";

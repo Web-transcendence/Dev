@@ -248,7 +248,7 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
-    app.post('/Connected', (req: FastifyRequest, res: FastifyReply) => {
+    app.get('/Connected', (req: FastifyRequest, res: FastifyReply) => {
         try {
             const id = Number(req.headers.id);
             if (!id)
@@ -267,4 +267,9 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
+    app.post('/notify', (req: FastifyRequest, res: FastifyReply) => {
+        const zod_result = Schema.pictureSchema.safeParse(req.body);
+        if (!zod_result.success)
+            throw new InputError(`Cannot parse the input`)
+    })
 }
