@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Agent.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/30 21:34:57 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/01 00:48:02 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
+#include <thread>
+#include <chrono>
 #include <array>
 
 Agent::Agent(int const maxTraining, int const maxAct, double const learningRate, \
@@ -59,7 +61,7 @@ void	Agent::train( void ) {
 			totalReward += experience->reward;
 			this->_xp->add(experience);
 			this->batchTrain(16);
-			if (experience->reward) {this->TNetUpdate();}
+			if (experience->reward > 0.) {this->TNetUpdate();}
 			if (experience->done) {
 				recordStep.push_back(iAct);
 				break ;
@@ -91,6 +93,7 @@ void	Agent::test( void ) {
     	this->_env->displayState(*experience.state);
 		if (experience.done)
 			break ;
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
 	return ;
 }

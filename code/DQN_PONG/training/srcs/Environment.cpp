@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Environment.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/30 21:22:55 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/01 00:19:56 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,12 @@ Environment::~Environment( void ) {}
 void	Environment::action(t_exp * exp) {
     int const   timeStamp = 6;
 	auto		state = std::make_shared<std::vector<double>>(std::vector<double>(INPUT_SIZE));
-    for (int lap = 0, num = 0.16; lap < timeStamp && !exp->done; lap++, num += 0.16) {
+    double num = 0.16;
+    for (int lap = 0; lap < timeStamp && !exp->done; lap++, num += 0.16) {
         this->moovePaddle(exp->action);
         this->mooveBall(exp);
 		auto	act = this->getGameState();
-		this->drawBall(*state, std::floor(act.bx/DS_R), std::floor(act.bx/DS_R), num);
+		this->drawBall(*state, std::floor(act.bx/DS_R), std::floor(act.by/DS_R), num);
 		this->drawPaddle(*state, std::floor(act.rPx/DS_R), std::floor(act.rPy/DS_R), 200, num);
 		this->drawPaddle(*state, std::floor(act.lPx/DS_R), std::floor(act.lPy/DS_R), 200, num);
     }
@@ -141,7 +142,7 @@ void	Environment::reset( void ) {
     this->lPaddle.y = 0.5 * HEIGHT;
     this->rPaddle.y = 0.5 * HEIGHT;
 	auto		state = std::make_shared<std::vector<double>>(std::vector<double>(INPUT_SIZE));
-	this->drawBall(*state, std::floor(this->ball.x/DS_R), std::floor(this->ball.x/DS_R), 1.0);
+	this->drawBall(*state, std::floor(this->ball.x/DS_R), std::floor(this->ball.y/DS_R), 1.0);
 	this->drawPaddle(*state, std::floor(this->rPaddle.x/DS_R), std::floor(this->rPaddle.y/DS_R), 200, 1.0);
 	this->drawPaddle(*state, std::floor(this->lPaddle.x/DS_R), std::floor(this->lPaddle.y/DS_R), 200, 1.0);
 	this->_state = state;
@@ -200,7 +201,7 @@ t_gState    Environment::getGameState( void ) {
 void	Environment::drawBall(std::vector<double> & s, int x, int y, double num) {
 	int i = y * W + x;
 	
-	if (i < 600 && i >= 0)
+	if (i < INPUT_SIZE && i >= 0)
 		s.at(i) = num;
 	return ;
 }
@@ -208,7 +209,6 @@ void	Environment::drawBall(std::vector<double> & s, int x, int y, double num) {
 void	Environment::drawPaddle(std::vector<double> & s, int x, int y, int sizePaddle, double num) {
 	int	size = sizePaddle / DS_R;
 	int start = (y - (size / 2)) * W;
-	
 	
 	while (size && start < 600 && start >= 0) {
 		s.at(start + x) = num;
@@ -227,7 +227,7 @@ void	Environment::displayState(std::vector<double> const & vec) {
     }
     std::cout << "\033[H"; // remet le curseur en haut à gauche
 	for (auto it = vec.begin(); it != vec.end();) {
-		for (int count = 0; count < W; count++, it++) {
+		for (int lap = 0; lap < W; lap++, it++) {
 			if (*it != 0.)
             	std::cout << "\033[31m"; // rouge
         	else

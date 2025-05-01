@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 15:36:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/30 21:23:02 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/01 00:39:27 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 
 int main( void ) {
 	Environment	myEnv(100);
-	Agent	myAgent(1000, 99, 0.95, 0.93, 1.0, 1./1000.);
+	Agent	myAgent(10000, 1000, 0.95, 0.93, 1.0, 1./10000.);
 	std::vector<unsigned int>	net = {INPUT_SIZE,25,OUTPUT_SIZE};
 	myAgent.setMap(myEnv);
 	myAgent.genTNet(net, LEAKYRELU, LEAKYRELU);

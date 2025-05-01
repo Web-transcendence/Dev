@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Environment.class.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:41:48 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/30 21:12:19 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/04/30 22:26:09 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 # define WIDTH 1200
 # define HEIGHT 800
 # define DS_R 40
-# define W WIDTH/DS_R
-# define H HEIGHT/DS_R
+# define W 30
+# define H 20
 # include "TypeDefinition.hpp"
 # include <vector>
 # include <string>
