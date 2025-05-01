@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Network.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/28 01:52:05 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/01 21:04:22 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "json.hpp"
 
 Network::Network(std::vector<unsigned int>sizes, t_actFunc actHiddenFunc, t_actFunc actOutputFunc) : _num_layers(sizes.size()), _sizes(sizes) {
 	int	i_layers;
@@ -25,6 +26,52 @@ Network::Network(std::vector<unsigned int>sizes, t_actFunc actHiddenFunc, t_actF
 	for (i_layers = 1; i_layers < this->_num_layers - 1; i_layers++)
 		this->_layers.at(i_layers - 1) = new Layer(sizes[i_layers], sizes[i_layers - 1], actHiddenFunc);
 	this->_layers.at(i_layers - 1) = new Layer(sizes[i_layers], sizes[i_layers - 1], actOutputFunc);
+	return ;
+}
+
+Network::Network(std::string const & inFile) : _num_layers(3) {
+	std::string	dataStr;
+	
+	std::ifstream ifs(inFile.c_str());
+	if (!ifs)
+		throw std::exception();
+	std::getline(ifs, dataStr, '\0');
+	ifs.close();
+	auto data = nlohmann::json::parse(dataStr)["Network"];
+	std::vector<unsigned int>	sizes( + 2);
+	sizes.at(0) = INPUT_SIZE;
+	for (unsigned int i = 1; i < N_LAYER_HIDDEN + 1; i++)
+		sizes.at(i) = HIDDEN_SIZE;
+	sizes.at(N_LAYER_HIDDEN + 1) = OUTPUT_SIZE;
+	this->_weights = std::vector<std::vector<std::vector<double>>>(N_LAYER_HIDDEN + 1);
+	this->_biaises = std::vector<std::vector<double>>(N_LAYER_HIDDEN + 1);
+	auto				it_wl = this->_weights.begin();
+	auto				it_bl = this->_biaises.begin();
+	unsigned int		whichLayer = 1;
+	unsigned int		countLayer = 0;
+	for (; it_wl != this->_weights.end(); it_wl++, it_bl++, whichLayer++, countLayer++) {
+		std::stringstream	ssLayer;
+		unsigned int	countNeuron = 0;
+		*it_wl = std::vector<std::vector<double>>(sizes.at(whichLayer));
+		*it_bl = std::vector<double>(sizes.at(whichLayer));
+		ssLayer << "Layer " << countLayer;
+		auto	it_wn = (*it_wl).begin();
+		auto	it_bn = (*it_bl).begin();
+		for (;it_wn != (*it_wl).end(); it_wn++, it_bn++, countNeuron++) {
+			std::stringstream	ssNeuron;
+			ssNeuron << "neuron " << countNeuron;
+			*it_wn = std::vector<double>(sizes.at(whichLayer - 1));
+			unsigned int	countWeight = 0;
+			for (auto it_ww = (*it_wn).begin(); it_ww != (*it_wn).end(); it_ww++, countWeight++) {
+				std::stringstream	w;
+				w << data[ssLayer.str()][ssNeuron.str()]["w"][countWeight];
+				w >> *it_ww;
+			}
+			std::stringstream	b;
+			b << data[ssLayer.str()][ssNeuron.str()]["b"];
+			b >> *it_bn;
+		}
+	}
 	return ;
 }
 
@@ -138,6 +185,21 @@ std::vector<double>*	Network::feedForward(std::vector<double> const & input) {
 		delete temp;
 	}
 	return activation;
+}
+
+std::vector<double>	Network::feedForwardTest(std::vector<double> const & input) {
+	std::vector<double>	layerOutput(input);
+	
+	for (auto it_l = this->_weights.begin();it_l != this->_weights.end(); it_l++) {
+		layerOutput.resize((*it_l).size());
+		auto	it_lo = layerOutput.begin();
+		for (auto it_n = (*it_l).begin(); it_n != (*it_l).end(); it_n++, it_lo++) {
+			std::vector<double>	input(layerOutput);
+			*it_lo = Math::leakyReLu(Math::dotProduct(input, *it_n));
+		}
+	}
+	layerOutput.resize(OUTPUT_SIZE);
+	return layerOutput;
 }
 
 int     Network::evaluate(std::vector<t_tuple*>& test_data) {

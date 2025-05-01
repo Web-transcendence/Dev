@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Environment.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/01 00:19:56 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/01 16:46:29 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void	Environment::action(t_exp * exp) {
     }
 	exp->nextState = state;
 	this->_state = state;
+	// this->displayState(*state);
 	return ;
 }
 
@@ -102,14 +103,14 @@ void	Environment::mooveBall(t_exp * exp) {
     }
     if (ball.x > WIDTH) {
         exp->done = true;
-        exp->reward = -0.1;
 		return ;
     }
     else if (ball.x < 0) {
         exp->done = true;
-        exp->reward = +0.5;
+        exp->reward = 10.;
 		return ;
     }
+	exp->reward += 0.05;
     // if (ball.x > WIDTH) {
     //     ball.x = WIDTH - (ball.x - WIDTH);
     //     ball.a = M_PI - ball.a;

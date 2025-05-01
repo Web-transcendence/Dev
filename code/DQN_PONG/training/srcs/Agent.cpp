@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Agent.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/01 00:48:02 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/01 21:09:58 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,13 +61,12 @@ void	Agent::train( void ) {
 			totalReward += experience->reward;
 			this->_xp->add(experience);
 			this->batchTrain(16);
-			if (experience->reward > 0.) {this->TNetUpdate();}
+			if (experience->reward >= 1.) {this->TNetUpdate();}
 			if (experience->done) {
 				recordStep.push_back(iAct);
 				break ;
 			}
 		}
-		if (totalReward > 20) {this->TNetUpdate();}
 		if (exploRate - this->_explorationDecay > 0.0001)
 			exploRate -= this->_explorationDecay;
 		recordReward.push_back(totalReward);
@@ -77,9 +76,9 @@ void	Agent::train( void ) {
 			double averageStep = std::accumulate(recordStep.begin(),recordStep.end(),0.0) / static_cast<double>(recordStep.size());
 			recordReward.clear();
 			std::cout<<"epoch: "<<iEp-100<<" to "<<this->_maxEpTraining<<", average reward: "<<averageReward<<", average steps: "<<averageStep<<", exploration: "<<exploRate<<std::endl;
+			this->_QNet->printNetworkToJson("weights.json");
 		}
 	}
-	this->_QNet->printNetworkToJson("weights.json");
 	return ;
 }
 
@@ -98,6 +97,24 @@ void	Agent::test( void ) {
 	return ;
 }
 
+void	Agent::test(Network & QnetTest) {
+	this->_env->reset();
+	for (int iAct = 0; iAct < 1000; iAct++) {
+		t_exp	experience;
+		experience.state = this->_env->getState();
+		auto	output = QnetTest.feedForwardTest(*experience.state);
+		experience.action = std::distance(output.begin(), std::max_element(output.begin(), output.end()));
+		this->_env->action(&experience);
+    	this->_env->displayState(*experience.state);
+		if (experience.done) {
+			this->_env->reset();
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	}
+	return ;
+}
+
+
 void	Agent::batchTrain(unsigned int const batchSize) {
  	if (this->_xp->getNum() < this->_xp->getMin())
 		return ;
@@ -110,13 +127,15 @@ void	Agent::batchTrain(unsigned int const batchSize) {
 		unsigned int	act = (*it_b)->action;
 		unsigned int	actNext = std::distance(oTNet->begin(), std::max_element(oTNet->begin(), oTNet->end()));
 		adjusted.at(act) = (*it_b)->reward; 
-		if ((*it_b)->done == false) 
-		adjusted.at(act) += this->_discount*(oTNet->at(actNext));
+		if ((*it_b)->done == false) {adjusted.at(act) += this->_discount*(oTNet->at(actNext));}
 		training.input = (*it_b)->state.get();
 		training.expectedOutput = &adjusted;
 		this->_QNet->SDG(&training, 0.05);
-		delete oTNet;
+		// std::cout << " ------------------ " << std::endl;
+		// Math::printdebug(*training.input, "input");
+		// Math::printdebug(*training.expectedOutput, "output");
 		delete oQNet;
+		delete oTNet;
 	}
 	delete batches;
 	return ;

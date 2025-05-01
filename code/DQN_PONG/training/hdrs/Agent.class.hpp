@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Agent.class.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:31:17 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/28 01:46:13 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/01 21:09:10 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ public:
 
 	void	train( void );
 	void	test( void );
+
+	void	test(Network & QnetTest);
 
 	void	setMap(Environment & env) {this->_env = &env;};
 	void	genQNet(std::vector<unsigned int> const & sizes, t_actFunc hidden, t_actFunc output);

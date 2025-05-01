@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Math.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 14:09:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/28 02:09:18 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/01 17:26:48 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ std::vector<double>*	Math::reLuPrime(std::vector<double> const & zs) {
 	return res;
 }
 
-double	Math::leakyReLu(double const z) {return (z > 0. ? z : 0.01*z);}
+double	Math::leakyReLu(double const z) {return (z > 0. ? z : -0.01*z);}
 	
 std::vector<double>*	Math::leakyReLu(std::vector<double> const & zs) {
 	auto	res = new std::vector<double>(zs.size());

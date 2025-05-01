@@ -6,7 +6,7 @@
 /*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/29 14:24:06 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/01 20:59:52 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,13 @@ class Layer;
 class Network {
 public:
     Network(std::vector<unsigned int>sizes, t_actFunc actHiddenFunc, t_actFunc actOutputFunc);
+	Network(std::string const & inFile);
     ~Network( void );
     
     void                    SDG(t_tuple* trainingData, double const eta);
     void                    SDG(std::vector<t_tuple*>& trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data);
     std::vector<double>*	feedForward(std::vector<double> const & input);
+	std::vector<double>		feedForwardTest(std::vector<double> const & input);
     
     static void             displayProgress(int current, int max);
 
@@ -47,6 +49,9 @@ private:
     int const                   _num_layers;
     std::vector<unsigned int>	_sizes;
     std::vector<Layer*>         _layers;
+
+	std::vector<std::vector<std::vector<double>>>	_weights;
+	std::vector<std::vector<double>>				_biaises;
 
 friend class Agent;
 };

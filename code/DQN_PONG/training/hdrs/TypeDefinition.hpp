@@ -6,7 +6,7 @@
 /*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:15:27 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/30 20:30:42 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/01 20:59:16 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define TYPEDEFINITION_HPP
 # define OUTPUT_SIZE 3
 # define INPUT_SIZE 600
+# define HIDDEN_SIZE 25
+# define N_LAYER_HIDDEN 1
 # define UP 0
 # define DOWN 1
 # define NOTHING 2
