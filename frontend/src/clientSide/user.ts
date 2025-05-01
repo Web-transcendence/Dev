@@ -18,7 +18,7 @@ export function register(button: HTMLElement): void {
         if (result.token) {
             localStorage.setItem('token', result.token)
             localStorage.setItem('nickName', result.nickName)
-            sseConnection(result.token)
+            sseConnection()
             loadPart("/connected")
             handleConnection(true)
         } else {
@@ -50,7 +50,7 @@ export function login(button: HTMLElement): void {
             await loadPart("/connected")
             handleConnection(true)
             getAvatar();
-            await sseConnection(data.token)
+            await sseConnection()
         } else {
             const errorData = await response.json()
             const loginError = document.getElementById("LoginError") as HTMLSpanElement

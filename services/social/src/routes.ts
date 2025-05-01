@@ -34,7 +34,7 @@ export default async function socialRoutes(app: FastifyInstance) {
             if (!id)
                 throw new Error("cannot recover id")
 
-            authUser(id)
+            await authUser(id)
 
             const result = await addFriend(id, friendNickName)
             //sse
@@ -51,13 +51,13 @@ export default async function socialRoutes(app: FastifyInstance) {
         }
     })
 
-    app.get('/List', (req: FastifyRequest, res: FastifyReply) => {
+    app.get('/List', async (req: FastifyRequest, res: FastifyReply) => {
         try {
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
 
-            authUser(id);
+            await authUser(id);
 
             const result = getFriendList(id)
 

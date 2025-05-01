@@ -7,7 +7,12 @@ import {EventMessage} from "fastify-sse-v2"
 import {InputError, MyError, ServerError} from "./error.js";
 
 
-
+export function logConnectedUser() {
+    const connected = []
+    for (const [id, user] of connectedUsers)
+        connected.push(id)
+    console.log(connected);
+}
 
 export default async function userRoutes(app: FastifyInstance) {
 
@@ -118,7 +123,7 @@ export default async function userRoutes(app: FastifyInstance) {
             const user = new User(id)
 
             const profileData = user.getProfile()
-
+            logConnectedUser()
             return res.status(200).send(profileData)
         }
         catch(err) {
@@ -133,25 +138,25 @@ export default async function userRoutes(app: FastifyInstance) {
 
 
 
-
-
-
     /**
      * initiate the sse connection between the server and the client, stock the response in a map.
      *      the response can call the method .sse to send data in this format : {data: JSON.stringify({ event: string, data: any })}
      */
     app.get('/sse', async function (req, res) {
-        const id: number = Number(req.headers.id)
-        if (!id)
-            return res.status(500).send({error: "Server error: Id not found"})
-        connectedUsers.set(id, res)
-        const message: EventMessage = { event: "initiation", data: "Some message" }
-        res.sse({data: JSON.stringify(message)})
-
-        setInterval(() => {
-            const message: EventMessage = { event: "initiation", data: "Some message" }
-            res.sse({data: JSON.stringify(message)})
-        }, 15000)
+        try {
+            const id: number = Number(req.headers.id)
+            if (!id)
+                throw new ServerError(`cannot parse id, which should not happen`, 500)
+            const user = new User(id)
+            user.ssehandler(req, res)
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
 
     })
 
@@ -242,4 +247,24 @@ export default async function userRoutes(app: FastifyInstance) {
             return res.status(500).send()
         }
     })
+
+    app.post('/Connected', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const id = Number(req.headers.id);
+            if (!id)
+                throw new ServerError(`cannot parse id, which should not happen`, 500)
+
+            const user = new User(id);
+
+            return res.status(200).send({connected: user.isConnected()})
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
+    })
+
 }

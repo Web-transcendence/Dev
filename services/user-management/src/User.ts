@@ -5,6 +5,8 @@ import {connectedUsers} from "./api.js"
 import speakeasy, {GeneratedSecret} from "speakeasy"
 import QRCode from "qrcode"
 import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
+import {EventMessage} from "fastify-sse-v2";
+import { FastifyReply, FastifyRequest } from "fastify"
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
@@ -212,10 +214,19 @@ export class User {
         connection.sse({data: JSON.stringify(data)})
     }
 
-    logConnectedUser() {
-        const connected = []
-        for (const [id, user] of connectedUsers)
-            connected.push(id)
-        console.log(connected);
+    ssehandler(req: FastifyRequest, res: FastifyReply): void {
+        if (connectedUsers.has(this.id))
+            res.status(100).send()
+        connectedUsers.set(this.id, res)
+        const interval = setInterval(() => {
+            const message: EventMessage = {event: "ping"}
+            res.sse({data: JSON.stringify(message)})
+        }, 15000)
+
+        req.raw.on('close', () => {
+            clearInterval(interval)
+            console.log('sse disconnected client = ' + this.id)
+            connectedUsers.delete(this.id)
+        })
     }
 }

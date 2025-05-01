@@ -1,5 +1,6 @@
 import {getAvatar} from './user.js'
 import {loadPart} from './insert.js';
+import {sseConnection} from "./serverSentEvent.js";
 
 declare const tsParticles: any;
 
@@ -22,6 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const path = localStorage.getItem('path');
     if (path) loadPart(path)
     else loadPart("/home")
+    await sseConnection()
 });
 
 tsParticles.load("tsparticles", {

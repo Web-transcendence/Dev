@@ -26,6 +26,16 @@ export const pictureSchema = z.object({
     )
 })
 
+export const idListSchema = z.object({
+    ids: z.array(z.string()).transform((arr: string[]) =>
+        arr.map((idStr: string) => {
+            const num = Number(idStr);
+            if (isNaN(num)) throw new Error(`Invalid number: ${idStr}`);
+            return num;
+        })
+    )
+})
+
 export const signUpSchema = z.object({
     nickName: z.string().min(3, "Minimum 3 caracteres"),
     email: z.string().email("Invalid email"),
