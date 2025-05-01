@@ -316,7 +316,6 @@ export async function setAvatar(target: HTMLInputElement) {
     try {
         if (target.files && target.files[0]) {
             const file: File = target.files[0]
-            console.log(typeof(await toBase64(file)))
             const base64File: string = await toBase64(file) as string
 
             const token = localStorage.getItem('token')

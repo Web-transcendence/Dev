@@ -101,7 +101,6 @@ app.register(async function (instance) {
 
 app.get("/*", (req, res) => { // Route pour la page d'accueil
     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
-    console.log(join(import.meta.dirname, "..", "..", "public"))
     const readFile = readFileSync(pagePath, 'utf8');
     res.status(202).type('text/html').send(readFile);
 });
