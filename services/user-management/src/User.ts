@@ -216,7 +216,8 @@ export class User {
         }
     }
 
-    ssehandler(req: FastifyRequest, res: FastifyReply): void {
+    sseHandler(req: FastifyRequest, res: FastifyReply) {
+
         if (connectedUsers.has(this.id))
             res.status(100).send()
         connectedUsers.set(this.id, res)
@@ -225,15 +226,18 @@ export class User {
             res.sse({data: JSON.stringify(message)})
         }, 15000)
 
-        req.raw.on('close', () => {
+        req.raw.on('close', async() => {
             clearInterval(interval)
-            console.log('sse disconnected client = ' + this.id)
-            this.disconnect()
-            connectedUsers.delete(this.id)
+            if (connectedUsers.has(this.id)) {
+                console.log('sse disconnected client = ' + this.id)
+                await this.disconnect()
+                connectedUsers.delete(this.id)
+            }
         })
     }
 
-    async disconnect(): void {
+
+    async disconnect() {
         const friends = await fetchAcceptedFriends(this.id)
         this.notifyUser(friends, 'disconnection', {id: this.id})
 
@@ -244,5 +248,6 @@ export class User {
                 'id': `${this.id}`
             }
         })
+
     }
 }

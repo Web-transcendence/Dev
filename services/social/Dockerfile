@@ -1,4 +1,5 @@
 FROM node:lts-alpine3.20
+RUN apk add curl
 
 
 RUN adduser -D -s /bin/sh -u 1001 app

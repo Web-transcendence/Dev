@@ -286,7 +286,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
 export async function getFriendList(): Promise<FriendList | undefined> {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`/social/List`, {
+        const response = await fetch(`/social/list`, {
            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
