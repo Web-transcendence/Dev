@@ -7,12 +7,18 @@
         </p>
     </section>
     <!-- Frontend Section -->
-    <section id="frontend" class="box-home rounded-r-full left-0" data-aos="slide-right" data-aos-delay="300>
-        <h2 class="font-bold text-purple-700 mb-4">Frontend</h2>
-        <p class="text-wrap text-gray-400">
-            The frontend is a Single Page Application developed in <strong>TypeScript</strong> using <strong>Tailwind CSS</strong>. It manages user interaction, navigation, matchmaking, and the Pong game interface.
-        </p>
-        <img src="../assets/docker_compose.png" alt="docker compose" class="rounded-full" />
+    <section id="frontend" class="box-home rounded-r-full left-0 w-5/6" data-aos="slide-right" data-aos-delay="300" >
+        <div class="text-left">
+            <h2 class="font-bold text-purple-700 text-2xl mb-4">Frontend</h2>
+            <p class="text-gray-500 leading-relaxed">
+                The frontend is a Single Page Application developed in <strong>TypeScript</strong> using
+                <strong>Tailwind CSS</strong>. It manages user interaction, navigation, matchmaking, and the Pong game interface.
+            </p>
+        </div>
+        <div class="md:w-1/3 mt-6 md:mt-0 md:ml-6 flex justify-center">
+            <img src="../assets/docker_compose.png" alt="docker compose" class="w-32 h-32 rounded-full object-cover" />
+        </div>
+
     </section>
 
     <!-- Backend Section -->
@@ -24,7 +30,7 @@
     </section>
 
     <!-- Docker & Microservices Section -->
-    <section id="docker" class="box-home rounded-r-full left-0" data-aos="slide-right" data-aos-delay="300">
+    <section id="docker" class="box-home rounded-r-full left-0 w-5/6" data-aos="slide-right" data-aos-delay="300">
         <h2 class="font-bold text-pink-700 mb-4">Docker & Microservices</h2>
         <p class="text-wrap text-gray-400">
             The project is fully containerized using <strong>Docker</strong>. Each component (frontend, backend, database) runs in its own container, orchestrated via <code>docker-compose</code>. This ensures isolation, scalability, and portability.

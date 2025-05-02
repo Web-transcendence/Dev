@@ -2,6 +2,8 @@ import {activateBtn} from "./button.js";
 
 export async function loadPart(page: string) {
     try {
+        localStorage.setItem('path', page);
+        console.log("setItem path :", page);
         await insertTag(`part${page}`);
         insertScript(page);
         activateBtn(page);
