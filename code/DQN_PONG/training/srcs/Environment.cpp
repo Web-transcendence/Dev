@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/02 14:56:19 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/03 01:00:35 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,9 @@ void	Environment::moovelPaddle( void ) {
 
 	double tolerance = 10.0;
 
-	if (std::abs(diff) > tolerance) {
+    if (this->randDouble() > 0.5) {
+        this->lPaddle.y += (this->randDouble() > 0.5 ? 1 : -1) * this->lPaddle.s * 0.6;
+    } else if (std::abs(diff) > tolerance) {
 		double direction = (diff > 0) ? 1.0 : -1.0;
 		lPaddle.y += direction * lPaddle.s * 0.6;
 	}

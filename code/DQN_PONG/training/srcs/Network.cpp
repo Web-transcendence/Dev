@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/03 00:14:04 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/03 01:07:54 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,13 +189,16 @@ std::vector<double>*	Network::feedForward(std::vector<double> const & input) {
 
 std::vector<double>	Network::feedForwardTest(std::vector<double> const & input) {
 	std::vector<double>	layerOutput(input);
-	
-	for (auto it_l = this->_weights->begin();it_l != this->_weights->end(); it_l++) {
+	auto				it_b = this->_biaises->begin();
+
+	for (auto it_l = this->_weights->begin();it_l != this->_weights->end(); it_l++, it_b++) {
+		auto	in(layerOutput);
 		layerOutput.resize((*it_l)->size());
 		auto	it_lo = layerOutput.begin();
-		for (auto it_n = (*it_l)->begin(); it_n != (*it_l)->end(); it_n++, it_lo++) {
+		auto	it_bn = (*it_b)->begin();
+		for (auto it_n = (*it_l)->begin(); it_n != (*it_l)->end(); it_n++, it_bn++, it_lo++) {
 			std::vector<double>	input(layerOutput);
-			*it_lo = Math::sigmoid(Math::dotProduct(input, *it_n));
+			*it_lo = Math::sigmoid(Math::dotProduct(in, *it_n) + *it_bn);
 		}
 	}
 	layerOutput.resize(OUTPUT_SIZE);
