@@ -1,5 +1,6 @@
 import {addFriend, login, profile, register, setAvatar, verify2fa} from "./user.js";
-import { friendList, init2fa} from "./user.js";
+import {init2fa} from "./user.js";
+import {friendList} from "./friends.js";
 import {connected, handleConnection, navigate} from "./front.js";
 
 
@@ -20,14 +21,14 @@ export function activateBtn(page: string) {
 }
 
 function connectBtn() {
-    document.getElementById("loginButton")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/login"));
+    document.getElementById("loginButton")?.addEventListener("click", (event: MouseEvent) => navigate("/login", event));
     const button = document.getElementById("registerButton") as HTMLButtonElement;
     if (button)
         register(button);
 }
 
 function loginBtn() {
-    document.getElementById('connectPageBtn')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
+    document.getElementById('connectPageBtn')?.addEventListener("click", (event: MouseEvent) => navigate("/connect", event));
     const button = document.getElementById("loginButton") as HTMLButtonElement;
     if (button)
         login(button)
@@ -46,13 +47,15 @@ function profileBtn() {
     }
     const logoutBtn = document.getElementById('logout')  as HTMLButtonElement;
     if (logoutBtn && connected)
-        logoutBtn.addEventListener("click", (event: MouseEvent) => navigate(event, "/logout"));
+        logoutBtn.addEventListener("click", (event: MouseEvent) => navigate("/logout", event));
     const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
     if (addFriendBtn && addFriendIpt) {
         addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
         friendList();
     }
+    document.getElementById('totalFactor')?.classList.add("hidden")
+    document.getElementById('activeFactor')?.classList.remove("hidden")
     const initfa = document.getElementById("initfa") as HTMLButtonElement;
     if (initfa) {
         initfa.addEventListener("click", async () => {
@@ -117,9 +120,9 @@ function factor() {
 }
 
 function pongMode() {
-    document.getElementById("pongRemote")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongRemote"));
+    document.getElementById("pongRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/pongRemote", event));
 }
 
 function towerMode() {
-    document.getElementById("towerRemote")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/towerRemote"));
+    document.getElementById("towerRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/towerRemote", event));
 }

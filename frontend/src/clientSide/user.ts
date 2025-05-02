@@ -1,7 +1,13 @@
-import {handleConnection} from "./front.js"
+import {navigate} from "./front.js"
 import {loadPart} from "./insert.js"
 import {sseConnection} from "./serverSentEvent.js"
 import {DispayNotification} from "./notificationHandler.js"
+
+type FriendList = {
+    acceptedNickName: string[]
+    pendingNickName: string[]
+    receivedNickName: string[]
+}
 
 export function register(button: HTMLElement): void {
     button.addEventListener("click", async () => {
@@ -20,8 +26,7 @@ export function register(button: HTMLElement): void {
             localStorage.setItem('token', result.token)
             localStorage.setItem('nickName', result.nickName)
             sseConnection(result.token)
-            loadPart("/connected")
-            handleConnection(true)
+            navigate('/connected', undefined)
         } else {
             console.log("ErrorDisplay : nickname, email or password are not respecting my authority")
             DispayNotification('respecting my authority', { type: "error" });
@@ -49,8 +54,7 @@ export function login(button: HTMLElement): void {
                 return await loadPart("/2fa")
             }
             localStorage.setItem('token', data.token)
-            await loadPart("/connected")
-            handleConnection(true)
+            navigate('/connected', undefined)
             getAvatar();
             await sseConnection(data.token)
         } else {
@@ -62,104 +66,6 @@ export function login(button: HTMLElement): void {
     })
 }
 
-export interface Person {
-    name: string
-    // email: string
-    imageUrl: string
-}
-
-type FriendList = {
-    acceptedNickName: string[]
-    pendingNickName: string[]
-    receivedNickName: string[]
-}
-
-export async function friendList() {
-    try {
-        const friendlist = await getFriendList() as FriendList
-        const noFriend = document.getElementById("noFriend") as HTMLHeadingElement
-        if (!friendlist || !friendlist.receivedNickName.length) {
-            if (noFriend)
-                noFriend.classList.remove("hidden")
-        } else {
-            const receivedPeople: Person[] = friendlist.receivedNickName.map(nickname => ({
-                name: nickname,
-                imageUrl: '../images/login.png'
-            }))
-            const receivedList = document.getElementById("receivedList")
-            const receivedTemplate = document.getElementById("receivedTemplate") as HTMLTemplateElement
-
-            if (receivedList && receivedTemplate) {
-                receivedList.innerHTML = ''
-                receivedPeople.forEach(person => {
-                    const clone = receivedTemplate.content.cloneNode(true) as HTMLElement
-                    const img = clone.querySelector("img")!
-                    const name = clone.querySelector(".name")!
-
-                    img.src = person.imageUrl
-                    img.alt = person.name
-                    name.textContent = person.name
-
-                    receivedList.appendChild(clone)
-                })
-            }
-        }
-        if (!friendlist || !friendlist.pendingNickName.length) {
-            if (noFriend)
-                noFriend.classList.remove("hidden")
-        } else {
-            const requestPeople: Person[] = friendlist.pendingNickName.map(nickname => ({
-                name: nickname,
-                imageUrl: '../images/login.png'
-            }))
-            const requestList = document.getElementById("requestList")
-            const requestTemplate = document.getElementById("requestTemplate") as HTMLTemplateElement
-
-            if (requestList && requestTemplate) {
-                requestList.innerHTML = ''
-                requestPeople.forEach(person => {
-                    const clone = requestTemplate.content.cloneNode(true) as HTMLElement
-                    const img = clone.querySelector("img")!
-                    const name = clone.querySelector(".name")!
-
-                    img.src = person.imageUrl
-                    img.alt = person.name
-                    name.textContent = person.name
-
-                    requestList.appendChild(clone)
-                })
-            }
-        }
-        if (!friendlist || !friendlist.acceptedNickName.length) {
-            if (noFriend)
-                noFriend.classList.remove("hidden")
-        } else {
-            const acceptedPeople: Person[] = friendlist.acceptedNickName.map(nickname => ({
-                name: nickname,
-                imageUrl: '../images/login.png'
-            }))
-            const acceptedList = document.getElementById("acceptedList")
-            const acceptedTemplate = document.getElementById("acceptedTemplate") as HTMLTemplateElement
-
-            if (acceptedList && acceptedTemplate) {
-                acceptedList.innerHTML = ''
-                acceptedPeople.forEach(person => {
-                    const clone = acceptedTemplate.content.cloneNode(true) as HTMLElement
-                    const img = clone.querySelector("img")!
-                    const name = clone.querySelector(".name")!
-
-                    img.src = person.imageUrl
-                    img.alt = person.name
-                    name.textContent = person.name
-
-                    acceptedList.appendChild(clone)
-                })
-            }
-        }
-    } catch (err) {
-        console.error("Erreur dans friendList():", err)
-    }
-}
 
 export async function profile(nickName: HTMLElement, email: HTMLElement) {
     try {
@@ -221,9 +127,8 @@ export async function verify2fa(secret: string) {
         if (response.ok) {
             const result = await response.json()
             localStorage.setItem('token', result.token)
-            loadPart('/home')
-            handleConnection(true)
-            localStorage.setItem('factor', 'true') //Add hidden factor 2fa
+            localStorage.setItem('factor', 'true')
+            navigate('/home', undefined)
         }
         else {
             const errorData = await response.json()
@@ -250,6 +155,7 @@ export async function addFriend(friendNickName: string) {
         const input = document.getElementById('friendNameIpt') as HTMLInputElement
         input.value = ''
         input.focus()
+        console.log("Succes addFriend")
         if (!response.ok) {
             const error = await response.json()
             console.error(error.error)
