@@ -53,12 +53,11 @@ export default async function socialRoutes(app: FastifyInstance) {
 
     app.get('/list', async (req: FastifyRequest, res: FastifyReply) => {
         try {
-            console.log('ssssssssssssss')
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
 
-            // await authUser(id);
+            await authUser(id);
 
             const result = getFriendList(id)
 
@@ -102,9 +101,6 @@ export default async function socialRoutes(app: FastifyInstance) {
             return res.status(500).send()
         }
     })
-    app.get('/test', (req: FastifyRequest, res: FastifyReply) => {
-        console.log('test')
-        return res.status(200).send()
-    })
+
 
 }

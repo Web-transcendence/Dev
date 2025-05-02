@@ -1,9 +1,7 @@
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
-import sanitizeHtml from "sanitize-html";
 import {tournamentSessions} from './api.js';
 import * as Schema from "./schema.js"
-import fetch from 'undici'
-import {ConflictError, InputError, MyError, ServerError, UnauthorizedError} from "./error.js";
+import {ConflictError, InputError, MyError, ServerError} from "./error.js";
 import {authUser} from "./utils.js";
 
 
@@ -15,7 +13,7 @@ export default async function tournamentRoutes(app: FastifyInstance) {
             const zod_result = Schema.tournamentIdSchema.safeParse(req.body)
             if (!zod_result.success)
                 throw new InputError(`Cannot parse the input`)
-            let idTournament = Number(sanitizeHtml(zod_result.data.tournamentId))
+            let idTournament = zod_result.data.tournamentId
             if (!idTournament)
                 throw new InputError(`Empty tournament input`)
 
@@ -101,4 +99,5 @@ export default async function tournamentRoutes(app: FastifyInstance) {
             return res.status(500).send()
         }
     })
+
 }

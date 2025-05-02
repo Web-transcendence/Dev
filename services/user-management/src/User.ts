@@ -40,7 +40,6 @@ export class User {
     }
 
 
-
     /**
      * check if nickName and email aren't in the db, hash the password
      *      and add the data in the db. Then the db return the id of
@@ -162,13 +161,6 @@ export class User {
         return {nickName: userData.nickName, email: userData.email}
     }
 
-    sendNotification() {
-        const res = connectedUsers.get(this.id)
-        if (!res)
-            return console.log("Server error: res not found in connectedUsers")
-        res.sse({data: JSON.stringify({event: "invite", data: "teeest"})})
-    }
-
     updatePictureProfile(pictureURL: string) {
         const change = Client_db.prepare(`UPDATE Client SET pictureProfile = ? WHERE id = ?`).run(pictureURL, this.id);
         if (!change || !change.changes)
@@ -207,20 +199,22 @@ export class User {
         return (userData.nickName)
     }
 
-    notifyUser(ids: number[], event: string, data: any): void {
+    static notifyUser(ids: number[], event: string, data: any): void {
         for (const id of ids) {
-            if (connectedUsers.has(id)) {
-                const connection = connectedUsers.get(id);
-                connection?.sse({data: JSON.stringify({event: event, data: data})})
-            }
+            const connection: FastifyReply | undefined = connectedUsers.get(id);
+            if (connection)
+                connection.sse({data: JSON.stringify({event: event, data: data})})
         }
     }
 
     sseHandler(req: FastifyRequest, res: FastifyReply) {
 
         if (connectedUsers.has(this.id))
-            res.status(100).send()
+            return res.status(100).send()
         connectedUsers.set(this.id, res)
+        console.log('sse connected : id', this.id)
+        const message: EventMessage = {event: "ping"}
+        res.sse({data: JSON.stringify(message)})
         const interval = setInterval(() => {
             const message: EventMessage = {event: "ping"}
             res.sse({data: JSON.stringify(message)})
@@ -239,6 +233,7 @@ export class User {
 
     async disconnect() {
         const friends = await fetchAcceptedFriends(this.id)
+        console.log(friends)
         this.notifyUser(friends, 'disconnection', {id: this.id})
 
         await fetch(`http://tournament:7000/quit`, {

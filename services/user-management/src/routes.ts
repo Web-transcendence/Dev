@@ -3,9 +3,7 @@ import sanitizeHtml from "sanitize-html"
 import {User} from "./User.js"
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
 import {connectedUsers} from "./api.js"
-import {EventMessage} from "fastify-sse-v2"
 import {InputError, MyError, ServerError} from "./error.js";
-import {fetchAcceptedFriends} from "./utils.js";
 
 
 export function logConnectedUser() {
@@ -122,10 +120,8 @@ export default async function userRoutes(app: FastifyInstance) {
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
             const user = new User(id)
-            console.log('ssss')
 
             const profileData = user.getProfile()
-            logConnectedUser()
             return res.status(200).send(profileData)
         }
         catch(err) {
@@ -252,12 +248,21 @@ export default async function userRoutes(app: FastifyInstance) {
     })
 
     app.post('/notify', (req: FastifyRequest, res: FastifyReply) => {
-        const zod_result = Schema.pictureSchema.safeParse(req.body);
-        if (!zod_result.success)
-            throw new InputError(`Cannot parse the input`)
+        try {
+            const zod_result = Schema.notifySchema.safeParse(req.body);
+            if (!zod_result.success)
+                throw new InputError(`Cannot parse the input`)
+            const data = zod_result.data
+            User.notifyUser(data.ids, data.event, data.body);
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
     })
-    app.get('/test', (req: FastifyRequest, res: FastifyReply) => {
-        fetchAcceptedFriends(1);
-        return res.status(200).send()
-    })
+
 }
+

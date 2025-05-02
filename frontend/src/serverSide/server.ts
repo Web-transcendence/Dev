@@ -78,14 +78,14 @@ app.register(httpProxy, {
 });
 
 app.register(httpProxy, {
-    upstream: 'http://social:6000',
+    upstream: 'http://social:6500',
     prefix: '/social',
     http2: false,
     preHandler: authentificate
 });
 
 app.register(httpProxy, {
-    upstream: 'http://tournament:6000',
+    upstream: 'http://tournament:7000',
     prefix: '/tournament',
     http2: false,
     preHandler: authentificate

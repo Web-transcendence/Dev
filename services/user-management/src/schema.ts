@@ -55,8 +55,9 @@ export const notifySchema = z.object({
             return num;
         })
     ),
-    event: z.string().transform((val) => {
-        
+    event: z.string(),
+    body: z.string().transform((val) => {
+        return JSON.parse(val);
     })
 })
 
