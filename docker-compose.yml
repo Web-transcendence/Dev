@@ -22,7 +22,7 @@ services:
           ignore:
             - app/public/dist/*.js
         - action: rebuild
-          path: ./frontend/package.json
+          path: ./frontend/*.json
           target: app/
 
   user-management:

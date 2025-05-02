@@ -10,4 +10,5 @@
     "rootDir": "src/api.ts",
     "lib": ["dom", "ESNext"]
   },
+  "include": ["src/servertSide/**/*"]
 }
