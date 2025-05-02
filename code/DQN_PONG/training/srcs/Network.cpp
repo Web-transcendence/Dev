@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Network.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 16:17:49 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/01 21:04:22 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/02 02:54:54 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ Network::Network(std::string const & inFile) : _num_layers(3) {
 	std::getline(ifs, dataStr, '\0');
 	ifs.close();
 	auto data = nlohmann::json::parse(dataStr)["Network"];
-	std::vector<unsigned int>	sizes( + 2);
+	std::vector<unsigned int>	sizes(N_LAYER_HIDDEN + 2);
 	sizes.at(0) = INPUT_SIZE;
 	for (unsigned int i = 1; i < N_LAYER_HIDDEN + 1; i++)
 		sizes.at(i) = HIDDEN_SIZE;

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:41:48 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/30 22:26:09 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/02 03:01:08 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ typedef struct s_paddle {
 
 class Environment {
 public:
-	Environment(unsigned int const maxStep);
+	Environment( void );
 	~Environment( void );
 
 	void					action(s_exp * exp);
@@ -89,8 +89,6 @@ private:
 
 	std::shared_ptr<std::vector<double>>	_state;
 	bool									_done;
-
-	unsigned int const	_maxEpStep;
 
 friend class Agent;
 };

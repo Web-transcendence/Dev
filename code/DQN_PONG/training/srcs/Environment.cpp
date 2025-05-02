@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Environment.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/01 16:46:29 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/02 03:22:50 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,10 @@
 #include <random>
 #include <cmath>
 
-Environment::Environment(unsigned int const maxStep) : \
+Environment::Environment( void ) : \
 	ball(std::array<double, 6>{WIDTH/2,HEIGHT,2,0,10,10}), \
 	rPaddle(std::array<double, 5>{WIDTH-30,HEIGHT/2,20,200,10}), \
-	lPaddle(std::array<double, 5>{30,HEIGHT/2,20,200,10}), \
-    _maxEpStep(maxStep) {
+	lPaddle(std::array<double, 5>{30,HEIGHT/2,20,200,10}) {
 	return ;
 }
 
@@ -44,7 +43,7 @@ void	Environment::action(t_exp * exp) {
     }
 	exp->nextState = state;
 	this->_state = state;
-	// this->displayState(*state);
+	this->displayState(*state);
 	return ;
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Agent.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/01 21:09:58 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/02 03:00:21 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,12 +48,13 @@ Agent::~Agent( void ) {
 void	Agent::train( void ) {
 	double 				exploRate = this->_explorationRate;
 	std::vector<double>	recordReward;
+	std::vector<double>	recordStep;
 	
 	for (int iEp = 0; iEp < this->_maxEpTraining; iEp++) {
-		std::vector<double>	recordStep;
 		double	totalReward = 0.0;
+		recordStep.push_back(0.0);
 		this->_env->reset();
-		for (int iAct = 0; ; iAct++) {
+		for (int iAct = 0; iAct < this->_maxActions; iAct++) {
 			auto	experience = new t_exp;
 			experience->state = this->_env->getState();
 			this->getAction(experience, exploRate);
@@ -62,8 +63,8 @@ void	Agent::train( void ) {
 			this->_xp->add(experience);
 			this->batchTrain(16);
 			if (experience->reward >= 1.) {this->TNetUpdate();}
+			recordStep.back() += 1.0;
 			if (experience->done) {
-				recordStep.push_back(iAct);
 				break ;
 			}
 		}
@@ -75,6 +76,7 @@ void	Agent::train( void ) {
 			double averageReward = std::accumulate(recordReward.begin(),recordReward.end(),0.0) / static_cast<double>(recordReward.size());
 			double averageStep = std::accumulate(recordStep.begin(),recordStep.end(),0.0) / static_cast<double>(recordStep.size());
 			recordReward.clear();
+			recordStep.clear();
 			std::cout<<"epoch: "<<iEp-100<<" to "<<this->_maxEpTraining<<", average reward: "<<averageReward<<", average steps: "<<averageStep<<", exploration: "<<exploRate<<std::endl;
 			this->_QNet->printNetworkToJson("weights.json");
 		}
