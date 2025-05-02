@@ -48,17 +48,9 @@ export const signInSchema = z.object({
 });
 
 export const notifySchema = z.object({
-    ids: z.array(z.string()).transform((arr: string[]) =>
-        arr.map((idStr: string) => {
-            const num = Number(idStr);
-            if (isNaN(num)) throw new Error(`Invalid number: ${idStr}`);
-            return num;
-        })
-    ),
+    ids: z.array(z.number()),
     event: z.string(),
-    body: z.string().transform((val) => {
-        return JSON.parse(val);
-    })
+    body: z.any()
 })
 
 export * from "./schema.js";

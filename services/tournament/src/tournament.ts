@@ -33,7 +33,7 @@ export class tournament {
             if (tournament.hasParticipant(participantId))
                 throw new ConflictError(`this user has already another tournament`, `internal error system`)
 
-        await fetchNotifyUser(this.participantId, 'joinTournament', participantId)
+        await fetchNotifyUser(this.participantId, 'joinTournament', {id : participantId})
         this.participantId.push(participantId)
     }
 
@@ -54,8 +54,6 @@ export class tournament {
             this.participantId.filter(participantId => participantId !== id)
             await fetchNotifyUser(this.participantId, 'quitTournament', {id: id})
         }
-
-
     }
 
     async bracketHandler(bracket: number[]): Promise<number> {

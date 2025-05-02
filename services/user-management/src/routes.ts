@@ -4,6 +4,7 @@ import {User} from "./User.js"
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
 import {connectedUsers} from "./api.js"
 import {InputError, MyError, ServerError} from "./error.js";
+import {notifyUser} from "./serverSentEvent.js";
 
 
 export function logConnectedUser() {
@@ -140,13 +141,13 @@ export default async function userRoutes(app: FastifyInstance) {
      * initiate the sse connection between the server and the client, stock the response in a map.
      *      the response can call the method .sse to send data in this format : {data: JSON.stringify({ event: string, data: any })}
      */
-    app.get('/sse', async function (req, res) {
+    app.get('/sse', async function (req: FastifyRequest, res: FastifyReply) {
         try {
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
             const user = new User(id)
-            user.sseHandler(req, res)
+            await user.sseHandler(req, res)
         } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)
@@ -250,10 +251,12 @@ export default async function userRoutes(app: FastifyInstance) {
     app.post('/notify', (req: FastifyRequest, res: FastifyReply) => {
         try {
             const zod_result = Schema.notifySchema.safeParse(req.body);
-            if (!zod_result.success)
+            if (!zod_result.success) {
+                console.log(zod_result.error)
                 throw new InputError(`Cannot parse the input`)
+            }
             const data = zod_result.data
-            User.notifyUser(data.ids, data.event, data.body);
+            notifyUser(data.ids, data.event, data.body);
         } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)

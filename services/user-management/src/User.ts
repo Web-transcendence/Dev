@@ -7,8 +7,7 @@ import QRCode from "qrcode"
 import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
 import {EventMessage} from "fastify-sse-v2";
 import { FastifyReply, FastifyRequest } from "fastify"
-import {fetch} from 'undici'
-import {fetchAcceptedFriends} from "./utils.js";
+import {connection, disconnect} from "./serverSentEvent.js";
 
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
@@ -199,19 +198,14 @@ export class User {
         return (userData.nickName)
     }
 
-    static notifyUser(ids: number[], event: string, data: any): void {
-        for (const id of ids) {
-            const connection: FastifyReply | undefined = connectedUsers.get(id);
-            if (connection)
-                connection.sse({data: JSON.stringify({event: event, data: data})})
-        }
-    }
 
-    sseHandler(req: FastifyRequest, res: FastifyReply) {
+
+    async sseHandler(req: FastifyRequest, res: FastifyReply) {
 
         if (connectedUsers.has(this.id))
             return res.status(100).send()
         connectedUsers.set(this.id, res)
+        await connection(this.id)
         console.log('sse connected : id', this.id)
         const message: EventMessage = {event: "ping"}
         res.sse({data: JSON.stringify(message)})
@@ -224,25 +218,12 @@ export class User {
             clearInterval(interval)
             if (connectedUsers.has(this.id)) {
                 console.log('sse disconnected client = ' + this.id)
-                await this.disconnect()
+                await disconnect(this.id)
                 connectedUsers.delete(this.id)
             }
         })
     }
 
 
-    async disconnect() {
-        const friends = await fetchAcceptedFriends(this.id)
-        console.log(friends)
-        this.notifyUser(friends, 'disconnection', {id: this.id})
 
-        await fetch(`http://tournament:7000/quit`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'id': `${this.id}`
-            }
-        })
-
-    }
 }

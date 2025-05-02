@@ -1,28 +1,17 @@
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
 import * as Schema from "./schema.js"
-import {InputError, MyError, NotFoundError, ServerError, UnauthorizedError} from "./error.js";
+import {InputError, MyError, ServerError} from "./error.js";
 import sanitizeHtml from "sanitize-html"
 import {addFriend, getFriendList, removeFriend} from "./friend.js";
-import {fetch} from 'undici'
+import {authUser} from "./utils.js";
 
-async function authUser(id: number) {
-    const result = await fetch(`http://user-management:5000/authId/${id}`)
-    if (!result.ok)
-        throw new UnauthorizedError(`this id doesn't exist in database`, `internal server error`)
-}
 
-export async function fetchId(nickName: string) {
-    const result = await fetch(`http://user-management:5000/idByNickName/${nickName}`)
-    if (!result.ok)
-        throw new NotFoundError(`fetchId`, 'user not found')
-    const { id } = await result.json()
-    return id
-}
 
 export default async function socialRoutes(app: FastifyInstance) {
 
     app.post('/add', async (req: FastifyRequest, res: FastifyReply) => {
         try {
+            console.log('add friend')
             const zod_result = Schema.manageFriendSchema.safeParse(req.body)
             if (!zod_result.success)
                 throw new InputError(`Cannot parse the input`)
@@ -37,7 +26,6 @@ export default async function socialRoutes(app: FastifyInstance) {
             await authUser(id)
 
             const result = await addFriend(id, friendNickName)
-            //sse
 
             return res.status(200).send({message: result})
         }
@@ -89,7 +77,6 @@ export default async function socialRoutes(app: FastifyInstance) {
             await authUser(id)
             await removeFriend(id, friendNickName)
 
-            //sse
             return res.status(200).send()
         }
         catch(err) {
