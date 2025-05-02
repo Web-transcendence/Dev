@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 15:36:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/02 03:01:43 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/03 00:04:00 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int main(int ac, char** av) {
 	myAgent.genQNet(net, SIGMOIDs, SIGMOIDs);
 	myAgent.genExpReplay(1000, 2500);
 	std::cout << std::endl << "=== TRAINING DQN ===" << std::endl;
-	myAgent.train();
+	// myAgent.train();
 	std::cout << std::endl << "=== TESTING ===" << std::endl;
 	Network	tester(av[1]);
 	myAgent.test(tester);

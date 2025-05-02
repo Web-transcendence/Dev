@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/02 03:00:21 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/03 00:08:08 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <thread>
 #include <chrono>
 #include <array>
+#include <fstream>
 
 Agent::Agent(int const maxTraining, int const maxAct, double const learningRate, \
 	double const discount, double const exploRate, double const exploDecay) : \
@@ -49,7 +50,8 @@ void	Agent::train( void ) {
 	double 				exploRate = this->_explorationRate;
 	std::vector<double>	recordReward;
 	std::vector<double>	recordStep;
-	
+	std::ofstream		ofs("logger.txt");
+
 	for (int iEp = 0; iEp < this->_maxEpTraining; iEp++) {
 		double	totalReward = 0.0;
 		recordStep.push_back(0.0);
@@ -77,10 +79,12 @@ void	Agent::train( void ) {
 			double averageStep = std::accumulate(recordStep.begin(),recordStep.end(),0.0) / static_cast<double>(recordStep.size());
 			recordReward.clear();
 			recordStep.clear();
-			std::cout<<"epoch: "<<iEp-100<<" to "<<this->_maxEpTraining<<", average reward: "<<averageReward<<", average steps: "<<averageStep<<", exploration: "<<exploRate<<std::endl;
+			ofs<<"epoch: "<<iEp-100<<" to "<<this->_maxEpTraining<<", average reward: "<<averageReward<<", average steps: "<<averageStep<<", exploration: "<<exploRate<<std::endl;
 			this->_QNet->printNetworkToJson("weights.json");
 		}
 	}
+	this->_QNet->printNetworkToJson("weights.json");
+	ofs.close();
 	return ;
 }
 
@@ -91,7 +95,7 @@ void	Agent::test( void ) {
 		experience.state = this->_env->getState();
 		this->getAction(&experience, 0.0);
 		this->_env->action(&experience);
-    	this->_env->displayState(*experience.state);
+    	// this->_env->displayState(*experience.state);
 		if (experience.done)
 			break ;
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -107,7 +111,7 @@ void	Agent::test(Network & QnetTest) {
 		auto	output = QnetTest.feedForwardTest(*experience.state);
 		experience.action = std::distance(output.begin(), std::max_element(output.begin(), output.end()));
 		this->_env->action(&experience);
-    	this->_env->displayState(*experience.state);
+    	// this->_env->displayState(*experience.state);
 		if (experience.done) {
 			this->_env->reset();
 		}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Network.class.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/01 20:59:52 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/03 00:11:55 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,8 @@ private:
     std::vector<unsigned int>	_sizes;
     std::vector<Layer*>         _layers;
 
-	std::vector<std::vector<std::vector<double>>>	_weights;
-	std::vector<std::vector<double>>				_biaises;
+	std::vector<std::vector<std::vector<double>>*>*	_weights;
+	std::vector<std::vector<double>*>*				_biaises;
 
 friend class Agent;
 };

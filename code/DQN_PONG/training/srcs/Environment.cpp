@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/02 03:22:50 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/02 14:56:19 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void	Environment::moovelPaddle( void ) {
 
 	if (std::abs(diff) > tolerance) {
 		double direction = (diff > 0) ? 1.0 : -1.0;
-		lPaddle.y += direction * lPaddle.s * 0.4;
+		lPaddle.y += direction * lPaddle.s * 0.6;
 	}
 }
 
@@ -109,7 +109,6 @@ void	Environment::mooveBall(t_exp * exp) {
         exp->reward = 10.;
 		return ;
     }
-	exp->reward += 0.05;
     // if (ball.x > WIDTH) {
     //     ball.x = WIDTH - (ball.x - WIDTH);
     //     ball.a = M_PI - ball.a;
