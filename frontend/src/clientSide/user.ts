@@ -165,7 +165,7 @@ export async function profile(nickName: HTMLElement, email: HTMLElement) {
             console.error('token missing')
             return
         }
-        const response = await fetch(`/user-management/getProfile`, {
+        const response = await fetch(`/user-management/privateProfile`, {
         method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -174,8 +174,40 @@ export async function profile(nickName: HTMLElement, email: HTMLElement) {
         })
         const data = await response.json()
         if (response.ok) {
+            localStorage.setItem('id', data.id)
+            localStorage.setItem('nickName', data.nickName)
+            localStorage.setItem('email', data.email)
+            localStorage.setItem('avatar', data.avatar)
             nickName.innerText = data.nickName
             email.innerText = data.email
+        }
+    }
+    catch (err) {
+        console.error(err)
+    }
+}
+
+export const fetchUserInformation = async (ids: number[]) => {
+    try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+            console.error('token missing')
+            return
+        }
+        const response = await fetch(`/user-management/userInformation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(ids)
+        })
+        if (response.ok)
+            return await response.json()
+        else {
+            const error = await response.json()
+            console.log(error)
+            //notify error
         }
     }
     catch (err) {
@@ -378,6 +410,50 @@ export async function getAvatar() {
     }
 }
 
+export async function setPassword(newPassword: string) {
+    try {
+        const token = localStorage.getItem('token')
+        const response = await fetch(`/user-management/setPassword`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+            body: JSON.stringify({password: newPassword}),
+        })
+        if (!response.ok) {
+            console.error('failed')
+        }
+        else
+            console.log('success')
+
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function setNickName(newNickName: string) {
+    try {
+        const token = localStorage.getItem('token')
+        const response = await fetch(`/user-management/setNickName`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+            body: JSON.stringify({nickName: newNickName}),
+        })
+        if (!response.ok) {
+            console.error('failed')
+        }
+        else
+            console.log('success')
+
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 export const updateAvatar = (id: string, src: string) => {
     const img = document.getElementById(id) as HTMLImageElement | null;
     if (img) {
@@ -386,6 +462,8 @@ export const updateAvatar = (id: string, src: string) => {
         console.warn(`Element with id '${id}' not found.`);
     }
 };
+
+
 
 export async function joinTournament() {
     try {
