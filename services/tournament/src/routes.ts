@@ -80,7 +80,7 @@ export default async function tournamentRoutes(app: FastifyInstance) {
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
 
-            authUser(id);
+            await authUser(id);
 
             const tournament = tournamentSessions.get(id)
             if (!tournament)

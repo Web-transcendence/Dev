@@ -1,6 +1,9 @@
 import fastify from 'fastify'
 import socialRoutes from "./routes.js"
 
+export const INTERNAL_PASSWORD = "toChange"
+
+
 const app = fastify();
 
 app.register(socialRoutes);

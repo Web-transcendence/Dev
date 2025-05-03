@@ -6,6 +6,8 @@ import { FastifyReply } from "fastify";
 
 const app = fastify();
 
+export const INTERNAL_PASSWORD = "toChange"
+
 app.register(FastifySSEPlugin);
 app.register(userRoutes);
 app.post('/auth/google', googleAuth);

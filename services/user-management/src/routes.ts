@@ -2,8 +2,8 @@ import * as Schema from "./schema.js"
 import sanitizeHtml from "sanitize-html"
 import {User} from "./User.js"
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
-import {connectedUsers} from "./api.js"
-import {InputError, MyError, ServerError} from "./error.js";
+import {connectedUsers, INTERNAL_PASSWORD} from "./api.js"
+import {InputError, MyError, ServerError, UnauthorizedError} from "./error.js";
 import {notifyUser} from "./serverSentEvent.js";
 import {nickNameSchema, passwordSchema} from "./schema.js";
 
@@ -13,6 +13,11 @@ export function logConnectedUser() {
     for (const [id, user] of connectedUsers)
         connected.push(id)
     console.log(connected);
+}
+
+const internalVerification = async (req, res) => {
+    if (req.headers.authorization !== INTERNAL_PASSWORD)
+        throw new UnauthorizedError(`bad internal password to access to this url: ${req.url}`, `internal server error`)
 }
 
 export default async function userRoutes(app: FastifyInstance) {
@@ -280,7 +285,7 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
-    app.get('/authId/:id', (req: FastifyRequest, res: FastifyReply) => {
+    app.get('/authId/:id', {preHandler: internalVerification} ,  (req: FastifyRequest, res: FastifyReply) => {
         try {
             const { id } = req.params as { id: string }
 
@@ -303,7 +308,7 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
-    app.get('/idByNickName/:nickName', (req: FastifyRequest, res: FastifyReply) => {
+    app.get('/idByNickName/:nickName', {preHandler: internalVerification} , (req: FastifyRequest, res: FastifyReply) => {
         try {
             const { nickName }  = req.params as { nickName: string }
             if (!nickName)
@@ -322,7 +327,7 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
-    app.post('/notify', (req: FastifyRequest, res: FastifyReply) => {
+    app.post('/notify', {preHandler: internalVerification}, (req: FastifyRequest, res: FastifyReply) => {
         try {
             const zod_result = Schema.notifySchema.safeParse(req.body);
             if (!zod_result.success) {
