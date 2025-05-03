@@ -8,8 +8,6 @@ import fastifyStatic from "@fastify/static";
 import {env} from "./env";
 import {routes} from "./routes";
 
-// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-//
 const httpsOptions = {
     https: {
         key: readFileSync(join(import.meta.dirname, '../../secure/key.pem')),      // Private key
@@ -18,7 +16,7 @@ const httpsOptions = {
 };
 
 
-const SECRET_KEY = /*process.env.SECRET_KEY || */ "secret_key";
+const SECRET_KEY = process.env.SECRET_KEY;
 
 const app = Fastify(httpsOptions);
 

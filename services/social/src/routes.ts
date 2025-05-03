@@ -3,7 +3,7 @@ import * as Schema from "./schema.js"
 import {InputError, MyError, ServerError} from "./error.js";
 import sanitizeHtml from "sanitize-html"
 import {addFriend, getFriendList, removeFriend} from "./friend.js";
-import {authUser} from "./utils.js";
+import {authUser, fetchId} from "./utils.js";
 
 
 
@@ -89,5 +89,8 @@ export default async function socialRoutes(app: FastifyInstance) {
         }
     })
 
-
+    app.get('/test', async (req: FastifyRequest, res: FastifyReply) => {
+        await fetchId('sss')
+        return res.status(200).send()
+    })
 }

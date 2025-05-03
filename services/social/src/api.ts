@@ -1,7 +1,8 @@
 import fastify from 'fastify'
 import socialRoutes from "./routes.js"
 
-export const INTERNAL_PASSWORD = "toChange"
+export const INTERNAL_PASSWORD = process.env.SECRET_KEY;
+
 
 
 const app = fastify();

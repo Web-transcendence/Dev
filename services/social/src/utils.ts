@@ -23,8 +23,11 @@ export async function fetchId(nickName: string) {
             'authorization': `${INTERNAL_PASSWORD}`
         },
     })
-    if (!result.ok)
+    if (!result.ok) {
+        const err = await result.json()
+        console.log(err)
         throw new NotFoundError(`fetchId`, 'user not found')
+    }
     const { id } = await result.json()
     return id
 }

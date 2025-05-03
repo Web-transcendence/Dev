@@ -1,7 +1,7 @@
 import Database from "better-sqlite3"
 import bcrypt from "bcrypt"
 import jwt from 'jsonwebtoken'
-import {connectedUsers} from "./api.js"
+import {connectedUsers, INTERNAL_PASSWORD} from "./api.js"
 import speakeasy, {GeneratedSecret} from "speakeasy"
 import QRCode from "qrcode"
 import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
@@ -84,7 +84,7 @@ export class User {
     }
 
     private static makeToken(id: number): string {
-        const token = jwt.sign({id: id}, 'secret_key', {expiresIn: '1h'})
+        const token = jwt.sign({id: id}, INTERNAL_PASSWORD, {expiresIn: '1h'})
         return (token)
     }
 
