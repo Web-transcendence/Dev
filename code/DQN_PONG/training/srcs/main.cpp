@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 15:36:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/03 00:04:00 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/04 18:55:53 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,14 @@
 
 int main(int ac, char** av) {
 	Environment	myEnv;
-	Agent	myAgent(10000, 250, 0.95, 0.93, 1.0, 1./10000.);
+	Agent	myAgent(50000, 250, 0.95, 0.93, 1.0, 1./50000.);
 	std::vector<unsigned int>	net = {INPUT_SIZE,25,OUTPUT_SIZE};
 	myAgent.setMap(myEnv);
 	myAgent.genTNet(net, SIGMOIDs, SIGMOIDs);
 	myAgent.genQNet(net, SIGMOIDs, SIGMOIDs);
-	myAgent.genExpReplay(1000, 2500);
+	myAgent.genExpReplay(2500, 25000);
 	std::cout << std::endl << "=== TRAINING DQN ===" << std::endl;
-	// myAgent.train();
+	myAgent.train();
 	std::cout << std::endl << "=== TESTING ===" << std::endl;
 	Network	tester(av[1]);
 	myAgent.test(tester);
