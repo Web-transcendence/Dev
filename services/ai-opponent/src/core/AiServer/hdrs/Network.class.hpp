@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Network.class.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 15:33:52 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/11 13:40:39 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/05 16:05:11 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@ public:
 private:
 	Network( void ) {}
 	
-	std::vector<std::vector<std::vector<double>>>	_weights;
-	std::vector<std::vector<double>>				_biaises;
+	std::vector<std::vector<std::vector<double>>*>*	_weights;
+	std::vector<std::vector<double>*>*				_biaises;
 };
 
 #endif
