@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:46:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/20 16:27:14 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/05 12:54:32 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,13 @@
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
 
-#include "../../third-party/json/json.hpp"
+#include "json.hpp"
 
 #include <vector>
 #include <atomic>
 #include <thread>
 #include <chrono>
+#include <array>
 
 typedef websocketpp::client<websocketpp::config::asio_client>	client;
 typedef std::shared_ptr<websocketpp::connection<websocketpp::config::asio_client>>	server_ptr;
@@ -45,6 +46,8 @@ private:
 	
 	void	loop( void );
 	
+	bool	giveArrow(std::string const & key, nlohmann::json & j);
+
 	bool	checkTime( void );
 
 	client	c;
@@ -52,12 +55,16 @@ private:
 	server_ptr	aiServer;
 	server_ptr	gameServer;
 
+	std::string	lastKey;
+	
 	std::mutex			cgMutex;
 	std::vector<double>	currentGameState;
 
 	std::atomic<bool>	active;
 
 	std::atomic<std::chrono::steady_clock::time_point>	t1;
+
+	std::array<std::string, 3> const	allInput;
 };
 
 

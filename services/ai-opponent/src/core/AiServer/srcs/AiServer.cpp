@@ -6,18 +6,20 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/23 15:59:26 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/05 11:15:35 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "AiServer.class.hpp"
 
 #include "Network.class.hpp"
-#include "../../third-party/json/json.hpp"
+#include "json.hpp"
 
 #include <iostream>
-#include <string>
 #include <cstdlib>
+#include <string>
+#include <chrono>
+
 
 double	_1[sizeof(double)*16]; //place holder input
 char	_2[sizeof(double)*4]; // place holder output
@@ -40,7 +42,7 @@ void	AiServer::start( void ) {
 	
 	this->_myServer.init_asio();
 	
-	this->_myServer.listen(9002);
+	this->_myServer.listen(AI_SERVER_PORT);
 
 	this->_myServer.start_accept();
 	this->_myServer.run();

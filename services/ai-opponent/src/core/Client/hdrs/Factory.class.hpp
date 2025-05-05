@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:47:28 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/20 16:27:07 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/05 11:16:46 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
 
-#include "../../third-party/json/json.hpp"
+#include "json.hpp"
 
 #include <vector>
 #include <memory>

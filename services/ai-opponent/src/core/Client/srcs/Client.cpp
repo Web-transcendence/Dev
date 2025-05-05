@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/23 15:57:13 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/05 13:15:14 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 char	_1[sizeof(double)*N_NEURON_INPUT]; //place holder input
 double	_2[sizeof(double)*N_NEURON_OUTPUT]; //place holder output
 
-Client::Client(std::string const & urlGame) {
+Client::Client(std::string const & urlGame) : allInput(std::array<std::string, 3>{UP, DOWN, NOTHING}) {
 	this->currentGameState = std::vector<double>(N_NEURON_INPUT);
 	
 	this->c.init_asio();
@@ -36,6 +36,7 @@ Client::Client(std::string const & urlGame) {
 	}
 	this->c.connect(this->aiServer);
 	this->c.connect(this->gameServer);
+	lastKey = NOTHING;
 	return ;
 }
 
@@ -55,18 +56,19 @@ void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg
 
 void	Client::on_message_aiServer(nlohmann::json const & data) {
 	unsigned int		idx = 0;
-	std::vector<double>	output(N_NEURON_OUTPUT);
+	std::vector<double>	o(N_NEURON_OUTPUT);
 
-	for (auto it = output.begin(); it != output.end(); it++) {
+	for (auto it = o.begin(); it != o.end(); it++) {
 		std::stringstream	ss;
 		ss << data["Data"][idx];
 		ss >> *it;
 	}
 	nlohmann::json	j;
-	j["ID"] = "Client AI";
-	j["Arrow"] = "UP";
-	// definir l input grace a la plus grande valeur contenue dans output dans un format json (voir avec ben)
-	this->gameServer->send(j.dump());
+	int const	key = std::distance(o.begin(), std::max_element(o.begin(), o.end()));
+	j["type"] = "input";
+	bool const	send = this->giveArrow(this->allInput.at(key), j);
+	if (send == true)
+		this->gameServer->send(j.dump());
 	return ;
 }
 
@@ -90,7 +92,7 @@ void	Client::loop( void ) {
 		memcpy(_1, this->currentGameState.data(), sizeof(double)*N_NEURON_INPUT);
 		cgMutex.unlock();
 		this->aiServer->send(_1, sizeof(double)*N_NEURON_INPUT);
-		std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+		std::this_thread::sleep_for(std::chrono::milliseconds(CLIENT_INPUT_TIME_SPAN));
 		if (!checkTime()) {
 			this->c.stop();
 			this->active.store(false);
@@ -100,10 +102,27 @@ void	Client::loop( void ) {
 	return ;
 }
 
+bool	Client::giveArrow(std::string const & key, nlohmann::json & j) {
+	bool	send = false;
+
+	if (key != this->lastKey) {
+		j["key"] = lastKey;
+		j["state"] = RELEASE;
+		if (key != RELEASE) {	
+			this->gameServer->send(j.dump());
+			j["key"] = key;
+			j["state"] = PRESS;
+		}
+		send = true;
+	}
+	this->lastKey = key;
+	return send;
+}
+
 bool	Client::checkTime( void ) {
 	auto	t2 = std::chrono::steady_clock::now();
 	auto	timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - this->t1.load());
-	if (timeSpan.count() >= 3.0)
+	if (timeSpan.count() >= CLIENT_MAX_SPAN_STATE)
 		return false;
 	return true;
 }

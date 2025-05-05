@@ -3,21 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   TypeDefinition.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:15:27 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/05 16:05:38 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/05 13:15:02 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef TYPEDEFINITION_HPP
 # define TYPEDEFINITION_HPP
-# define UP 0
-# define DOWN 1
+# define UP "w"
+# define DOWN "s"
+# define NOTHING "n"
+# define PRESS "down"
+# define RELEASE "release"
 # define N_LAYER_HIDDEN 1
 # define N_NEURON_INPUT 600
 # define N_NEURON_OUTPUT 3
 # define N_NEURON_HIDDEN 25
+# define AI_SERVER_PORT 9090
+# define CLIENT_INPUT_TIME_SPAN 100
+# define CLIENT_MAX_SPAN_STATE 3.0
 # include <vector>
 # include <cstring>
 
