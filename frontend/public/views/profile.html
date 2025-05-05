@@ -37,17 +37,21 @@
                     <h2 class="text-lg font-bold ">Empty</h2>
                 </li>
             </ul>
-
             <template id="acceptedTemplate">
                 <li class="list-user">
-                    <div class="ml-5 flex items-center">
-                        <img class="h-10 w-10 rounded-full" src="../images/login.png" alt="Avatar"/>
+                    <div class="ml-5 flex items-center relative">
+                        <div class="relative">
+                            <img class="h-10 w-10 rounded-full" src="../images/login.png" alt="Avatar"/>
+                            <!-- Indicateur de statut -->
+                            <span id="online" class="hidden absolute bottom-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-green-500 status-indicator"></span>
+                        </div>
                         <div class="ml-3 overflow-hidden">
                             <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
                         </div>
                     </div>
                 </li>
             </template>
+
 
             <div class="flex flex-col items-center justify-center">
                 <div class="absolute bottom-0 ">
@@ -114,15 +118,15 @@
                         <!-- Boutons d'action -->
                         <div class="flex space-x-2 mr-5">
                             <button
-                                    class="accept-btn group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none accept-btn">
+                                    class="accept-btn group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-pink-500 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none accept-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg"
-                                     class="w-5 h-5 opacity-25 group-hover:opacity-100 transition-opacity duration-200"
+                                     class="w-5 h-5 opacity-25 group-hover:opacity-100  transition-opacity duration-500"
                                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
                             </button>
                             <button
-                                    class="decline-btn group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none decline-btn">
+                                    class="decline-btn group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-pink-500 text-white rounded-full transition-transform duration-600 hover:scale-110 focus:outline-none decline-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                      class="w-5 h-5 opacity-25 group-hover:opacity-100 transition-opacity duration-200"
                                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -198,8 +202,6 @@
         </div>
 
     </div>
-
-    <div class="border-t border-gray-300 my-6"></div>
 
     <div class="text-center">
         <button id="logout" class="bg-pink-500 btn-primary">
