@@ -16,3 +16,6 @@ https://medium.com/@qempsil0914/zero-to-one-deep-q-learning-part1-basic-introduc
 https://medium.com/@qempsil0914/deep-q-learning-part2-double-deep-q-network-double-dqn-b8fc9212bbb2
 https://web.stanford.edu/class/psych209/Readings/MnihEtAlHassibis15NatureControlDeepRL.pdf
 
+CUDA:
+https://docs.nvidia.com/cuda/cuda-c-programming-guide/
+https://docs.nvidia.com/cuda/cuda-c-programming-guide/#cuda-enabled-gpus
