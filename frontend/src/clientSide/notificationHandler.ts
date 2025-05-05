@@ -1,22 +1,17 @@
 
-export function DispayNotification(message: string, options ?: {
-    type?: "error" | "invitation",
-        onAccept?: () => void
+export function DispayNotification(message: string, options?: {
+    type?: "error" | "invitation";
+    onAccept?: () => void;
 }) {
     const banner = document.getElementById("notificationBanner");
     const messageSpan = document.getElementById("notificationMessage");
-    const actionBtn = document.getElementById("notificationAction");
-
+    const actionBtn = document.getElementById("notificationActionAccept");
     if (!banner || !messageSpan || !actionBtn) {
         console.error("Notification elements missing");
         return;
     }
-
-    // Met à jour le message
     messageSpan.textContent = message;
-
-    // Gère les styles selon le type
-    if (options?.type === "error") {
+    if (options?.type === "error") { // Red for error | Blue for invite
         banner.classList.remove("bg-gray-800");
         banner.classList.add("bg-red-600");
         actionBtn.classList.add("hidden");
@@ -29,26 +24,23 @@ export function DispayNotification(message: string, options ?: {
             options.onAccept?.();
             hideNotification();
         };
-    } else {
-        // Par défaut
+    } else { // Default Green
         banner.classList.remove("bg-red-600", "bg-blue-600");
-        banner.classList.add("bg-gray-800");
+        banner.classList.add("bg-green-800");
         actionBtn.classList.add("hidden");
     }
 
     banner.classList.remove("hidden");
     window.requestAnimationFrame(() => {
-        banner.classList.add("!right-0"); // glisse dedans
+        banner.classList.add("!right-0");
     });
     console.log('End of banner notification');
 
     requestAnimationFrame(() => {
         banner.classList.add("!right-0");
-
-        // Retire la notification après un délai (ex: 5s visibles)
         setTimeout(() => {
             banner.classList.remove("!right-0");
-            setTimeout(() => banner.classList.add("hidden"), 500); // après la transition
+            setTimeout(() => banner.classList.add("hidden"), 500);
         }, 5000);
     });
 

@@ -2,12 +2,7 @@ import {navigate} from "./front.js"
 import {loadPart} from "./insert.js"
 import {sseConnection} from "./serverSentEvent.js"
 import {DispayNotification} from "./notificationHandler.js"
-
-type FriendList = {
-    acceptedNickName: string[]
-    pendingNickName: string[]
-    receivedNickName: string[]
-}
+import {options} from "sanitize-html";
 
 export function register(button: HTMLElement): void {
     button.addEventListener("click", async () => {
@@ -26,10 +21,10 @@ export function register(button: HTMLElement): void {
             localStorage.setItem('token', result.token)
             localStorage.setItem('nickName', result.nickName)
             navigate('/connected', undefined)
-            sseConnection()
+            await getAvatar();
+            await sseConnection()
         } else {
-            console.log("ErrorDisplay : nickname, email or password are not respecting my authority")
-            DispayNotification('respecting my authority', { type: "error" });
+            DispayNotification(result.error , { type: "error" });
         }
     })
 }
@@ -55,13 +50,11 @@ export function login(button: HTMLElement): void {
             }
             localStorage.setItem('token', data.token)
             navigate('/connected', undefined)
-            getAvatar();
+            await getAvatar();
             await sseConnection()
         } else {
             const errorData = await response.json()
-            const loginError = document.getElementById("LoginError") as HTMLSpanElement
-            loginError.textContent = errorData?.error ?? "An error occurred"
-            loginError.classList.remove("hidden")
+            DispayNotification('Wrong password or nickname', { type: "error" });
         }
     })
 }
@@ -96,31 +89,37 @@ export async function profile(nickName: HTMLElement, email: HTMLElement) {
     }
 }
 
-export const fetchUserInformation = async (ids: number[]) => {
-    try {
-        const token = localStorage.getItem('token')
-        if (!token) {
-            console.error('token missing')
-            return
-        }
-        const response = await fetch(`/user-management/userInformation`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify(ids)
-        })
-        if (response.ok)
-            return await response.json()
-        else {
-            const error = await response.json()
-            console.log(error)
-            //notify error
-        }
+
+export type UserData = {
+    id: number,
+    nickName: string,
+    avatar: string,
+    online: boolean
+}
+
+export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> => {
+    const token = localStorage.getItem('token')
+    if (!token)
+        throw new Error('token missing')
+    if (!ids)
+        throw new Error('ids missing')
+    const response = await fetch(`/user-management/userInformation`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ids})
+    })
+    if (response.ok) {
+        const {usersData} = await response.json() as {usersData: UserData[]}
+        return usersData
     }
-    catch (err) {
-        console.error(err)
+    else {
+        const error = await response.json()
+        console.log(error)
+        //notify error
+        throw error
     }
 }
 
@@ -187,12 +186,13 @@ export async function addFriend(friendNickName: string) {
         const input = document.getElementById('friendNameIpt') as HTMLInputElement
         input.value = ''
         input.focus()
-        console.log("Succes addFriend")
         if (!response.ok) {
             const error = await response.json()
-            console.error(error.error)
+            console.error('ERROR addFriend', error.error)
+            DispayNotification(error.error, { type: "error" })
             return false
         }
+        DispayNotification('Successfully Invited')
         return true
     } catch (error) {
         console.error(error)
@@ -224,25 +224,27 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
     }
 }
 
-export async function getFriendList(): Promise<FriendList | undefined> {
-    try {
-        const token = localStorage.getItem('token')
-        const response = await fetch(`/social/list`, {
-           method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
-            },
-        })
-        if (!response.ok) {
-            const error = await response.json()
-            console.error(error.error)
-            return undefined
-        }
-        return await response.json()
-    } catch (error) {
-        console.error(error)
+export type FriendIds = {
+    acceptedIds: number[];
+    pendingIds: number[];
+    receivedIds: number[];
+}
+
+export async function getFriendList() : Promise<FriendIds> {
+    const token = localStorage.getItem('token')
+    const response = await fetch(`/social/list`, {
+       method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': 'Bearer ' + token,
+        },
+    })
+    if (!response.ok) {
+        const error = await response.json()
+        console.error(error.error)
+        throw error
     }
+    return await response.json()
 }
 
 // @ts-ignore
@@ -255,6 +257,7 @@ const toBase64 = (file: any) => new Promise((resolve, reject) => {
 
 export async function setAvatar(target: HTMLInputElement) {
     try {
+        console.log('files', target.files)
         if (target.files && target.files[0]) {
             const file: File = target.files[0]
             const base64File: string = await toBase64(file) as string
@@ -271,15 +274,17 @@ export async function setAvatar(target: HTMLInputElement) {
             if (!response.ok) {
                 const error = await response.json()
                 console.error(error.error)
+                DispayNotification(error.error, { type: "error" })
             }
             else {
                 localStorage.setItem('avatar', base64File)
                 updateAvatar('avatarProfile', base64File);
                 updateAvatar('avatar', base64File);
+                DispayNotification('New Avatar !')
             }
         }
     } catch (err) {
-        console.error(err)
+        DispayNotification('Not a File', { type: "error" })
     }
 }
 

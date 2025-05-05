@@ -1,4 +1,4 @@
-import {addFriend, login, profile, register, setAvatar, verify2fa} from "./user.js";
+import {addFriend, getAvatar, login, profile, register, setAvatar, verify2fa} from "./user.js";
 import {init2fa} from "./user.js";
 import {friendList} from "./friends.js";
 import {connected, handleConnection, navigate} from "./front.js";
@@ -51,10 +51,8 @@ function profileBtn() {
         logoutBtn.addEventListener("click", (event: MouseEvent) => navigate("/logout", event));
     const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
-    if (addFriendBtn && addFriendIpt) {
+    if (addFriendBtn && addFriendIpt)
         addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
-        friendList();
-    }
     const activeFa = localStorage.getItem('activeFa');
     if (activeFa) {
         document.getElementById('totalFactor')?.classList.add("hidden")
@@ -130,6 +128,7 @@ function pongMode() {
 function towerMode() {
     document.getElementById("towerRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/towerRemote", event));
 }
+
 function tower() {
     tdStop()
     console.log("prout");

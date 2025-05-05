@@ -143,9 +143,12 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.post('/userInformation', async (req: FastifyRequest, res: FastifyReply) => {
         try {
+            console.log('req', req.body)
             const zod_result = Schema.idArraySchema.safeParse(req.body)
-            if (!zod_result.success)
+            if (!zod_result.success) {
+                console.log(zod_result.error)
                 throw new InputError(`Cannot parse the input`)
+            }
             const ids: number[] = zod_result.data.ids
 
             const idsInformation = []
@@ -155,7 +158,7 @@ export default async function userRoutes(app: FastifyInstance) {
                 idsInformation.push(user.publicData())
             }
 
-            return res.status(200).send(idsInformation)
+            return res.status(200).send({usersData: idsInformation})
         } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)
@@ -175,12 +178,13 @@ export default async function userRoutes(app: FastifyInstance) {
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
+            console.log(id)
             const user = new User(id)
             await user.sseHandler(req, res)
         } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
             return res.status(500).send()
@@ -208,7 +212,7 @@ export default async function userRoutes(app: FastifyInstance) {
         } catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
             return res.status(500).send()
@@ -228,7 +232,7 @@ export default async function userRoutes(app: FastifyInstance) {
         } catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
             return res.status(500).send()
@@ -253,7 +257,7 @@ export default async function userRoutes(app: FastifyInstance) {
         } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
             return res.status(500).send()
@@ -278,7 +282,7 @@ export default async function userRoutes(app: FastifyInstance) {
         } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
             return res.status(500).send()
@@ -301,7 +305,7 @@ export default async function userRoutes(app: FastifyInstance) {
         } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
             return res.status(500).send()
@@ -320,7 +324,7 @@ export default async function userRoutes(app: FastifyInstance) {
         } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
             return res.status(500).send()
@@ -336,10 +340,11 @@ export default async function userRoutes(app: FastifyInstance) {
             }
             const data = zod_result.data
             notifyUser(data.ids, data.event, data.body);
+            return res.status(200).send()
         } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)
-                return res.status(err.code).send({error: err.message})
+                return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
             return res.status(500).send()

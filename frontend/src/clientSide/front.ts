@@ -8,14 +8,10 @@ declare const AOS: any;
 export let connected = false;
 
 window.addEventListener("popstate", (event) => {
-    console.log("popstate");
-    console.log("state:", event.state);
-    console.log("WLP:", window.location.pathname);
     if ((window.location.pathname === '/connect' || window.location.pathname === '/login') && connected ) {
         history.replaceState(null, '', '/home');
         loadPart('/home')
     }
-        // navigate('/home', undefined)
     else
         loadPart(window.location.pathname)
 });
@@ -141,6 +137,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                     localStorage.setItem('nickName', reply.nickName)
                 navigate('/connected', undefined);
                 await getAvatar();
+                await sseConnection()
             }
         }
     }

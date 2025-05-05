@@ -24,8 +24,10 @@ export async function sseConnection() {
             if (done) break;
             if (value.startsWith('retry: ')) continue;
             const parse = JSON.parse(value?.replace('data: ', ''));
-            if (parse.event in mapEvent)
+            if (parse.event in mapEvent) {
+                console.log(parse)
                 mapEvent[parse.event](parse.data);
+            }
         }
     } catch (err) {
         console.error(err);
