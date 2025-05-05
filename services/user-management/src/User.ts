@@ -1,20 +1,18 @@
 import Database from "better-sqlite3"
 import bcrypt from "bcrypt"
 import jwt from 'jsonwebtoken'
-import {connectedUsers, tournamentSessions} from "./api.js"
+import {connectedUsers, INTERNAL_PASSWORD} from "./api.js"
 import speakeasy, {GeneratedSecret} from "speakeasy"
 import QRCode from "qrcode"
-import {tournament} from "./tournament.js"
 import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
+import {EventMessage} from "fastify-sse-v2";
+import { FastifyReply, FastifyRequest } from "fastify"
+import {connection, disconnect} from "./serverSentEvent.js";
+
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
 
-type FriendList = {
-    acceptedNickName: string[];
-    pendingNickName: string[];
-    receivedNickName: string[];
-};
 
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
@@ -29,16 +27,6 @@ Client_db.exec(`
     )
 `)
 
-Client_db.exec(`
-    CREATE TABLE IF NOT EXISTS FriendList (
-        userA_id INTEGER NOT NULL,
-        userB_id INTEGER NOT NULL,
-        status TEXT check(status IN ('pending', 'accepted')) DEFAULT ('pending'),
-        PRIMARY KEY (userA_id, userB_id),
-        FOREIGN KEY (userA_id) REFERENCES Client(id) ON DELETE CASCADE,
-        FOREIGN KEY (userB_id) REFERENCES Client(id) ON DELETE CASCADE
-    )
-`)
 
 export class User {
     id: number
@@ -50,23 +38,9 @@ export class User {
         }
     }
 
-    static getIdbyNickName(nickName: string): number {
-        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined
-        if (!userData)
-            throw new DataBaseError(`id not found for nickName: ${nickName}`, `This nickname doesn't exist`, 404)
-        return userData.id
-    }
+    // AUTHENTIFICATION AND CONNECTION //
 
-    /**
-     * check if nickName and email aren't in the db, hash the password
-     *      and add the data in the db. Then the db return the id of
-     *      this client
-     *
-     * @param nickName
-     * @param email
-     * @param password
-     * @return boolean about status and if it success the JWT
-     */
+
     static async addClient(nickName: string, email: string, password: string): Promise<string> {
         if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(nickName))
             throw new ConflictError(`${nickName} is already taken`, `This nickname is already taken`)
@@ -85,15 +59,6 @@ export class User {
         return this.makeToken(id)
     }
 
-
-    /**
-     * check in the db if this nickname exist. if yes it call .isPasswordValid() to
-     *      check if the password match with the password given.
-     *
-     * @param nickName
-     * @param password
-     * @return JWT on success
-     */
     static async login(nickName: string, password: string): Promise<string> {
         const id: number = this.getIdbyNickName(nickName)
 
@@ -110,10 +75,6 @@ export class User {
         return User.makeToken(client.id)
     }
 
-    /** recover the hashed password from the db and use bcrypt tu compare with the one given.
-     *
-     * @param password
-     */
     async isPasswordValid(password: string): Promise<boolean> {
         const userData = Client_db.prepare("SELECT password FROM Client WHERE id = ?").get(this.id) as { password: string } | undefined
         if (!userData)
@@ -123,7 +84,7 @@ export class User {
     }
 
     private static makeToken(id: number): string {
-        const token = jwt.sign({id: id}, 'secret_key', {expiresIn: '1h'})
+        const token = jwt.sign({id: id}, INTERNAL_PASSWORD, {expiresIn: '1h'})
         return (token)
     }
 
@@ -170,19 +131,18 @@ export class User {
         return User.makeToken(this.id)
     }
 
-    getProfile(): { nickName: string, email: string } {
-        const userData = Client_db.prepare("SELECT nickName, email FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string } | undefined
-        if (!userData) {
-            throw new DataBaseError(`User with ID ${this.id} not found`, `internal error system`, 500)
-        }
-        return {nickName: userData.nickName, email: userData.email}
+    // SETTER AND GETTER //
+
+    async setPassword(newPassword: string) {
+        const hashedPassword: string = await bcrypt.hash(newPassword, 10)
+
+        if (!Client_db.prepare("UPDATE Client set password = ? where id = ?").run(hashedPassword, this.id))
+            throw new DataBaseError('cannot insert new password', 'internal error system', 500)
     }
 
-    sendNotification() {
-        const res = connectedUsers.get(this.id)
-        if (!res)
-            return console.log("Server error: res not found in connectedUsers")
-        res.sse({data: JSON.stringify({event: "invite", data: "teeest"})})
+    async setNickname(newNickName: string) {
+        if (!Client_db.prepare("UPDATE Client set nickName = ? where id = ?").run(newNickName, this.id))
+            throw new DataBaseError('cannot insert new password', 'internal error system', 500)
     }
 
     updatePictureProfile(pictureURL: string) {
@@ -190,6 +150,29 @@ export class User {
         if (!change || !change.changes)
             throw new DataBaseError(`cannot upload the picture in the db`, 'error 500: internal error system', 500)
     }
+
+
+    getProfile(): { id:number,  nickName: string, email: string, avatar: string } {
+        const userData = Client_db.prepare("SELECT nickName, email, pictureProfile FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string, pictureProfile: string } | undefined
+        if (!userData) {
+            throw new DataBaseError(`User with ID ${this.id} not found`, `internal error system`, 500)
+        }
+        return {id: this.id, nickName: userData.nickName, email: userData.email, avatar: userData.pictureProfile}
+    }
+
+    publicData(): {id:number,  nickName: string, avatar: string, online: boolean} {
+        const data = Client_db.prepare("SELECT nickName, pictureProfile FROM Client WHERE id = ?").get(this.id) as { nickName: string, pictureProfile: string } | undefined
+        if (!data)
+            throw new DataBaseError(`User with ID ${this.id} not found`, 'internal error system', 500)
+
+        return {
+            id: this.id,
+            nickName: data.nickName,
+            avatar: data.pictureProfile,
+            online: connectedUsers.has(this.id)
+        }
+    }
+
 
     getPictureProfile(): string {
         const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`).get(this.id) as {pictureProfile: string} | undefined;
@@ -200,104 +183,40 @@ export class User {
         return userData.pictureProfile;
     }
 
-    /**
-     * recover the id of the friend, check his friendship status in db, if it doesn't exist it add with status = pending,
-     *      if it is pending and the user is userB_id, it update status to accepted, it it is userA_id nothing happens.
-     *
-     * @param nickName
-     * @return a status for the client
-     */
-    addFriend(nickName: string): string {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined
-        if (!friendId)
-            throw new DataBaseError(`id not found for this friend nickName: ${nickName}`, `This nickname doesn't exist`, 404)
 
-        const checkStatus = Client_db.prepare("SELECT status FROM FriendList WHERE userA_id = ? AND userB_id = ?").get(friendId.id, this.id) as {status: string}
-        if (checkStatus?.status == 'accepted')
-            throw new ConflictError(`This friend is already in friendList`, `This nickname is already in your friendlist`)
-
-        else if (checkStatus?.status == 'pending') {
-            Client_db.prepare(`UPDATE FriendList SET status = 'accepted' WHERE userA_id = ? AND userB_id = ?`).run(friendId.id, this.id)
-            return `Friend invitation accepted`
-        }
-
-        const res = Client_db.prepare(`INSERT OR IGNORE INTO FriendList (userA_id, userB_id, status) VALUES (?, ?, ?)`).run(this.id, friendId.id, 'pending')
-        if (res.changes === 0)
-            throw new ConflictError(`Friend invitation already sent`, `You already send an invitation to this nickname`)
-        this.notifyUser(nickName, 'friendInvitation');
-        return `Friend invitation sent successfully`
-    }
-
-    /**
-     * recover the id of the client, remove it. if there wasn't friend nothing happens (checkstatus.changes set to 0)
-     *
-     * @param nickName
-     */
-    removeFriend(nickName: string) {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number} | undefined
-        if (!friendId)
-            throw new DataBaseError(`id not found for this friend nickName: ${nickName}`, `This nickname isn't in your friendlist`, 404)
-
-        const checkStatus = Client_db.prepare("DELETE FROM FriendList WHERE (userA_id = ? AND userB_id = ?) OR (userB_id = ? AND userA_id = ?)").run(friendId.id, this.id, friendId.id, this.id)
-        if (!checkStatus.changes)
-            throw new ConflictError(`This user isn't in your friendList`, `internal error system`)
-    }
-
-    /**
-     * recover friend by status:
-     *      - accepted when each of them accepted the friendship
-     *      - pending when the user is waiting the friend to accept
-     *      - received when the user received an invitation by another user and he didn't accept yet
-     *
-     * @return an object with three array of id. One for each type of friend.
-     */
-        getFriendList(): FriendList {
-            this.logConnectedUser()
-
-            const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[]
-            const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[]
-            const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[]
-
-            const acceptedIds = accepted.map(row => row.userA_id ?? row.userB_id).filter(id => id !== undefined)
-            const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined)
-            const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined)
-
-            const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row))
-            const pendingNickName = pendingIds.map(row => this.getNickNameById(row))
-            const receivedNickName = receivedIds.map(row => this.getNickNameById(row))
-
-
-            return {acceptedNickName, pendingNickName, receivedNickName}
-        }
-
-    getNickNameById(id: number): string {
-        const userData = Client_db.prepare("SELECT nickName FROM Client WHERE id = ?").get(id) as {nickName: string} | undefined
+    static getIdbyNickName(nickName: string): number {
+        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined
         if (!userData)
-            throw new DataBaseError(`nickName not found for id ${id}`, 'internal error system', 500)
-        return (userData.nickName)
+            throw new DataBaseError(`id not found for nickName: ${nickName}`, `This nickname doesn't exist`, 404)
+        return userData.id
     }
 
-    getActualTournament(): tournament | null {
-        for (const [id, tournament] of tournamentSessions)
-            if (tournament.hasParticipant(this.id))
-                return tournament
-        return null
+    // SSE //
+
+    async sseHandler(req: FastifyRequest, res: FastifyReply) {
+
+        if (connectedUsers.has(this.id))
+            return res.status(100).send()
+        connectedUsers.set(this.id, res)
+        await connection(this.id)
+        console.log('sse connected : id', this.id)
+        const message: EventMessage = {event: "ping"}
+        res.sse({data: JSON.stringify(message)})
+        const interval = setInterval(() => {
+            const message: EventMessage = {event: "ping"}
+            res.sse({data: JSON.stringify(message)})
+        }, 15000)
+
+        req.raw.on('close', async() => {
+            clearInterval(interval)
+            if (connectedUsers.has(this.id)) {
+                console.log('sse disconnected client = ' + this.id)
+                await disconnect(this.id)
+                connectedUsers.delete(this.id)
+            }
+        })
     }
 
-    notifyUser(nickName: string, event: string): void {
-        const userId: number = User.getIdbyNickName(nickName);
 
-        const connection = connectedUsers.get(userId);
-        if (!connection)
-            throw new ConflictError(`this user isn't connected`, 'internal error system')
-        const data = {event: event, nickName: nickName}
-        connection.sse({data: JSON.stringify(data)})
-    }
 
-    logConnectedUser() {
-        const connected = []
-        for (const [id, user] of connectedUsers)
-            connected.push(id)
-        console.log(connected);
-    }
 }

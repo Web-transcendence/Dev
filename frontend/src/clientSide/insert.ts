@@ -1,4 +1,5 @@
 import {activateBtn} from "./button.js";
+import {tdStop} from "./td.js";
 
 export async function loadPart(page: string) {
     try {
@@ -95,4 +96,6 @@ export function insertScript(page: string): void {
         script.src = currentScriptSrc;
         document.body.appendChild(script);
     }
+    if (page != "/towerRemote")
+        tdStop()
 }

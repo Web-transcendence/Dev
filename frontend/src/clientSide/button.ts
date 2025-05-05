@@ -2,6 +2,7 @@ import {addFriend, login, profile, register, setAvatar, verify2fa} from "./user.
 import {init2fa} from "./user.js";
 import {friendList} from "./friends.js";
 import {connected, handleConnection, navigate} from "./front.js";
+import {tdStop, TowerDefense} from "./td.js";
 
 
 const mapButton : {[key: string] : () => void} = {
@@ -54,8 +55,11 @@ function profileBtn() {
         addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
         friendList();
     }
-    document.getElementById('totalFactor')?.classList.add("hidden")
-    document.getElementById('activeFactor')?.classList.remove("hidden")
+    const activeFa = localStorage.getItem('activeFa');
+    if (activeFa) {
+        document.getElementById('totalFactor')?.classList.add("hidden")
+        document.getElementById('activeFactor')?.classList.remove("hidden")
+    }
     const initfa = document.getElementById("initfa") as HTMLButtonElement;
     if (initfa) {
         initfa.addEventListener("click", async () => {
@@ -125,4 +129,9 @@ function pongMode() {
 
 function towerMode() {
     document.getElementById("towerRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/towerRemote", event));
+}
+function tower() {
+    tdStop()
+    console.log("prout");
+    TowerDefense()
 }

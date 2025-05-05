@@ -25,8 +25,8 @@ export function register(button: HTMLElement): void {
         if (result.token) {
             localStorage.setItem('token', result.token)
             localStorage.setItem('nickName', result.nickName)
-            sseConnection(result.token)
             navigate('/connected', undefined)
+            sseConnection()
         } else {
             console.log("ErrorDisplay : nickname, email or password are not respecting my authority")
             DispayNotification('respecting my authority', { type: "error" });
@@ -56,7 +56,7 @@ export function login(button: HTMLElement): void {
             localStorage.setItem('token', data.token)
             navigate('/connected', undefined)
             getAvatar();
-            await sseConnection(data.token)
+            await sseConnection()
         } else {
             const errorData = await response.json()
             const loginError = document.getElementById("LoginError") as HTMLSpanElement
@@ -74,7 +74,7 @@ export async function profile(nickName: HTMLElement, email: HTMLElement) {
             console.error('token missing')
             return
         }
-        const response = await fetch(`/user-management/getProfile`, {
+        const response = await fetch(`/user-management/privateProfile`, {
         method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -83,8 +83,40 @@ export async function profile(nickName: HTMLElement, email: HTMLElement) {
         })
         const data = await response.json()
         if (response.ok) {
+            localStorage.setItem('id', data.id)
+            localStorage.setItem('nickName', data.nickName)
+            localStorage.setItem('email', data.email)
+            localStorage.setItem('avatar', data.avatar)
             nickName.innerText = data.nickName
             email.innerText = data.email
+        }
+    }
+    catch (err) {
+        console.error(err)
+    }
+}
+
+export const fetchUserInformation = async (ids: number[]) => {
+    try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+            console.error('token missing')
+            return
+        }
+        const response = await fetch(`/user-management/userInformation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(ids)
+        })
+        if (response.ok)
+            return await response.json()
+        else {
+            const error = await response.json()
+            console.log(error)
+            //notify error
         }
     }
     catch (err) {
@@ -127,7 +159,7 @@ export async function verify2fa(secret: string) {
         if (response.ok) {
             const result = await response.json()
             localStorage.setItem('token', result.token)
-            localStorage.setItem('factor', 'true')
+            localStorage.setItem('activeFA', 'true')
             navigate('/home', undefined)
         }
         else {
@@ -143,7 +175,7 @@ export async function verify2fa(secret: string) {
 export async function addFriend(friendNickName: string) {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`/user-management/addFriend`, {
+        const response = await fetch(`/social/add`, {
            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -171,7 +203,7 @@ export async function addFriend(friendNickName: string) {
 export async function removeFriend(friendNickName: string): Promise<boolean> {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`/user-management/removeFriend`, {
+        const response = await fetch(`/social/remove`, {
         method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -195,7 +227,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
 export async function getFriendList(): Promise<FriendList | undefined> {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:4000/user-management/friendList`, {
+        const response = await fetch(`/social/list`, {
            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -225,11 +257,10 @@ export async function setAvatar(target: HTMLInputElement) {
     try {
         if (target.files && target.files[0]) {
             const file: File = target.files[0]
-            console.log(typeof(await toBase64(file)))
             const base64File: string = await toBase64(file) as string
 
             const token = localStorage.getItem('token')
-            const response = await fetch(`https://${window.location.hostname}:4000/user-management/updatePicture`, {
+            const response = await fetch(`/user-management/updatePicture`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -263,7 +294,7 @@ export async function getAvatar() {
         }
 
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:4000/user-management/getPicture`, {
+        const response = await fetch(`/user-management/getPicture`, {
            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -288,6 +319,50 @@ export async function getAvatar() {
     }
 }
 
+export async function setPassword(newPassword: string) {
+    try {
+        const token = localStorage.getItem('token')
+        const response = await fetch(`/user-management/setPassword`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+            body: JSON.stringify({password: newPassword}),
+        })
+        if (!response.ok) {
+            console.error('failed')
+        }
+        else
+            console.log('success')
+
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function setNickName(newNickName: string) {
+    try {
+        const token = localStorage.getItem('token')
+        const response = await fetch(`/user-management/setNickName`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+            body: JSON.stringify({nickName: newNickName}),
+        })
+        if (!response.ok) {
+            console.error('failed')
+        }
+        else
+            console.log('success')
+
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 export const updateAvatar = (id: string, src: string) => {
     const img = document.getElementById(id) as HTMLImageElement | null;
     if (img) {
@@ -297,10 +372,12 @@ export const updateAvatar = (id: string, src: string) => {
     }
 };
 
+
+
 export async function joinTournament() {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:4000/user-management/joinTournament`, {
+        const response = await fetch(`/tournament/join`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -320,7 +397,7 @@ export async function joinTournament() {
 export async function getTournamentList(): Promise<string[] | undefined> {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:4000/user-management/getTournamentLis`, {
+        const response = await fetch(`/tournament/getList`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -341,7 +418,7 @@ export async function getTournamentList(): Promise<string[] | undefined> {
 export async function launchTournament() {
     try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`https://${window.location.hostname}:4000/user-management/launchTournament`, {
+        const response = await fetch(`/tournament/launch`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

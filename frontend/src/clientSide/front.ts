@@ -1,5 +1,6 @@
 import {getAvatar} from './user.js'
 import {loadPart} from './insert.js';
+import {sseConnection} from "./serverSentEvent.js";
 
 declare const tsParticles: any;
 declare const AOS: any;
@@ -42,8 +43,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.getElementById('connect')?.click();
     });
     const path = localStorage.getItem('path');
-    if (path) loadPart(path)
-    else loadPart("/home")
+    if (path && !(!connected && path === '/profile'))
+        await loadPart(path)
+    else
+        await loadPart("/home")
+    await sseConnection()
 });
 
 tsParticles.load("tsparticles", {
@@ -128,13 +132,14 @@ window.CredentialResponse = async (credit: { credential: string }) => {
             const reply = await response.json();
             if (reply.valid) {
                 if (reply.avatar)
-                    // setAvatar(reply.avatar);
-                if (reply.token)
+                    localStorage.setItem('avatar', reply.avatar)
+                if (reply.token) {
+                    console.log('VALID RESPONSE', reply.token);
                     localStorage.setItem('token', reply.token)
+                }
                 if (reply.nickName)
                     localStorage.setItem('nickName', reply.nickName)
-                await loadPart("/connected");
-                handleConnection(true);
+                navigate('/connected', undefined);
                 await getAvatar();
             }
         }

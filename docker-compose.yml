@@ -8,8 +8,10 @@ services:
       - transcendence
     ports:
       - "4000:4000"
-#    depends_on:
-#      - api-gateway
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
     develop:
       watch:
@@ -33,8 +35,10 @@ services:
       - transcendence
     ports:
       - "5000:5000"         #DEV
-#    depends_on:
-#      - api-gateway
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
     develop:
       watch:
@@ -53,6 +57,10 @@ services:
       - transcendence
     ports:
       - "4443:4443"
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
     develop:
       watch:
@@ -71,6 +79,10 @@ services:
       - transcendence
     ports:
       - "2246:2246"
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
     develop:
       watch:
@@ -79,6 +91,50 @@ services:
           target: /app/src/
         - action: rebuild
           path: ./services/tower-defense/package.json
+          target: app/
+
+  social:
+    container_name: social
+    build:
+      context: services/social/
+    networks:
+      - transcendence
+    ports:
+      - "6500:6500"
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/social/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/social/package.json
+          target: app/
+
+  tournament:
+    container_name: tournament
+    build:
+      context: services/tournament/
+    networks:
+      - transcendence
+    ports:
+      - "7000:7000"
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/tournament/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/tournament/package.json
           target: app/
 
 #  ai-opponent:

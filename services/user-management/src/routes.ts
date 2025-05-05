@@ -2,18 +2,28 @@ import * as Schema from "./schema.js"
 import sanitizeHtml from "sanitize-html"
 import {User} from "./User.js"
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
-import {connectedUsers, tournamentSessions} from "./api.js"
-import {EventMessage} from "fastify-sse-v2"
-import {ConflictError, InputError, MyError, ServerError} from "./error.js";
+import {connectedUsers, INTERNAL_PASSWORD} from "./api.js"
+import {InputError, MyError, ServerError, UnauthorizedError} from "./error.js";
+import {notifyUser} from "./serverSentEvent.js";
+import {nickNameSchema, passwordSchema} from "./schema.js";
 
 
+export function logConnectedUser() {
+    const connected = []
+    for (const [id, user] of connectedUsers)
+        connected.push(id)
+    console.log(connected);
+}
 
+const internalVerification = async (req, res) => {
+    if (req.headers.authorization !== INTERNAL_PASSWORD)
+        throw new UnauthorizedError(`bad internal password to access to this url: ${req.url}`, `internal server error`)
+}
 
 export default async function userRoutes(app: FastifyInstance) {
 
     app.post('/register', async (req, res) => {
         try {
-            console.log('sssssssssssssssssssssss')
             const zod_result = Schema.signUpSchema.safeParse(req.body)
             if (!zod_result.success)
                 throw new InputError(`Cannot parse the input`)
@@ -68,7 +78,6 @@ export default async function userRoutes(app: FastifyInstance) {
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
-            console.log(id)
             const user = new User(id)
 
             const QRCode = await user.generateSecretKey()
@@ -87,10 +96,8 @@ export default async function userRoutes(app: FastifyInstance) {
     app.post("/2faVerify", (req: FastifyRequest, res: FastifyReply) => {
         try {
             const zod_result = Schema.verifySchema.safeParse(req.body)
-            if (!zod_result.success) {
-                console.log(zod_result.error)
+            if (!zod_result.success)
                 throw new InputError(`Cannot parse the input`)
-            }
             let {secret, nickName} = {
                 secret : sanitizeHtml(zod_result.data.secret),
                 nickName: sanitizeHtml(zod_result.data.nickName),
@@ -114,7 +121,7 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
-    app.get('/getProfile', async (req, res) => {
+    app.get('/privateProfile', async (req, res) => {
         try {
             const id: number = Number(req.headers.id)
             if (!id)
@@ -122,7 +129,6 @@ export default async function userRoutes(app: FastifyInstance) {
             const user = new User(id)
 
             const profileData = user.getProfile()
-
             return res.status(200).send(profileData)
         }
         catch(err) {
@@ -135,172 +141,27 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
-
-    app.post('/addFriend', (req: FastifyRequest, res: FastifyReply) => {
+    app.post('/userInformation', async (req: FastifyRequest, res: FastifyReply) => {
         try {
-            const zod_result = Schema.manageFriendSchema.safeParse(req.body)
+            const zod_result = Schema.idArraySchema.safeParse(req.body)
             if (!zod_result.success)
                 throw new InputError(`Cannot parse the input`)
-            let friendNickName = sanitizeHtml(zod_result.data.friendNickName)
-            if (!friendNickName)
-                throw new InputError(`Empty nickname to add`)
+            const ids: number[] = zod_result.data.ids
 
-            const id: number = Number(req.headers.id)
-            if (!id)
-                throw new Error("cannot recover id")
-            const user = new User(id)
-            const result = user.addFriend(friendNickName)
+            const idsInformation = []
 
-            return res.status(200).send({message: result})
-        }
-        catch(err) {
+            for (const id of ids) {
+                const user = new User(id)
+                idsInformation.push(user.publicData())
+            }
+
+            return res.status(200).send(idsInformation)
+        } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)
                 return res.status(err.code).send({error: err.toSend})
             }
-            console.error(err)
-            return res.status(500).send()
-        }
-    })
-
-    app.get('/friendList', (req: FastifyRequest, res: FastifyReply) => {
-        try {
-            const id: number = Number(req.headers.id)
-            if (!id)
-                throw new ServerError(`cannot parse id, which should not happen`, 500)
-            const user = new User(id)
-            const result = user.getFriendList()
-            return res.status(200).send(result)
-        }
-        catch(err) {
-            if (err instanceof MyError) {
-                console.error(err.message)
-                return res.status(err.code).send({error: err.toSend})
-            }
-            console.error(err)
-            return res.status(500).send()
-        }
-    })
-
-    app.post('/removeFriend', (req: FastifyRequest, res: FastifyReply) => {
-        try {
-            const zod_result = Schema.manageFriendSchema.safeParse(req.body)
-            if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
-            let friendNickName = sanitizeHtml(zod_result.data.friendNickName)
-            if (!friendNickName)
-                throw new InputError(`Empty nickname to remove from friendList`)
-
-            const id: number = Number(req.headers.id)
-            if (!id)
-                throw new ServerError(`cannot parse id, which should not happen`, 500)
-
-            const user = new User(id)
-            user.removeFriend(friendNickName)
-
-            return res.status(200).send()
-        }
-        catch(err) {
-            if (err instanceof MyError) {
-                console.error(err.message)
-                return res.status(err.code).send({error: err.toSend})
-            }
-            console.error(err)
-            return res.status(500).send()
-        }
-    })
-
-
-    app.post('/joinTournament', (req: FastifyRequest, res: FastifyReply) => {
-        try {
-            const zod_result = Schema.tournamentIdSchema.safeParse(req.body)
-            if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
-            let idTournament = Number(sanitizeHtml(zod_result.data.tournamentId))
-            if (!idTournament)
-                throw new InputError(`Empty tournament input`)
-
-            const id: number = Number(req.headers.id)
-            if (!id)
-                throw new ServerError(`cannot parse id, which should not happen`, 500)
-
-            new User(id)
-
-            const tournament = tournamentSessions.get(idTournament)
-            if (!tournament)
-                throw new ConflictError(`there is no tournament with this id`, 'internal error system')
-
-            tournament.addParticipant(id)
-
-            return res.status(200).send()
-        }
-        catch(err) {
-            if (err instanceof MyError) {
-                console.error(err.message)
-                return res.status(err.code).send({error: err.toSend})
-            }
-            console.error(err)
-            return res.status(500).send()
-        }
-    })
-
-    app.get('/getTournamentList', (req: FastifyRequest, res: FastifyReply) => {
-        const tournamentList: {maxPlayer: number, participantCount: number, status: string}[] = []
-
-        for (const [id, tournament] of tournamentSessions)
-            tournamentList.push(tournament.getData())
-
-        return res.status(200).send(tournamentList)
-    })
-
-    app.post('/quitTournament', (req: FastifyRequest, res: FastifyReply) => {
-        try {
-            const id: number = Number(req.headers.id)
-            if (!id)
-                throw new ServerError(`cannot parse id, which should not happen`, 500)
-
-            const user = new User(id)
-
-            const tournament = user.getActualTournament()
-            if (!tournament)
-                throw new ConflictError(`this user isn't in tournament actually`, 'internal error system')
-
-            tournament.quit(id)
-
-            return res.status(200).send()
-        }
-        catch(err) {
-            if (err instanceof MyError) {
-                console.error(err.message)
-                return res.status(err.code).send({error: err.toSend})
-            }
-            console.error(err)
-            return res.status(500).send()
-        }
-    })
-
-    app.post('/launchTournament', async (req: FastifyRequest, res: FastifyReply) => {
-        try {
-            const id: number = Number(req.headers.id)
-            if (!id)
-                throw new ServerError(`cannot parse id, which should not happen`, 500)
-
-            new User(id)
-
-            const tournament = tournamentSessions.get(id)
-            if (!tournament)
-                throw new ConflictError(`there is no tournament with this id`, 'internal error system')
-
-            const result = await tournament.launch()
-
-            return res.status(200).send({result: result})
-        }
-        catch(err) {
-            if (err instanceof MyError) {
-                console.error(err.message)
-                return res.status(err.code).send({error: err.toSend})
-            }
-            console.error(err)
+            console.log(err)
             return res.status(500).send()
         }
     })
@@ -309,18 +170,21 @@ export default async function userRoutes(app: FastifyInstance) {
      * initiate the sse connection between the server and the client, stock the response in a map.
      *      the response can call the method .sse to send data in this format : {data: JSON.stringify({ event: string, data: any })}
      */
-    app.get('/sse', async function (req, res) {
-        const id: number = Number(req.headers.id)
-        if (!id)
-            return res.status(500).send({error: "Server error: Id not found"})
-        connectedUsers.set(id, res)
-        const message: EventMessage = { event: "initiation", data: "Some message" }
-        res.sse({data: JSON.stringify(message)})
-
-        setInterval(() => {
-            const message: EventMessage = { event: "initiation", data: "Some message" }
-            res.sse({data: JSON.stringify(message)})
-        }, 15000)
+    app.get('/sse', async function (req: FastifyRequest, res: FastifyReply) {
+        try {
+            const id: number = Number(req.headers.id)
+            if (!id)
+                throw new ServerError(`cannot parse id, which should not happen`, 500)
+            const user = new User(id)
+            await user.sseHandler(req, res)
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
 
     })
 
@@ -371,5 +235,116 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
+    app.post('/setPassword', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const zod_result = passwordSchema.safeParse(req.body)
+            if (!zod_result.success)
+                throw new InputError(`Cannot parse the input`)
+            const newPassword = zod_result.data.password
+
+            const id = Number(req.headers.id);
+            if (!id)
+                throw new ServerError(`cannot parse id, which should not happen`, 500)
+
+            const user = new User(id);
+            user.setPassword(newPassword);
+
+            return res.status(200).send();
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
+    })
+
+    app.post('/setNickName', (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const zod_result = nickNameSchema.safeParse(req.body)
+            if (!zod_result.success)
+                throw new InputError(`Cannot parse the input`)
+            const newNickName = sanitizeHtml(zod_result.data.nickName)
+
+            const id = Number(req.headers.id);
+            if (!id)
+                throw new ServerError(`cannot parse id, which should not happen`, 500)
+
+            const user = new User(id);
+            user.setNickname(newNickName);
+
+            return res.status(200).send();
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
+    })
+
+    app.get('/authId/:id', {preHandler: internalVerification} ,  (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const { id } = req.params as { id: string }
+
+            const numericId = Number(id)
+
+            if (isNaN(numericId))
+                throw new InputError('invalidId')
+
+            new User(numericId)
+
+
+            return res.status(200).send()
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
+    })
+
+    app.get('/idByNickName/:nickName', {preHandler: internalVerification} , (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const { nickName }  = req.params as { nickName: string }
+            if (!nickName)
+                throw new InputError('nickname')
+
+            const id = User.getIdbyNickName(nickName)
+
+            return res.status(200).send({id})
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
+    })
+
+    app.post('/notify', {preHandler: internalVerification}, (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const zod_result = Schema.notifySchema.safeParse(req.body);
+            if (!zod_result.success) {
+                console.log(zod_result.error)
+                throw new InputError(`Cannot parse the input`)
+            }
+            const data = zod_result.data
+            notifyUser(data.ids, data.event, data.body);
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.message})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
+    })
 
 }
+
