@@ -143,10 +143,8 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.post('/userInformation', async (req: FastifyRequest, res: FastifyReply) => {
         try {
-            console.log('req', req.body)
             const zod_result = Schema.idArraySchema.safeParse(req.body)
             if (!zod_result.success) {
-                console.log(zod_result.error)
                 throw new InputError(`Cannot parse the input`)
             }
             const ids: number[] = zod_result.data.ids
@@ -178,7 +176,6 @@ export default async function userRoutes(app: FastifyInstance) {
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
-            console.log(id)
             const user = new User(id)
             await user.sseHandler(req, res)
         } catch (err) {
@@ -335,11 +332,10 @@ export default async function userRoutes(app: FastifyInstance) {
         try {
             const zod_result = Schema.notifySchema.safeParse(req.body);
             if (!zod_result.success) {
-                console.log(zod_result.error)
                 throw new InputError(`Cannot parse the input`)
             }
             const data = zod_result.data
-            notifyUser(data.ids, data.event, data.body);
+            notifyUser(data.ids, data.event, data.data);
             return res.status(200).send()
         } catch (err) {
             if (err instanceof MyError) {
