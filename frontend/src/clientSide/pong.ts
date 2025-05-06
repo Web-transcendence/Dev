@@ -35,6 +35,7 @@ class gameState {
     start: boolean = false;
     score1: string = "0";
     score2: string = "0";
+    winner: string = "none";
     hazard: Hazard = new Hazard (0, 0, "Default");
     timer: Timer = new Timer(0, 4);
 }
@@ -193,20 +194,20 @@ export function Pong(mode: string, room?: number) {
         fSize = Math.round(60 * ratio());
         ctx.font = `${fSize}px 'Press Start 2P'`;
         ctx.textAlign = "center";
-        if (game.state = 2.5) {
+        if (game.state === 2.5) {
             ctx.fillText("You Win", canvas.width * 0.5, canvas.height * 0.4);
             fSize = Math.round(26 * ratio());
             ctx.font = `${fSize}px 'Press Start 2P'`;
             ctx.textAlign = "center";
             ctx.fillText("Opponent disconnected", canvas.width * 0.5, canvas.height * 0.65);
-        } else if (game.score1 > game.score2)
+        } else if (mode === "solo" && game.score1 > game.score2)
             ctx.fillText("Player 1 Wins", canvas.width * 0.5, canvas.height * 0.4);
-        else
+        else if (mode === "solo" && game.score1 < game.score2)
             ctx.fillText("Player 2 Wins", canvas.width * 0.5, canvas.height * 0.4);
-        // fSize = Math.round(26 * ratio());
-        // ctx.font = `${fSize}px 'Press Start 2P'`;
-        // ctx.textAlign = "center";
-        // ctx.fillText("Press any key to restart game", canvas.width * 0.5, canvas.height * 0.65);
+        else if (mode === "remote" && game.winner === nick)
+            ctx.fillText("You Win", canvas.width * 0.5, canvas.height * 0.4);
+        else if (mode === "remote")
+            ctx.fillText("You Lose", canvas.width * 0.5, canvas.height * 0.4);
     }
 
     function drawHazard() {
@@ -253,6 +254,8 @@ export function Pong(mode: string, room?: number) {
             case 2.5:
                 endScreen();
                 break;
+            default:
+                break;
         }
         if (pongConnect)
             requestAnimationFrame(gameLoop);
@@ -275,18 +278,12 @@ export function Pong(mode: string, room?: number) {
             socket.send(JSON.stringify({type: "socketInit", nick: nick, room: room}));
         };
 
-        window.addEventListener("keydown", keyDownHandler);
+        window.addEventListener("keydown", keyDownHandler, { passive: false });
 
         window.addEventListener("keyup", keyUpHandler);
 
         socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
-            // const existingScript = document.querySelector('script[src="/static/dist/pong.js"]');
-            // if (!existingScript) {
-            //     socket.close();
-            //     pongConnect = false;
-            //     console.log("Pong script finished, socket closed.");
-            // }
             switch (data.type) {
                 case "Game":
                     game.state = data.state;
@@ -298,6 +295,7 @@ export function Pong(mode: string, room?: number) {
                     game.hazard.type = data.hazard.type;
                     game.timer.timeLeft = data.timer.timeLeft;
                     game.timer.started = data.timer.started;
+                    game.winner = data.winner;
                     break;
                 case "Ball":
                     ball.x = data.x;
@@ -337,7 +335,8 @@ export function Pong(mode: string, room?: number) {
         socket.onclose = function () {
             window.removeEventListener("keyup", keyUpHandler);
             window.removeEventListener("keydown", keyDownHandler);
-            return console.log("Disconnected from Pong server");
+            pongConnect = false;
+            return (console.log("Disconnected from Pong server"));
         };
     } catch (error) {
         console.error("Unexpected error: ", error);
@@ -352,11 +351,18 @@ function createKeyUpHandler(socket: WebSocket) {
 
 function createKeyDownHandler(socket: WebSocket, game: gameState, mode: string) {
     return function(event: KeyboardEvent) {
-        if (game.ready === false) {
-            game.ready = true;
-            socket.send(JSON.stringify({type: "ready", mode: mode}));
+        if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+            event.preventDefault();
         }
-        socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
+        if (game.state !== 2 && game.state !== 2.5) {
+            if (game.ready === false) {
+                game.ready = true;
+                socket.send(JSON.stringify({type: "ready", mode: mode}));
+            }
+            socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
+        } else {
+            socket.close();
+        }
     };
 }
 

@@ -14,6 +14,5 @@ export const fetchIdByNickName = async (nickName: string): Promise<number> => {
         throw new Error(`this nickname doesn't exist`);
     }
     const {id} = await response.json() as {id: number};
-    console.log('sssssssssssss', id);
     return id;
 }

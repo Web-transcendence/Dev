@@ -83,10 +83,11 @@ export class gameState {
     maxScore: string = "6";
     score1: string = "0";
     score2: string = "0";
+    winner: string = "none";
     hazard: Hazard = new Hazard(0, 0, "Default");
     timer: Timer = new Timer (0, 3);
     toJSON() {
-        return {type: "Game", state: this.state, start: this.start, score1: this.score1, score2: this.score2, hazard: this.hazard, timer: this.timer};
+        return {type: "Game", state: this.state, start: this.start, score1: this.score1, score2: this.score2, hazard: this.hazard, timer: this.timer, winner: this.winner};
     }
 }
 
@@ -189,6 +190,10 @@ export function resetGame(ball: Ball, player1: Player, player2: Player, game: ga
         game.state = 2;
         game.score1 = player1.paddle.score;
         game.score2 = player2.paddle.score;
+        if (player1.paddle.score > player2.paddle.score)
+            game.winner = player1.name;
+        else
+            game.winner = player2.name;
         player1.paddle.score = "0";
         player2.paddle.score = "0";
         console.log(getMatchHistory(player1.dbId));
