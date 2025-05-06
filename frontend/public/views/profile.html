@@ -1,20 +1,30 @@
 <div class="grid place-items-center min-h-screen text-white px-4">
     <div class="grid flex-col grid-cols-1 gap-14 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 content-center text-white m-4 container">
 
-        <div class="box-profile pb-20" data-aos="slide-right" data-aos-delay="200">
-            <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">Your Profile</h1>
+        <div class="box-profile pb-20 flex flex-col items-center " data-aos="slide-right" data-aos-delay="200">
+            <h1 class="text-lg font-bold text-yellow-400 text-center">Your Profile</h1>
 
-            <div class="border-t border-gray-300 my-4"></div>
+            <div class="border w-full border-gray-300 my-4"></div>
 
             <dl  class="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
                 <div class="insert-nickName">
                     <dt class="mb-1 text-gray-500 md:text-lg dark:text-gray-400">Nick name</dt>
-                    <div id="profileNickName" class="text-gray-300 font-semibold truncate">loading ...</div>
+                    <input
+                            id="profileNickName"
+                            type="text"
+                            class="p-4 block w-full rounded-md bg-gray-600"
+                            value="Loading..."
+                    />
                 </div>
 
                 <div class="insert-email">
                     <dt class="mb-1 text-gray-500 md:text-lg dark:text-gray-400">Email address</dt>
-                    <div id="profileEmail" class="text-gray-300 font-semibold truncate">loading ...</div>
+                    <input
+                            id="profileEmail"
+                            type="text"
+                            class="mt-1 p-4 block w-full rounded-md bg-gray-600"
+                            value="Loading..."
+                    />
                 </div>
 
                 <div class="flex justify-center items-center">
@@ -30,20 +40,17 @@
         <div class="box-profile pb-20" data-aos="slide-left" data-aos-delay="200">
             <h2 class="text-lg font-bold text-yellow-400 text-center mb-4">Friends</h2>
 
-            <div class="border-t border-gray-300 my-4"></div>
+            <div class="border border-gray-300 my-4"></div>
 
             <ul id="acceptedList" class="p-2 space-y-2 w-full max-h-60 overflow-y-auto custom-scrollbar" role="list">
-                <li class="list-empty">
-                    <h2 class="text-lg font-bold ">Empty</h2>
-                </li>
             </ul>
             <template id="acceptedTemplate">
-                <li class="list-user">
+                <li class="list-user" id="friendAcceptedId">
                     <div class="ml-5 flex items-center relative">
                         <div class="relative">
                             <img class="h-10 w-10 rounded-full" src="../images/login.png" alt="Avatar"/>
                             <!-- Indicateur de statut -->
-                            <span id="online" class="hidden absolute bottom-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-green-500 status-indicator"></span>
+                            <span class="online hidden absolute bottom-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-green-500 status-indicator"></span>
                         </div>
                         <div class="ml-3 overflow-hidden">
                             <p class="text-sm font-medium text-gray-900 dark:text-white name"></p>
@@ -71,18 +78,15 @@
         <div class="box-profile" data-aos="slide-right" data-aos-delay="200">
             <h2 class="text-lg font-bold text-yellow-400 text-center mb-4">Request</h2>
 
-            <div class="border-t border-gray-300 my-4"></div>
+            <div class="border border-gray-300 my-4"></div>
 
             <ul id="requestList"
                 role="list"
                 class="p-2 space-y-2 w-full max-h-60 overflow-y-auto custom-scrollbar">
-                <li class="list-empty">
-                    <h2 class="text-lg font-bold">Empty</h2>
-                </li>
             </ul>
 
             <template id="requestTemplate">
-                <li class="list-user">
+                <li class="list-user"  id="friendRequestId">
                     <div class="ml-5 flex items-center">
                         <img class="h-10 w-10 rounded-full"  alt="Avatar" src="../images/login.png"/>
                         <div class="ml-3 overflow-hidden">
@@ -96,18 +100,15 @@
         <div class="box-profile" data-aos="slide-left" data-aos-delay="200">
             <h2 class="text-lg font-bold text-yellow-400 text-center mb-4">Received</h2>
 
-            <div class="border-t border-gray-300 my-4"></div>
+            <div class="border border-gray-300 my-4"></div>
 
             <ul id="receivedList"
                 role="list"
                 class="p-2 space-y-2 w-full max-h-60 overflow-y-auto custom-scrollbar">
-                <li class="list-empty">
-                    <h2 class="text-lg font-bold">Empty</h2>
-                </li>
             </ul>
 
                 <template id="receivedTemplate">
-                    <li class="list-user">
+                    <li class="list-user" id="friendReceivedId">
                         <div class="ml-5 flex items-center">
                             <img class="h-10 w-10 rounded-full"  alt="Avatar" src="../images/login.png"/>
                             <div class="ml-3 overflow-hidden">
@@ -142,7 +143,7 @@
         <div class="box-profile items-center pb-20" data-aos="slide-right" data-aos-delay="200">
             <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">Avatar</h1>
 
-            <div class="border-t border-gray-300 my-4"></div>
+            <div class="border border-gray-300 my-4"></div>
 
             <div class="flex justify-center">
                 <img id="avatarProfile" src="../images/login.png" alt="Avatar" class="avatar-img">
@@ -167,7 +168,7 @@
 
         <div class="box-profile pb-20" data-aos="slide-left" data-aos-delay="200">
             <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">2FA</h1>
-            <div class="border-t border-gray-300 my-4"></div>
+            <div class="border border-gray-300 my-4"></div>
 
             <div id="totalFactor">
                 <p class="text-center text-sm indent-4"> Add an extra layer of protection to your account by enabling Two-Factor Authentication (2FA).

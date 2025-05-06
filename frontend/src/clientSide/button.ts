@@ -1,8 +1,10 @@
-import {addFriend, getAvatar, login, profile, register, setAvatar, verify2fa} from "./user.js";
+import {addFriend, login, profile, register, setAvatar, setNickName, setPassword, verify2fa} from "./user.js";
 import {init2fa} from "./user.js";
 import {friendList} from "./friends.js";
-import {connected, handleConnection, navigate} from "./front.js";
+import {handleConnection, navigate} from "./front.js";
 import {tdStop, TowerDefense} from "./td.js";
+import { editProfile } from "./editInfoProfile.js";
+import {DispayNotification} from "./notificationHandler.js";
 
 
 const mapButton : {[key: string] : () => void} = {
@@ -10,7 +12,6 @@ const mapButton : {[key: string] : () => void} = {
     "/login": loginBtn,
     "/profile": profileBtn,
     "/logout": logoutBtn,
-    "/editProfile" : editProfileBtn,
     "/factor" : factor,
     "/pongMode" : pongMode,
     "/towerMode" : towerMode
@@ -40,19 +41,29 @@ function profileBtn() {
     const avatar = localStorage.getItem('avatar')
     if (avatar)
         avatarImg.src = avatar
-    const nickName = document.getElementById("profileNickName")!;
-    const email = document.getElementById("profileEmail")!;
-    if (email && nickName) {
-        profile(nickName, email);
-        friendList();
-    }
-    const logoutBtn = document.getElementById('logout')  as HTMLButtonElement;
-    if (logoutBtn && connected)
-        logoutBtn.addEventListener("click", (event: MouseEvent) => navigate("/logout", event));
+    profile();
+    friendList();
+    document.getElementById("editProfileButton")?.addEventListener("click", () => {
+        const nickInput = document.getElementById("profileNickName") as HTMLInputElement | null;
+        const emailInput = document.getElementById("profileEmail") as HTMLInputElement | null;
+        if (nickInput && emailInput) {
+            const newNickName = nickInput.value.trim();
+            const newEmail = emailInput.value.trim();
+            console.log("New nickname:", newNickName);
+            console.log("New email:", newEmail);
+            setNickName(newNickName);
+            // setPassword();
+            // setEmail();
+        }
+    });
+    document.getElementById('logout')?.addEventListener("click", (event: MouseEvent) => navigate("/logout", event));
     const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
     if (addFriendBtn && addFriendIpt)
-        addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
+        addFriendBtn.addEventListener("click", () => {
+            addFriend(addFriendIpt.value);
+            friendList();
+        });
     const activeFA = localStorage.getItem('activeFA');
     if (activeFA) {
         document.getElementById('totalFactor')?.classList.add("hidden")
@@ -95,22 +106,11 @@ function profileBtn() {
 
 function logoutBtn() {
     handleConnection(false);
-    localStorage.removeItem('avatar');
-    localStorage.removeItem('token');
     const avatar = document.getElementById("avatar") as HTMLImageElement;
-    if (avatar)
-        avatar.src = "../images/logout.png";
+    if (avatar) avatar.src = "../images/logout.png";
     const nickName = document.getElementById("nickName") as HTMLSpanElement;
-    if (nickName)
-        nickName.textContent = '';
-}
+    if (nickName) nickName.textContent = '';
 
-function editProfileBtn() {
-    document.getElementById('editAvatar')?.addEventListener("change", async (event: Event)=> {
-            const target = event.target as HTMLInputElement;
-            await setAvatar(target);
-        }
-    );
 }
 
 function factor() {

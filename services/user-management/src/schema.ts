@@ -35,7 +35,7 @@ export const passwordSchema = z.object({
 })
 
 export const nickNameSchema = z.object({
-    nickName: z.string().min(6, "Minimum 3 caracteres")
+    nickName: z.string().min(3, "Minimum 3 caracteres")
 })
 
 export const notifySchema = z.object({

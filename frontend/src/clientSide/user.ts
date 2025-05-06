@@ -60,7 +60,7 @@ export function login(button: HTMLElement): void {
 }
 
 
-export async function profile(nickName: HTMLElement, email: HTMLElement) {
+export async function profile() {
     try {
         const token = localStorage.getItem('token')
         if (!token) {
@@ -81,8 +81,10 @@ export async function profile(nickName: HTMLElement, email: HTMLElement) {
             localStorage.setItem('email', data.email)
             if (data.avatar)
                 localStorage.setItem('avatar', data.avatar)
-            nickName.innerText = data.nickName
-            email.innerText = data.email
+            const nameInput = document.getElementById("profileNickName");
+            if (nameInput instanceof HTMLInputElement) nameInput.value = data.nickName;
+            const emailInput = document.getElementById("profileEmail");
+            if (emailInput instanceof HTMLInputElement) emailInput.value = data.email;
         }
     }
     catch (err) {
@@ -219,6 +221,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
             console.error(error.error)
             return false
         }
+        DispayNotification('Successfully Removed')
         return true
     } catch (error) {
         console.error(error)
@@ -362,10 +365,11 @@ export async function setNickName(newNickName: string) {
         })
         if (!response.ok) {
             console.error('failed')
-        }
-        else
+            DispayNotification('Bad input', { type: "error" } )
+        } else {
             console.log('success')
-
+            DispayNotification('New Nickname')
+        }
     } catch (error) {
         console.error(error)
     }

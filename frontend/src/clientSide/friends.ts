@@ -1,4 +1,5 @@
 import {addFriend, fetchUserInformation, FriendIds, getFriendList, removeFriend, UserData} from "./user.js";
+import { CreateFriendLi } from "./serverSentEvent.js";
 
 export async function friendList() {
     try {
@@ -19,16 +20,23 @@ export async function friendList() {
                 list.innerHTML = '';
                 for (const userData of  usersData) {
                     const clone = template.content.cloneNode(true) as HTMLElement;
-                    clone.id = `friendId-${userData.id}`;
+                    const item = clone.querySelector("li");
+                    if (item) item.id = `friendId-${userData.id}`;
                     const img = clone.querySelector("img");
                     if (img && userData.avatar) img.src = userData.avatar;
                     const name = clone.querySelector(".name");
                     if (name) name.textContent = userData.nickName;
-                    if (userData.online)
+                    if (userData.online && key === "acceptedIds")
                         clone.querySelector(".online")?.classList.remove('hidden');
                     if (key === "receivedIds") {
-                        clone.querySelector(".accept-btn")?.addEventListener("click", () => addFriend(userData.nickName));
-                        clone.querySelector(".decline-btn")?.addEventListener("click", () => removeFriend(userData.nickName));
+                        clone.querySelector(".accept-btn")?.addEventListener("click", async () => {
+                            if (await addFriend(userData.nickName))
+                                CreateFriendLi(userData.id, "acceptedList", "acceptedTemplate")
+                        });
+                        clone.querySelector(".decline-btn")?.addEventListener("click", async () => {
+                            if (await removeFriend(userData.nickName))
+                                document.getElementById(`friendId-${userData.id}`)?.remove();
+                        });
                     }
                     list.appendChild(clone);
                 }
