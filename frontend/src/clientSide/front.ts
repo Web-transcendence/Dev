@@ -1,6 +1,6 @@
 import {getAvatar} from './user.js'
 import {loadPart} from './insert.js';
-import {sseConnection} from "./serverSentEvent.js";
+import {controller, sseConnection} from "./serverSentEvent.js";
 
 declare const tsParticles: any;
 declare const AOS: any;
@@ -102,6 +102,7 @@ export function handleConnection(input: boolean) {
         document.getElementById('connect')?.classList.add('hidden');
         document.getElementById('profile')?.classList.remove('hidden');
     } else {
+        controller.abort();
         localStorage.clear();
         document.getElementById('connect')?.classList.remove('hidden');
         document.getElementById('profile')?.classList.add('hidden');

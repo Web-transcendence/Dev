@@ -1,5 +1,5 @@
 
-
+export const controller = new AbortController();
 
 const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
     const result: Record<string, string> = {}
@@ -20,7 +20,8 @@ export async function sseConnection() {
             headers: {
                 'Content-Type': 'text/event-stream',
                 'Authorization': `Bearer ${token}`
-            }
+            },
+            signal: controller.signal
         })
         if (res.status === 100)
             return;

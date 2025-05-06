@@ -194,9 +194,8 @@ export class User {
     // SSE //
 
     async sseHandler(req: FastifyRequest, res: FastifyReply) {
-
         if (connectedUsers.has(this.id))
-            return res.status(100).send()
+            return res.status(409).send({error: 'SSE connection already exists'})
         connectedUsers.set(this.id, res)
         await connection(this.id)
         console.log('sse connected : id', this.id)
