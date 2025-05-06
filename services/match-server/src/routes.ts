@@ -1,17 +1,9 @@
 import {FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
 import {fetchIdByNickName} from "./utils.js";
-import {
-    generateId, generateRoom,
-    initSchema,
-    inputHandler,
-    inputSchema,
-    joinRoom, leaveRoom,
-    Player,
-    readySchema,
-    resetInput,
-    soloMode
-} from "./api.js";
+import {generateId, initSchema, inputHandler, inputSchema, Player, readySchema, resetInput,} from "./api.js";
 import {getMatchHistory, MatchResult} from "./database.js"
+import {soloMode} from "./solo.js";
+import {generateRoom, joinRoom, leaveRoom} from "./netcode.js";
 
 export default async function pongRoutes(fastify: FastifyInstance) {
     fastify.get('/ws', { websocket: true }, (socket, req) => {
