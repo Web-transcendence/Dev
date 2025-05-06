@@ -3,23 +3,41 @@ import {loadPart} from './insert.js';
 import {sseConnection} from "./serverSentEvent.js";
 
 declare const tsParticles: any;
+declare const AOS: any;
 
 export let connected = false;
 
-window.addEventListener("popstate", () => {
-    console.log("popstate");
-    loadPart(window.location.pathname)
+window.addEventListener("popstate", (event) => {
+    if ((window.location.pathname === '/connect' || window.location.pathname === '/login') && connected ) {
+        history.replaceState(null, '', '/home');
+        loadPart('/home')
+    }
+    else
+        loadPart(window.location.pathname)
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
     constantButton(); // Constant button on the Single Page Application
-    // For Client Connection
-    if (await checkForToken()) {
+    // animate slides on scroll
+    AOS.init({
+        once: true,
+        duration: 800,
+    });
+    // Reconnect User
+    const token = localStorage.getItem("token");
+    if (token && await checkForToken()) {
         await getAvatar();
         handleConnection(true);
     }
     else
         handleConnection(false);
+    // For Client Connection
+    document.getElementById('avatar')?.addEventListener('click', () => {
+        if (connected)
+            document.getElementById('profile')?.click();
+        else
+            document.getElementById('connect')?.click();
+    });
     const path = localStorage.getItem('path');
     if (path && !(!connected && path === '/profile'))
         await loadPart(path)
@@ -32,7 +50,7 @@ tsParticles.load("tsparticles", {
     fullScreen: { enable: false },
     particles: {
         number: { value: 100 },
-        size: { value: 3 },
+        size: { value: 6 },
         move: { enable: true, speed: 1 },
         opacity: { value: 0.5 },
         color: { value: "#ffffff" },
@@ -66,22 +84,16 @@ async function checkForToken(): Promise<boolean>  {
 
 function constantButton() {
     //Duo Button
-    document.getElementById('connect')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/connect"));
-    document.getElementById('profile')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/profile"));
-    document.getElementById('avatar')?.addEventListener('click', () => {
-        if (connected)
-            document.getElementById('connect')?.click();
-        else
-            document.getElementById('profile')?.click();
-    });
+    document.getElementById('connect')?.addEventListener("click", (event: MouseEvent) => navigate("/connect", event));
+    document.getElementById('profile')?.addEventListener("click", (event: MouseEvent) => navigate("/profile", event));
     //navigation page
-    document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate(event, "/home"));
-    document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/pongMode"));
-    document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tower"));
-    document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/tournaments"));
+    document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate("/home", event));
+    document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate("/pongMode", event));
+    document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate("/towerMode", event));
+    document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate("/tournaments", event));
     // Footer
-    document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/about"));
-    document.getElementById("contact")?.addEventListener("click", (event: MouseEvent) => navigate(event, "/contact"));
+    document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate("/about", event));
+    document.getElementById("contact")?.addEventListener("click", (event: MouseEvent) => navigate("/contact", event));
 }
 
 
@@ -116,14 +128,16 @@ window.CredentialResponse = async (credit: { credential: string }) => {
             const reply = await response.json();
             if (reply.valid) {
                 if (reply.avatar)
-                    // setAvatar(reply.avatar);
-                if (reply.token)
+                    localStorage.setItem('avatar', reply.avatar)
+                if (reply.token) {
+                    console.log('VALID RESPONSE', reply.token);
                     localStorage.setItem('token', reply.token)
+                }
                 if (reply.nickName)
                     localStorage.setItem('nickName', reply.nickName)
-                await loadPart("/connected");
-                handleConnection(true);
+                navigate('/connected', undefined);
                 await getAvatar();
+                await sseConnection()
             }
         }
     }
@@ -132,11 +146,15 @@ window.CredentialResponse = async (credit: { credential: string }) => {
     }
 }
 
-export async function navigate(event: MouseEvent, path: string): Promise<void> {
+export async function navigate(path: string, event?: MouseEvent): Promise<void> {
+    if (event) event.preventDefault();
+
     handleConnection(await checkForToken());
-    if (!connected && path == "/profile") {
+    if (!connected && path == "/profile")
         path = "/connect";
-    }
-    event.preventDefault();
+    if (connected && path == "/connect")
+        path = "/profile";
+    history.pushState({}, "", path);
+    console.log("pushState :", path);
     await loadPart(path);
 }

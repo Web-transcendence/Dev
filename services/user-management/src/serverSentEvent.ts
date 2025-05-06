@@ -7,8 +7,9 @@ import {fetch} from "undici";
 export const notifyUser = (ids: number[], event: string, data: any): void => {
     for (const id of ids) {
         const connection: FastifyReply | undefined = connectedUsers.get(id);
+        const stringData: string = JSON.stringify(data);
         if (connection)
-            connection.sse({data: JSON.stringify({event: event, data: data})})
+            connection.sse({event: event, data: stringData});
     }
 }
 

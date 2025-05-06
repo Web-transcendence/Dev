@@ -3,9 +3,9 @@ import {tdStop} from "./td.js";
 import {pongStop} from "./pong.js";
 
 export async function loadPart(page: string) {
-    window.history.pushState({}, "", page);
-    localStorage.setItem("path", page);
     try {
+        localStorage.setItem('path', page);
+        console.log("setItem path :", page);
         await insertTag(`part${page}`);
         insertScript(page);
         activateBtn(page);
@@ -77,8 +77,8 @@ export function activateGoogle(page: string) {
 
 export function insertScript(page: string): void {
     const scripts: Record<string, string> = {
-        "/pong": "/static/dist/pong.js",
-        "/tower": "/static/dist/td.js",
+        "/pongRemote": "/static/dist/pong.js",
+        "/towerRemote": "/static/dist/td.js",
     };
 
     const currentScriptSrc = scripts[page];
@@ -97,7 +97,7 @@ export function insertScript(page: string): void {
         script.src = currentScriptSrc;
         document.body.appendChild(script);
     }
-    if (page != "/tower")
+    if (page != "/towerRemote")
         tdStop()
     if (page != '/pongRemote')
         pongStop()

@@ -1,4 +1,15 @@
 @import "../node_modules/tailwindcss";
+/* Appliquer un style à tous les scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 16px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #374151; /* couleur de fond */
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #718096; /* couleur du curseur */
+    border-radius: 16px;
+}
 
 @layer components {
     .btn-primary {
@@ -24,9 +35,18 @@
         @apply flex items-center justify-between bg-gray-600 p-6 rounded-lg relative
          hover:scale-105 transform transition-transform duration-300 ;
     }
-    /*. {*/
-    /*    @apply   ;*/
-    /*}*/
+    .box-home {
+        @apply rounded-2xl bg-gray-700 shadow-md p-10 px-16 mb-30 py-10 ;
+    }
+    .box-profile {
+        @apply relative w-full bg-gray-700 shadow-lg rounded-lg p-8 overflow-hidden ;
+    }
+    .list-user {
+        @apply flex py-4 first:pt-4 last:pb-4 items-center justify-between shadow-lg rounded-lg bg-gray-800 ;
+    }
+    .list-empty {
+        @apply flex py-4 mx-6;
+    }
 }
 
 #canvasContainer {

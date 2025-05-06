@@ -15,14 +15,9 @@ export const pictureSchema = z.object({
 })
 
 export const idArraySchema = z.object({
-    ids: z.array(z.string()).transform((arr: string[]) =>
-        arr.map((idStr: string) => {
-            const num = Number(idStr);
-            if (isNaN(num)) throw new Error(`Invalid number: ${idStr}`);
-            return num;
-        })
-    )
+        ids: z.array(z.number())
 })
+
 
 export const signUpSchema = z.object({
     nickName: z.string().min(3, "Minimum 3 caracteres"),
@@ -46,7 +41,7 @@ export const nickNameSchema = z.object({
 export const notifySchema = z.object({
     ids: z.array(z.number()),
     event: z.string(),
-    body: z.any()
+    data: z.any()
 })
 
 export * from "./schema.js";

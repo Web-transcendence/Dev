@@ -1,6 +1,8 @@
-import {handleConnection} from "./front.js"
+import {navigate} from "./front.js"
 import {loadPart} from "./insert.js"
 import {sseConnection} from "./serverSentEvent.js"
+import {DispayNotification} from "./notificationHandler.js"
+import {options} from "sanitize-html";
 
 export function register(button: HTMLElement): void {
     button.addEventListener("click", async () => {
@@ -18,11 +20,11 @@ export function register(button: HTMLElement): void {
         if (result.token) {
             localStorage.setItem('token', result.token)
             localStorage.setItem('nickName', result.nickName)
-            sseConnection()
-            loadPart("/connected")
-            handleConnection(true)
+            navigate('/connected', undefined)
+            await getAvatar();
+            await sseConnection()
         } else {
-            console.log("ErrorDisplay : nickname, email or password are not respecting my authority")
+            DispayNotification(result.error , { type: "error" });
         }
     })
 }
@@ -47,116 +49,16 @@ export function login(button: HTMLElement): void {
                 return await loadPart("/2fa")
             }
             localStorage.setItem('token', data.token)
-            await loadPart("/connected")
-            handleConnection(true)
-            getAvatar();
+            navigate('/connected', undefined)
+            await getAvatar();
             await sseConnection()
         } else {
             const errorData = await response.json()
-            const loginError = document.getElementById("LoginError") as HTMLSpanElement
-            loginError.textContent = errorData?.error ?? "An error occurred"
-            loginError.classList.remove("hidden")
+            DispayNotification('Wrong password or nickname', { type: "error" });
         }
     })
 }
 
-export interface Person {
-    id: number,
-    // email: string
-    imageUrl: string
-}
-
-type FriendList = {
-    acceptedIds: number[]
-    pendingIds: number[]
-    receivedIds: number[]
-}
-
-export async function friendList() {
-    try {
-        const friendlist = await getFriendList() as FriendList
-        const noFriend = document.getElementById("noFriend") as HTMLHeadingElement
-        // if (!friendlist || !friendlist.receivedNickName.length) {
-        //     if (noFriend)
-        //         noFriend.classList.remove("hidden")
-        // } else {
-        //     const receivedPeople: Person[] = friendlist.receivedNickName.map(nickname => ({
-        //         name: nickname,
-        //         imageUrl: '../images/login.png'
-        //     }))
-        //     const receivedList = document.getElementById("receivedList")
-        //     const receivedTemplate = document.getElementById("receivedTemplate") as HTMLTemplateElement
-        //
-        //     if (receivedList && receivedTemplate) {
-        //         receivedList.innerHTML = ''
-        //         receivedPeople.forEach(person => {
-        //             const clone = receivedTemplate.content.cloneNode(true) as HTMLElement
-        //             const img = clone.querySelector("img")!
-        //             const name = clone.querySelector(".name")!
-        //
-        //             img.src = person.imageUrl
-        //             img.alt = person.name
-        //             name.textContent = person.name
-        //
-        //             receivedList.appendChild(clone)
-        //         })
-        //     }
-        // }
-        if (!friendlist || !friendlist.pendingIds.length) {
-            if (noFriend)
-                noFriend.classList.remove("hidden")
-        } else {
-            const requestPeople: Person[] = friendlist.pendingIds.map(id => ({
-                id: id,
-                imageUrl: '../images/login.png'
-            }))
-            const requestList = document.getElementById("requestList")
-            const requestTemplate = document.getElementById("requestTemplate") as HTMLTemplateElement
-
-            if (requestList && requestTemplate) {
-                requestList.innerHTML = ''
-                requestPeople.forEach(person => {
-                    const clone = requestTemplate.content.cloneNode(true) as HTMLElement
-                    const img = clone.querySelector("img")!
-                    const name = clone.querySelector(".name")!
-
-                    img.src = person.imageUrl
-                    name.textContent = person.id.toString()
-
-                    requestList.appendChild(clone)
-                })
-            }
-        }
-        // if (!friendlist || !friendlist.acceptedNickName.length) {
-        //     if (noFriend)
-        //         noFriend.classList.remove("hidden")
-        // } else {
-        //     const acceptedPeople: Person[] = friendlist.acceptedNickName.map(nickname => ({
-        //         name: nickname,
-        //         imageUrl: '../images/login.png'
-        //     }))
-        //     const acceptedList = document.getElementById("acceptedList")
-        //     const acceptedTemplate = document.getElementById("acceptedTemplate") as HTMLTemplateElement
-        //
-        //     if (acceptedList && acceptedTemplate) {
-        //         acceptedList.innerHTML = ''
-        //         acceptedPeople.forEach(person => {
-        //             const clone = acceptedTemplate.content.cloneNode(true) as HTMLElement
-        //             const img = clone.querySelector("img")!
-        //             const name = clone.querySelector(".name")!
-        //
-        //             img.src = person.imageUrl
-        //             img.alt = person.name
-        //             name.textContent = person.name
-        //
-        //             acceptedList.appendChild(clone)
-        //         })
-        //     }
-        // }
-    } catch (err) {
-        console.error("Erreur dans friendList():", err)
-    }
-}
 
 export async function profile(nickName: HTMLElement, email: HTMLElement) {
     try {
@@ -187,31 +89,37 @@ export async function profile(nickName: HTMLElement, email: HTMLElement) {
     }
 }
 
-export const fetchUserInformation = async (ids: number[]) => {
-    try {
-        const token = localStorage.getItem('token')
-        if (!token) {
-            console.error('token missing')
-            return
-        }
-        const response = await fetch(`/user-management/userInformation`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify(ids)
-        })
-        if (response.ok)
-            return await response.json()
-        else {
-            const error = await response.json()
-            console.log(error)
-            //notify error
-        }
+
+export type UserData = {
+    id: number,
+    nickName: string,
+    avatar: string,
+    online: boolean
+}
+
+export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> => {
+    const token = localStorage.getItem('token')
+    if (!token)
+        throw new Error('token missing')
+    if (!ids)
+        throw new Error('ids missing')
+    const response = await fetch(`/user-management/userInformation`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ids})
+    })
+    if (response.ok) {
+        const {usersData} = await response.json() as {usersData: UserData[]}
+        return usersData
     }
-    catch (err) {
-        console.error(err)
+    else {
+        const error = await response.json()
+        console.log(error)
+        //notify error
+        throw error
     }
 }
 
@@ -250,9 +158,8 @@ export async function verify2fa(secret: string) {
         if (response.ok) {
             const result = await response.json()
             localStorage.setItem('token', result.token)
-            loadPart('/home')
-            handleConnection(true)
-            localStorage.setItem('factor', 'true') //Add hidden factor 2fa
+            localStorage.setItem('activeFA', 'true')
+            navigate('/home', undefined)
         }
         else {
             const errorData = await response.json()
@@ -281,9 +188,11 @@ export async function addFriend(friendNickName: string) {
         input.focus()
         if (!response.ok) {
             const error = await response.json()
-            console.error(error.error)
+            console.error('ERROR addFriend', error.error)
+            DispayNotification(error.error, { type: "error" })
             return false
         }
+        DispayNotification('Successfully Invited')
         return true
     } catch (error) {
         console.error(error)
@@ -315,25 +224,27 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
     }
 }
 
-export async function getFriendList(): Promise<FriendList | undefined> {
-    try {
-        const token = localStorage.getItem('token')
-        const response = await fetch(`/social/list`, {
-           method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
-            },
-        })
-        if (!response.ok) {
-            const error = await response.json()
-            console.error(error.error)
-            return undefined
-        }
-        return await response.json()
-    } catch (error) {
-        console.error(error)
+export type FriendIds = {
+    acceptedIds: number[];
+    pendingIds: number[];
+    receivedIds: number[];
+}
+
+export async function getFriendList() : Promise<FriendIds> {
+    const token = localStorage.getItem('token')
+    const response = await fetch(`/social/list`, {
+       method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': 'Bearer ' + token,
+        },
+    })
+    if (!response.ok) {
+        const error = await response.json()
+        console.error(error.error)
+        throw error
     }
+    return await response.json()
 }
 
 // @ts-ignore
@@ -346,6 +257,7 @@ const toBase64 = (file: any) => new Promise((resolve, reject) => {
 
 export async function setAvatar(target: HTMLInputElement) {
     try {
+        console.log('files', target.files)
         if (target.files && target.files[0]) {
             const file: File = target.files[0]
             const base64File: string = await toBase64(file) as string
@@ -362,15 +274,17 @@ export async function setAvatar(target: HTMLInputElement) {
             if (!response.ok) {
                 const error = await response.json()
                 console.error(error.error)
+                DispayNotification(error.error, { type: "error" })
             }
             else {
                 localStorage.setItem('avatar', base64File)
                 updateAvatar('avatarProfile', base64File);
                 updateAvatar('avatar', base64File);
+                DispayNotification('New Avatar !')
             }
         }
     } catch (err) {
-        console.error(err)
+        DispayNotification('Not a File', { type: "error" })
     }
 }
 

@@ -83,7 +83,7 @@ export class User {
         return await bcrypt.compare(password, userData.password)
     }
 
-    private static makeToken(id: number): string {
+    static makeToken(id: number): string {
         const token = jwt.sign({id: id}, INTERNAL_PASSWORD, {expiresIn: '1h'})
         return (token)
     }

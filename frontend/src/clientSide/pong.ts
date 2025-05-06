@@ -78,7 +78,9 @@ export function Pong(mode: string, room?: number) {
         room = -1;
     const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
     const ctx = canvas.getContext("2d")!;
-    const nick = getNick();
+    let nick = "Player 1";
+    if (mode !== "local")
+        nick = getNick();
     const game = new gameState();
     const ball = new Ball(canvas.width / 2, canvas.height / 2, 10, "#fcc800");
     const lPaddle = new Paddle("Player 1", 30, canvas.height / 2, 20, 200, "#fcc800");
@@ -183,6 +185,12 @@ export function Pong(mode: string, room?: number) {
         ctx.fillText(score2, canvas.width * 0.5 + 46 * ratio(), 80 * ratio());
         ctx.textAlign = "right"
         ctx.fillText(score1, canvas.width * 0.5 - 40 * ratio(), 80 * ratio());
+        // Names
+        fSize = Math.round(20 * ratio());
+        ctx.font = `${fSize}px 'Press Start 2P'`;
+        ctx.fillText(rPaddle.name, canvas.width - (40 * ratio()), 40 * ratio());
+        ctx.textAlign = "left"
+        ctx.fillText(lPaddle.name, 40 * ratio(), 40 * ratio());
     }
 
     function endScreen() {
@@ -200,9 +208,9 @@ export function Pong(mode: string, room?: number) {
             ctx.font = `${fSize}px 'Press Start 2P'`;
             ctx.textAlign = "center";
             ctx.fillText("Opponent disconnected", canvas.width * 0.5, canvas.height * 0.65);
-        } else if (mode === "solo" && game.score1 > game.score2)
+        } else if (mode === "local" && game.score1 > game.score2)
             ctx.fillText("Player 1 Wins", canvas.width * 0.5, canvas.height * 0.4);
-        else if (mode === "solo" && game.score1 < game.score2)
+        else if (mode === "local" && game.score1 < game.score2)
             ctx.fillText("Player 2 Wins", canvas.width * 0.5, canvas.height * 0.4);
         else if (mode === "remote" && game.winner === nick)
             ctx.fillText("You Win", canvas.width * 0.5, canvas.height * 0.4);
@@ -335,7 +343,9 @@ export function Pong(mode: string, room?: number) {
         socket.onclose = function () {
             window.removeEventListener("keyup", keyUpHandler);
             window.removeEventListener("keydown", keyDownHandler);
-            pongConnect = false;
+            window.removeEventListener("resize", resizeCanvas);
+            if (room === -1)
+                Pong(mode);
             return (console.log("Disconnected from Pong server"));
         };
     } catch (error) {
@@ -361,7 +371,7 @@ function createKeyDownHandler(socket: WebSocket, game: gameState, mode: string) 
             }
             socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
         } else {
-            socket.close();
+            pongConnect = false;
         }
     };
 }

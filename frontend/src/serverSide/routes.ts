@@ -17,56 +17,50 @@ export async function routes(fastify: FastifyInstance) {
         return;
     })
     // ROAD OF TAG
-    fastify.get('/part/about', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "about.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag);
-    })
-    fastify.get('/part/connected', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH || "", "connected.html");
-        let htmlContent = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(htmlContent);
-    })
-    fastify.get('/part/logout', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH || "", "home.html");
-        let htmlContent = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(htmlContent);
-    })
-    fastify.get('/part/login', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH || "", "login.html");
-        let htmlContent = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(htmlContent);
-    })
-    fastify.get('/part/register', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "register.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag)
-    })
-    fastify.get('/part/connect', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "register.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag)
-    })
-    fastify.get('/part/contact', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "contact.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag)
-    })
-    fastify.get('/part/profile', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "profile.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag)
-    })
-    fastify.get('/part/home', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "home.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag)
-    })
-    fastify.get('/part/towerDefense', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "towerDefense.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag)
-    })
+    const htmlRoutes = [
+        "about",
+        "connected",
+        "logout",
+        "login",
+        "register",
+        "connect",
+        "contact",
+        "profile",
+        "home",
+        "towerDefense",
+        "towerMode",
+        "pongRemote",
+        "pongLocal",
+        "pongMode",
+        "tournaments",
+        "2fa"
+    ];
+
+    // Route dynamique pour chaque page définie
+    htmlRoutes.forEach(route => {
+        fastify.get(`/part/${route}`, (req, reply) => {
+            const filename = route === "logout" ? "home.html" : `${route}.html`;
+            try {
+                const fullPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, filename);
+                const html = readFileSync(fullPath, "utf8");
+                reply.type("text/html").send(html);
+            } catch (error) {
+                reply.code(404).send(`Page ${filename} non trouvée`);
+            }
+        });
+    });
+
+        // Route par défaut : redirige toute autre page sur index.html
+        fastify.get('/part/:name', (req, reply) => {
+            try {
+                const fullPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, 'index.html');
+                const html = readFileSync(fullPath, 'utf8');
+                reply.type('text/html').send(html);
+            } catch (error) {
+                reply.code(500).send('Erreur serveur : index.html introuvable');
+            }
+        });
+
     // FAV ICON
     fastify.get('/images/favicon.ico', function (req, reply) {
         try {
@@ -95,37 +89,6 @@ export async function routes(fastify: FastifyInstance) {
             reply.code(404).send("Fichier non trouvé");
         }
     });
-    fastify.get('/part/2fa', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "factor.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag);
-    })
-    fastify.get('/part/pongRemote', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "pongRemote.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag);
-    })
-    fastify.get('/part/pongLocal', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "pongLocal.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag);
-    })
-    //navigation bar, under page
-    fastify.get('/part/pongMode', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "pongMode.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag);
-    })
-    fastify.get('/part/tower', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "towerDefense.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag);
-    })
-    fastify.get('/part/tournaments', function (req, reply) {
-        const frontPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "tournaments.html");
-        const tag = readFileSync(frontPath, 'utf8');
-        reply.type('text/html').send(tag);
-    })
     // Png For Pong
     fastify.get('/assets/pong/ballup.png', function (req, reply) {
         try {

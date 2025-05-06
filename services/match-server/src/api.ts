@@ -34,13 +34,14 @@ export class Ball {
 }
 
 export class Paddle {
+    name: string = "Player 2";
     x: number;
     y: number;
     width: number;
     height: number;
     speed: number;
     color: string;
-    score: string;
+    score: string = "0";
     constructor(x: number, y: number, width: number, height: number, speed: number, color: string) {
         this.x = x;
         this.y = y;
@@ -48,10 +49,9 @@ export class Paddle {
         this.height = height;
         this.speed = speed;
         this.color = color;
-        this.score = "0";
     }
     toJSON() {
-        return {type: "Paddle", x: this.x, y: this.y, width: this.width, height: this.height, color: this.color, score: this.score};
+        return {type: "Paddle", name: this.name, x: this.x, y: this.y, width: this.width, height: this.height, color: this.color, score: this.score};
     }
 }
 

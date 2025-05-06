@@ -47,14 +47,14 @@ export async function addFriend(id: number, nickName: string) {
 
     else if (checkStatus?.status == 'pending') {
         Friend_db.prepare(`UPDATE FriendList SET status = 'accepted' WHERE userA_id = ? AND userB_id = ?`).run(friendId, id)
-        await fetchNotifyUser([id, friendId], 'newFriend', {friendIds: [id, friendId]})
+        await fetchNotifyUser([friendId], 'newFriend', {id: id})
         return `Friend invitation accepted`
     }
 
     const res = Friend_db.prepare(`INSERT OR IGNORE INTO FriendList (userA_id, userB_id, status) VALUES (?, ?, ?)`).run(id, friendId, 'pending')
     if (res.changes === 0)
         throw new ConflictError(`Friend invitation already sent`, `You already send an invitation to this nickname`)
-    await fetchNotifyUser([friendId], 'friendInvitation', {friendId: id})
+    await fetchNotifyUser([friendId], 'friendInvitation', {id: id})
     return `Friend invitation sent successfully`
 }
 
@@ -72,5 +72,5 @@ export async function removeFriend(id: number, nickName: string) {
     const checkStatus = Friend_db.prepare("DELETE FROM FriendList WHERE (userA_id = ? AND userB_id = ?) OR (userB_id = ? AND userA_id = ?)").run(friendId, id, friendId, id)
     if (!checkStatus.changes)
         throw new ConflictError(`This user isn't in your friendList`, `internal error system`)
-    await fetchNotifyUser([friendId], 'friendRemoved', {friendId: id})
+    await fetchNotifyUser([friendId], 'friendRemoved', {id: id})
 }
