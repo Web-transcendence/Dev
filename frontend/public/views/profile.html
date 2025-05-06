@@ -144,8 +144,8 @@
 
             <div class="border-t border-gray-300 my-4"></div>
 
-            <div class="flex flex-col items-center justify-center">
-                <img id="avatarProfile" src="../images/login.png" alt="Avatar" class="aspect-auto p-4 rounded-full">
+            <div class="flex justify-center">
+                <img id="avatarProfile" src="../images/login.png" alt="Avatar" class="avatar-img">
             </div>
 
             <div class="flex flex-col items-center justify-center">
@@ -180,7 +180,6 @@
                 </button>
                 </div>
                 <label id="codeFaInput" class="sr-only flex flex-col items-center justify-center">
-                    Code de vérification
                     <input id="inputVerify"
                         type="text"
                         inputmode="numeric"
@@ -194,8 +193,11 @@
 
                 </dl>
             </div>
-            <div id="activeFactor" class="hidden" >
-                <p class="text-center text-sm indent-4"> You have activated 2FA. </p>
+            <div id="activeFactor" class="hidden flex flex-col items-center justify-center space-y-2" >
+                <p class="text-center text-sm indent-4"> You have enabled two-factor authentication. </p>
+                <div class="flex items-center">
+                    <img id="factorImage" src="../images/BigLock.png" alt="" class="avatar-img">
+                </div>
             </div>
 
                 <div class="border-spacing-2 border-spacing-x-2 border-spacing-y-2 border-gray-300 my-6"></div>

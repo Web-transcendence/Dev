@@ -32,7 +32,7 @@ export async function routes(fastify: FastifyInstance) {
         "pongRemote",
         "pongMode",
         "tournaments",
-        "2fa"
+        "factor"
     ];
 
     // Route dynamique pour chaque page définie
@@ -73,6 +73,15 @@ export async function routes(fastify: FastifyInstance) {
     fastify.get('/images/login.png', function (req, reply) {
         try {
             const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "login.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier non trouvé");
+        }
+    });
+    fastify.get('/images/BigLock.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "BigLock.png");
             const tag = readFileSync(frontPath);
             reply.type('img/ico').send(tag)
         } catch (error) {

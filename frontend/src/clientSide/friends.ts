@@ -19,6 +19,7 @@ export async function friendList() {
                 list.innerHTML = '';
                 for (const userData of  usersData) {
                     const clone = template.content.cloneNode(true) as HTMLElement;
+                    clone.id = `friendId-${userData.id}`;
                     const img = clone.querySelector("img");
                     if (img && userData.avatar) img.src = userData.avatar;
                     const name = clone.querySelector(".name");

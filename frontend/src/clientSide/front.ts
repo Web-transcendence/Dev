@@ -102,10 +102,7 @@ export function handleConnection(input: boolean) {
         document.getElementById('connect')?.classList.add('hidden');
         document.getElementById('profile')?.classList.remove('hidden');
     } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('avatar');
-        localStorage.removeItem('nickName');
-        localStorage.removeItem('factor');
+        localStorage.clear();
         document.getElementById('connect')?.classList.remove('hidden');
         document.getElementById('profile')?.classList.add('hidden');
     }
@@ -135,7 +132,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                 }
                 if (reply.nickName)
                     localStorage.setItem('nickName', reply.nickName)
-                navigate('/connected', undefined);
+                navigate('/connected');
                 await getAvatar();
                 await sseConnection()
             }

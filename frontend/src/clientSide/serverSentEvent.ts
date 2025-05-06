@@ -35,16 +35,9 @@ export async function sseConnection() {
 }
 
 
-const notifyJoinTournament = ({id}: { id: number }) => {
-    console.log(`the user with the id ${id} joined my tournament`)
-}
-
-const notifyQuitTournament = ({id}: { id: number }) => {
-    console.log(`the user with the id ${id} Quit my tournament`)
-}
-
 const notifyNewFriend = ({id}: { id: number }) => {
     console.log(`this id ${id} have to be add in the friendlist`)
+
 }
 
 const notifyFriendInvitation = ({id1, id2}: {id1: number, id2: number}) => {
@@ -61,6 +54,14 @@ const notifyDisconnection = ({id}: { id: number }) => {
 
 const notifyConnection = ({id}: { id: number }) => {
     console.log(`this friend have to be marked as connected`)
+}
+
+const notifyJoinTournament = ({id}: { id: number }) => {
+    console.log(`the user with the id ${id} joined my tournament`)
+}
+
+const notifyQuitTournament = ({id}: { id: number }) => {
+    console.log(`the user with the id ${id} Quit my tournament`)
 }
 
 

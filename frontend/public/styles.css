@@ -47,6 +47,10 @@
     .list-empty {
         @apply flex py-4 mx-6;
     }
+    .avatar-img {
+        @apply w-50 h-50 object-cover rounded-full;
+        flex-shrink: 0;
+    }
 }
 
 #canvasContainer {

@@ -1,13 +1,11 @@
-<div class="relative w-full bg-gray-700 shadow-lg rounded-lg p-8 pb-40 overflow-hidden">
+<div class="relative mx-auto my-50 w-1/2 bg-gray-700 shadow-lg rounded-lg p-8 pb-40 overflow-hidden">
     <h1 class="text-lg font-bold text-yellow-400 mb-4 text-center">2FA</h1>
 
     <div class="border-t border-gray-300 my-4"></div>
-    <div id="active">
-        <p class="text-center text-sm indent-4"> 2FA Active </p>
-    </div>
-    <div id="desactive">
-        <p class="text-center text-sm indent-4"> Add an extra layer of protection to your account by enabling Two-Factor Authentication (2FA).
-            Once activated, you’ll need a verification code from your phone in addition to your password when logging in. </p>
+        <p class="text-center text-sm indent-4 m-5">
+            You have enabled two-factor authentication.<br>
+            Please enter the 6-digit code from your authenticator app to continue.
+        </p>
         <div id="insertQrcode" class="flex flex-col items-center justify-center">
         </div>
         <div class="flex flex-col items-center justify-center">
@@ -16,7 +14,6 @@
             </button>
         </div>
         <label id="codeFaInput" class="flex flex-col items-center justify-center">
-            Code de vérification
             <input id="inputVerify"
                    type="text"
                    inputmode="numeric"
@@ -26,7 +23,6 @@
                    placeholder="123456"
             />
         </label>
-    </div>
     <dl  class="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
 
     </dl>

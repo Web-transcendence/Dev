@@ -11,7 +11,7 @@ const mapButton : {[key: string] : () => void} = {
     "/profile": profileBtn,
     "/logout": logoutBtn,
     "/editProfile" : editProfileBtn,
-    "/2fa" : factor,
+    "/factor" : factor,
     "/pongMode" : pongMode,
     "/towerMode" : towerMode
 }
@@ -53,38 +53,39 @@ function profileBtn() {
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
     if (addFriendBtn && addFriendIpt)
         addFriendBtn.addEventListener("click", () => addFriend(addFriendIpt.value));
-    const activeFa = localStorage.getItem('activeFa');
-    if (activeFa) {
+    const activeFA = localStorage.getItem('activeFA');
+    if (activeFA) {
         document.getElementById('totalFactor')?.classList.add("hidden")
         document.getElementById('activeFactor')?.classList.remove("hidden")
-    }
-    const initfa = document.getElementById("initfa") as HTMLButtonElement;
-    if (initfa) {
-        initfa.addEventListener("click", async () => {
-            const qrcode = await init2fa();
-            if (qrcode == undefined) {
-                console.log("ErrorDisplay: qrcode not found!");
-                return;
-            }
-            const insertQrcode = document.getElementById("insertQrcode");
-            if (insertQrcode) {
-                const img = document.createElement("img");
-                img.src = qrcode;
-                img.classList.add("h-3/4", "w-3/4", "p-4", "rounded-lg");
-                insertQrcode.innerHTML = "";
-                insertQrcode.appendChild(img);
-                const label = document.getElementById("codeFaInput");
-                if (label)
-                    label.classList.remove("sr-only");
-                const input = document.getElementById("inputVerify") as HTMLInputElement;
+    } else {
+        const initfa = document.getElementById("initfa") as HTMLButtonElement;
+        if (initfa) {
+            initfa.addEventListener("click", async () => {
+                const qrcode = await init2fa();
+                if (qrcode == undefined) {
+                    console.log("ErrorDisplay: qrcode not found!");
+                    return;
+                }
+                const insertQrcode = document.getElementById("insertQrcode");
+                if (insertQrcode) {
+                    const img = document.createElement("img");
+                    img.src = qrcode;
+                    img.classList.add("h-3/4", "w-3/4", "p-4", "rounded-lg");
+                    insertQrcode.innerHTML = "";
+                    insertQrcode.appendChild(img);
+                    const label = document.getElementById("codeFaInput");
+                    if (label)
+                        label.classList.remove("sr-only");
+                    const input = document.getElementById("inputVerify") as HTMLInputElement;
 
-                input.addEventListener("keydown", async (event :KeyboardEvent) => {
-                    if (event.key === "Enter") {
-                        verify2fa(input.value)
-                    }
-                })
-            }
-        });
+                    input.addEventListener("keydown", async (event :KeyboardEvent) => {
+                        if (event.key === "Enter") {
+                            verify2fa(input.value)
+                        }
+                    })
+                }
+            });
+        }
     }
     document.getElementById("inputAvatar")?.addEventListener("change", async (event: Event) => {
         const target = event.target as HTMLInputElement

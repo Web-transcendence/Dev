@@ -20,7 +20,7 @@ export function register(button: HTMLElement): void {
         if (result.token) {
             localStorage.setItem('token', result.token)
             localStorage.setItem('nickName', result.nickName)
-            navigate('/connected', undefined)
+            await navigate('/connected')
             await getAvatar();
             await sseConnection()
         } else {
@@ -46,10 +46,10 @@ export function login(button: HTMLElement): void {
             const data = await response.json()
             localStorage.setItem('nickName', data.nickName)
             if (!data.token || data.token.empty) {
-                return await loadPart("/2fa")
+                return await loadPart("/factor")
             }
             localStorage.setItem('token', data.token)
-            navigate('/connected', undefined)
+            navigate('/connected')
             await getAvatar();
             await sseConnection()
         } else {
@@ -79,7 +79,8 @@ export async function profile(nickName: HTMLElement, email: HTMLElement) {
             localStorage.setItem('id', data.id)
             localStorage.setItem('nickName', data.nickName)
             localStorage.setItem('email', data.email)
-            localStorage.setItem('avatar', data.avatar)
+            if (data.avatar)
+                localStorage.setItem('avatar', data.avatar)
             nickName.innerText = data.nickName
             email.innerText = data.email
         }
@@ -159,7 +160,8 @@ export async function verify2fa(secret: string) {
             const result = await response.json()
             localStorage.setItem('token', result.token)
             localStorage.setItem('activeFA', 'true')
-            navigate('/home', undefined)
+            DispayNotification('You have enabled two-factor authentication.');
+            navigate('/home')
         }
         else {
             const errorData = await response.json()
@@ -314,6 +316,7 @@ export async function getAvatar() {
         const img = await response.json()
         if (img.url) {
             avatarImg.src = img.url
+            console.log('avatar', avatarImg.src)
             localStorage.setItem('avatar', avatarImg.src)
         }
         else
