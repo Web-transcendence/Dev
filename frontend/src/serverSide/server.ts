@@ -8,8 +8,6 @@ import fastifyStatic from "@fastify/static";
 import {env} from "./env";
 import {routes} from "./routes";
 
-// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-//
 const httpsOptions = {
     https: {
         key: readFileSync(join(import.meta.dirname, '../../secure/key.pem')),      // Private key
@@ -18,7 +16,7 @@ const httpsOptions = {
 };
 
 
-const SECRET_KEY = /*process.env.SECRET_KEY || */ "secret_key";
+const SECRET_KEY = process.env.SECRET_KEY;
 
 const app = Fastify(httpsOptions);
 
@@ -78,14 +76,14 @@ app.register(httpProxy, {
 });
 
 app.register(httpProxy, {
-    upstream: 'http://social:6000',
+    upstream: 'http://social:6500',
     prefix: '/social',
     http2: false,
     preHandler: authentificate
 });
 
 app.register(httpProxy, {
-    upstream: 'http://tournament:6000',
+    upstream: 'http://tournament:7000',
     prefix: '/tournament',
     http2: false,
     preHandler: authentificate
@@ -101,7 +99,6 @@ app.register(async function (instance) {
 
 app.get("/*", (req, res) => { // Route pour la page d'accueil
     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");
-    console.log(join(import.meta.dirname, "..", "..", "public"))
     const readFile = readFileSync(pagePath, 'utf8');
     res.status(202).type('text/html').send(readFile);
 });

@@ -2,6 +2,7 @@ import fastify from 'fastify'
 import tournamentRoutes from "./routes.js"
 import {tournament} from "./tournament.js";
 
+export const INTERNAL_PASSWORD = process.env.SECRET_KEY;
 
 const app = fastify();
 

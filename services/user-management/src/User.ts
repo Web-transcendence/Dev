@@ -1,10 +1,14 @@
 import Database from "better-sqlite3"
 import bcrypt from "bcrypt"
 import jwt from 'jsonwebtoken'
-import {connectedUsers} from "./api.js"
+import {connectedUsers, INTERNAL_PASSWORD} from "./api.js"
 import speakeasy, {GeneratedSecret} from "speakeasy"
 import QRCode from "qrcode"
 import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
+import {EventMessage} from "fastify-sse-v2";
+import { FastifyReply, FastifyRequest } from "fastify"
+import {connection, disconnect} from "./serverSentEvent.js";
+
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
@@ -34,18 +38,9 @@ export class User {
         }
     }
 
+    // AUTHENTIFICATION AND CONNECTION //
 
 
-    /**
-     * check if nickName and email aren't in the db, hash the password
-     *      and add the data in the db. Then the db return the id of
-     *      this client
-     *
-     * @param nickName
-     * @param email
-     * @param password
-     * @return boolean about status and if it success the JWT
-     */
     static async addClient(nickName: string, email: string, password: string): Promise<string> {
         if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(nickName))
             throw new ConflictError(`${nickName} is already taken`, `This nickname is already taken`)
@@ -64,15 +59,6 @@ export class User {
         return this.makeToken(id)
     }
 
-
-    /**
-     * check in the db if this nickname exist. if yes it call .isPasswordValid() to
-     *      check if the password match with the password given.
-     *
-     * @param nickName
-     * @param password
-     * @return JWT on success
-     */
     static async login(nickName: string, password: string): Promise<string> {
         const id: number = this.getIdbyNickName(nickName)
 
@@ -89,10 +75,6 @@ export class User {
         return User.makeToken(client.id)
     }
 
-    /** recover the hashed password from the db and use bcrypt tu compare with the one given.
-     *
-     * @param password
-     */
     async isPasswordValid(password: string): Promise<boolean> {
         const userData = Client_db.prepare("SELECT password FROM Client WHERE id = ?").get(this.id) as { password: string } | undefined
         if (!userData)
@@ -102,7 +84,7 @@ export class User {
     }
 
     private static makeToken(id: number): string {
-        const token = jwt.sign({id: id}, 'secret_key', {expiresIn: '1h'})
+        const token = jwt.sign({id: id}, INTERNAL_PASSWORD, {expiresIn: '1h'})
         return (token)
     }
 
@@ -149,19 +131,18 @@ export class User {
         return User.makeToken(this.id)
     }
 
-    getProfile(): { nickName: string, email: string } {
-        const userData = Client_db.prepare("SELECT nickName, email FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string } | undefined
-        if (!userData) {
-            throw new DataBaseError(`User with ID ${this.id} not found`, `internal error system`, 500)
-        }
-        return {nickName: userData.nickName, email: userData.email}
+    // SETTER AND GETTER //
+
+    async setPassword(newPassword: string) {
+        const hashedPassword: string = await bcrypt.hash(newPassword, 10)
+
+        if (!Client_db.prepare("UPDATE Client set password = ? where id = ?").run(hashedPassword, this.id))
+            throw new DataBaseError('cannot insert new password', 'internal error system', 500)
     }
 
-    sendNotification() {
-        const res = connectedUsers.get(this.id)
-        if (!res)
-            return console.log("Server error: res not found in connectedUsers")
-        res.sse({data: JSON.stringify({event: "invite", data: "teeest"})})
+    async setNickname(newNickName: string) {
+        if (!Client_db.prepare("UPDATE Client set nickName = ? where id = ?").run(newNickName, this.id))
+            throw new DataBaseError('cannot insert new password', 'internal error system', 500)
     }
 
     updatePictureProfile(pictureURL: string) {
@@ -169,6 +150,29 @@ export class User {
         if (!change || !change.changes)
             throw new DataBaseError(`cannot upload the picture in the db`, 'error 500: internal error system', 500)
     }
+
+
+    getProfile(): { id:number,  nickName: string, email: string, avatar: string } {
+        const userData = Client_db.prepare("SELECT nickName, email, pictureProfile FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string, pictureProfile: string } | undefined
+        if (!userData) {
+            throw new DataBaseError(`User with ID ${this.id} not found`, `internal error system`, 500)
+        }
+        return {id: this.id, nickName: userData.nickName, email: userData.email, avatar: userData.pictureProfile}
+    }
+
+    publicData(): {id:number,  nickName: string, avatar: string, online: boolean} {
+        const data = Client_db.prepare("SELECT nickName, pictureProfile FROM Client WHERE id = ?").get(this.id) as { nickName: string, pictureProfile: string } | undefined
+        if (!data)
+            throw new DataBaseError(`User with ID ${this.id} not found`, 'internal error system', 500)
+
+        return {
+            id: this.id,
+            nickName: data.nickName,
+            avatar: data.pictureProfile,
+            online: connectedUsers.has(this.id)
+        }
+    }
+
 
     getPictureProfile(): string {
         const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`).get(this.id) as {pictureProfile: string} | undefined;
@@ -179,14 +183,6 @@ export class User {
         return userData.pictureProfile;
     }
 
-    /**
-     * recover the id of the friend, check his friendship status in db, if it doesn't exist it add with status = pending,
-     *      if it is pending and the user is userB_id, it update status to accepted, it it is userA_id nothing happens.
-     *
-     * @param nickName
-     * @return a status for the client
-     */
-
 
     static getIdbyNickName(nickName: string): number {
         const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined
@@ -195,27 +191,32 @@ export class User {
         return userData.id
     }
 
-    getNickNameById(id: number): string {
-        const userData = Client_db.prepare("SELECT nickName FROM Client WHERE id = ?").get(id) as {nickName: string} | undefined
-        if (!userData)
-            throw new DataBaseError(`nickName not found for id ${id}`, 'internal error system', 500)
-        return (userData.nickName)
+    // SSE //
+
+    async sseHandler(req: FastifyRequest, res: FastifyReply) {
+
+        if (connectedUsers.has(this.id))
+            return res.status(100).send()
+        connectedUsers.set(this.id, res)
+        await connection(this.id)
+        console.log('sse connected : id', this.id)
+        const message: EventMessage = {event: "ping"}
+        res.sse({data: JSON.stringify(message)})
+        const interval = setInterval(() => {
+            const message: EventMessage = {event: "ping"}
+            res.sse({data: JSON.stringify(message)})
+        }, 15000)
+
+        req.raw.on('close', async() => {
+            clearInterval(interval)
+            if (connectedUsers.has(this.id)) {
+                console.log('sse disconnected client = ' + this.id)
+                await disconnect(this.id)
+                connectedUsers.delete(this.id)
+            }
+        })
     }
 
-    notifyUser(nickName: string, event: string): void {
-        const userId: number = User.getIdbyNickName(nickName);
 
-        const connection = connectedUsers.get(userId);
-        if (!connection)
-            throw new ConflictError(`this user isn't connected`, 'internal error system')
-        const data = {event: event, nickName: nickName}
-        connection.sse({data: JSON.stringify(data)})
-    }
 
-    logConnectedUser() {
-        const connected = []
-        for (const [id, user] of connectedUsers)
-            connected.push(id)
-        console.log(connected);
-    }
 }
