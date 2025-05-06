@@ -207,7 +207,7 @@ export function Pong(mode: string, room?: number) {
             fSize = Math.round(26 * ratio());
             ctx.font = `${fSize}px 'Press Start 2P'`;
             ctx.textAlign = "center";
-            ctx.fillText("Opponent disconnected", canvas.width * 0.5, canvas.height * 0.65);
+            ctx.fillText("Opponent disconnected", canvas.width * 0.5, canvas.height * 0.60);
         } else if (mode === "local" && game.score1 > game.score2)
             ctx.fillText("Player 1 Wins", canvas.width * 0.5, canvas.height * 0.4);
         else if (mode === "local" && game.score1 < game.score2)
@@ -216,6 +216,7 @@ export function Pong(mode: string, room?: number) {
             ctx.fillText("You Win", canvas.width * 0.5, canvas.height * 0.4);
         else if (mode === "remote")
             ctx.fillText("You Lose", canvas.width * 0.5, canvas.height * 0.4);
+        ctx.fillText("Press any key to restart", canvas.width * 0.5, canvas.height * 0.70);
     }
 
     function drawHazard() {

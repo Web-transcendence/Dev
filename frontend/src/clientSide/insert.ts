@@ -90,11 +90,11 @@ export function insertScript(page: string): void {
             if (existing) existing.remove();
         }
     });
-
     // Si nécessaire, insère le script correspondant
     if (currentScriptSrc && !document.querySelector(`script[src="${currentScriptSrc}"]`)) {
         const script = document.createElement('script');
         script.src = currentScriptSrc;
+        // console.log(script);
         document.body.appendChild(script);
     }
     if (page != "/towerRemote")

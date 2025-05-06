@@ -13,7 +13,7 @@ const mapButton : {[key: string] : () => void} = {
     "/logout": logoutBtn,
     "/editProfile" : editProfileBtn,
     "/2fa" : factor,
-    "towerRemote" : towerRemote,
+    "/towerRemote" : towerRemote,
     "/towerMode" : towerMode,
     "/pongRemote" : pongRemote,
     "/pongLocal" : pongLocal,
