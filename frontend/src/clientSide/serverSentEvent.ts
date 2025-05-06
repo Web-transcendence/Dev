@@ -1,4 +1,17 @@
 
+
+
+const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
+    const result: Record<string, string> = {}
+    const lines = raw.split('\n')
+
+    for (const line of lines) {
+        const [key, ...rest] = line.split(':')
+        result[key.trim()] = rest.join(':').trim()
+    }
+    return {event: result.event, stringData: result.data}
+}
+
 export async function sseConnection() {
     try {
         const token = localStorage.getItem('token')
@@ -23,11 +36,9 @@ export async function sseConnection() {
             const {value, done} = await reader.read();
             if (done) break;
             if (value.startsWith('retry: ')) continue;
-            const parse = JSON.parse(value?.replace('data: ', ''));
-            if (parse.event in mapEvent) {
-                console.log(parse)
-                mapEvent[parse.event](parse.data);
-            }
+            const parse = parseSSEMessage(value)
+            if (parse.event in mapEvent)
+                mapEvent[parse.event](JSON.parse(parse.stringData));
         }
     } catch (err) {
         console.error(err);
@@ -47,7 +58,7 @@ const notifyNewFriend = ({id}: { id: number }) => {
     console.log(`this id ${id} have to be add in the friendlist`)
 }
 
-const notifyFriendInvitation = ({id1, id2}: {id1: number, id2: number}) => {
+const notifyFriendInvitation = ({id}: {id: number}) => {
     console.log(`this friend have to be add in the invitation list`)
 }
 
