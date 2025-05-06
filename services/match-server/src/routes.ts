@@ -23,8 +23,10 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                 }
                 player.name = data.nick;
                 player.paddle.name = data.nick;
-                if (player.name === "AI")
+                if (player.name === "AI") {
                     player.frequency = 1000;
+                    player.dbId = -2;
+                }
                 try {
                     player.dbId = await fetchIdByNickName(data.nick);
                 } catch (error) {
