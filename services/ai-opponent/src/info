@@ -1,4 +1,9 @@
 sudo apt install libwebsocketpp-dev
+wget https://github.com/chriskohlhoff/asio/archive/refs/tags/asio-1-28-0.tar.gz
+tar -xzf asio-1-28-0.tar.gz
+git clone https://github.com/CrowCpp/Crow.git (tout delete sauf le fichier include)
+
+g++ main.cpp -I../third-party -Iasio-asio-1-28-0/asio/include -lpthread
 
 idea:
 	In client, no info from the server during three seconds the client/thread

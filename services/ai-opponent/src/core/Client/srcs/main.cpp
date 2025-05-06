@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 14:37:11 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/23 14:52:02 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/06 12:47:40 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,15 @@
 #include <iostream>
 
 int	main(int ac, char** av) {
-	if (ac != 2) {
-		std::cout << "Error: Parameters: ./Factory <Game Server Ws>" << std::endl;
+	if (ac != 3) {
+		std::cout << "Error: Parameters: ./Factory <Game Server Ws> <port http factory>" << std::endl;
 		return 1;
 	}
 	try {
-		Factory	myFactory(av[1]);
+		std::stringstream	ss(av[2]);
+		int					port;
+		ss >> port;
+		Factory	myFactory(av[1], port);
 		myFactory.run();
 	} catch (std::exception const & e) {
 		std::cout << "Error: " << e.what() << std::endl;

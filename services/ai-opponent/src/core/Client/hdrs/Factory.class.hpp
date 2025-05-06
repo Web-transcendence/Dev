@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:47:28 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/05 11:16:46 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/06 13:50:48 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,18 @@
 
 #define MAX_CLIENTS 50
 
-#include <websocketpp/config/asio_no_tls_client.hpp>
-#include <websocketpp/client.hpp>
+#include "TypeDefinition.hpp"
 
 #include "json.hpp"
+#include "crow.h"
 
+#include <websocketpp/config/asio_no_tls_client.hpp>
+#include <websocketpp/client.hpp>
 #include <vector>
 #include <memory>
 #include <string>
 #include <thread>
+#include <atomic>
 #include <queue>
 #include <map>
 
@@ -38,25 +41,24 @@ public:
 	Factory(std::string const & serverWs);
 	~Factory( void );
 
-	void	run( void );
+	void	run(int const port);
 
 private:
 	Factory( void ) {}
 	
-	void	on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);
-
-	void	createGame(std::string const & ws);
-	void	deleteGame(std::string const & ws);
+	void	createGame(int const gameId);
+	void	deleteGame(int const gameId);
 
 	void	settlingMessage(unsigned int const sizePool);
 
-	client		myFactory;
-	server_ptr	gameServer;
-	
-	std::mutex						_mMutex;
-	std::queue<client::message_ptr>	_messages;
+	crow::SimpleApp	app;
 
-	std::map<std::string, std::shared_ptr<Client>>	_connectedClients;
+	std::string const	_gameServerWs;
+	
+	std::mutex				_mMutex;
+	std::queue<std::string>	_messages;
+
+	std::map<int, std::shared_ptr<Client>>	_connectedClients;
 	
 	std::mutex	ccMutex;
 	std::mutex	sendMutex;
