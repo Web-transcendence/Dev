@@ -102,6 +102,7 @@ const notifyConnection = ({id}: { id: number }) => {
 
 const notifyJoinTournament = ({id}: { id: number }) => {
     console.log(`the user with the id ${id} joined my tournament`)
+
 }
 
 const notifyQuitTournament = ({id}: { id: number }) => {

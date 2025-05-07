@@ -104,6 +104,7 @@ export function handleConnection(input: boolean) {
     } else {
         
         localStorage.clear();
+        sessionStorage.clear();
         document.getElementById('connect')?.classList.remove('hidden');
         document.getElementById('profile')?.classList.add('hidden');
     }

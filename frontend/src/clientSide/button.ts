@@ -1,11 +1,11 @@
-import {addFriend, login, profile, register, setAvatar, setNickName, setPassword, verify2fa} from "./user.js";
+import {addFriend, login, profile, register, setAvatar, verify2fa, joinTournament} from "./user.js";
 import {init2fa} from "./user.js";
 import {friendList} from "./friends.js";
 import {handleConnection, navigate} from "./front.js";
-import {tdStop, TowerDefense} from "./td.js";
+// import {tdStop, TowerDefense} from "./td.js";
 import { editProfile } from "./editInfoProfile.js";
-import {DispayNotification} from "./notificationHandler.js";
-
+import {  displayTournaments } from "./tournaments.js";
+import {  DispayNotification } from "./notificationHandler.js";
 
 const mapButton : {[key: string] : () => void} = {
     "/connect" : connectBtn,
@@ -14,7 +14,9 @@ const mapButton : {[key: string] : () => void} = {
     "/logout": logoutBtn,
     "/factor" : factor,
     "/pongMode" : pongMode,
-    "/towerMode" : towerMode
+    "/towerMode" : towerMode,
+    "/tournaments" : tournaments,
+    "/lobby" : lobby
 }
 
 export function activateBtn(page: string) {
@@ -36,42 +38,30 @@ function loginBtn() {
         login(button)
 }
 
-function profileBtn() {
+async function profileBtn() {
     const avatarImg = document.getElementById('avatarProfile') as HTMLImageElement
     const avatar = localStorage.getItem('avatar')
     if (avatar)
         avatarImg.src = avatar
-    profile();
-    friendList();
-    document.getElementById("editProfileButton")?.addEventListener("click", () => {
-        const nickInput = document.getElementById("profileNickName") as HTMLInputElement | null;
-        const emailInput = document.getElementById("profileEmail") as HTMLInputElement | null;
-        if (nickInput && emailInput) {
-            const newNickName = nickInput.value.trim();
-            const newEmail = emailInput.value.trim();
-            console.log("New nickname:", newNickName);
-            console.log("New email:", newEmail);
-            setNickName(newNickName);
-            // setPassword();
-            // setEmail();
-        }
-    });
+    await profile();
+    await friendList();
+    editProfile();
     document.getElementById('logout')?.addEventListener("click", (event: MouseEvent) => navigate("/logout", event));
     const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
     if (addFriendBtn && addFriendIpt)
-        addFriendBtn.addEventListener("click", () => {
-            addFriend(addFriendIpt.value);
-            friendList();
+        addFriendBtn.addEventListener("click", async () => {
+            await addFriend(addFriendIpt.value);
+            await friendList();
         });
     const activeFA = localStorage.getItem('activeFA');
     if (activeFA) {
         document.getElementById('totalFactor')?.classList.add("hidden")
         document.getElementById('activeFactor')?.classList.remove("hidden")
     } else {
-        const initfa = document.getElementById("initfa") as HTMLButtonElement;
-        if (initfa) {
-            initfa.addEventListener("click", async () => {
+        const initFa = document.getElementById("initFa") as HTMLButtonElement;
+        if (initFa) {
+            initFa.addEventListener("click", async () => {
                 const qrcode = await init2fa();
                 if (qrcode == undefined) {
                     console.log("ErrorDisplay: qrcode not found!");
@@ -89,9 +79,9 @@ function profileBtn() {
                         label.classList.remove("sr-only");
                     const input = document.getElementById("inputVerify") as HTMLInputElement;
 
-                    input.addEventListener("keydown", async (event :KeyboardEvent) => {
+                    input.addEventListener("keydown", async (event: KeyboardEvent) => {
                         if (event.key === "Enter") {
-                            verify2fa(input.value)
+                            await verify2fa(input.value)
                         }
                     })
                 }
@@ -118,7 +108,7 @@ function factor() {
 
     input.addEventListener("keydown", async (event :KeyboardEvent) => {
         if (event.key === "Enter")
-            verify2fa(input.value)
+            await verify2fa(input.value)
     })
 }
 
@@ -130,8 +120,37 @@ function towerMode() {
     document.getElementById("towerRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/towerRemote", event));
 }
 
-function tower() {
-    tdStop()
-    console.log("prout");
-    TowerDefense()
+// function tower() {
+//     tdStop()
+//     console.log("prout");
+//     TowerDefense()
+// }
+
+function tournaments() {
+    const tournaments : {id: number, name: string} []= [
+        {id: 4, name: 'junior'},
+        {id: 8, name: 'contender'},
+        {id: 16, name: 'major'},
+        {id: 32, name: 'worlds'}];
+    for (const parse of tournaments)
+        document.getElementById(`${parse.id}`)
+            ?.addEventListener("click", async (event) => {
+                await navigate('/lobby', event)
+                sessionStorage.setItem('idTournaments', JSON.stringify(parse.id));
+                sessionStorage.setItem('nameTournaments', JSON.stringify(parse.name));
+            });
+}
+
+async function lobby() {
+    await joinTournament()
+    const id = sessionStorage.getItem('idTournaments');
+    const name = sessionStorage.getItem('nameTournaments');
+    if (!id || !name) {
+        DispayNotification("Missing tournament information.");
+        await navigate("/home");
+        return ;
+    }
+    const toIntId = Number.parseInt(id);
+    if (isNaN(toIntId)) DispayNotification("Invalid tournament ID.");
+    await displayTournaments(toIntId, name);
 }

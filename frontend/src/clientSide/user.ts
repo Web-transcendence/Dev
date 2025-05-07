@@ -406,7 +406,7 @@ export async function joinTournament() {
     }
 }
 
-export async function getTournamentList(): Promise<string[] | undefined> {
+export async function getTournamentList() {
     try {
         const token = localStorage.getItem('token')
         const response = await fetch(`/tournament/getList`, {
@@ -419,6 +419,7 @@ export async function getTournamentList(): Promise<string[] | undefined> {
         if (!response.ok) {
             const error = await response.json()
             console.error(error.error)
+            DispayNotification("Register To join Tournaments", { type: "error" })
             return undefined
         }
         return await response.json()

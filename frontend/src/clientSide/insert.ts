@@ -1,7 +1,7 @@
 import {activateBtn} from "./button.js";
 import {tdStop} from "./td.js";
 
-export async function loadPart(page: string) {
+export async function   loadPart(page: string) {
     try {
         localStorage.setItem('path', page);
         console.log("setItem path :", page);
