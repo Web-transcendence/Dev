@@ -141,6 +141,9 @@ export class User {
     }
 
     async setNickname(newNickName: string) {
+        if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(newNickName))
+            throw new ConflictError("An user try to set his nickName to an already used nickname", "Nickname already used")
+
         if (!Client_db.prepare("UPDATE Client set nickName = ? where id = ?").run(newNickName, this.id))
             throw new DataBaseError('cannot insert new password', 'internal error system', 500)
     }
