@@ -94,7 +94,7 @@ export class gameState {
 export class Room {
     id: number;
     players: Player[] = [];
-    recorded = false;
+    ended = false;
     constructor (id: number) {
         this.id = id;
     }
@@ -190,7 +190,7 @@ export function resetGame(ball: Ball, player1: Player, player2: Player, game: ga
         let winner = 2;
         if (player1.paddle.score > player2.paddle.score)
             winner = 0;
-        else if (player1.paddle.score < player2.hpaddle.score)
+        else if (player1.paddle.score < player2.paddle.score)
             winner = 1;
         insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score), winner);
         game.state = 2;

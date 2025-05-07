@@ -22,7 +22,9 @@ export function generateRoom() {
 }
 
 function checkRoom(room: Room, game: gameState) {
-    if (game.winner !== "none" || room.players.length !== 2) {
+    if (game.state === 2)
+        room.ended = true;
+    if (room.players.length !== 2) {
         game.state = 2;
         room.players.forEach(player => {
             player.ws.send(JSON.stringify({ type: "Disconnected" }));
@@ -34,19 +36,25 @@ function checkRoom(room: Room, game: gameState) {
 }
 
 export function leaveRoom(userId: number) {
-    for (let i = 0 ; i < rooms.length; i++) {
-        for (let j = 0; j < rooms[i].players.length; j++) {
-            if (rooms[i].players[j].id === userId) {
-                if (rooms[i].players.length === 2 && Number(rooms[i].players[0].paddle.score) < 6 && Number(rooms[i].players[1].paddle.score) < 6)
-                    insertMatchResult(rooms[i].players[0].dbId, rooms[i].players[1].dbId, Number(rooms[i].players[0].paddle.score), Number(rooms[i].players[1].paddle.score), j = 0 ? 1 : 0);
-                console.log("player: ", rooms[i].players[j].name, " with id: ", userId, " left room ", rooms[i].id);
-                rooms[i].players.splice(j, 1);
-                if (rooms[i].players.length === 0) {
-                    console.log("room: ", rooms[i].id, " has been cleaned.");
-                    rooms.splice(i, 1);
-                }
-                return ;
+    for (let i = 0; i < rooms.length; i++) {
+        const room = rooms[i];
+        const playerIndex = room.players.findIndex(player => player.id === userId);
+        if (playerIndex !== -1) {
+            const player = room.players[playerIndex];
+            console.log(`player: ${player.name} with id: ${userId} left room ${room.id}`);
+            if (room.players.length === 2 && Number(room.players[0].paddle.score) < 6 && Number(room.players[1].paddle.score) < 6) {
+                const [playerA, playerB] = room.players;
+                const scoreA = Number(playerA.paddle.score);
+                const scoreB = Number(playerB.paddle.score);
+                const winnerIndex = playerIndex === 0 ? 1 : 0;
+                insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, room.players[winnerIndex].dbId);
             }
+            room.players.splice(playerIndex, 1);
+            if (room.players.length === 0) {
+                console.log(`room: ${room.id} has been cleaned.`);
+                rooms.splice(i, 1);
+            }
+            return;
         }
     }
     console.log("Player has not joined a room yet.");
@@ -75,6 +83,7 @@ export function joinRoom(player: Player, roomId: number) {
                 player.paddle.x = 1200 - 30;
                 rooms[i].players.push(player);
                 id = rooms[i].id;
+                console.log(player.paddle.name, "joined room", rooms[i].id);
                 break;
             }
         }
@@ -83,6 +92,7 @@ export function joinRoom(player: Player, roomId: number) {
             let room = new Room(rooms.length);
             room.players.push(player);
             rooms.push(room);
+            console.log(player.paddle.name, "created and joined room", rooms[i].id);
             return;
         }
     }
@@ -129,7 +139,7 @@ export function joinRoom(player: Player, roomId: number) {
 
 function checkTournamentResult(roomId: number) {
     for (const room of rooms) {
-        if (room.id === roomId) {
+        if (room.id === roomId && room.ended) {
             return true; //Game still in progress
         }
     }

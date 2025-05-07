@@ -216,7 +216,7 @@ export function Pong(mode: string, room?: number) {
             ctx.fillText("You Win", canvas.width * 0.5, canvas.height * 0.4);
         else if (mode === "remote")
             ctx.fillText("You Lose", canvas.width * 0.5, canvas.height * 0.4);
-        ctx.fillText("Press any key to restart", canvas.width * 0.5, canvas.height * 0.70);
+        // ctx.fillText("Press any key to restart", canvas.width * 0.5, canvas.height * 0.70);
     }
 
     function drawHazard() {
@@ -345,8 +345,6 @@ export function Pong(mode: string, room?: number) {
             window.removeEventListener("keyup", keyUpHandler);
             window.removeEventListener("keydown", keyDownHandler);
             window.removeEventListener("resize", resizeCanvas);
-            if (room === -1)
-                Pong(mode);
             return (console.log("Disconnected from Pong server"));
         };
     } catch (error) {
