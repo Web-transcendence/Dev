@@ -50,11 +50,14 @@ export function getMatchHistory(userId: number): MatchResult[] {
     `).all(userId, userId) as MatchResult[];
 }
 
-export function Result(playerA_id: number, playerB_id: number): number {
-    let Match = getMatchHistory(playerA_id);
-    Match.filter((match) =>
+export function getWinnerId(playerA_id: number, playerB_id: number): number | null {
+    const matches = getMatchHistory(playerA_id).filter(
+        (match) =>
             (match.playerA_id === playerA_id && match.playerB_id === playerB_id) ||
             (match.playerA_id === playerB_id && match.playerB_id === playerA_id)
     );
-    return (Match[Match.length].winner_id);
+    if (matches.length === 0)
+        return null;
+    const lastMatch = matches[0];
+    return (lastMatch.winner_id);
 }

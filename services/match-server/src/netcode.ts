@@ -1,6 +1,6 @@
 // Netcode
 import {Ball, gameState, hazardGenerator, moveBall, moveHazard, movePaddle, Player, Room, timerCheck} from "./api.js";
-import {insertMatchResult} from "./database.js";
+import {getWinnerId, insertMatchResult} from "./database.js";
 import {fetchNotifyUser} from "./utils.js";
 
 let rooms: Room[] = [];
@@ -138,26 +138,29 @@ export function joinRoom(player: Player, roomId: number) {
     checkRoom(rooms[i], game);
 }
 
-function checkTournamentResult(roomId: number) {
-    for (const room of rooms) {
-        if (room.id === roomId && room.ended) {
-            return true; //Game still in progress
-        }
-    }
-    return false; //Game ended;
+function isTournamentMatchEnded(roomId: number): boolean {
+    const room = rooms.find(room => room.id === roomId);
+    return room ? room.ended : true;
 }
 
 export async function startInviteMatch(requester: number, opponent: number) {
     const roomId = generateRoom();
+    await fetchNotifyUser([opponent], `invitationGame`, roomId);
+    return (roomId);
+}
 
-    await fetchNotifyUser([opponent], `invitationGame`, roomId)
+export async function waitForMatchEnd(roomId: number, playerA_id: number, playerB_id: number): Promise<number | null> {
+    while (true) {
+        if (isTournamentMatchEnded(roomId)) {
+            return getWinnerId(playerA_id, playerB_id);
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
 }
 
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
     const roomId = generateRoom();
-
     await fetchNotifyUser([playerA_id, playerB_id], `invitationGame`, roomId)
-
-    //return winner Id
-    return(playerA_id)
+    const winnerId = await waitForMatchEnd(roomId, playerA_id, playerB_id);
+    return (winnerId);
 }
