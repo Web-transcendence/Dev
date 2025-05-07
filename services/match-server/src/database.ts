@@ -28,10 +28,14 @@ export function insertMatchResult(
     playerA_id: number,
     playerB_id: number,
     scoreA: number,
-    scoreB: number
+    scoreB: number,
+    winner: number
 ) {
-    const winner_id = scoreA > scoreB ? playerA_id : playerB_id;
-
+    let winner_id = -3; // -3 means draw game
+    if (winner === 0)
+        winner_id = playerA_id;
+    else if (winner === 1)
+        winner_id = playerB_id;
     Pong_Hist_db.prepare(`
         INSERT INTO MatchResult (playerA_id, playerB_id, scoreA, scoreB, winner_id)
         VALUES (?, ?, ?, ?, ?)

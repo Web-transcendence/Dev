@@ -187,7 +187,12 @@ export function resetGame(ball: Ball, player1: Player, player2: Player, game: ga
     player2.paddle.y = 0.5 * 800;
     game.hazard.type = "Default";
     if (player1.paddle.score === game.maxScore || player2.paddle.score === game.maxScore) {
-        insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score));
+        let winner = 2;
+        if (player1.paddle.score > player2.paddle.score)
+            winner = 0;
+        else if (player1.paddle.score < player2.hpaddle.score)
+            winner = 1;
+        insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score), winner);
         game.state = 2;
         game.score1 = player1.paddle.score;
         game.score2 = player2.paddle.score;
