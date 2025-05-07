@@ -1,11 +1,15 @@
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
 import * as Schema from "./schema.js"
-import {InputError, MyError, ServerError} from "./error.js";
+import {InputError, MyError, ServerError, UnauthorizedError} from "./error.js";
 import sanitizeHtml from "sanitize-html"
-import {addFriend, getFriendList, removeFriend} from "./friend.js";
+import {addFriend, checkFriend, getFriendList, removeFriend} from "./friend.js";
 import {authUser, fetchId} from "./utils.js";
+import {INTERNAL_PASSWORD} from "./api.js";
 
-
+const internalVerification = async (req, res) => {
+    if (req.headers.authorization !== INTERNAL_PASSWORD)
+        throw new UnauthorizedError(`bad internal password to access to this url: ${req.url}`, `internal server error`)
+}
 
 export default async function socialRoutes(app: FastifyInstance) {
 
@@ -89,8 +93,21 @@ export default async function socialRoutes(app: FastifyInstance) {
         }
     })
 
-    app.get('/test', async (req: FastifyRequest, res: FastifyReply) => {
-        await fetchId('sss')
-        return res.status(200).send()
+    app.post('/checkFriend', {preHandler: internalVerification}, async (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const zod_result = Schema.checkFriendSchema.safeParse(req.body)
+            if (!zod_result.success)
+                throw new InputError(`Cannot parse the input`)
+
+            checkFriend(zod_result.data)
+            return res.status(200).send()
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.toSend})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
     })
 }
