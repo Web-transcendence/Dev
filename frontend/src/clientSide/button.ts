@@ -5,6 +5,7 @@ import {handleConnection, navigate} from "./front.js";
 import {tdStop, TowerDefense} from "./td.js";
 import { editProfile } from "./editInfoProfile.js";
 import {DispayNotification} from "./notificationHandler.js";
+import {Pong} from "./pong.js";
 
 
 const mapButton : {[key: string] : () => void} = {
@@ -13,8 +14,11 @@ const mapButton : {[key: string] : () => void} = {
     "/profile": profileBtn,
     "/logout": logoutBtn,
     "/factor" : factor,
+    "/towerMode" : towerMode,
+    "/towerRemote" : towerRemote,
     "/pongMode" : pongMode,
-    "/towerMode" : towerMode
+    "/pongRemote" : pongRemote,
+    "/pongLocal" : pongLocal
 }
 
 export function activateBtn(page: string) {
@@ -124,14 +128,22 @@ function factor() {
 
 function pongMode() {
     document.getElementById("pongRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/pongRemote", event));
+    document.getElementById("pongLocal")?.addEventListener("click", (event: MouseEvent) => navigate("/pongLocal", event));
 }
 
 function towerMode() {
     document.getElementById("towerRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/towerRemote", event));
 }
 
-function tower() {
+function towerRemote() {
     tdStop()
-    console.log("prout");
     TowerDefense()
+}
+
+function pongLocal() {
+    Pong("local")
+}
+
+function pongRemote() {
+    Pong("remote")
 }

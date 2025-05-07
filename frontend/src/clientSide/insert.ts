@@ -1,5 +1,6 @@
 import {activateBtn} from "./button.js";
 import {tdStop} from "./td.js";
+import {pongStop} from "./pong.js";
 
 export async function loadPart(page: string) {
     try {
@@ -89,13 +90,17 @@ export function insertScript(page: string): void {
             if (existing) existing.remove();
         }
     });
-
     // Si nécessaire, insère le script correspondant
     if (currentScriptSrc && !document.querySelector(`script[src="${currentScriptSrc}"]`)) {
         const script = document.createElement('script');
         script.src = currentScriptSrc;
+        // console.log(script);
         document.body.appendChild(script);
     }
     if (page != "/towerRemote")
         tdStop()
+    if (page != '/pongRemote')
+        pongStop()
+    if (page != '/pongLocal')
+        pongStop()
 }
