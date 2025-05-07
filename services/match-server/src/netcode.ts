@@ -123,3 +123,23 @@ export function joinRoom(player: Player, roomId: number) {
     timerCheck(game);
     checkRoom(rooms[i], game);
 }
+
+function checkTournamentResult(roomId: number) {
+    for (const room of rooms) {
+        if (room.id === roomId) {
+            return true; //Game still in progress
+        }
+    }
+    return false; //Game ended;
+}
+
+export function startInviteMatch(requester: number, opponent: number) {
+    const roomId = generateRoom();
+    //send roomId to usermanagement
+}
+
+export function startTournamentMatch(playerA_id: number, playerB_id: number) {
+    const roomId = generateRoom();
+    //send roomId to usermanagement
+
+}
