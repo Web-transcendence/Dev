@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/06 13:57:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/07 14:39:39 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,13 @@
 #include "Client.class.hpp"
 
 #include <csignal>
+
+std::atomic<bool>	shouldStop;
+
+void	handling_SIGTERM(int) {
+	shouldStop.store(true);
+	return ;
+}
 
 Factory::Factory(std::string const & serverWs) : _gameServerWs(serverWs) {
 	CROW_ROUTE(this->app, "/createAI/<int>")([this](int gameId){
@@ -38,21 +45,14 @@ Factory::Factory(std::string const & serverWs) : _gameServerWs(serverWs) {
 		this->_mMutex.unlock();
 		return "OK";
 	});
-	
-}
 
-// Factory::Factory(std::string const & serverWs) {
-// 	this->myFactory.init_asio();
-// 	this->myFactory.set_message_handler([this](websocketpp::connection_hdl hdl, client::message_ptr msg) {this->on_message(hdl, msg);});
-// 	websocketpp::lib::error_code	ec;
-// 	this->gameServer = this->myFactory.get_connection(serverWs, ec);
-// 	if (ec) {
-// 		std::cout << "Error: " << ec.message() << std::endl;
-// 		throw std::exception();
-// 	}
-// 	this->myFactory.connect(this->gameServer);
-// 	return ;
-// }
+	CROW_ROUTE(this->app, "/ping")([](){
+		return "pong";
+	});
+	
+	shouldStop.store(false);
+	return ;
+}
 
 Factory::~Factory( void ) {
 	return ;
@@ -103,7 +103,7 @@ void	Factory::settlingMessage(unsigned int const sizePool) {
 
 void	Factory::createGame(int const gameId) {
 	try {
-		auto	c = std::make_shared<Client>(gameId);
+		auto	c = std::make_shared<Client>(this->_gameServerWs ,gameId);
 		if (this->_connectedClients[gameId])
 			throw std::exception(); // duplicate game
 		this->_connectedClients[gameId] = c;

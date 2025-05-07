@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/05 11:15:35 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/07 14:05:01 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,6 @@ void	AiServer::start( void ) {
 	this->_myServer.set_access_channels(websocketpp::log::alevel::all);
 	this->_myServer.clear_access_channels(websocketpp::log::alevel::frame_payload);
 	
-	this->_myServer.set_open_handler([this](websocketpp::connection_hdl hdl) {this->on_open(hdl);});
-	this->_myServer.set_close_handler([this](websocketpp::connection_hdl hdl) {this->on_close(hdl);});
 	this->_myServer.set_message_handler([this](websocketpp::connection_hdl hdl, message_ptr msg) {this->on_message(hdl, msg);});
 	
 	this->_myServer.init_asio();
@@ -49,23 +47,13 @@ void	AiServer::start( void ) {
 	return ;
 }
 
-void	AiServer::on_open(websocketpp::connection_hdl hdl) {
-	std::cout << "Connected " << std::endl;
-	return ;
-}
-
-void	AiServer::on_close(websocketpp::connection_hdl hdl) {
-	std::cout << "Disconnected " << std::endl;
-	return ;
-}
-
 void	AiServer::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
 	memcpy(_1, msg->get_payload().c_str(), sizeof(double)*16);
 	auto	input = std::vector<double>(_1, _1+16);
 	auto	oQNet = this->_QNet.feedForward(input);
 	nlohmann::json	j;
-	j["ID"] = "AI";
-	j["Data"] = oQNet;
+	j["source"] = "ai";
+	j["data"] = oQNet;
 	this->_myServer.send(hdl, j.dump(), websocketpp::frame::opcode::text);
 	return ;
 }

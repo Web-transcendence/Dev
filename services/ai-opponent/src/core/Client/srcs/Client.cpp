@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/05 13:15:14 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/07 14:43:38 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,22 +14,26 @@
 
 #include "TypeDefinition.hpp"
 
-#include <sstream>
 #include <exception>
+#include <sstream>
 #include <ratio>
 #include <ctime>
 
-char	_1[sizeof(double)*N_NEURON_INPUT]; //place holder input
-double	_2[sizeof(double)*N_NEURON_OUTPUT]; //place holder output
+Client::Client(std::string const & wsGameServer, int const gameId) :\
+		gameId(gameId),\
+		factoryServer("http://0.0.0.0:" + FACTORY_SERVER_PORT),\
+		allInput(std::array<std::string, 3>{UP, DOWN, NOTHING}) {
+	auto res = this->factoryServer.Get("/ping");
+	if (!res)
+		throw std::exception(); // pas de connection avec la factory
 
-Client::Client(std::string const & urlGame) : allInput(std::array<std::string, 3>{UP, DOWN, NOTHING}) {
-	this->currentGameState = std::vector<double>(N_NEURON_INPUT);
-	
 	this->c.init_asio();
 	this->c.set_message_handler([this](websocketpp::connection_hdl hdl, client::message_ptr msg){this->on_message(hdl, msg);});
+	this->c.set_fail_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){this->promise.set_value(false);});
+	this->c.set_open_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){this->promise.set_value(true);});
 	websocketpp::lib::error_code	ec;
-	this->aiServer = this->c.get_connection("ws://localhost:9002", ec);
-	this->gameServer = this->c.get_connection(urlGame, ec);
+	this->aiServer = this->c.get_connection("ws://0.0.0.0:" + AI_SERVER_PORT, ec);
+	this->gameServer = this->c.get_connection(wsGameServer, ec);
 	if (ec) {
 		std::cout << "Error: " << ec.message() << std::endl;
 		throw std::exception();
@@ -46,10 +50,12 @@ Client::~Client( void ) {
 
 void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
 	auto	data = nlohmann::json::parse(msg->get_payload());
-	if (data["ID"] == "Game")
-		this->on_message_gameServer(data); // pb ? 
-	else if (data["ID"] == "AI")
+	if (data["source"] == "ai")
 		this->on_message_aiServer(data);
+	else if (data["source"] == "game")
+		this->on_message_gameServer(data);
+	else
+		throw std::exception(); // unrecognized token 
 	(void)hdl;
 	return ;
 }
@@ -60,11 +66,14 @@ void	Client::on_message_aiServer(nlohmann::json const & data) {
 
 	for (auto it = o.begin(); it != o.end(); it++) {
 		std::stringstream	ss;
-		ss << data["Data"][idx];
+		ss << data["data"][idx];
 		ss >> *it;
 	}
 	nlohmann::json	j;
 	int const	key = std::distance(o.begin(), std::max_element(o.begin(), o.end()));
+	this->stateMutex.lock();
+	this->localPong.action(key);
+	this->stateMutex.unlock();
 	j["type"] = "input";
 	bool const	send = this->giveArrow(this->allInput.at(key), j);
 	if (send == true)
@@ -73,31 +82,46 @@ void	Client::on_message_aiServer(nlohmann::json const & data) {
 }
 
 void	Client::on_message_gameServer(nlohmann::json const & data) {
-	unsigned int		idx = 0;
-	std::vector<double>	temp(N_NEURON_INPUT);
+	std::vector<double>	temp(N_RAW_STATE);
 
-	for (auto it = temp.begin(); it != temp.end(); it++, idx++)
-		*it = data["Data"][idx];
-	cgMutex.lock();
-	memcpy(this->currentGameState.data(), temp.data(), sizeof(double)*N_NEURON_INPUT);
-	cgMutex.unlock();
+	t_ball	ball(std::array<double, 6>{\
+		data["Ball"]["x"],\
+		data["Ball"]["y"],\
+		data["Ball"]["angle"],\
+		data["Ball"]["speed"],\
+		data["Ball"]["ispeed"],\
+		data["Ball"]["radius"]\
+	});
+	t_paddle rPaddle(std::array<double, 5>{\
+		data["rPaddle"]["x"],\
+		data["rPaddle"]["x"],\
+		data["rPaddle"]["width"],\
+		data["rPaddle"]["height"],\
+		data["rPaddle"]["speed"]
+	});
+	t_paddle lPaddle(std::array<double, 5>{\
+		data["lPaddle"]["x"],\
+		data["lPaddle"]["x"],\
+		data["lPaddle"]["width"],\
+		data["lPaddle"]["height"],\
+		data["lPaddle"]["speed"]
+	});
+	this->stateMutex.lock();
+	this->localPong.reset(ball, lPaddle, rPaddle);
+	this->stateMutex.unlock();
 	this->t1 = std::chrono::steady_clock::now();
 	return ;
 }
 
 void	Client::loop( void ) {
-	// resortir un nouvel input tous les 100ms
-	while (1) {
-		cgMutex.lock();
-		memcpy(_1, this->currentGameState.data(), sizeof(double)*N_NEURON_INPUT);
-		cgMutex.unlock();
-		this->aiServer->send(_1, sizeof(double)*N_NEURON_INPUT);
-		std::this_thread::sleep_for(std::chrono::milliseconds(CLIENT_INPUT_TIME_SPAN));
-		if (!checkTime()) {
-			this->c.stop();
+	while (this->active.load() == true) {
+		this->stateMutex.lock();
+		auto	input = this->localPong.getState();
+		this->stateMutex.unlock();
+		this->aiServer->send(input->data(), sizeof(double)*N_NEURON_INPUT);
+		if (!checkTime())
 			this->active.store(false);
-			break ;
-		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
 	return ;
 }
@@ -130,10 +154,15 @@ bool	Client::checkTime( void ) {
 bool	Client::getActive( void ) {return this->active.load();}
 
 void	Client::run( void ) {
+	std::future<bool>	future = this->promise.get_future();
 	this->active.store(true);
 	std::thread	t([this](){this->c.run();});
 	t.detach();
-	this->loop();
+	bool	success = future.get();
+	if (success)
+		this->loop();
+	this->stop();
+	this->factoryServer.Get("/deleteAI/"+this->gameId);
 	return ;
 }
 

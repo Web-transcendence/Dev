@@ -6,7 +6,7 @@
 #    By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:21:22 by thibaud           #+#    #+#              #
-#    Updated: 2025/04/20 16:37:00 by thibaud          ###   ########.fr        #
+#    Updated: 2025/05/07 14:45:12 by thibaud          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,14 +17,14 @@ THIRDPARTY	=	../third-party/
 SRCS_DIR	=	srcs/
 OBJS_DIR	=	.objs/
 DEPS_DIR	=	.deps/
-SRCS		=	main.cpp Factory.cpp Client.cpp\
+SRCS		=	main.cpp Factory.cpp Client.cpp Environment.cpp
 
 
 OBJS		= $(SRCS:%.cpp=$(OBJS_DIR)%.o)
 DEPS		= $(SRCS:%.cpp=$(DEPS_DIR)%.d)
 
 CC		= c++
-CFLAGS	= -I$(HEADER) -I$(THIRDPARTY) -Wall -Wextra -Werror -g3
+CFLAGS	= -I$(HEADER) -I$(THIRDPARTY) -I../third-party/asio-asio-1-28-0/asio/include -Wall -Wextra -Werror -g3
 DFLAGS	= -MMD -MP -MT $@ -MF $(DEPS_DIR)$*.d
 RM		= rm -rf
 

@@ -6,13 +6,16 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:47:28 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/06 13:50:48 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/07 14:36:37 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FACTORY_CLASS_HPP
 # define FACTORY_CLASS_HPP
 
+#define ASIO_STANDALONE
+#define _WEBSOCKETPP_CPP11_STL_
+#define _WEBSOCKETPP_CPP11_FUNCTIONAL_
 #define MAX_CLIENTS 50
 
 #include "TypeDefinition.hpp"
@@ -59,7 +62,7 @@ private:
 	std::queue<std::string>	_messages;
 
 	std::map<int, std::shared_ptr<Client>>	_connectedClients;
-	
+
 	std::mutex	ccMutex;
 	std::mutex	sendMutex;
 }; 
