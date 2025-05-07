@@ -28,10 +28,14 @@ export function insertMatchResult(
     playerA_id: number,
     playerB_id: number,
     scoreA: number,
-    scoreB: number
+    scoreB: number,
+    winner: number
 ) {
-    const winner_id = scoreA > scoreB ? playerA_id : playerB_id;
-
+    let winner_id = -3; // -3 means draw game
+    if (winner === 0)
+        winner_id = playerA_id;
+    else if (winner === 1)
+        winner_id = playerB_id;
     Pong_Hist_db.prepare(`
         INSERT INTO MatchResult (playerA_id, playerB_id, scoreA, scoreB, winner_id)
         VALUES (?, ?, ?, ?, ?)
@@ -44,4 +48,13 @@ export function getMatchHistory(userId: number): MatchResult[] {
         WHERE playerA_id = ? OR playerB_id = ?
         ORDER BY match_time DESC
     `).all(userId, userId) as MatchResult[];
+}
+
+export function Result(playerA_id: number, playerB_id: number): number {
+    let Match = getMatchHistory(playerA_id);
+    Match.filter((match) =>
+            (match.playerA_id === playerA_id && match.playerB_id === playerB_id) ||
+            (match.playerA_id === playerB_id && match.playerB_id === playerA_id)
+    );
+    return (Match[Match.length].winner_id);
 }
