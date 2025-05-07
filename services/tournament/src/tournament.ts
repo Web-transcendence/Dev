@@ -1,6 +1,23 @@
-import {tournamentSessions} from "./api.js"
+import {INTERNAL_PASSWORD, tournamentSessions} from "./api.js"
 import {ConflictError, ServerError} from "./error.js";
 import {fetchNotifyUser} from "./utils.js";
+
+
+async function fetchMatch(id1: number, id2: number) {
+    const response = await fetch(`http://match-server:4443/tournamentGame`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': `${INTERNAL_PASSWORD}`
+        },
+        body: JSON.stringify({id1: id1, id2: id2})
+    })
+    if (response.ok) {
+        const winner = await response.json()
+        return winner.id
+    }
+    throw new Error(`CREATE A REAL ERROR MESSAGE`)
+}
 
 export class tournament {
 
@@ -56,13 +73,14 @@ export class tournament {
         }
     }
 
+
+
     async bracketHandler(bracket: number[]): Promise<number> {
         if (bracket.length === 2) {
             //await startMatch(bracket[0], bracket[1])
-            console.log(`Match entre ${bracket[0]} et ${bracket[1]}`)
-            await new Promise(res => setTimeout(res, 1000))
+            const winnerId = await fetchMatch(bracket[0], bracket[1])
             console.log(`Match terminé: ${bracket[0]} vs ${bracket[1]}`)
-            return bracket[Math.floor(Math.random() > 0.5 ? 0 : 1)]
+            return winnerId
         }
         else {
             const winner = await Promise.all([
@@ -71,12 +89,12 @@ export class tournament {
             ])
 
             //await startMatch(bracket[0], bracket[1])
-            console.log(`Match entre ${winner[0]} et ${winner[1]}`)
-            await new Promise(res => setTimeout(res, 1000))
+            const winnerId = await fetchMatch(winner[0], winner[1])
             console.log(`Match terminé: ${winner[0]} vs ${winner[1]}`)
-            return bracket[Math.floor(Math.random() > 0.5 ? 0 : 1)]
+            return winnerId
         }
     }
+
 
     async launch(): Promise<string> {
         if (this.status === 'started')
