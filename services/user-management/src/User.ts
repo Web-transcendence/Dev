@@ -67,6 +67,9 @@ export class User {
         if (!await client.isPasswordValid(password))
             throw new UnauthorizedError(`bad password`, 'wrong password')
 
+        if (connectedUsers.has(id))
+            throw new ConflictError("user try to connect on different sessions", "you are already connected on an other session")
+
         const data = Client_db.prepare("SELECT activated2fa FROM Client WHERE id = ?").get(id) as { activated2fa: boolean } | undefined
         if (!data)
             throw new DataBaseError(`User with ID ${id} not found`, `internal error system`, 500)
@@ -197,9 +200,8 @@ export class User {
     // SSE //
 
     async sseHandler(req: FastifyRequest, res: FastifyReply) {
-
         if (connectedUsers.has(this.id))
-            return res.status(100).send()
+            return res.status(409).send({error: "already connected by sse"})
         connectedUsers.set(this.id, res)
         await connection(this.id)
         console.log('sse connected : id', this.id)
