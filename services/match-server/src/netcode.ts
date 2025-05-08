@@ -136,10 +136,12 @@ export function joinRoom(player: Player, roomId: number) {
             return;
         }
         rooms[i].specs.forEach(spec => {
-            spec.ws.send(JSON.stringify(rooms[i].players[0].paddle));
-            spec.ws.send(JSON.stringify(rooms[i].players[1].paddle));
-            spec.ws.send(JSON.stringify(ball));
-            spec.ws.send(JSON.stringify(game));
+            if (rooms[i].players.length === 2) {
+                spec.ws.send(JSON.stringify(rooms[i].players[0].paddle));
+                spec.ws.send(JSON.stringify(rooms[i].players[1].paddle));
+                spec.ws.send(JSON.stringify(ball));
+                spec.ws.send(JSON.stringify(game));
+            }
         });
         if (rooms[i].players.length !== 2)
             clearInterval(intervalId3);

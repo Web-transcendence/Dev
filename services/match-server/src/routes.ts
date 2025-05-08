@@ -62,7 +62,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                 if (mode !== "spec") {
                     resetInput(player.input);
                     inputHandler(data.key, data.state, player.input);
-                } else
+                } else if (data.state === "down")
                     changeRoomSpec(player);
             } else if (init && msg.type === "ready") {
                 const {data, success, error} = readySchema.safeParse(JSON.parse(message.toString()));

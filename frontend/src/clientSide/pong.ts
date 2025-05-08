@@ -369,10 +369,10 @@ function createKeyDownHandler(socket: WebSocket, game: gameState, mode: string) 
             event.preventDefault();
         }
         if (game.state !== 2 && game.state !== 2.5) {
-            if (game.ready === false) {
+            if (!game.ready) {
                 game.ready = true;
                 socket.send(JSON.stringify({type: "ready", mode: mode}));
-            } else if (mode !== "spec")
+            } else
                 socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
         } else {
             pongConnect = false;

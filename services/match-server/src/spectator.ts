@@ -29,7 +29,7 @@ export function leaveRoomSpec(userId: number) {
         if (playerIndex !== -1) {
             const player = room.specs[playerIndex];
             console.log(`spectator: ${player.name} with id: ${userId} left room ${room.id}`);
-            room.players.splice(playerIndex, 1);
+            room.specs.splice(playerIndex, 1);
             return (room.id);
         }
     }
