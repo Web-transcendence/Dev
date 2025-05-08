@@ -1,5 +1,5 @@
 import {addFriend, fetchUserInformation, removeFriend} from "./user.js";
-import {Pong} from "./pong";
+import {Pong} from "./pong.js";
 
 
 const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
