@@ -33,7 +33,8 @@ export async function routes(fastify: FastifyInstance) {
         "pongMode",
         "tournaments",
         "lobby",
-        "factor"
+        "factor",
+        "matchHistory",
     ];
 
     // Route dynamique pour chaque page définie

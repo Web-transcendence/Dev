@@ -6,6 +6,7 @@ import {handleConnection, navigate} from "./front.js";
 import { editProfile } from "./editInfoProfile.js";
 import {  displayTournaments } from "./tournaments.js";
 import {  DispayNotification } from "./notificationHandler.js";
+import {type} from "node:os";
 
 const mapButton : {[key: string] : () => void} = {
     "/connect" : connectBtn,
@@ -16,7 +17,8 @@ const mapButton : {[key: string] : () => void} = {
     "/pongMode" : pongMode,
     "/towerMode" : towerMode,
     "/tournaments" : tournaments,
-    "/lobby" : lobby
+    "/lobby" : lobby,
+    "/matchHistory" : matchHistory
 }
 
 export function activateBtn(page: string) {
@@ -153,4 +155,24 @@ async function lobby() {
     const toIntId = Number.parseInt(id);
     if (isNaN(toIntId)) DispayNotification("Invalid tournament ID.");
     await displayTournaments(toIntId, name);
+}
+
+async function matchHistory() {
+    const template = document.getElementById('matchTemplate') as HTMLTemplateElement;
+    const list = document.getElementById('matchHistoryList');
+
+    if (!template || !list) {
+        DispayNotification('Error From html', { type: "error" })
+        return;
+    }
+    //Gradient to green or red to black for info
+    const clone = template.content.cloneNode(true) as HTMLElement;
+    // (clone.querySelector('#matchGame') as HTMLElement).textContent = game;
+    // (clone.querySelector('#matchOpponent') as HTMLElement).textContent = opponent;
+    // (clone.querySelector('#matchScore') as HTMLElement).textContent = score;
+    // (clone.querySelector('#matchResult') as HTMLElement).textContent = result;
+    // (clone.querySelector('#matchDate') as HTMLElement).textContent = date;
+    // (clone.querySelector('#matchTime') as HTMLElement).textContent = time;
+
+    list.appendChild(clone);
 }

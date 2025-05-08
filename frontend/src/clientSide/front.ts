@@ -91,6 +91,7 @@ function constantButton() {
     document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate("/pongMode", event));
     document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate("/towerMode", event));
     document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate("/tournaments", event));
+    document.getElementById("matchHistory")?.addEventListener("click", (event: MouseEvent) => navigate("/matchHistory", event));
     // Footer
     document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate("/about", event));
     document.getElementById("contact")?.addEventListener("click", (event: MouseEvent) => navigate("/contact", event));
