@@ -18,6 +18,7 @@ export function register(button: HTMLElement): void {
         })
         const result = await response.json()
         if (result.token) {
+            localStorage.setItem('id', result.id)
             localStorage.setItem('token', result.token)
             localStorage.setItem('nickName', result.nickName)
             await navigate('/connected')
@@ -44,6 +45,7 @@ export function login(button: HTMLElement): void {
 
         if (response.ok) {
             const data = await response.json()
+            localStorage.setItem('id', data.id)
             localStorage.setItem('nickName', data.nickName)
             if (!data.token || data.token.empty) {
                 return await loadPart("/factor")

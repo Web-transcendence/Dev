@@ -45,7 +45,6 @@ export async function routes(fastify: FastifyInstance) {
             const filename = route === "logout" ? "home.html" : `${route}.html`;
             try {
                 const fullPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, filename);
-                console.log('FP: ', fullPath);
                 const html = readFileSync(fullPath, "utf8");
                 reply.type("text/html").send(html);
             } catch (error) {

@@ -133,6 +133,9 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                     console.log('VALID RESPONSE', reply.token);
                     localStorage.setItem('token', reply.token)
                 }
+                console.log('ID GOOGLE ', reply.id)
+                if (reply.id)
+                    localStorage.setItem('id', reply.id)
                 if (reply.nickName)
                     localStorage.setItem('nickName', reply.nickName)
                 navigate('/connected');

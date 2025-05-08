@@ -7,7 +7,7 @@ import { editProfile } from "./editInfoProfile.js";
 import {DispayNotification} from "./notificationHandler.js";
 import {Pong} from "./pong.js";
 import {  displayTournaments } from "./tournaments.js";
-import {type} from "node:os";
+import { printMatchHistory } from "./matchHistory.js";
 
 const mapButton : {[key: string] : () => void} = {
     "/connect" : connectBtn,
@@ -20,7 +20,7 @@ const mapButton : {[key: string] : () => void} = {
     "/pongMode" : pongMode,
     "/pongRemote" : pongRemote,
     "/pongLocal" : pongLocal,
-    "/pongWatch" : pongWatch
+    "/pongWatch" : pongWatch,
     "/tournaments" : tournaments,
     "/lobby" : lobby,
     "/matchHistory" : matchHistory
@@ -176,21 +176,5 @@ async function lobby() {
 }
 
 async function matchHistory() {
-    const template = document.getElementById('matchTemplate') as HTMLTemplateElement;
-    const list = document.getElementById('matchHistoryList');
-
-    if (!template || !list) {
-        DispayNotification('Error From html', {type: "error"})
-        return;
-    }
-    //Gradient to green or red to black for info
-    const clone = template.content.cloneNode(true) as HTMLElement;
-    // (clone.querySelector('#matchGame') as HTMLElement).textContent = game;
-    // (clone.querySelector('#matchOpponent') as HTMLElement).textContent = opponent;
-    // (clone.querySelector('#matchScore') as HTMLElement).textContent = score;
-    // (clone.querySelector('#matchResult') as HTMLElement).textContent = result;
-    // (clone.querySelector('#matchDate') as HTMLElement).textContent = date;
-    // (clone.querySelector('#matchTime') as HTMLElement).textContent = time;
-
-    list.appendChild(clone);
+    await printMatchHistory();
 }

@@ -2,13 +2,12 @@
   <h2 class="text-center text-2xl md:text-3xl font-bold text-yellow-400 mb-6">Match History</h2>
 
   <!-- Légende -->
-  <div class="hidden md:grid grid-cols-6 gap-4 text-sm text-gray-300 border-b border-gray-600 pb-2 mb-2">
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm text-gray-300 border-b border-gray-600 p-2 mb-2 text-center">
     <div>Game</div>
-    <div>Opponent</div>
+    <div>Player</div>
     <div>Score</div>
     <div>Result</div>
     <div>Date</div>
-    <div>Time</div>
   </div>
 
   <!-- Liste des matchs -->
@@ -18,13 +17,19 @@
 
   <!-- Template clonable -->
   <template id="matchTemplate">
-    <li class="grid grid-cols-1 md:grid-cols-6 gap-4 items-center p-4 bg-gray-800 rounded shadow">
-      <div class="text-white text-center md:text-left" id="matchGame">Pong</div>
-      <div class="text-white text-center md:text-left" id="matchOpponent">vs Alice</div>
-      <div class="text-white text-center md:text-left" id="matchScore">10 - 8</div>
-      <div class="text-white text-center md:text-left font-bold" id="matchResult">Victory</div>
-      <div class="text-gray-400 text-center md:text-left" id="matchDate">2025-05-05</div>
-      <div class="text-gray-400 text-center md:text-left" id="matchTime">14:00</div>
+    <li class="grid grid-cols-1 md:grid-cols-5 gap-4 text-center items-center p-4 m-2 bg-gradient-to-r from-green-700 to-gray-800 rounded-lg hover:scale-105 transition duration-500 flex justify-between">
+      <div class="text-white text-center" id="matchGame"></div>
+      <div class="flex items-center justify-between w-full m-2">
+        <img class="h-10 x-10 rounded-full m-2" id="opponentAvatar" src="../images/login.png" alt=""></img>
+        <div class="text-yellow-400 text-lg text-center truncate overflow-hidden text-ellipsis max-w-[10rem]" id="matchOpponent"></div>
+      </div>
+      <div class="flex items-center w-full justify-center gap-2">
+        <div class="text-white text-xl" id="matchScore1">1</div>
+        <div class="text-2xl">-</div>
+        <div class="text-white text-xl" id="matchScore2">2</div>
+      </div>
+      <div class="text-xl text-center font-bold" id="matchResult"></div>
+      <div class="text-gray-400 text-center" id="matchTime"></div>
     </li>
   </template>
 </section>
