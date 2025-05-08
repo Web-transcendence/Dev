@@ -3,7 +3,7 @@ import {Ball, gameState, hazardGenerator, moveBall, moveHazard, movePaddle, Play
 import {getWinnerId, insertMatchResult} from "./database.js";
 import {fetchNotifyUser} from "./utils.js";
 
-let rooms: Room[] = [];
+export let rooms: Room[] = [];
 
 function checkId(id: number) {
     for (const room of rooms) {
@@ -114,7 +114,7 @@ export function joinRoom(player: Player, roomId: number) {
             rooms[i].players[0].ws.send(JSON.stringify(game));
         } else
             clearInterval(intervalId1);
-    }, freq1);
+    }, freq1); //Send game info to player 1
     const intervalId2 = setInterval(() => {
         let i = rooms.findIndex(room => room.id === id);
         if (i === -1) {
@@ -128,7 +128,22 @@ export function joinRoom(player: Player, roomId: number) {
             rooms[i].players[1].ws.send(JSON.stringify(game));
         } else
             clearInterval(intervalId2);
-    }, freq2);
+    }, freq2); //Send game info to player 2
+    const intervalId3 = setInterval(() => {
+        let i = rooms.findIndex(room => room.id === id);
+        if (i === -1) {
+            clearInterval(intervalId3);
+            return;
+        }
+        rooms[i].specs.forEach(spec => {
+            spec.ws.send(JSON.stringify(rooms[i].players[0].paddle));
+            spec.ws.send(JSON.stringify(rooms[i].players[1].paddle));
+            spec.ws.send(JSON.stringify(ball));
+            spec.ws.send(JSON.stringify(game));
+        });
+        if (rooms[i].players.length !== 2)
+            clearInterval(intervalId3);
+    }, 10); //Send game info to spectators
     game.state = 1;
     moveBall(ball, rooms[i].players[0], rooms[i].players[1], game);
     movePaddle(rooms[i].players[0].input, rooms[i].players[1].input, rooms[i].players[0].paddle, rooms[i].players[1].paddle, game);

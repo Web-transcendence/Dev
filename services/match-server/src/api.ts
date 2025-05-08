@@ -94,6 +94,7 @@ export class gameState {
 export class Room {
     id: number;
     players: Player[] = [];
+    specs: Player[] = [];
     ended = false;
     constructor (id: number) {
         this.id = id;

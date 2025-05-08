@@ -141,14 +141,20 @@ export function Pong(mode: string, room?: number) {
                 ctx.fillStyle = "#ffdb5e";
             fSize = Math.round(30 * ratio());
             ctx.font = `${fSize}px 'Press Start 2P'`;
-            ctx.fillText("Press any key", canvas.width * 0.5, canvas.height * 0.5 + (60 + animFrame) * ratio());
+            if (mode !== "spec")
+                ctx.fillText("Press any key", canvas.width * 0.5, canvas.height * 0.5 + (60 + animFrame) * ratio());
+            else
+                ctx.fillText("Press any to join spectator mode", canvas.width * 0.5, canvas.height * 0.5 + (60 + animFrame) * ratio());
             animFrame += animLoop;
             if (animFrame === 0 || animFrame === 9)
                 animLoop *= -1;
         } else {
             fSize = Math.round(30 * ratio());
             ctx.font = `${fSize}px 'Press Start 2P'`;
-            ctx.fillText("Waiting for opponent...", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio()));
+            if (mode !== "spec")
+                ctx.fillText("Waiting for opponent...", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio()));
+            else
+                ctx.fillText("Loading...", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio()));
         }
 
     }
@@ -287,8 +293,7 @@ export function Pong(mode: string, room?: number) {
             socket.send(JSON.stringify({type: "socketInit", nick: nick, room: room}));
         };
 
-        window.addEventListener("keydown", keyDownHandler, { passive: false });
-
+        window.addEventListener("keydown", keyDownHandler, {passive: false});
         window.addEventListener("keyup", keyUpHandler);
 
         socket.onmessage = function (event) {
@@ -367,8 +372,8 @@ function createKeyDownHandler(socket: WebSocket, game: gameState, mode: string) 
             if (game.ready === false) {
                 game.ready = true;
                 socket.send(JSON.stringify({type: "ready", mode: mode}));
-            }
-            socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
+            } else if (mode !== "spec")
+                socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
         } else {
             pongConnect = false;
         }
