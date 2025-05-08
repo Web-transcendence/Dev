@@ -34,9 +34,11 @@ export default async function tournamentRoutes(app: FastifyInstance) {
         catch(err) {
             if (err instanceof MyError) {
                 console.error(err.message)
+                console.log(err.message)
                 return res.status(err.code).send({error: err.toSend})
             }
             console.error(err)
+            console.log(err)
             return res.status(500).send()
         }
     })

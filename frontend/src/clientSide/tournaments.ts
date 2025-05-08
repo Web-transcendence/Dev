@@ -2,6 +2,28 @@ import { navigate } from './front.js'
 import {fetchUserInformation, getTournamentList, UserData} from "./user.js";
 import {DispayNotification} from "./notificationHandler.js";
 
+export async function joinTournament(tournamentId: number, userId: number) {
+    try {
+        const token = localStorage.getItem('token')
+        const response = await fetch(`/tournament/join`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+                'id': userId.toString(),
+            },
+            body: JSON.stringify({ tournamentId })
+        })
+
+        if (!response.ok) {
+            const error = await response.json()
+            console.error(error.error)
+        }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 export async function displayTournaments(nbrTournament: number, nameTournament: string) {
     console.log(`joinTournaments: ${nameTournament}`);
     const name = document.getElementById('nameTournaments');

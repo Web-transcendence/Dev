@@ -18,28 +18,20 @@
   <div id="tsparticles"></div>
   <div id="app" class="flex-1 mt-15">
 
-      <nav class="fixed top-0 z-20 left-0 p-4 flex justify-between items-center w-full bg-transparent">
+      <nav class="fixed top-0 z-20 left-0 p-4 mb-50 flex justify-between items-center w-full bg-transparent">
 
           <div class="flex items-center add-blur">
               <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
                   <img src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
-                  <p class="text-center text-xl hidden md:block"> TABG. </p>
+                  <p class="text-center text-xl hidden lg:block"> TABG. </p>
               </button>
           </div>
 
-          <div class="grid grid-cols-2 md:grid-cols-4 flex text-center space-x-8 items-center add-blur">
-              <div>
-                  <button id="pongMode" class="btn-line">Pong</button>
-              </div>
-              <div>
-                <button id="towerDefense" class="btn-line">Tower-Defense</button>
-              </div>
-              <div>
-                <button id="tournaments" class="btn-line">Tournaments</button>
-              </div>
-              <div>
-                <button id="matchHistory" class="btn-line">Match History</button>
-              </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 text-center space-x-8 items-center add-blur">
+              <button id="pongMode" class="btn-line">Pong</button>
+              <button id="towerDefense" class="btn-line">Tower-Defense</button>
+              <button id="tournaments" class="btn-line">Tournaments</button>
+              <button id="matchHistory" class="btn-line">Match History</button>
           </div>
 
           <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">

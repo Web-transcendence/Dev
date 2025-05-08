@@ -386,28 +386,6 @@ export const updateAvatar = (id: string, src: string) => {
     }
 };
 
-
-
-export async function joinTournament() {
-    try {
-        const token = localStorage.getItem('token')
-        const response = await fetch(`/tournament/join`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
-            },
-        })
-
-        if (!response.ok) {
-            const error = await response.json()
-            console.error(error.error)
-        }
-    } catch (error) {
-        console.error(error)
-    }
-}
-
 export async function getTournamentList() {
     try {
         const token = localStorage.getItem('token')

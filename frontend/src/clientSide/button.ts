@@ -1,12 +1,12 @@
-import {addFriend, login, profile, register, setAvatar, verify2fa, joinTournament} from "./user.js";
-import {init2fa} from "./user.js";
-import {friendList} from "./friends.js";
-import {handleConnection, navigate} from "./front.js";
-import {tdStop, TowerDefense} from "./td.js";
+import {addFriend, login, profile, register, setAvatar, verify2fa, launchTournament} from "./user.js";
+import { init2fa } from "./user.js";
+import { friendList } from "./friends.js";
+import { handleConnection, navigate } from "./front.js";
+import { tdStop, TowerDefense } from "./td.js";
 import { editProfile } from "./editInfoProfile.js";
-import {DispayNotification} from "./notificationHandler.js";
-import {Pong} from "./pong.js";
-import {  displayTournaments } from "./tournaments.js";
+import { DispayNotification } from "./notificationHandler.js";
+import { Pong } from "./pong.js";
+import { displayTournaments, joinTournament} from "./tournaments.js";
 import { printMatchHistory } from "./matchHistory.js";
 
 const mapButton : {[key: string] : () => void} = {
@@ -158,11 +158,11 @@ function tournaments() {
                 await navigate('/lobby', event)
                 sessionStorage.setItem('idTournaments', JSON.stringify(parse.id));
                 sessionStorage.setItem('nameTournaments', JSON.stringify(parse.name));
+                await joinTournament(parse.id, Number(parse.name))
             });
 }
 
 async function lobby() {
-    await joinTournament()
     const id = sessionStorage.getItem('idTournaments');
     const name = sessionStorage.getItem('nameTournaments');
     if (!id || !name) {
@@ -173,6 +173,9 @@ async function lobby() {
     const toIntId = Number.parseInt(id);
     if (isNaN(toIntId)) DispayNotification("Invalid tournament ID.");
     await displayTournaments(toIntId, name);
+    document.getElementById("launchTournamentBtn")?.addEventListener("click", async () => {
+        await launchTournament();
+    });
 }
 
 async function matchHistory() {
