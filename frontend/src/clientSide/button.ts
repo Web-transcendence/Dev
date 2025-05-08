@@ -18,7 +18,8 @@ const mapButton : {[key: string] : () => void} = {
     "/towerRemote" : towerRemote,
     "/pongMode" : pongMode,
     "/pongRemote" : pongRemote,
-    "/pongLocal" : pongLocal
+    "/pongLocal" : pongLocal,
+    "/pongWatch" : pongWatch
 }
 
 export function activateBtn(page: string) {
@@ -129,6 +130,7 @@ function factor() {
 function pongMode() {
     document.getElementById("pongRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/pongRemote", event));
     document.getElementById("pongLocal")?.addEventListener("click", (event: MouseEvent) => navigate("/pongLocal", event));
+    document.getElementById("pongWatch")?.addEventListener("click", (event: MouseEvent) => navigate("/pongWatch", event));
 }
 
 function towerMode() {
@@ -146,4 +148,8 @@ function pongLocal() {
 
 function pongRemote() {
     Pong("remote")
+}
+
+function pongWatch() {
+    Pong("spec")
 }

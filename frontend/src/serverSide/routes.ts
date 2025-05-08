@@ -31,6 +31,7 @@ export async function routes(fastify: FastifyInstance) {
         "towerMode",
         "pongRemote",
         "pongLocal",
+        "pongWatch",
         "pongMode",
         "tournaments",
         "factor"
