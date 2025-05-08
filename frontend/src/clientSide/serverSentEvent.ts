@@ -1,4 +1,5 @@
 import {addFriend, fetchUserInformation, removeFriend} from "./user.js";
+import {Pong} from "./pong.js";
 
 
 const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
@@ -109,6 +110,10 @@ const notifyQuitTournament = ({id}: { id: number }) => {
     console.log(`the user with the id ${id} Quit my tournament`)
 }
 
+const notifyInvitationGame = ({id}: { id: number }) => {
+    Pong("remote", id)
+}
+
 
 const mapEvent : {[key: string] : (data: any) => void} = {
     "joinTournament" : notifyJoinTournament,
@@ -118,5 +123,5 @@ const mapEvent : {[key: string] : (data: any) => void} = {
     "friendRemoved": notifyFriendRemoved,
     "connection" : notifyConnection,
     "disconnection" : notifyDisconnection,
-
+    "invitationGame" : notifyInvitationGame
 }

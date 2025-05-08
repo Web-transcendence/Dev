@@ -147,7 +147,7 @@ class AssetsTd {
 }
 
 let frame: number = 0;
-let connect: boolean;
+let tdConnect: boolean;
 
 // Main function
 export function TowerDefense(room?: number) {
@@ -590,12 +590,12 @@ export function TowerDefense(room?: number) {
             default:
                 break;
         }
-        if (connect)
+        if (tdConnect)
             requestAnimationFrame(mainLoopTd);
     }
 
     function connectionCheck(socket: WebSocket) {
-        if (!connect)
+        if (!tdConnect)
             socket.close();
         else
             setTimeout(() => connectionCheck(socket), 10);
@@ -612,11 +612,10 @@ export function TowerDefense(room?: number) {
     // Communication with backend
     try {
         const socketTd = new WebSocket("http://localhost:2246/ws");
-        connect = true;
+        tdConnect = true;
         socketTd.onopen = function () {
-            console.log("Connected to server");
+            console.log("Connected to TD server");
             socketTd.send(JSON.stringify({event: "socketInit", nick: nick, room: room}));
-            console.log(socketTd);
         };
         socketTd.onmessage = function (event) {
             const data = JSON.parse(event.data);
@@ -757,7 +756,7 @@ export function TowerDefense(room?: number) {
         });
 
         socketTd.onclose = function () {
-            return (console.log("Disconnected"));
+            return (console.log("Disconnected from TD server"));
         };
         connectionCheck(socketTd);
     } catch (error) {
@@ -766,5 +765,5 @@ export function TowerDefense(room?: number) {
 }
 
 export function tdStop() {
-    connect = false;
+    tdConnect = false;
 }

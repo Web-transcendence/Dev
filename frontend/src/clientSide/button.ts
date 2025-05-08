@@ -2,10 +2,11 @@ import {addFriend, login, profile, register, setAvatar, verify2fa, joinTournamen
 import {init2fa} from "./user.js";
 import {friendList} from "./friends.js";
 import {handleConnection, navigate} from "./front.js";
-// import {tdStop, TowerDefense} from "./td.js";
+import {tdStop, TowerDefense} from "./td.js";
 import { editProfile } from "./editInfoProfile.js";
+import {DispayNotification} from "./notificationHandler.js";
+import {Pong} from "./pong.js";
 import {  displayTournaments } from "./tournaments.js";
-import {  DispayNotification } from "./notificationHandler.js";
 import {type} from "node:os";
 
 const mapButton : {[key: string] : () => void} = {
@@ -14,8 +15,12 @@ const mapButton : {[key: string] : () => void} = {
     "/profile": profileBtn,
     "/logout": logoutBtn,
     "/factor" : factor,
-    "/pongMode" : pongMode,
     "/towerMode" : towerMode,
+    "/towerRemote" : towerRemote,
+    "/pongMode" : pongMode,
+    "/pongRemote" : pongRemote,
+    "/pongLocal" : pongLocal,
+    "/pongWatch" : pongWatch
     "/tournaments" : tournaments,
     "/lobby" : lobby,
     "/matchHistory" : matchHistory
@@ -116,17 +121,30 @@ function factor() {
 
 function pongMode() {
     document.getElementById("pongRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/pongRemote", event));
+    document.getElementById("pongLocal")?.addEventListener("click", (event: MouseEvent) => navigate("/pongLocal", event));
+    document.getElementById("pongWatch")?.addEventListener("click", (event: MouseEvent) => navigate("/pongWatch", event));
 }
 
 function towerMode() {
     document.getElementById("towerRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/towerRemote", event));
 }
 
-// function tower() {
-//     tdStop()
-//     console.log("prout");
-//     TowerDefense()
-// }
+function towerRemote() {
+    tdStop()
+    TowerDefense()
+}
+
+function pongLocal() {
+    Pong("local")
+}
+
+function pongRemote() {
+    Pong("remote")
+}
+
+function pongWatch() {
+    Pong("spec")
+}
 
 function tournaments() {
     const tournaments : {id: number, name: string} []= [
@@ -162,7 +180,7 @@ async function matchHistory() {
     const list = document.getElementById('matchHistoryList');
 
     if (!template || !list) {
-        DispayNotification('Error From html', { type: "error" })
+        DispayNotification('Error From html', {type: "error"})
         return;
     }
     //Gradient to green or red to black for info
