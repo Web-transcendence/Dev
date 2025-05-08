@@ -4,6 +4,7 @@ export const Pong_Hist_db = new Database('pong_hist.db')
 
 Pong_Hist_db.exec(`
     CREATE TABLE IF NOT EXISTS MatchResult (
+        game INTEGER DEFAULT 0,
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         playerA_id INTEGER NOT NULL,
         playerB_id INTEGER NOT NULL,
@@ -15,6 +16,7 @@ Pong_Hist_db.exec(`
 `)
 
 export type MatchResult = {
+    game: number;
     id: number;
     playerA_id: number;
     playerB_id: number;

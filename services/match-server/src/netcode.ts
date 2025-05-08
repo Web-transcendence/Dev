@@ -48,7 +48,7 @@ export function leaveRoom(userId: number) {
                 const scoreA = Number(playerA.paddle.score);
                 const scoreB = Number(playerB.paddle.score);
                 const winnerIndex = playerIndex === 0 ? 1 : 0;
-                insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, room.players[winnerIndex].dbId);
+                insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
             }
             room.players.splice(playerIndex, 1);
             if (room.players.length === 0) {
