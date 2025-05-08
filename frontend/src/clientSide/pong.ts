@@ -225,6 +225,22 @@ export function Pong(mode: string, room?: number) {
         // ctx.fillText("Press any key to restart", canvas.width * 0.5, canvas.height * 0.70);
     }
 
+    function specEndScreen() {
+        drawBg();
+        drawBall();
+        drawPaddles();
+        drawScores(game.score1, game.score2);
+        ctx.fillStyle = "#ddae00";
+        fSize = Math.round(60 * ratio());
+        ctx.font = `${fSize}px 'Press Start 2P'`;
+        ctx.textAlign = "center";
+        ctx.fillText(`${game.winner} won`, canvas.width * 0.5, canvas.height * 0.4);
+        fSize = Math.round(26 * ratio());
+        ctx.font = `${fSize}px 'Press Start 2P'`;
+        ctx.textAlign = "center";
+        ctx.fillText("Press any key to restart", canvas.width * 0.5, canvas.height * 0.70);
+    }
+
     function drawHazard() {
         switch (game.hazard.type) {
             case "BarSizeUp":
@@ -255,6 +271,13 @@ export function Pong(mode: string, room?: number) {
             ctx.textAlign = "center"
             ctx.fillText(game.timer.timeLeft.toString(), canvas.width * 0.5, canvas.height * 0.75);
         }
+        if (mode === "spec") {
+            ctx.fillStyle = "#fcc800";
+            fSize = Math.round(45 * ratio());
+            ctx.font = `${fSize}px 'Press Start 2P'`;
+            ctx.textAlign = "center"
+            ctx.fillText("Spectator Mode", canvas.width * 0.5, canvas.height * 0.95);
+        }
     }
 
     function gameLoop() {
@@ -268,6 +291,9 @@ export function Pong(mode: string, room?: number) {
             case 2:
             case 2.5:
                 endScreen();
+                break;
+            case 3:
+                specEndScreen();
                 break;
             default:
                 break;
@@ -340,6 +366,10 @@ export function Pong(mode: string, room?: number) {
                     if (game.state !== 2)
                         game.state = 2.5;
                     break;
+                case "gameEnd":
+                    game.state = 3;
+                    game.winner = data.winner;
+                    break;
                 default:
                     console.warn("Unknown type received:", data);
             }
@@ -372,8 +402,11 @@ function createKeyDownHandler(socket: WebSocket, game: gameState, mode: string) 
             if (!game.ready) {
                 game.ready = true;
                 socket.send(JSON.stringify({type: "ready", mode: mode}));
-            } else
+            } else {
                 socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
+                if (game.state === 3)
+                    game.state = 0;
+            }
         } else {
             pongConnect = false;
         }

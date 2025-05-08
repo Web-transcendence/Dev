@@ -47,8 +47,12 @@ export function leaveRoom(userId: number) {
                 const [playerA, playerB] = room.players;
                 const scoreA = Number(playerA.paddle.score);
                 const scoreB = Number(playerB.paddle.score);
-                const winnerIndex = playerIndex === 0 ? 1 : 0;
+                const winnerIndex = room.players.findIndex(player => player.id !== userId);
+                const winner = room.players[winnerIndex];
                 insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
+                room.specs.forEach(spec => {
+                    spec.ws.send(JSON.stringify({ type: "gameEnd", winner: winner.name }));
+                });
             }
             room.players.splice(playerIndex, 1);
             if (room.players.length === 0) {
@@ -136,7 +140,7 @@ export function joinRoom(player: Player, roomId: number) {
             return;
         }
         rooms[i].specs.forEach(spec => {
-            if (rooms[i].players.length === 2) {
+            if (rooms[i].players.length === 2 && game.state < 2) {
                 spec.ws.send(JSON.stringify(rooms[i].players[0].paddle));
                 spec.ws.send(JSON.stringify(rooms[i].players[1].paddle));
                 spec.ws.send(JSON.stringify(ball));
@@ -147,7 +151,7 @@ export function joinRoom(player: Player, roomId: number) {
             clearInterval(intervalId3);
     }, 10); //Send game info to spectators
     game.state = 1;
-    moveBall(ball, rooms[i].players[0], rooms[i].players[1], game);
+    moveBall(ball, rooms[i].players[0], rooms[i].players[1], game, rooms[i]);
     movePaddle(rooms[i].players[0].input, rooms[i].players[1].input, rooms[i].players[0].paddle, rooms[i].players[1].paddle, game);
     moveHazard(game, ball);
     hazardGenerator(game);
