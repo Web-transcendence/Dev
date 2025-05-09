@@ -510,12 +510,10 @@ function joinRoomTd(player: Player, roomId: number) {
             clearInterval(intervalId);
             return;
         }
-        if (roomsTd[i].players[0]) {
+        if (roomsTd[i].players.length === 2) {
             roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[0]));
             roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[1]));
             roomsTd[i].players[0].ws.send(JSON.stringify(game));
-        }
-        if (roomsTd[i].players[1]) {
             roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[1]));
             roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[0]));
             roomsTd[i].players[1].ws.send(JSON.stringify(game));
