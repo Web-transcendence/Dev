@@ -25,9 +25,15 @@ using ptrFuncS = double(*)(double*);
 typedef	enum e_actFunc {SIGMOID, RELU, LEAKYRELU, TANH, STEP} t_actFunc;
 typedef enum e_mode {TRAIN, TEST} t_mode;
 
-class cudaMallocException : std::exception {
+class CudaMallocException : std::exception {
 	char	*what(void) const throw() {
-		return "cudaMalloc failed";
+		return "CudaMalloc failed";
+	}
+};
+
+class MallocException : std::exception {
+	char	*what(void) const throw() {
+		return "Malloc failed";
 	}
 };
 
@@ -40,7 +46,7 @@ typedef struct  s_tuple {
 		err[0] = cudaMalloc(&this->input, N_NEURON_INPUT * sizeof(double));
 		err[1] = cudaMalloc(&this->expectedOutput, N_NEURON_OUTPUT * sizeof(double));
 		if (!err[0] || !err[1])
-			throw cudaMallocException();
+			throw CudaMallocException();
 	}
 
 	~s_tuple() {

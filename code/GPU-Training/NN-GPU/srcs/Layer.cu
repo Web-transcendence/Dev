@@ -14,41 +14,56 @@
 #include "Neuron.class.hpp"
 #include "Math.namespace.hpp"
 
-Layer::Layer(int const n_neurons, int const n_weights, t_actFunc actFunc) :\
+#include <array>;
+
+Layer::Layer(unsigned int const n_neurons, unsigned int const n_weights, t_actFunc actFunc) :\
 	sizeNeurons(n_neurons), sizeWeight(n_weights) {
+	std::random_device					rd;
+	std::mt19937						gen(rd());
+	double 								stddev = 1.0 / std::sqrt(n_weights);
+	std::normal_distribution<double> 	dist(0.0, stddev);
+
 	cudaError_t	errN[3];
 	errN[0] = cudaMalloc(&this->weight, n_neurons * sizeof(double*));
 	errN[1] = cudaMalloc(&this->nablaW, n_neurons * sizeof(double*));
 	errN[2] = cudaMalloc(&this->deltaNablaW, n_neurons * sizeof(double*));
-	if (errN[0] != cudaSuccess || errN[1] != cudaSuccess || errN[2] != cudaSuccess)
-		throw cudaMallocException();
-	for (int i = 0; i < n_neurons; i++) {
-		errN[0] = cudaMalloc(&this->weight[i], n_weights * sizeof(double));
-		errN[1] = cudaMalloc(&this->nablaW , n_weights * sizeof(double));
-		errN[2] = cudaMalloc(&this->deltaNablaW , n_weights * sizeof(double));
-		if (errN[0] != cudaSuccess || errN[1] != cudaSuccess || errN[2] != cudaSuccess)
-			throw cudaMallocException();
+	if (!this->checkErr(errN, 3)) {throw CudaMallocException();}
+	this->contPtr_w = std::vector<double*>(n_neurons);
+	this->contPtr_nw = std::vector<double*>(n_neurons);
+	this->contPtr_dnw = std::vector<double*>(n_neurons);
+	auto it_w = this->contPtr_w.begin();
+	auto it_nw = this->contPtr_nw.begin();
+	auto it_dnw = this->contPtr_dnw.begin();
+	for (;it_w != this->contPtr_w.end();it_w++, it_nw++, it_dnw++) {
+		errN[0] = cudaMalloc(&*it_w, n_weights * sizeof(double));
+		errN[1] = cudaMalloc(&*it_nw, n_weights * sizeof(double));
+		errN[2] = cudaMalloc(&*it_dnw, n_weights * sizeof(double));
+		if (!this->checkErr(errN, 3))
+			throw	CudaMallocException(); // bad handling have to free temp
+		std::vector<double>	tempWeight(n_weights);
+		for (double& w : tempWeight)
+			w = dist(gen);
+		cudaMemcpy(*it_w, tempWeight.data(), n_weights * sizeof(double), cudaMemcpyHostToDevice);
 	}
-	// il faut instancier les weights et biaises
-	errN[0] = cudaMalloc(&this->biais, n_weights * sizeof(double));
-	errN[1] = cudaMalloc(&this->nablaB, n_weights * sizeof(double));
-	errN[2] = cudaMalloc(&this->deltaNablaB, n_weights * sizeof(double));
-	if (errN[0] != cudaSuccess || errN[1] != cudaSuccess || errN[2] != cudaSuccess)
-			throw cudaMallocException();
-	this->_actFuncSingle = Math::actFuncS[actFunc];
-	this->_actFuncVector = Math::actFuncV[actFunc];
-	this->_primeActFuncSingle = Math::primeActFuncS[actFunc];
-	this->_primeActFuncVector = Math::primeActFuncV[actFunc];
+	cudaMemcpy(this->weight, this->contPtr_w.data(), n_neurons * sizeof(double*), cudaMemcpyHostToDevice);
+	cudaMemcpy(this->nablaW, this->contPtr_nw.data(), n_neurons * sizeof(double*), cudaMemcpyHostToDevice);
+	cudaMemcpy(this->deltaNablaW, this->contPtr_dnw.data(), n_neurons * sizeof(double*), cudaMemcpyHostToDevice);
+	errN[0] = cudaMalloc(&this->biais, n_neurons * sizeof(double));
+	errN[1] = cudaMalloc(&this->nablaB, n_neurons * sizeof(double));
+	errN[2] = cudaMalloc(&this->deltaNablaB, n_neurons * sizeof(double));
+	if (!checkErr(errN, 3))
+		throw CudaMallocException();
 	return ;
 }
 
 Layer::~Layer( void ) {
-	if (this->weight && this->nablaW && this->deltaNablaW) {
-		for (int i = 0; i < this->sizeNeurons; i++) {
-			if (this->weight[i]) {cudaFree(this->weight[i]);}
-			if (this->nablaW[i]) {cudaFree(this->nablaW[i]);}
-			if (this->deltaNablaW[i]) {cudaFree(this->deltaNablaW[i]);}
-		}	
+	auto it_w = this->contPtr_w.begin();
+	auto it_nw = this->contPtr_nw.begin();
+	auto it_dnw = this->contPtr_dnw.begin();
+	for (;it_w != this->contPtr_w.end();it_w++, it_nw++, it_dnw++) {
+		if (*it_w) {cudaFree(*it_w);}
+		if (*it_nw) {cudaFree(*it_nw);}
+		if (*it_nw) {cudaFree(*it_dnw);}
 	}
 	if (weight) {cudaFree(this->weight);}
 	if (nablaW) {cudaFree(this->nablaW);}
@@ -74,7 +89,7 @@ double	*Layer::feedForward(double const *input) {
 
 	err = cudaMalloc(&res, this->sizeNeurons * sizeof(double));
 	if (err != cudaSuccess)
-		throw	cudaMallocException();
+		throw CudaMallocException();
 	fireFeedForward<<<1, this->sizeNeurons>>>(input, this->weight, this->biais, res, this->_actFuncSingle, this->sizeNeurons);
 	return res;
 }
@@ -177,4 +192,9 @@ std::vector<double>*	Layer::calcDelta(std::vector<double> const & delta, std::ve
 	}
 	delete transposed;
 	return Math::hadamardProduct(temp, sp);	
+}
+
+bool	Layer::checkErr(cudaError_t const * err, int const size) {
+	for (int i = 0; i < size; i++) {if (err[i] != cudaSuccess) {return false;}}
+	return true;
 }

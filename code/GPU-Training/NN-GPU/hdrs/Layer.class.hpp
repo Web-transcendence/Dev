@@ -17,7 +17,7 @@
 
 class Layer {
 public:
-	Layer(int const n_neurons, int const n_weights, t_actFunc actFunc);
+	Layer(unsigned int const n_neurons,unsigned int const n_weights, t_actFunc actFunc);
 	~Layer( void );
 
 	double*	affineTransformation(double const *input);
@@ -40,6 +40,8 @@ public:
 private:
 	Layer( void ) : sizeNeurons(0), sizeWeight(0) {}
 
+	bool	checkErr(cudaError_t const * err, int const size);
+	
 	double(*_actFuncSingle)(double*);
 	std::vector<double>*(*_actFuncVector)(std::vector<double> const&);
     double(*_primeActFuncSingle)(double const);
@@ -51,6 +53,10 @@ private:
 	double		*biais;
 	double		*nablaB;
 	double		*deltaNablaB;
+
+	std::vector<double*>	contPtr_w;
+	std::vector<double*>	contPtr_nw;
+	std::vector<double*>	contPtr_dnw;
 
 	int const	sizeNeurons;
 	int const	sizeWeight;
