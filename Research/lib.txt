@@ -19,3 +19,6 @@ https://web.stanford.edu/class/psych209/Readings/MnihEtAlHassibis15NatureControl
 CUDA:
 https://docs.nvidia.com/cuda/cuda-c-programming-guide/
 https://docs.nvidia.com/cuda/cuda-c-programming-guide/#cuda-enabled-gpus
+https://docs.nvidia.com/deeplearning/performance/dl-performance-matrix-multiplication/index.html#requirements-tc
+https://docs.nvidia.com/deeplearning/performance/dl-performance-gpu-background/index.html#gpu-arch__fig2
+https://docs.nvidia.com/deeplearning/performance/dl-performance-fully-connected/index.html#:~:text=As%20fully,twice%20the%20time%20to%20calculate
