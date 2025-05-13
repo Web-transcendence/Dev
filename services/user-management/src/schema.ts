@@ -4,13 +4,14 @@ export const verifySchema = z.object({
     secret: z.string().regex(/^\d{6}$/, {
         message: "only 6 digits are allowed",
     }),
-    nickName: z.string().min(3, "Minimum 3 caracteres")
+    nickName: z.string().min(3, "3 character or more for the nickname")
+        .regex(/^[a-zA-Z0-9]+$/, "only alphanumeric character accepted for the nickname")
 })
 
 export const pictureSchema = z.object({
     pictureURL: z.string().regex(
         /^data:image\/(jpeg|png);base64/,
-        'String must start with "data:image/jpeg;base64"'
+        'only jpeg and png are allowed'
     )
 })
 
@@ -20,22 +21,25 @@ export const idArraySchema = z.object({
 
 
 export const signUpSchema = z.object({
-    nickName: z.string().min(3, "Minimum 3 caracteres"),
-    email: z.string().email("Invalid email"),
-    password: z.string().min(6, "Minimum 6 caracteres"),
+    nickName: z.string().min(3, "3 character or more for the nickname")
+        .regex(/^[a-zA-Z0-9]+$/, "only alphanumeric character accepted for the nickname"),
+    email: z.string().email("Invalid email format"),
+    password: z.string().min(6, "6 character or more for the password"),
 });
 
 export const signInSchema = z.object({
-    nickName: z.string().min(3, "Minimum 3 caracteres"),
-    password: z.string().min(6, "Minimum 6 caracteres"),
+    nickName: z.string().min(3, "3 character or more for the nickname")
+        .regex(/^[a-zA-Z0-9]+$/, "only alphanumeric character accepted for the nickname"),
+    password: z.string().min(6, "6 character or more for the password"),
 });
 
 export const passwordSchema = z.object({
-    password: z.string().min(6, "Minimum 6 caracteres")
+    password: z.string().min(6, "6 character or more for the password")
 })
 
 export const nickNameSchema = z.object({
-    nickName: z.string().min(3, "Minimum 3 caracteres")
+    nickName: z.string().min(3, "3 character or more for the nickname")
+        .regex(/^[a-zA-Z0-9]+$/, "only alphanumeric character accepted for the nickname"),
 })
 
 export const notifySchema = z.object({

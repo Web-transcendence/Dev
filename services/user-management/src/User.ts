@@ -120,7 +120,7 @@ export class User {
         if (!secret)
             throw new DataBaseError(`secret key not found for id: ${this.id}`, 'internal error system', 500)
         if (!secret.secret_key)
-            throw new ConflictError("2fa isn't activated", 'internal error system')
+            throw new ConflictError("2fa isn't activated", `you have to activate the 2fa before verifying it`)
 
         const verified = speakeasy.totp.verify({
             secret: secret.secret_key,
@@ -129,7 +129,7 @@ export class User {
             window: 1
         })
         if (!verified)
-            throw new UnauthorizedError(`invalid secret key for 2fa`, 'bad 2fa code')
+            throw new UnauthorizedError(`invalid secret key for 2fa`, 'wrong code')
         Client_db.prepare(`UPDATE Client SET activated2fa = ? WHERE id = ?`).run(1, this.id)
         return User.makeToken(this.id)
     }
