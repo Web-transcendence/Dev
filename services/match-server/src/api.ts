@@ -94,6 +94,8 @@ export class gameState {
 export class Room {
     id: number;
     players: Player[] = [];
+    specs: Player[] = [];
+    ended = false;
     constructor (id: number) {
         this.id = id;
     }
@@ -171,7 +173,7 @@ export function resetInput(Input: keyInput) {
     Input.arrowUp = false;
 }
 
-export function resetGame(ball: Ball, player1: Player, player2: Player, game: gameState) {
+export function resetGame(ball: Ball, player1: Player, player2: Player, game: gameState, room: Room) {
     game.start = false;
     game.timer = new Timer (0, 2);
     if (ball.x < 0)
@@ -186,7 +188,20 @@ export function resetGame(ball: Ball, player1: Player, player2: Player, game: ga
     player2.paddle.y = 0.5 * 800;
     game.hazard.type = "Default";
     if (player1.paddle.score === game.maxScore || player2.paddle.score === game.maxScore) {
-        insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score));
+        let winner = 2;
+        if (player1.paddle.score > player2.paddle.score) {
+            winner = 0;
+            room.specs.forEach(spec => {
+                spec.ws.send(JSON.stringify({ type: "gameEnd", winner: player1.paddle.name }));
+            });
+        }
+        else if (player1.paddle.score < player2.paddle.score) {
+            winner = 1;
+            room.specs.forEach(spec => {
+                spec.ws.send(JSON.stringify({ type: "gameEnd", winner: player2.paddle.name }));
+            });
+        }
+        insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score), winner);
         game.state = 2;
         game.score1 = player1.paddle.score;
         game.score2 = player2.paddle.score;
@@ -234,7 +249,7 @@ export function bounceAngle(ball: Ball, paddle: Paddle, side: string) {
     norAngle(ball);
 }
 
-export function moveBall(ball: Ball, player1: Player, player2: Player, game: gameState) {
+export function moveBall(ball: Ball, player1: Player, player2: Player, game: gameState, room: Room) {
     if (game.start) {
         let oldX = ball.x;
         let oldY = ball.y;
@@ -264,11 +279,11 @@ export function moveBall(ball: Ball, player1: Player, player2: Player, game: gam
         }
         if (ball.x > 1200) {
             player1.paddle.score = String(Number(player1.paddle.score) + 1);
-            resetGame(ball, player1, player2, game);
+            resetGame(ball, player1, player2, game, room);
         }
         if (ball.x < 0) {
             player2.paddle.score = String(Number(player2.paddle.score) + 1);
-            resetGame(ball, player1, player2, game);
+            resetGame(ball, player1, player2, game, room);
         }
         if (ball.y > 800) {
             ball.y = 800 - (ball.y - 800);
@@ -279,7 +294,7 @@ export function moveBall(ball: Ball, player1: Player, player2: Player, game: gam
         }
         norAngle(ball);
     }
-    setTimeout(() => moveBall(ball, player1, player2, game), 10);
+    setTimeout(() => moveBall(ball, player1, player2, game, room), 10);
 }
 
 export function movePaddle(lInput: keyInput, rInput: keyInput, lPaddle: Paddle, rPaddle: Paddle, game: gameState) {

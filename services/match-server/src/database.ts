@@ -4,6 +4,7 @@ export const Pong_Hist_db = new Database('pong_hist.db')
 
 Pong_Hist_db.exec(`
     CREATE TABLE IF NOT EXISTS MatchResult (
+        game INTEGER DEFAULT 0,
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         playerA_id INTEGER NOT NULL,
         playerB_id INTEGER NOT NULL,
@@ -15,6 +16,7 @@ Pong_Hist_db.exec(`
 `)
 
 export type MatchResult = {
+    game: number;
     id: number;
     playerA_id: number;
     playerB_id: number;
@@ -28,10 +30,14 @@ export function insertMatchResult(
     playerA_id: number,
     playerB_id: number,
     scoreA: number,
-    scoreB: number
+    scoreB: number,
+    winner: number
 ) {
-    const winner_id = scoreA > scoreB ? playerA_id : playerB_id;
-
+    let winner_id = -3; // -3 means draw game
+    if (winner === 0)
+        winner_id = playerA_id;
+    else if (winner === 1)
+        winner_id = playerB_id;
     Pong_Hist_db.prepare(`
         INSERT INTO MatchResult (playerA_id, playerB_id, scoreA, scoreB, winner_id)
         VALUES (?, ?, ?, ?, ?)
@@ -44,4 +50,16 @@ export function getMatchHistory(userId: number): MatchResult[] {
         WHERE playerA_id = ? OR playerB_id = ?
         ORDER BY match_time DESC
     `).all(userId, userId) as MatchResult[];
+}
+
+export function getWinnerId(playerA_id: number, playerB_id: number): number | null {
+    const matches = getMatchHistory(playerA_id).filter(
+        (match) =>
+            (match.playerA_id === playerA_id && match.playerB_id === playerB_id) ||
+            (match.playerA_id === playerB_id && match.playerB_id === playerA_id)
+    );
+    if (matches.length === 0)
+        return null;
+    const lastMatch = matches[0];
+    return (lastMatch.winner_id);
 }

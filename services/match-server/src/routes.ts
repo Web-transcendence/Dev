@@ -1,9 +1,26 @@
 import {FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
-import {fetchIdByNickName} from "./utils.js";
-import {generateId, initSchema, inputHandler, inputSchema, Player, readySchema, resetInput,} from "./api.js";
+import {fetchIdByNickName, fetchNotifyUser} from "./utils.js";
+import {
+    generateId,
+    initSchema,
+    inputHandler,
+    inputSchema,
+    INTERNAL_PASSWORD,
+    Player,
+    readySchema,
+    resetInput,
+} from "./api.js";
 import {getMatchHistory, MatchResult} from "./database.js"
 import {soloMode} from "./solo.js";
-import {generateRoom, joinRoom, leaveRoom} from "./netcode.js";
+import {generateRoom, joinRoom, leaveRoom, startInviteMatch, startTournamentMatch} from "./netcode.js";
+import {z} from "zod";
+import {changeRoomSpec, joinRoomSpec, leaveRoomSpec} from "./spectator.js";
+
+
+const internalVerification = async (req, res) => {
+    if (req.headers.authorization !== INTERNAL_PASSWORD)
+        throw new Error(`only server can reach this endpoint`)
+}
 
 export default async function pongRoutes(fastify: FastifyInstance) {
     fastify.get('/ws', { websocket: true }, (socket, req) => {
@@ -13,6 +30,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
         let init = false;
         let room = -1;
         let solo: boolean;
+        let mode = "local";
         socket.on("message", async (message) => {
             const msg = JSON.parse(message.toString());
             if (!init && msg.type === "socketInit") {
@@ -41,26 +59,35 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                     console.error(error);
                     return ;
                 }
-                resetInput(player.input);
-                inputHandler(data.key, data.state, player.input);
+                if (mode !== "spec") {
+                    resetInput(player.input);
+                    inputHandler(data.key, data.state, player.input);
+                } else if (data.state === "down")
+                    changeRoomSpec(player);
             } else if (init && msg.type === "ready") {
                 const {data, success, error} = readySchema.safeParse(JSON.parse(message.toString()));
                 if (!success || !data) {
                     console.error(error);
                     return ;
                 }
-                console.log(data.mode);
+                mode = data.mode;
                 if (data.mode === "remote")
                     joinRoom(player, room);
                 else if (data.mode === "local") {
                     solo = true;
                     soloMode(player, solo);
+                } else if (data.mode === "spec") {
+                    joinRoomSpec(player, room);
                 }
             }
         });
         socket.on("close", () => {
-            leaveRoom(userId);
-            solo = false;
+            if (mode === "local")
+                solo = false;
+            else if (mode === "remote")
+                leaveRoom(userId);
+            else if (mode === "spec")
+                leaveRoomSpec(userId);
             console.log("Client disconnected");
         });
     });
@@ -78,6 +105,47 @@ export default async function pongRoutes(fastify: FastifyInstance) {
         } catch (error) {
             console.log(error);
             return (res.status(500).send({error}));
+        }
+    })
+
+    fastify.get('/invitationGame/:id', async (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const id: number = Number(req.headers.id)
+            const stringId = req.params as { id: string };
+            const friendId = Number(stringId.id);
+            if (!friendId)
+                throw new Error("id must be a number");
+            const response = fetch(`http://social:6500/checkFriend`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization': `${INTERNAL_PASSWORD}`
+                },
+                body: JSON.stringify({id1: id, id2: friendId})
+            })
+
+            const roomID = await startInviteMatch(id, friendId);
+            return res.status(200).send({roomId: roomID});
+        } catch (err) {
+            console.error(err)
+            return res.status(400).send(err)
+        }
+    })
+
+    fastify.post('/tournamentGame', {preHandler: internalVerification}, async (req: FastifyRequest, res: FastifyReply) => {
+        try {
+
+            const ids = z.object({
+                id1: z.number(),
+                id2: z.number()
+            }).parse(req.body)
+
+            const winnerId = await startTournamentMatch(ids.id1, ids.id2);
+
+            return res.status(200).send({id: winnerId});
+        } catch (err) {
+            console.error(err)
+            return res.status(500).send()
         }
     })
 }

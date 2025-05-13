@@ -463,7 +463,7 @@ function leaveRoom(userId: number) {
         for (let j = 0; j < roomsTd[i].players.length; j++) {
             if (roomsTd[i].players[j].id === userId) {
                 if (roomsTd[i].players.length === 2 && roomsTd[i].players[0].hp > 0 && roomsTd[i].players[1].hp > 0)
-                    insertMatchResult(roomsTd[i].players[0].dbId, roomsTd[i].players[1].dbId, roomsTd[i].players[0].hp, roomsTd[i].players[1].hp, j = 0 ? 1 : 0);
+                    insertMatchResult(roomsTd[i].players[0].dbId, roomsTd[i].players[1].dbId, roomsTd[i].players[0].hp, roomsTd[i].players[1].hp, j === 0 ? 1 : 0);
                 console.log("player: ", roomsTd[i].players[j].name, " with id: ", userId, " left room ", roomsTd[i].id);
                 roomsTd[i].players.splice(j, 1);
                 if (roomsTd[i].players.length === 0)
@@ -510,12 +510,10 @@ function joinRoomTd(player: Player, roomId: number) {
             clearInterval(intervalId);
             return;
         }
-        if (roomsTd[i].players[0]) {
+        if (roomsTd[i].players.length === 2) {
             roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[0]));
             roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[1]));
             roomsTd[i].players[0].ws.send(JSON.stringify(game));
-        }
-        if (roomsTd[i].players[1]) {
             roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[1]));
             roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[0]));
             roomsTd[i].players[1].ws.send(JSON.stringify(game));

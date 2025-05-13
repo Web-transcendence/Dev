@@ -1,7 +1,9 @@
 // Netcode
 import {Ball, gameState, hazardGenerator, moveBall, moveHazard, movePaddle, Player, Room, timerCheck} from "./api.js";
+import {getWinnerId, insertMatchResult} from "./database.js";
+import {fetchNotifyUser} from "./utils.js";
 
-let rooms: Room[] = [];
+export let rooms: Room[] = [];
 
 function checkId(id: number) {
     for (const room of rooms) {
@@ -21,6 +23,8 @@ export function generateRoom() {
 }
 
 function checkRoom(room: Room, game: gameState) {
+    if (game.state === 2)
+        room.ended = true;
     if (room.players.length !== 2) {
         game.state = 2;
         room.players.forEach(player => {
@@ -33,17 +37,29 @@ function checkRoom(room: Room, game: gameState) {
 }
 
 export function leaveRoom(userId: number) {
-    for (let i = 0 ; i < rooms.length; i++) {
-        for (let j = 0; j < rooms[i].players.length; j++) {
-            if (rooms[i].players[j].id === userId) {
-                console.log("player: ", rooms[i].players[j].name, " with id: ", userId, " left room ", rooms[i].id);
-                rooms[i].players.splice(j, 1);
-                if (rooms[i].players.length === 0) {
-                    console.log("room: ", rooms[i].id, " has been cleaned.");
-                    rooms.splice(i, 1);
-                }
-                return ;
+    for (let i = 0; i < rooms.length; i++) {
+        const room = rooms[i];
+        const playerIndex = room.players.findIndex(player => player.id === userId);
+        if (playerIndex !== -1) {
+            const player = room.players[playerIndex];
+            console.log(`player: ${player.name} with id: ${userId} left room ${room.id}`);
+            if (room.players.length === 2 && Number(room.players[0].paddle.score) < 6 && Number(room.players[1].paddle.score) < 6) {
+                const [playerA, playerB] = room.players;
+                const scoreA = Number(playerA.paddle.score);
+                const scoreB = Number(playerB.paddle.score);
+                const winnerIndex = room.players.findIndex(player => player.id !== userId);
+                const winner = room.players[winnerIndex];
+                insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
+                room.specs.forEach(spec => {
+                    spec.ws.send(JSON.stringify({ type: "gameEnd", winner: winner.name }));
+                });
             }
+            room.players.splice(playerIndex, 1);
+            if (room.players.length === 0) {
+                console.log(`room: ${room.id} has been cleaned.`);
+                rooms.splice(i, 1);
+            }
+            return;
         }
     }
     console.log("Player has not joined a room yet.");
@@ -72,6 +88,7 @@ export function joinRoom(player: Player, roomId: number) {
                 player.paddle.x = 1200 - 30;
                 rooms[i].players.push(player);
                 id = rooms[i].id;
+                console.log(player.paddle.name, "joined room", rooms[i].id);
                 break;
             }
         }
@@ -80,6 +97,7 @@ export function joinRoom(player: Player, roomId: number) {
             let room = new Room(rooms.length);
             room.players.push(player);
             rooms.push(room);
+            console.log(player.paddle.name, "created and joined room", rooms[i].id);
             return;
         }
     }
@@ -100,7 +118,7 @@ export function joinRoom(player: Player, roomId: number) {
             rooms[i].players[0].ws.send(JSON.stringify(game));
         } else
             clearInterval(intervalId1);
-    }, freq1);
+    }, freq1); //Send game info to player 1
     const intervalId2 = setInterval(() => {
         let i = rooms.findIndex(room => room.id === id);
         if (i === -1) {
@@ -114,12 +132,56 @@ export function joinRoom(player: Player, roomId: number) {
             rooms[i].players[1].ws.send(JSON.stringify(game));
         } else
             clearInterval(intervalId2);
-    }, freq2);
+    }, freq2); //Send game info to player 2
+    const intervalId3 = setInterval(() => {
+        let i = rooms.findIndex(room => room.id === id);
+        if (i === -1) {
+            clearInterval(intervalId3);
+            return;
+        }
+        rooms[i].specs.forEach(spec => {
+            if (rooms[i].players.length === 2 && game.state < 2) {
+                spec.ws.send(JSON.stringify(rooms[i].players[0].paddle));
+                spec.ws.send(JSON.stringify(rooms[i].players[1].paddle));
+                spec.ws.send(JSON.stringify(ball));
+                spec.ws.send(JSON.stringify(game));
+            }
+        });
+        if (rooms[i].players.length !== 2)
+            clearInterval(intervalId3);
+    }, 10); //Send game info to spectators
     game.state = 1;
-    moveBall(ball, rooms[i].players[0], rooms[i].players[1], game);
+    moveBall(ball, rooms[i].players[0], rooms[i].players[1], game, rooms[i]);
     movePaddle(rooms[i].players[0].input, rooms[i].players[1].input, rooms[i].players[0].paddle, rooms[i].players[1].paddle, game);
     moveHazard(game, ball);
     hazardGenerator(game);
     timerCheck(game);
     checkRoom(rooms[i], game);
+}
+
+function isTournamentMatchEnded(roomId: number): boolean {
+    const room = rooms.find(room => room.id === roomId);
+    return room ? room.ended : true;
+}
+
+export async function startInviteMatch(requester: number, opponent: number) {
+    const roomId = generateRoom();
+    await fetchNotifyUser([opponent], `invitationGame`, roomId);
+    return (roomId);
+}
+
+export async function waitForMatchEnd(roomId: number, playerA_id: number, playerB_id: number): Promise<number | null> {
+    while (true) {
+        if (isTournamentMatchEnded(roomId)) {
+            return getWinnerId(playerA_id, playerB_id);
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+}
+
+export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
+    const roomId = generateRoom();
+    await fetchNotifyUser([playerA_id, playerB_id], `invitationGame`, roomId)
+    const winnerId = await waitForMatchEnd(roomId, playerA_id, playerB_id);
+    return (winnerId);
 }

@@ -141,14 +141,20 @@ export function Pong(mode: string, room?: number) {
                 ctx.fillStyle = "#ffdb5e";
             fSize = Math.round(30 * ratio());
             ctx.font = `${fSize}px 'Press Start 2P'`;
-            ctx.fillText("Press any key", canvas.width * 0.5, canvas.height * 0.5 + (60 + animFrame) * ratio());
+            if (mode !== "spec")
+                ctx.fillText("Press any key", canvas.width * 0.5, canvas.height * 0.5 + (60 + animFrame) * ratio());
+            else
+                ctx.fillText("Press any to join spectator mode", canvas.width * 0.5, canvas.height * 0.5 + (60 + animFrame) * ratio());
             animFrame += animLoop;
             if (animFrame === 0 || animFrame === 9)
                 animLoop *= -1;
         } else {
             fSize = Math.round(30 * ratio());
             ctx.font = `${fSize}px 'Press Start 2P'`;
-            ctx.fillText("Waiting for opponent...", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio()));
+            if (mode !== "spec")
+                ctx.fillText("Waiting for opponent...", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio()));
+            else
+                ctx.fillText("Loading...", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio()));
         }
 
     }
@@ -216,6 +222,22 @@ export function Pong(mode: string, room?: number) {
             ctx.fillText("You Win", canvas.width * 0.5, canvas.height * 0.4);
         else if (mode === "remote")
             ctx.fillText("You Lose", canvas.width * 0.5, canvas.height * 0.4);
+        // ctx.fillText("Press any key to restart", canvas.width * 0.5, canvas.height * 0.70);
+    }
+
+    function specEndScreen() {
+        drawBg();
+        drawBall();
+        drawPaddles();
+        drawScores(game.score1, game.score2);
+        ctx.fillStyle = "#ddae00";
+        fSize = Math.round(60 * ratio());
+        ctx.font = `${fSize}px 'Press Start 2P'`;
+        ctx.textAlign = "center";
+        ctx.fillText(`${game.winner} won`, canvas.width * 0.5, canvas.height * 0.4);
+        fSize = Math.round(26 * ratio());
+        ctx.font = `${fSize}px 'Press Start 2P'`;
+        ctx.textAlign = "center";
         ctx.fillText("Press any key to restart", canvas.width * 0.5, canvas.height * 0.70);
     }
 
@@ -249,6 +271,13 @@ export function Pong(mode: string, room?: number) {
             ctx.textAlign = "center"
             ctx.fillText(game.timer.timeLeft.toString(), canvas.width * 0.5, canvas.height * 0.75);
         }
+        if (mode === "spec") {
+            ctx.fillStyle = "#fcc800";
+            fSize = Math.round(45 * ratio());
+            ctx.font = `${fSize}px 'Press Start 2P'`;
+            ctx.textAlign = "center"
+            ctx.fillText("Spectator Mode", canvas.width * 0.5, canvas.height * 0.95);
+        }
     }
 
     function gameLoop() {
@@ -262,6 +291,9 @@ export function Pong(mode: string, room?: number) {
             case 2:
             case 2.5:
                 endScreen();
+                break;
+            case 3:
+                specEndScreen();
                 break;
             default:
                 break;
@@ -287,8 +319,7 @@ export function Pong(mode: string, room?: number) {
             socket.send(JSON.stringify({type: "socketInit", nick: nick, room: room}));
         };
 
-        window.addEventListener("keydown", keyDownHandler, { passive: false });
-
+        window.addEventListener("keydown", keyDownHandler, {passive: false});
         window.addEventListener("keyup", keyUpHandler);
 
         socket.onmessage = function (event) {
@@ -335,6 +366,10 @@ export function Pong(mode: string, room?: number) {
                     if (game.state !== 2)
                         game.state = 2.5;
                     break;
+                case "gameEnd":
+                    game.state = 3;
+                    game.winner = data.winner;
+                    break;
                 default:
                     console.warn("Unknown type received:", data);
             }
@@ -345,8 +380,6 @@ export function Pong(mode: string, room?: number) {
             window.removeEventListener("keyup", keyUpHandler);
             window.removeEventListener("keydown", keyDownHandler);
             window.removeEventListener("resize", resizeCanvas);
-            if (room === -1)
-                Pong(mode);
             return (console.log("Disconnected from Pong server"));
         };
     } catch (error) {
@@ -366,11 +399,14 @@ function createKeyDownHandler(socket: WebSocket, game: gameState, mode: string) 
             event.preventDefault();
         }
         if (game.state !== 2 && game.state !== 2.5) {
-            if (game.ready === false) {
+            if (!game.ready) {
                 game.ready = true;
                 socket.send(JSON.stringify({type: "ready", mode: mode}));
+            } else {
+                socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
+                if (game.state === 3)
+                    game.state = 0;
             }
-            socket.send(JSON.stringify({type: "input", key: event.key, state: "down"}));
         } else {
             pongConnect = false;
         }
