@@ -1,7 +1,8 @@
 import {z} from "zod";
 
 export const manageFriendSchema = z.object({
-    friendNickName: z.string().min(3, "Minimum 3 caracteres")
+    friendNickName: z.string().min(3, "3 character or more for the nickname")
+        .regex(/^[a-zA-Z0-9]+$/, "only alphanumeric character accepted for the nickname"),
 })
 
 export * from "./schema.js";

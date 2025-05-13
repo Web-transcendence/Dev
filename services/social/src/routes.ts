@@ -3,7 +3,7 @@ import * as Schema from "./schema.js"
 import {InputError, MyError, ServerError} from "./error.js";
 import sanitizeHtml from "sanitize-html"
 import {addFriend, getFriendList, removeFriend} from "./friend.js";
-import {authUser, fetchId} from "./utils.js";
+import {authUser} from "./utils.js";
 
 
 
@@ -14,10 +14,10 @@ export default async function socialRoutes(app: FastifyInstance) {
             console.log('add friend')
             const zod_result = Schema.manageFriendSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(zod_result.error.message, zod_result.error.message)
             let friendNickName = sanitizeHtml(zod_result.data.friendNickName)
             if (!friendNickName)
-                throw new InputError(`Empty nickname to add`)
+                throw new InputError(`empty nickname for the friend to had`, `empty nickname`)
 
             const id: number = Number(req.headers.id)
             if (!id)
@@ -65,10 +65,10 @@ export default async function socialRoutes(app: FastifyInstance) {
         try {
             const zod_result = Schema.manageFriendSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(zod_result.error.message, zod_result.error.message)
             let friendNickName = sanitizeHtml(zod_result.data.friendNickName)
             if (!friendNickName)
-                throw new InputError(`Empty nickname to remove from friendList`)
+                throw new InputError(`Empty nickname to remove from friendList`, `empty nickname`)
 
             const id: number = Number(req.headers.id)
             if (!id)
@@ -87,10 +87,5 @@ export default async function socialRoutes(app: FastifyInstance) {
             console.error(err)
             return res.status(500).send()
         }
-    })
-
-    app.get('/test', async (req: FastifyRequest, res: FastifyReply) => {
-        await fetchId('sss')
-        return res.status(200).send()
     })
 }

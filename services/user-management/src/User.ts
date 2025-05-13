@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 import {connectedUsers, INTERNAL_PASSWORD} from "./api.js"
 import speakeasy, {GeneratedSecret} from "speakeasy"
 import QRCode from "qrcode"
-import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
+import {ConflictError, DataBaseError, NotFoundError, ServerError, UnauthorizedError} from "./error.js";
 import {EventMessage} from "fastify-sse-v2";
 import { FastifyReply, FastifyRequest } from "fastify"
 import {connection, disconnect} from "./serverSentEvent.js";
@@ -34,7 +34,7 @@ export class User {
     constructor(id: number) {
         this.id = id
         if (!Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(this.id)) {
-            throw new ServerError(`Client not found`, 404)
+            throw new NotFoundError(`Client not found`, `Client not found`)
         }
     }
 

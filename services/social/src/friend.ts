@@ -67,10 +67,10 @@ export async function removeFriend(id: number, nickName: string) {
     const friendId: number = await fetchId(nickName)
 
     if (friendId === id)
-        throw new ConflictError('cannot remove itself', `internal server error`)
+        throw new ConflictError('cannot remove itself', `cannot remove yourself`)
 
     const checkStatus = Friend_db.prepare("DELETE FROM FriendList WHERE (userA_id = ? AND userB_id = ?) OR (userB_id = ? AND userA_id = ?)").run(friendId, id, friendId, id)
     if (!checkStatus.changes)
-        throw new ConflictError(`This user isn't in your friendList`, `internal error system`)
+        throw new ConflictError(`This user isn't in your friendList`, `this nickname isn't in your friendlist`)
     await fetchNotifyUser([friendId], 'friendRemoved', {id: id})
 }
