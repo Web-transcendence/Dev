@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AiServer.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/07 14:05:01 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/13 14:43:23 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,6 @@
 #include <cstdlib>
 #include <string>
 #include <chrono>
-
-
-double	_1[sizeof(double)*16]; //place holder input
-char	_2[sizeof(double)*4]; // place holder output
 
 AiServer::AiServer(std::string const & QNetConfigFile) : _QNet(Network(QNetConfigFile)) {
 		return ;

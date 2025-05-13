@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AiServer.class.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 10:33:19 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/14 00:38:47 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/13 14:43:08 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,8 @@
 
 typedef websocketpp::server<websocketpp::config::asio> server;
 
-// pull out the type of messages sent by our config
 typedef server::message_ptr message_ptr;
 typedef server::connection_ptr connection_ptr;
-
-// typedef struct	s_client {
-	
-// }	t_client;
 
 class	AiServer {
 public:

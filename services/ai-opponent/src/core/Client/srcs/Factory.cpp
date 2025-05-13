@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Factory.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/07 14:39:39 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/13 14:44:30 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ void	Factory::settlingMessage(unsigned int const sizePool) {
 		else if (data["state"] == "delete")
 			this->deleteGame(data["id"]);
 		else
-			throw std::exception(); // unknow token
+			throw std::exception(); // unknown token
 		++settled;
 	}
 }
