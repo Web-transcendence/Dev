@@ -112,10 +112,14 @@ export function joinRoom(player: Player, roomId: number) {
             return;
         }
         if (rooms[i].players.length === 2) {
-            rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[0].paddle));
-            rooms[i].players[0].ws.send(JSON.stringify(rooms[i].players[1].paddle));
-            rooms[i].players[0].ws.send(JSON.stringify(ball));
-            rooms[i].players[0].ws.send(JSON.stringify(game));
+            const payload = {
+                type: "gameUpdate",
+                paddle1: rooms[i].players[0].paddle,
+                paddle2: rooms[i].players[1].paddle,
+                ball: ball,
+                game: game
+            };
+            rooms[i].players[0].ws.send(JSON.stringify(payload));
         } else
             clearInterval(intervalId1);
     }, freq1); //Send game info to player 1
@@ -126,10 +130,14 @@ export function joinRoom(player: Player, roomId: number) {
             return;
         }
         if (rooms[i].players.length === 2) {
-            rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[0].paddle));
-            rooms[i].players[1].ws.send(JSON.stringify(rooms[i].players[1].paddle));
-            rooms[i].players[1].ws.send(JSON.stringify(ball));
-            rooms[i].players[1].ws.send(JSON.stringify(game));
+            const payload = {
+                type: "gameUpdate",
+                paddle1: rooms[i].players[0].paddle,
+                paddle2: rooms[i].players[1].paddle,
+                ball: ball,
+                game: game
+            };
+            rooms[i].players[1].ws.send(JSON.stringify(payload));
         } else
             clearInterval(intervalId2);
     }, freq2); //Send game info to player 2
@@ -139,12 +147,16 @@ export function joinRoom(player: Player, roomId: number) {
             clearInterval(intervalId3);
             return;
         }
+        const payload = {
+            type: "gameUpdate",
+            paddle1: rooms[i].players[0].paddle,
+            paddle2: rooms[i].players[1].paddle,
+            ball: ball,
+            game: game
+        };
         rooms[i].specs.forEach(spec => {
             if (rooms[i].players.length === 2 && game.state < 2) {
-                spec.ws.send(JSON.stringify(rooms[i].players[0].paddle));
-                spec.ws.send(JSON.stringify(rooms[i].players[1].paddle));
-                spec.ws.send(JSON.stringify(ball));
-                spec.ws.send(JSON.stringify(game));
+                spec.ws.send(JSON.stringify(payload));
             }
         });
         if (rooms[i].players.length !== 2)

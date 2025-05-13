@@ -111,6 +111,37 @@ export function Pong(mode: string, room?: number) {
         canvas.height = height;
     }
 
+    function updatePaddle(data: Paddle) {
+        const paddle = data.x === 30 ? lPaddle : rPaddle;
+        paddle.name = data.name;
+        paddle.x = data.x;
+        paddle.y = data.y;
+        paddle.width = data.width;
+        paddle.height = data.height;
+        paddle.color = data.color;
+        paddle.score = data.score;
+    }
+
+    function updateGame(data: gameState) {
+        game.state = data.state;
+        game.score1 = data.score1;
+        game.score2 = data.score2;
+        game.start = data.start;
+        game.hazard.x = data.hazard.x;
+        game.hazard.y = data.hazard.y;
+        game.hazard.type = data.hazard.type;
+        game.timer.timeLeft = data.timer.timeLeft;
+        game.timer.started = data.timer.started;
+        game.winner = data.winner;
+    }
+
+    function updateBall(data: Ball) {
+        ball.x = data.x;
+        ball.y = data.y;
+        ball.radius = data.radius;
+        ball.color = data.color;
+    }
+
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
@@ -325,42 +356,11 @@ export function Pong(mode: string, room?: number) {
         socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
             switch (data.type) {
-                case "Game":
-                    game.state = data.state;
-                    game.score1 = data.score1;
-                    game.score2 = data.score2;
-                    game.start = data.start;
-                    game.hazard.x = data.hazard.x;
-                    game.hazard.y = data.hazard.y;
-                    game.hazard.type = data.hazard.type;
-                    game.timer.timeLeft = data.timer.timeLeft;
-                    game.timer.started = data.timer.started;
-                    game.winner = data.winner;
-                    break;
-                case "Ball":
-                    ball.x = data.x;
-                    ball.y = data.y;
-                    ball.radius = data.radius;
-                    ball.color = data.color;
-                    break;
-                case "Paddle":
-                    if (data.x === 30) {
-                        lPaddle.name = data.name;
-                        lPaddle.x = data.x;
-                        lPaddle.y = data.y;
-                        lPaddle.width = data.width;
-                        lPaddle.height = data.height;
-                        lPaddle.color = data.color;
-                        lPaddle.score = data.score;
-                    } else {
-                        rPaddle.name = data.name;
-                        rPaddle.x = data.x;
-                        rPaddle.y = data.y;
-                        rPaddle.width = data.width;
-                        rPaddle.height = data.height;
-                        rPaddle.color = data.color;
-                        rPaddle.score = data.score;
-                    }
+                case "gameUpdate":
+                    updatePaddle(data.paddle1);
+                    updatePaddle(data.paddle2);
+                    updateBall(data.ball);
+                    updateGame(data.game);
                     break;
                 case "Disconnected":
                     if (game.state !== 2)

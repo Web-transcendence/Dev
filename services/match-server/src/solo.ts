@@ -11,6 +11,7 @@ import {
     Player, resetHazard, resetInput,
     Timer, timerCheck
 } from "./api.js";
+import {rooms} from "./netcode.js";
 
 function resetGameSolo(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, game: gameState, lInput: keyInput, rInput: keyInput) {
     game.start = false;
@@ -122,10 +123,14 @@ export function soloMode(player: Player, solo: boolean) {
     let rPaddle = new Paddle(1170, 400, 20, 200, 10, "#fcc800");
     player.paddle.x = 30
     const intervalId = setInterval(() => {
-        player.ws.send(JSON.stringify(player.paddle));
-        player.ws.send(JSON.stringify(rPaddle));
-        player.ws.send(JSON.stringify(ball));
-        player.ws.send(JSON.stringify(game));
+        const payload = {
+            type: "gameUpdate",
+            paddle1: player.paddle,
+            paddle2: rPaddle,
+            ball: ball,
+            game: game
+        };
+        player.ws.send(JSON.stringify(payload));
     }, 10);
     game.state = 1;
     moveBallSolo(ball, player.paddle, rPaddle, player.input, player.input, game);
