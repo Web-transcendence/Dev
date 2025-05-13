@@ -6,7 +6,7 @@
 /*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/13 14:44:30 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/13 15:16:48 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ void	Factory::settlingMessage(unsigned int const sizePool) {
 		else if (data["state"] == "delete")
 			this->deleteGame(data["id"]);
 		else
-			throw std::exception(); // unknown token
+			throw UnknownMessageTokenException();
 		++settled;
 	}
 }
@@ -105,12 +105,12 @@ void	Factory::createGame(int const gameId) {
 	try {
 		auto	c = std::make_shared<Client>(this->_gameServerWs ,gameId);
 		if (this->_connectedClients[gameId])
-			throw std::exception(); // duplicate game
+			throw DuplicateGameException();
 		this->_connectedClients[gameId] = c;
 		std::thread	t([c]() {c->run();});
 		t.detach();
 	} catch (std::exception const & e) {
-		std::cout << e.what() << std::endl; // instantiation failed
+		std::cout << e.what() << std::endl;
 	}
 	return ;
 }
@@ -118,7 +118,7 @@ void	Factory::createGame(int const gameId) {
 void	Factory::deleteGame(int const gameId) {
 	auto	currentClient = this->_connectedClients.find(gameId);
 	if (currentClient == this->_connectedClients.end())
-		throw std::exception(); // client not found
+		throw UnknownGameException();
 	if (!currentClient->second->getActive())
 		this->_connectedClients.erase(currentClient);
 	return ;

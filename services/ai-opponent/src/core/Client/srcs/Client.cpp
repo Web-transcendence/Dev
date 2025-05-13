@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/07 14:43:38 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/13 15:12:12 by tmouche          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ Client::Client(std::string const & wsGameServer, int const gameId) :\
 		allInput(std::array<std::string, 3>{UP, DOWN, NOTHING}) {
 	auto res = this->factoryServer.Get("/ping");
 	if (!res)
-		throw std::exception(); // pas de connection avec la factory
+		throw DisconnectedFactoryException();
 
 	this->c.init_asio();
 	this->c.set_message_handler([this](websocketpp::connection_hdl hdl, client::message_ptr msg){this->on_message(hdl, msg);});
@@ -36,7 +36,7 @@ Client::Client(std::string const & wsGameServer, int const gameId) :\
 	this->gameServer = this->c.get_connection(wsGameServer, ec);
 	if (ec) {
 		std::cout << "Error: " << ec.message() << std::endl;
-		throw std::exception();
+		throw WsConnectionException();
 	}
 	this->c.connect(this->aiServer);
 	this->c.connect(this->gameServer);
@@ -53,9 +53,7 @@ void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg
 	if (data["source"] == "ai")
 		this->on_message_aiServer(data);
 	else if (data["source"] == "game")
-		this->on_message_gameServer(data);
-	else
-		throw std::exception(); // unrecognized token 
+		this->on_message_gameServer(data); 
 	(void)hdl;
 	return ;
 }
