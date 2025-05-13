@@ -1,11 +1,18 @@
-import Database from "better-sqlite3";
-import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken';
-import {connectedUsers} from "./api.js";
-import speakeasy, {GeneratedSecret} from "speakeasy";
-import QRCode from "qrcode";
+import Database from "better-sqlite3"
+import bcrypt from "bcrypt"
+import jwt from 'jsonwebtoken'
+import {connectedUsers, INTERNAL_PASSWORD} from "./api.js"
+import speakeasy, {GeneratedSecret} from "speakeasy"
+import QRCode from "qrcode"
+import {ConflictError, DataBaseError, ServerError, UnauthorizedError} from "./error.js";
+import {EventMessage} from "fastify-sse-v2";
+import { FastifyReply, FastifyRequest } from "fastify"
+import {connection, disconnect} from "./serverSentEvent.js";
+
 
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
+
+
 
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client (
@@ -14,231 +21,207 @@ Client_db.exec(`
         email UNIQUE NOT NULL COLLATE NOCASE,
         password TEXT NOT NULL,
         google_id INTEGER,
-        secret_key TEXT DEFAULT NULL
+        secret_key TEXT DEFAULT NULL,
+        pictureProfile TEXT DEFAULT NULL,
+        activated2fa BOOLEAN DEFAULT NULL
     )
-`);
+`)
 
-Client_db.exec(`
-    CREATE TABLE IF NOT EXISTS FriendList (
-        userA_id INTEGER NOT NULL,
-        userB_id INTEGER NOT NULL,
-        status TEXT check(status IN ('pending', 'accepted')) DEFAULT ('pending'),
-        PRIMARY KEY (userA_id, userB_id),
-        FOREIGN KEY (userA_id) REFERENCES Client(id) ON DELETE CASCADE,
-        FOREIGN KEY (userB_id) REFERENCES Client(id) ON DELETE CASCADE
-    )
-`);
 
 export class User {
-    id: string;
+    id: number
 
-    constructor(id: string) {
-        this.id = id;
-
+    constructor(id: number) {
+        this.id = id
         if (!Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(this.id)) {
-            throw new Error(`${this.id} not found`);
+            throw new ServerError(`Client not found`, 404)
         }
     }
 
-    /**
-     * check if nickName and email aren't in the db, hash the password
-     *      and add the data in the db. Then the db return the id of
-     *      this client
-     *
-     * @param nickName
-     * @param email
-     * @param password
-     * @return boolean about status and if it success the JWT
-     */
-    static async addClient(nickName: string, email: string, password: string): Promise<{success: boolean, result: string}> {
-        if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(nickName)) {
-            return {success: false, result: 'nickName'};
-        }
-        if (Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(email)) {
-            return {success: false, result: 'email'};
-        }
+    // AUTHENTIFICATION AND CONNECTION //
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+
+    static async addClient(nickName: string, email: string, password: string): Promise<string> {
+        if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(nickName))
+            throw new ConflictError(`${nickName} is already taken`, `This nickname is already taken`)
+        if (Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(email))
+            throw new ConflictError(`${email} is already taken`, `This email is already taken`)
+
+        const hashedPassword: string = await bcrypt.hash(password, 10)
 
         const res = Client_db.prepare("INSERT INTO Client (nickName, email, password) VALUES (?, ?, ?)")
-            .run(nickName, email, hashedPassword);
-        if (res.changes === 0) {
-            throw new Error(`User not inserted`);
-        }
-        const id : number | bigint = res.lastInsertRowid
-        const stringId: string = id.toString();
+            .run(nickName, email, hashedPassword)
+        if (res.changes === 0)
+            throw new DataBaseError(`client couldn't be inserted`, 'error 500 : internal error system', 500)
 
-        console.log("new user added");
-        return {success: true, result: this.makeToken(stringId)};
+        const id : number = Number(res.lastInsertRowid)
+
+        return this.makeToken(id)
     }
 
+    static async login(nickName: string, password: string): Promise<string> {
+        const id: number = this.getIdbyNickName(nickName)
 
-    /**
-     * check in the db if this nickname exist. if yes it call .isPasswordValid() to
-     *      check if the password match with the password given.
-     *
-     * @param nickName
-     * @param password
-     * @return JWT on success
-     */
-    static async login(nickName: string, password: string): Promise<{code: number, result: string}> {
-        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: string};
-        if (!userData)
-            return {code: 409, result: "this nickName doesn't exist"};
-
-        const client = new User(userData.id)
+        const client = new User(id)
 
         if (!await client.isPasswordValid(password))
-            return {code: 401, result: "invalid password"};
-        return {code: 201, result: User.makeToken(client.id)}
-    }
+            throw new UnauthorizedError(`bad password`, 'wrong password')
 
-    /** recover the hashed password from the db and use bcrypt tu compare with the one given.
-     *
-     * @param password
-     */
-    async isPasswordValid(password: string): Promise<boolean> {
-        const userData = Client_db.prepare("SELECT password FROM Client WHERE id = ?").get(this.id) as { password: string } | undefined;
-        if (!userData) {
-            throw new Error(`Database Error: cannot find password from ${this.id}`);
-        }
-        return (await bcrypt.compare(password, userData.password))
-    }
+        if (connectedUsers.has(id))
+            throw new ConflictError("user try to connect on different sessions", "you are already connected on an other session")
 
-    private static makeToken(id: string): string {
-        const token = jwt.sign({id: id}, 'secret_key', {expiresIn: '1h'})
-        return (token);
-    }
-
-    async generateSecretKey() :Promise<{ code: number, result: string }> {
-        const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id)as { secret_key: string } | undefined;
+        const data = Client_db.prepare("SELECT activated2fa FROM Client WHERE id = ?").get(id) as { activated2fa: boolean } | undefined
         if (!data)
-            throw new Error(`Database failed`);
-        if (data.secret_key)
-            return {code: 409, result: "secret_key already exists"};
-
-        const secret:GeneratedSecret = speakeasy.generateSecret();
-        if (!secret || !secret.otpauth_url)
-            return {code: 500, result: "speakeasy failed to generate secret"};
-
-        Client_db.prepare("UPDATE Client set secret_key = ? where id = ?").run(secret.base32, this.id);
-
-        const dataURL = await QRCode.toDataURL(secret.otpauth_url);
-
-        return {code: 200, result: dataURL};
+            throw new DataBaseError(`User with ID ${id} not found`, `internal error system`, 500)
+        if (data.activated2fa)
+            return ''
+        return User.makeToken(client.id)
     }
 
-    verify(token: string): {code: number, result: string} {
-        const secret = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined;
+    async isPasswordValid(password: string): Promise<boolean> {
+        const userData = Client_db.prepare("SELECT password FROM Client WHERE id = ?").get(this.id) as { password: string } | undefined
+        if (!userData)
+            throw new DataBaseError(`User with ID ${this.id} not found`, 'internal error system', 500)
+
+        return await bcrypt.compare(password, userData.password)
+    }
+
+    static makeToken(id: number): string {
+        const token = jwt.sign({id: id}, INTERNAL_PASSWORD, {expiresIn: '1h'})
+        return (token)
+    }
+
+    async generateSecretKey(): Promise<string> {
+        const data = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined
+        if (!data)
+            throw new DataBaseError(`User with ID ${this.id} not found`, 'internal error system', 500)
+        if (data.secret_key) {
+            const otpauthUrl = speakeasy.otpauthURL({
+                secret: data.secret_key,
+                label: 'transcendence',
+                issuer: 'master',
+                encoding: 'base32'
+            });
+            return await QRCode.toDataURL(otpauthUrl);
+        }
+
+        const secret:GeneratedSecret = speakeasy.generateSecret()
+
+        if (!secret || !secret.otpauth_url)
+            throw new ServerError(`speakeasy failed to create a secret key`, 500)
+
+        Client_db.prepare("UPDATE Client set secret_key = ? where id = ?").run(secret.base32, this.id)
+
+        return await QRCode.toDataURL(secret.otpauth_url)
+    }
+
+    verify(token: string): string {
+        const secret = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined
         if (!secret)
-            return {code: 500, result: "dataBase failed to Select secret_key"};
+            throw new DataBaseError(`secret key not found for id: ${this.id}`, 'internal error system', 500)
         if (!secret.secret_key)
-            return {code: 409, result: "2fa isn't activated"};
+            throw new ConflictError("2fa isn't activated", 'internal error system')
 
         const verified = speakeasy.totp.verify({
             secret: secret.secret_key,
             encoding: 'base32',
             token: token,
             window: 1
-        });
+        })
         if (!verified)
-            return {code: 401, result: "wrong code for authentification"};
-        return {code: 200, result: "valid code for authentification"};
+            throw new UnauthorizedError(`invalid secret key for 2fa`, 'bad 2fa code')
+        Client_db.prepare(`UPDATE Client SET activated2fa = ? WHERE id = ?`).run(1, this.id)
+        return User.makeToken(this.id)
     }
 
-    getProfile(): { nickName: string, email: string } {
-        const userData = Client_db.prepare("SELECT nickName, email FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string } | undefined;
+    // SETTER AND GETTER //
+
+    async setPassword(newPassword: string) {
+        const hashedPassword: string = await bcrypt.hash(newPassword, 10)
+
+        if (!Client_db.prepare("UPDATE Client set password = ? where id = ?").run(hashedPassword, this.id))
+            throw new DataBaseError('cannot insert new password', 'internal error system', 500)
+    }
+
+    async setNickname(newNickName: string) {
+        if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(newNickName))
+            throw new ConflictError("An user try to set his nickName to an already used nickname", "Nickname already used")
+
+        if (!Client_db.prepare("UPDATE Client set nickName = ? where id = ?").run(newNickName, this.id))
+            throw new DataBaseError('cannot insert new password', 'internal error system', 500)
+    }
+
+    updatePictureProfile(pictureURL: string) {
+        const change = Client_db.prepare(`UPDATE Client SET pictureProfile = ? WHERE id = ?`).run(pictureURL, this.id);
+        if (!change || !change.changes)
+            throw new DataBaseError(`cannot upload the picture in the db`, 'error 500: internal error system', 500)
+    }
+
+
+    getProfile(): { id:number,  nickName: string, email: string, avatar: string } {
+        const userData = Client_db.prepare("SELECT nickName, email, pictureProfile FROM Client WHERE id = ?").get(this.id) as { nickName: string, email: string, pictureProfile: string } | undefined
         if (!userData) {
-            throw new Error(`Database Error: cannot find data from ${this.id}`);
+            throw new DataBaseError(`User with ID ${this.id} not found`, `internal error system`, 500)
         }
-        return {nickName: userData.nickName, email: userData.email};
+        return {id: this.id, nickName: userData.nickName, email: userData.email, avatar: userData.pictureProfile}
     }
 
-    sendNotification() {
-        const res = connectedUsers.get(this.id);
-        if (!res)
-            return console.log("Server error: res not found in connectedUsers");
-        res.sse({data: JSON.stringify({event: "invite", data: "teeest"})});
-    }
+    publicData(): {id:number,  nickName: string, avatar: string, online: boolean} {
+        const data = Client_db.prepare("SELECT nickName, pictureProfile FROM Client WHERE id = ?").get(this.id) as { nickName: string, pictureProfile: string } | undefined
+        if (!data)
+            throw new DataBaseError(`User with ID ${this.id} not found`, 'internal error system', 500)
 
-
-    /**
-     * recover the id of the friend, check his friendship status in db, if it doesn't exist it add with status = pending,
-     *      if it is pending and the user is userB_id, it update status to accepted, it it is userA_id nothing happens.
-     *
-     * @param nickName
-     * @return a status for the client
-     */
-    addFriend(nickName: string): {code: number, message: string} {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number};
-        if (!friendId)
-            return {code: 409, message: "this nickName doesn't exist"};
-
-        const checkStatus = Client_db.prepare("SELECT status FROM FriendList WHERE userA_id = ? AND userB_id = ?").get(friendId.id, this.id) as {status: string};
-        if (checkStatus?.status == 'accepted')
-            return {code: 409, message: "Friend already added"};
-
-        else if (checkStatus?.status == 'pending') {
-            Client_db.prepare(`UPDATE FriendList SET status = 'accepted' WHERE userA_id = ? AND userB_id = ?`).run(friendId.id, this.id);
-            return {code: 201, message: "Friend invitation accepted"};
+        return {
+            id: this.id,
+            nickName: data.nickName,
+            avatar: data.pictureProfile,
+            online: connectedUsers.has(this.id)
         }
-
-        const res = Client_db.prepare(`INSERT OR IGNORE INTO FriendList (userA_id, userB_id, status) VALUES (?, ?, ?)`).run(this.id, friendId.id, 'pending');
-        if (res.changes === 0)
-            return {code: 409, message: "Friend invitation already sent"};
-
-        return {code: 201, message: `friend invitation sent successfully`};
     }
 
-    /**
-     * recover the id of the client, remove it. if there wasn't friend nothing happens (checkstatus.changes set to 0)
-     *
-     * @param nickName
-     */
-    removeFriend(nickName: string): {code: number, message: string} {
-        const friendId = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id :number};
-        if (!friendId)
-            return {code: 409, message: "this nickName doesn't exist"};
 
-        const checkStatus = Client_db.prepare("DELETE FROM FriendList WHERE (userA_id = ? AND userB_id = ?) OR (userB_id = ? AND userA_id = ?)").run(friendId.id, this.id, friendId.id, this.id);
-        if (!checkStatus.changes)
-            return {code: 409, message: "This user isn't your friendList"};
-        return {code: 201, message: "Friend removed"};
-    }
-
-    /**
-     * recover friend by status:
-     *      - accepted when each of them accepted the friendship
-     *      - pending when the user is waiting the friend to accept
-     *      - received when the user received an invitation by another user and he didn't accept yet
-     *
-     * @return an object with three array of id. One for each type of friend.
-     */
-    getFriendList(): {acceptedNickName: string[], pendingNickName: string[], receivedNickName: string[]} {
-        const accepted = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'accepted' UNION SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'accepted'`).all(this.id, this.id) as {userA_id?: number, userB_id?: number }[];
-        const pending = Client_db.prepare(`SELECT userB_id FROM FriendList WHERE userA_id = ? AND status = 'pending'`).all(this.id) as {userB_id: number}[];
-        const invited = Client_db.prepare(`SELECT userA_id FROM FriendList WHERE userB_id = ? AND status = 'pending'`).all(this.id) as {userA_id: number}[];
-
-        const acceptedIds = accepted.map(row => row.userA_id ?? row.userB_id).filter(id => id !== undefined);
-        const pendingIds = pending.map(row => row.userB_id).filter(id => id !== undefined);
-        const receivedIds = invited.map(row => row.userA_id).filter(id => id !== undefined);
-
-        const acceptedNickName = acceptedIds.map(row => this.getNickNameById(row));
-        const pendingNickName = pendingIds.map(row => this.getNickNameById(row));
-        const receivedNickName = receivedIds.map(row => this.getNickNameById(row));
-
-
-        return {acceptedNickName, pendingNickName, receivedNickName};
-    }
-
-    getNickNameById(id: number): string {
-        const userData = Client_db.prepare("SELECT * FROM Client WHERE id = ?").get(id) as {nickName: string};
+    getPictureProfile(): string {
+        const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`).get(this.id) as {pictureProfile: string} | undefined;
         if (!userData)
-            throw new Error('Database failed');
-        if (!userData.nickName) {
-            throw new Error(`${id} not found`);
-        }
-        return (userData.nickName);
+            throw new DataBaseError(`should not happen`, 'internal error system', 500)
+        if (!userData.pictureProfile)
+            return '';
+        return userData.pictureProfile;
     }
+
+
+    static getIdbyNickName(nickName: string): number {
+        const userData = Client_db.prepare("SELECT id FROM Client WHERE nickName = ?").get(nickName) as {id: number} | undefined
+        if (!userData)
+            throw new DataBaseError(`id not found for nickName: ${nickName}`, `This nickname doesn't exist`, 404)
+        return userData.id
+    }
+
+    // SSE //
+
+    async sseHandler(req: FastifyRequest, res: FastifyReply) {
+        if (connectedUsers.has(this.id))
+            return res.status(409).send({error: "already connected by sse"})
+        connectedUsers.set(this.id, res)
+        await connection(this.id)
+        console.log('sse connected : id', this.id)
+        const message: EventMessage = {event: "ping"}
+        res.sse({data: JSON.stringify(message)})
+        const interval = setInterval(() => {
+            const message: EventMessage = {event: "ping"}
+            res.sse({data: JSON.stringify(message)})
+        }, 15000)
+
+        req.raw.on('close', async() => {
+            clearInterval(interval)
+            if (connectedUsers.has(this.id)) {
+                console.log('sse disconnected client = ' + this.id)
+                await disconnect(this.id)
+                connectedUsers.delete(this.id)
+            }
+        })
+    }
+
+
 
 }

@@ -6,11 +6,15 @@ import { FastifyReply } from "fastify";
 
 const app = fastify();
 
+export const INTERNAL_PASSWORD = process.env.SECRET_KEY;
+
 app.register(FastifySSEPlugin);
 app.register(userRoutes);
 app.post('/auth/google', googleAuth);
 
-export const connectedUsers = new Map<string, FastifyReply>();
+export const connectedUsers = new Map<number, FastifyReply>();
+
+
 
 app.listen({port: 5000, host: '0.0.0.0'}, (err, adrr) => {
     if (err) {
@@ -19,4 +23,3 @@ app.listen({port: 5000, host: '0.0.0.0'}, (err, adrr) => {
     }
     console.log(`server running on ${adrr}`)
 })
-

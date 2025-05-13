@@ -1,24 +1,4 @@
 services:
-
-  api-gateway:
-    container_name: api-gateway
-    build:
-      context: api-gateway/
-    networks:
-      - transcendence
-    ports:
-      - "3000:3000"         #DEV
-    restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ./api-gateway/src/
-          target: /app/src/
-        - action: rebuild
-          path: ./api-gateway/package.json
-          target: /app/
-
-
   frontend:
     container_name: frontend
     build:
@@ -27,8 +7,10 @@ services:
       - transcendence
     ports:
       - "4000:4000"
-    depends_on:
-      - api-gateway
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
     develop:
       watch:
@@ -41,9 +23,8 @@ services:
           ignore:
             - app/public/dist/*.js
         - action: rebuild
-          path: ./frontend/package.json
-          target: /app/
-
+          path: ./frontend/*.json
+          target: app/
   user-management:
     container_name: user-management
     build:
@@ -52,8 +33,10 @@ services:
       - transcendence
     ports:
       - "5000:5000"         #DEV
-    depends_on:
-      - api-gateway
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
     develop:
       watch:
@@ -72,6 +55,10 @@ services:
       - transcendence
     ports:
       - "4443:4443"
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
     develop:
       watch:
@@ -82,40 +69,87 @@ services:
           path: ./services/match-server/package.json
           target: /app/
 
-  ai-opponent:
-    container_name: ai-opponent
+  tower-defense:
+    container_name: tower-defense
     build:
-      context: services/ai-opponent/
+      context: services/tower-defense/
     networks:
       - transcendence
     ports:
-      - "6000:6000"
+      - "2246:2246"
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
     develop:
       watch:
         - action: sync
-          path: ./services/ai-opponent/src/
+          path: ./services/tower-defense/src/
           target: /app/src/
         - action: rebuild
-          path: ./services/ai-opponent/package.json
-          target: /app/
-#
-#  live-chat:
-#    container_name: live-chat
+          path: ./services/tower-defense/package.json
+          target: app/
+
+  social:
+    container_name: social
+    build:
+      context: services/social/
+    networks:
+      - transcendence
+    ports:
+      - "6500:6500"
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/social/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/social/package.json
+          target: app/
+
+  tournament:
+    container_name: tournament
+    build:
+      context: services/tournament/
+    networks:
+      - transcendence
+    ports:
+      - "7000:7000"
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-""}
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./services/tournament/src/
+          target: /app/src/
+        - action: rebuild
+          path: ./services/tournament/package.json
+          target: app/
+
+#  ai-opponent:
+#    container_name: ai-opponent
 #    build:
-#      context: services/live-chat/
+#      context: services/ai-opponent/
 #    networks:
 #      - transcendence
 #    restart: unless-stopped
 #    develop:
 #      watch:
 #        - action: sync
-#          path: ./services/live-chat/src/
+#          path: ./services/ai-opponent/src/
 #          target: /app/src/
 #        - action: rebuild
-#          path: ./services/live-chat/package.json
+#          path: ./services/ai-opponent/package.json
 #          target: app/
-#
 
 
 networks:

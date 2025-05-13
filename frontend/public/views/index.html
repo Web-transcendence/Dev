@@ -6,62 +6,83 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transcendence</title>
-    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="../images/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link href="/static/output.css" rel="stylesheet">
+      <!-- AOS animation library -->
+      <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+      <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
   </head>
 
-  <body class="bg-gray-900 text-white" style="font-family: 'Press Start 2P', cursive;">
+  <body class="text-white min-h-screen flex flex-col" style="font-family: 'Press Start 2P', cursive;">
+  <div id="tsparticles"></div>
+  <div id="app" class="flex-1 mt-15">
 
-     <div id="app" class="flex flex-col">
-       <nav class="bg-gray-800 p-4 flex justify-between items-center border-b-4 border-yellow-400">
+      <nav class="fixed top-0 z-20 left-0 p-4 flex justify-between items-center w-full bg-transparent">
 
-         <div class="flex items-center">
-           <img src="../favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
-           <p class="text-center text-xl"> TRANS </p>
-         </div>
+          <div class="flex items-center add-blur">
+              <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
+                  <img src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
+                  <p class="text-center text-xl hidden md:block"> TABG. </p>
+              </button>
+          </div>
 
-         <button id="pong" class="bg-yellow-400 p-2 cursor-pointer transition hover:scale-105 hover:bg-yellow-600 rounded-full shadow-md">
-           Play Pong !
-         </button>
+          <div class="flex space-x-8 items-center add-blur">
+              <button id="pongMode" class="btn-line">Pong</button>
+              <button id="towerDefense" class="btn-line">Tower-Defense</button>
+              <button id="tournaments" class="btn-line">Tournaments</button>
+          </div>
 
-         <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">
-           <div class="relative group">
+          <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">
+              <div class="relative group">
+                  <img id="avatar" src="../images/logout.png" alt="Avatar" class="bg-pink-500 relative h-10 w-10 rounded-full z-50">
+                  <button id="profile" class="hidden btn-slide">
+                      Profil
+                  </button>
+                  <button id="connect" class="btn-slide">
+                      Connect
+                  </button>
+              </div>
+          </div>
+      </nav>
 
-             <img id="avatar" src="../logout.png" alt="Avatar" class="relative h-10 w-10 rounded-full z-10">
+      <div id="content" class="h-full w-full flex flex-grow justify-center mt-8 rounded-lg shadow-lg *:w-full">
 
-             <button id="profile" class="hidden absolute top-1/2 -right-6 -translate-x-11 h-10 -translate-y-1/2  rounded-r-none w-0 bg-pink-500 ease-in-out cursor-pointer
-             text-black group-hover:px-6 group-hover:pr-10 rounded-full text-sm group-hover:w-38 transition-[all,width] overflow-hidden duration-300 group-hover:delay-0">
-               Profil
-             </button>
+      </div>
 
-             <button id="connect" class="absolute top-1/2 -right-6 -translate-x-11 h-10 -translate-y-1/2  rounded-r-none w-0 bg-pink-500 ease-in-out cursor-pointer
-             text-black group-hover:px-6 group-hover:pr-10 rounded-full text-sm group-hover:w-38 transition-[all,width] overflow-hidden duration-300 group-hover:delay-0">
-               Connect
-             </button>
-           </div>
-         </div>
-       </nav>
+      <div id="notFound" class="hidden flextext-white font-mono items-center justify-center min-h-screen">
+          <div class="text-center space-y-6">
+              <span class="block text-9xl text-pink-500">404 - NOT FOUND</span>
+              <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
+          </div>
+      </div>
+  </div>
 
-       <div class="flex-grow p-5">
-         <h1 class="text-center text-5xl mt-10 text-yellow-400 font-bold text-shadow-md">Home</h1>
-         <p class="text-center mt-4 text-lg">Play the migthy Pong Game, or the other.</p>
-         <div id="content" class="h-full flex justify-center mt-8 bg-gray-700 p-5 rounded-lg border-4 border-yellow-600 shadow-lg">
-           <p class="text-center text-xl">Work In Progress.</p>
-         </div>
-       </div>
-     </div>
+  <div id="notificationBanner"
+       class="fixed top-35 right-[-100%] w-1/3 max-w-md p-4 rounded-l-lg shadow-lg text-white flex justify-between items-center gap-4 transition-all duration-500 z-50 hidden bg-gray-800">
+      <span id="notificationMessage" class="flex-1">Message</span>
+      <button id="notificationActionAccept"
+              class="bg-white text-gray-800 px-3 py-1 rounded hidden hover:bg-gray-200 transition">
+          Accept
+      </button>
+      <button id="notificationActionReject"
+              class="bg-white text-gray-800 px-3 py-1 rounded hidden hover:bg-gray-200 transition">
+          Reject
+      </button>
+  </div>
 
-     <footer class="bg-gray-700 text-white text-center rounded-t-lg p-4 flex justify-between items-center">
-       <img id="bottom-img" src="../favicon.ico" class="h-10 w-10 rounded-full">
-       <div class="space-between flex items-center">
-         <span id="bottom-text" class="text-lg font-bold"></span>
-           <button id="about" class="px-6 py-3 hover:underline transition-all duration-300">About Us</button>
-           <button id="contact" class="px-6 py-3 hover:underline transition-all duration-300">Contact Us</button>
-       </div>
-     </footer>
 
-     <script type="module" src="/static/dist/front.js"></script>
+  <footer class="bg-transparent text-white text-center rounded-t-lg p-4 flex justify-between items-center">
+      <img id="bottom-img" src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
+      <div class="flex space-x-8 items-center">
+          <span id="bottom-text" class="text-lg font-bold"></span>
+          <button id="about" class="btn-line">About Us</button>
+          <button id="contact" class="btn-line">Contact Us</button>
+      </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+  <script type="module" src="/static/dist/front.js"></script>
 
   </body>
 </html>

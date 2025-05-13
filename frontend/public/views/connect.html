@@ -1,0 +1,61 @@
+<div class="w-md max-w-md bg-gray-800 shadow-lg rounded-lg p-8 mx-auto">
+
+    <h1 class="text-xl font-bold text-yellow-400 mb-4 text-center">Welcome</h1>
+
+    <div class="flex flex-col items-center">
+        <div id="g_id_onload"
+             data-client_id="562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com"
+             data-callback="CredentialResponse">
+        </div>
+
+        <div class="g_id_signin"
+             data-type="standard"
+             data-size="medium"
+             data-theme="filled_blue"
+             data-text="signup_with"
+             data-shape="circle"
+             data-locale="en_US"
+             data-logo_alignment="center">
+        </div>
+    </div>
+
+    <div class="flex items-center my-4">
+        <div class="flex-grow border-t border-gray-300"></div>
+        <span class="px-3 text-gray-300 text-sm">OR</span>
+        <div class="flex-grow border-t border-gray-300"></div>
+    </div>
+
+    <form id="myForm" class="space-y-4" onsubmit="event.preventDefault();">
+
+        <div class="insert-nickName">
+            <label for="nickName" class="block text-gray-700 font-medium"></label>
+            <input class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none" placeholder="NickName" type="text" name="nickName" id="nickName" />
+            <span class="error-message text-red-500 text-xs hidden" id="nickNameError">Minimum 3 caracters</span>
+        </div>
+
+        <div class="insert-email">
+            <label for="email" class="block text-gray-700 font-medium"></label>
+            <input class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none" placeholder="Email" type="email" name="email" id="email" />
+            <span class="error-message text-red-500 text-xs hidden" id="emailError">Invalid: example@example.com</span>
+        </div>
+
+        <div class="insert-password">
+            <label for="password" class="block text-gray-700 font-medium"></label>
+            <input class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none" placeholder="Password" type="password" name="password" id="password" />
+            <span class="error-message text-red-500 text-xs hidden" id="passwordError">Minimum 6 caracters</span>
+        </div>
+
+        <div class="justify-center text-center">
+            <button id="registerButton" class="w-64 btn-primary">Subscribe!</button>
+        </div>
+    </form>
+
+    <div class="border-t border-gray-300 my-4"></div>
+
+    <div class="p-6 rounded-lg text-center">
+        <p class="text-gray-400 text-sm mb-2">
+            Already have an account?
+        </p>
+        <button id="loginButton" class="w-64 btn-primary">Sign In</button>
+    </div>
+</div>
