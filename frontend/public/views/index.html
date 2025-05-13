@@ -18,19 +18,20 @@
   <div id="tsparticles"></div>
   <div id="app" class="flex-1 mt-15">
 
-      <nav class="fixed top-0 z-20 left-0 p-4 flex justify-between items-center w-full bg-transparent">
+      <nav class="fixed top-0 z-20 left-0 p-4 mb-50 flex justify-between items-center w-full bg-transparent">
 
           <div class="flex items-center add-blur">
               <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
                   <img src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
-                  <p class="text-center text-xl hidden md:block"> TABG. </p>
+                  <p class="text-center text-xl hidden lg:block"> TABG. </p>
               </button>
           </div>
 
-          <div class="flex space-x-8 items-center add-blur">
+          <div class="grid grid-cols-2 md:grid-cols-4 text-center space-x-8 items-center add-blur">
               <button id="pongMode" class="btn-line">Pong</button>
               <button id="towerDefense" class="btn-line">Tower-Defense</button>
               <button id="tournaments" class="btn-line">Tournaments</button>
+              <button id="matchHistory" class="btn-line">Match History</button>
           </div>
 
           <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">
@@ -45,17 +46,17 @@
               </div>
           </div>
       </nav>
-
-      <div id="content" class="h-full w-full flex flex-grow justify-center mt-8 rounded-lg shadow-lg *:w-full">
-
-      </div>
-
-      <div id="notFound" class="hidden flextext-white font-mono items-center justify-center min-h-screen">
+      <div id="notFound" class="hidden flex text-white font-mono items-center justify-center min-h-screen">
           <div class="text-center space-y-6">
               <span class="block text-9xl text-pink-500">404 - NOT FOUND</span>
               <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
           </div>
       </div>
+
+      <div id="content" class="h-full w-full items-center flex flex-col flex-grow justify-center mt-8 rounded-lg shadow-lg *:w-full">
+
+      </div>
+
   </div>
 
   <div id="notificationBanner"

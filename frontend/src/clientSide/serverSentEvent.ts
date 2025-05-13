@@ -1,6 +1,7 @@
-import {addFriend, fetchUserInformation, removeFriend} from "./user.js";
+import {addFriend, fetchUserInformation, removeFriend, UserData} from "./user.js";
 import {Pong} from "./pong.js";
-
+import {DispayNotification} from "./notificationHandler.js";
+import {navigate} from "./front.js";
 
 const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
     const result: Record<string, string> = {}
@@ -15,12 +16,12 @@ const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
 
 export async function sseConnection() {
     try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         const res = await fetch(`/user-management/sse`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'text/event-stream',
-                'Authorization': `Bearer ${token}`
+                'authorization': 'Bearer ' + token
             }
         })
         if (res.status === 100)
@@ -31,6 +32,7 @@ export async function sseConnection() {
             //notifyhandling
             return ;
         }
+
         console.log('sse connection')
         const reader = res.body?.pipeThrough(new TextDecoderStream()).getReader() ?? null;
         while (reader) {
@@ -101,12 +103,53 @@ const notifyConnection = ({id}: { id: number }) => {
     if (list) list.querySelector(".online")?.classList.remove('hidden');
 }
 
-const notifyJoinTournament = ({id}: { id: number }) => {
+const notifyJoinTournament = async ({id, maxPlayer}: { id: number, maxPlayer: number }) => {
     console.log(`the user with the id ${id} joined my tournament`)
+    const playerList = document.getElementById('playerList')
+    const playerTmp = document.getElementById('playerTemplate')  as HTMLTemplateElement | null;
+    const [{nickName, avatar}]: UserData[] = await fetchUserInformation([id]);
+    if (!playerList || !playerTmp) {
+        DispayNotification(`Error Can't find Tournaments`);
+        await navigate('/home')
+        return ;
+    }
+    const clone = playerTmp.content.cloneNode(true) as HTMLElement | null;
+    const item = clone.querySelector("li");
+    if (!item) {
+        DispayNotification('Error 2 occur, please refresh your page.');
+        return;
+    }
+    item.id = `itemId-${id}`
+    const span = item.querySelector('span');
+    if (span) {
+        span.id = `spanId-${id}`;
+        console.log('logname', nickName)
+        span.innerText = nickName;
+    }
+    const img = item.querySelector('img');
+    if (img) {
+        img.id = `imgId-${id}`;
+        img.src = avatar;
+    }
+    const numberOfPlayer = document.getElementById(`numberOfPlayer`);
+    if (numberOfPlayer) {
+        const players = document.querySelectorAll("#playerList li");
+        const number = players.length;
+        numberOfPlayer.innerText = `${number}/${maxPlayer}`
+    }
+    playerList.appendChild(item);
 }
 
-const notifyQuitTournament = ({id}: { id: number }) => {
+const notifyQuitTournament = ({id, maxPlayer}: { id: number, maxPlayer: number }) => {
     console.log(`the user with the id ${id} Quit my tournament`)
+    const list = document.getElementById(`itemId-${id}`);
+    if (list) list.remove();
+   const numberOfPlayer = document.getElementById(`numberOfPlayer`);
+   if (numberOfPlayer) {
+       const players = document.querySelectorAll("#playerList li");
+       const number = players.length;
+       numberOfPlayer.innerText = `${number}/${maxPlayer}`
+   }
 }
 
 const notifyInvitationGame = ({id}: { id: number }) => {

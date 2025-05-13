@@ -1,6 +1,7 @@
 import {getAvatar} from './user.js'
 import {loadPart} from './insert.js';
 import {sseConnection} from "./serverSentEvent.js";
+import {joinTournament} from "./tournaments.js";
 
 declare const tsParticles: any;
 declare const AOS: any;
@@ -24,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         duration: 800,
     });
     // Reconnect User
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token && await checkForToken()) {
         await getAvatar();
         handleConnection(true);
@@ -38,7 +39,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         else
             document.getElementById('connect')?.click();
     });
-    const path = localStorage.getItem('path');
+    const tournamentId = sessionStorage.getItem('idTournaments')
+    if (tournamentId)
+        await joinTournament(Number(tournamentId))
+    const path = sessionStorage.getItem('path');
     if (path && !(!connected && path === '/profile'))
         await loadPart(path)
     else
@@ -62,7 +66,7 @@ tsParticles.load("tsparticles", {
 
 async function checkForToken(): Promise<boolean>  {
     try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         const response = await fetch(`/authJWT`, {
             method: 'GET',
             headers: {
@@ -91,6 +95,7 @@ function constantButton() {
     document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate("/pongMode", event));
     document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate("/towerMode", event));
     document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate("/tournaments", event));
+    document.getElementById("matchHistory")?.addEventListener("click", (event: MouseEvent) => navigate("/matchHistory", event));
     // Footer
     document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate("/about", event));
     document.getElementById("contact")?.addEventListener("click", (event: MouseEvent) => navigate("/contact", event));
@@ -103,7 +108,8 @@ export function handleConnection(input: boolean) {
         document.getElementById('profile')?.classList.remove('hidden');
     } else {
         
-        localStorage.clear();
+        sessionStorage.clear();
+        sessionStorage.clear();
         document.getElementById('connect')?.classList.remove('hidden');
         document.getElementById('profile')?.classList.add('hidden');
     }
@@ -126,13 +132,16 @@ window.CredentialResponse = async (credit: { credential: string }) => {
             const reply = await response.json();
             if (reply.valid) {
                 if (reply.avatar)
-                    localStorage.setItem('avatar', reply.avatar)
+                    sessionStorage.setItem('avatar', reply.avatar)
                 if (reply.token) {
                     console.log('VALID RESPONSE', reply.token);
-                    localStorage.setItem('token', reply.token)
+                    sessionStorage.setItem('token', reply.token)
                 }
+                console.log('ID GOOGLE ', reply.id)
+                if (reply.id)
+                    sessionStorage.setItem('id', reply.id)
                 if (reply.nickName)
-                    localStorage.setItem('nickName', reply.nickName)
+                    sessionStorage.setItem('nickName', reply.nickName)
                 navigate('/connected');
                 await getAvatar();
                 await sseConnection()

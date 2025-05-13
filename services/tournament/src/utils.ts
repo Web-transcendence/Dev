@@ -5,14 +5,16 @@ import {INTERNAL_PASSWORD} from "./api.js";
 
 export const authUser = async (id: number) => {
     const result = await fetch(`http://user-management:5000/authId/${id}`, {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `${INTERNAL_PASSWORD}`
         },
     })
-    if (!result.ok)
+    if (!result.ok) {
+        console.log(result)
         throw new UnauthorizedError(`this id doesn't exist in database`, `internal server error`)
+    }
 }
 
 export const fetchNotifyUser = async (ids: number[], event: string, data: any) => {

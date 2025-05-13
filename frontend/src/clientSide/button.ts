@@ -1,12 +1,13 @@
-import {addFriend, login, profile, register, setAvatar, setNickName, setPassword, verify2fa} from "./user.js";
-import {init2fa} from "./user.js";
-import {friendList} from "./friends.js";
-import {handleConnection, navigate} from "./front.js";
-import {tdStop, TowerDefense} from "./td.js";
+import {addFriend, login, profile, register, setAvatar, verify2fa, launchTournament} from "./user.js";
+import { init2fa } from "./user.js";
+import { friendList } from "./friends.js";
+import { handleConnection, navigate } from "./front.js";
+import { tdStop, TowerDefense } from "./td.js";
 import { editProfile } from "./editInfoProfile.js";
-import {DispayNotification} from "./notificationHandler.js";
-import {Pong} from "./pong.js";
-
+import { DispayNotification } from "./notificationHandler.js";
+import { Pong } from "./pong.js";
+import { displayTournaments, joinTournament} from "./tournaments.js";
+import { printMatchHistory } from "./matchHistory.js";
 
 const mapButton : {[key: string] : () => void} = {
     "/connect" : connectBtn,
@@ -19,7 +20,10 @@ const mapButton : {[key: string] : () => void} = {
     "/pongMode" : pongMode,
     "/pongRemote" : pongRemote,
     "/pongLocal" : pongLocal,
-    "/pongWatch" : pongWatch
+    "/pongWatch" : pongWatch,
+    "/tournaments" : tournaments,
+    "/lobby" : lobby,
+    "/matchHistory" : matchHistory
 }
 
 export function activateBtn(page: string) {
@@ -41,42 +45,30 @@ function loginBtn() {
         login(button)
 }
 
-function profileBtn() {
+async function profileBtn() {
     const avatarImg = document.getElementById('avatarProfile') as HTMLImageElement
-    const avatar = localStorage.getItem('avatar')
+    const avatar = sessionStorage.getItem('avatar')
     if (avatar)
         avatarImg.src = avatar
-    profile();
-    friendList();
-    document.getElementById("editProfileButton")?.addEventListener("click", () => {
-        const nickInput = document.getElementById("profileNickName") as HTMLInputElement | null;
-        const emailInput = document.getElementById("profileEmail") as HTMLInputElement | null;
-        if (nickInput && emailInput) {
-            const newNickName = nickInput.value.trim();
-            const newEmail = emailInput.value.trim();
-            console.log("New nickname:", newNickName);
-            console.log("New email:", newEmail);
-            setNickName(newNickName);
-            // setPassword();
-            // setEmail();
-        }
-    });
+    await profile();
+    await friendList();
+    editProfile();
     document.getElementById('logout')?.addEventListener("click", (event: MouseEvent) => navigate("/logout", event));
     const addFriendBtn = document.getElementById("friendNameBtn") as HTMLButtonElement;
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
     if (addFriendBtn && addFriendIpt)
-        addFriendBtn.addEventListener("click", () => {
-            addFriend(addFriendIpt.value);
-            friendList();
+        addFriendBtn.addEventListener("click", async () => {
+            await addFriend(addFriendIpt.value);
+            await friendList();
         });
-    const activeFA = localStorage.getItem('activeFA');
+    const activeFA = sessionStorage.getItem('activeFA');
     if (activeFA) {
         document.getElementById('totalFactor')?.classList.add("hidden")
         document.getElementById('activeFactor')?.classList.remove("hidden")
     } else {
-        const initfa = document.getElementById("initfa") as HTMLButtonElement;
-        if (initfa) {
-            initfa.addEventListener("click", async () => {
+        const initFa = document.getElementById("initFa") as HTMLButtonElement;
+        if (initFa) {
+            initFa.addEventListener("click", async () => {
                 const qrcode = await init2fa();
                 if (qrcode == undefined) {
                     console.log("ErrorDisplay: qrcode not found!");
@@ -94,9 +86,9 @@ function profileBtn() {
                         label.classList.remove("sr-only");
                     const input = document.getElementById("inputVerify") as HTMLInputElement;
 
-                    input.addEventListener("keydown", async (event :KeyboardEvent) => {
+                    input.addEventListener("keydown", async (event: KeyboardEvent) => {
                         if (event.key === "Enter") {
-                            verify2fa(input.value)
+                            await verify2fa(input.value)
                         }
                     })
                 }
@@ -123,7 +115,7 @@ function factor() {
 
     input.addEventListener("keydown", async (event :KeyboardEvent) => {
         if (event.key === "Enter")
-            verify2fa(input.value)
+            await verify2fa(input.value)
     })
 }
 
@@ -152,4 +144,40 @@ function pongRemote() {
 
 function pongWatch() {
     Pong("spec")
+}
+
+function tournaments() {
+    const tournaments : {id: number, name: string} []= [
+        {id: 4, name: 'Junior'},
+        {id: 8, name: 'Contender'},
+        {id: 16, name: 'Major'},
+        {id: 32, name: 'Worlds'}];
+    for (const parse of tournaments)
+        document.getElementById(`${parse.id}`)
+            ?.addEventListener("click", async (event) => {
+                sessionStorage.setItem('idTournaments', JSON.stringify(parse.id));
+                sessionStorage.setItem('nameTournaments', parse.name);
+                await joinTournament(parse.id)
+                await navigate('/lobby', event)
+            });
+}
+
+async function lobby() {
+    const id = sessionStorage.getItem('idTournaments');
+    const name = sessionStorage.getItem('nameTournaments');
+    if (!id || !name) {
+        DispayNotification("Missing tournament information.");
+        await navigate("/home");
+        return ;
+    }
+    const toIntId = Number.parseInt(id);
+    if (isNaN(toIntId)) DispayNotification("Invalid tournament ID.");
+    await displayTournaments(toIntId, name);
+    document.getElementById("launchTournamentBtn")?.addEventListener("click", async () => {
+        await launchTournament();
+    });
+}
+
+async function matchHistory() {
+    await printMatchHistory();
 }

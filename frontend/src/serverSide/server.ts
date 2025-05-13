@@ -15,18 +15,14 @@ const httpsOptions = {
     },
 };
 
-
 const SECRET_KEY = process.env.SECRET_KEY;
 
 const app = Fastify(httpsOptions);
-
 
 // app.register(cors, {
 //     origin: "*",
 //     methods: ["GET", "POST", "PUT", "DELETE"]
 // })
-
-
 
 async function authentificate (req: FastifyRequest, reply: FastifyReply) {
     if (req.url === "/user-management/login" || req.url === "/user-management/register" || req.url === "/user-management/auth/google" || req.url === "/user-management/2faVerify")
@@ -65,7 +61,15 @@ app.register(routes)
 app.register(httpProxy, {
     upstream: 'http://match-server:4443',
     prefix: '/match-server',
-    websocket: true,
+    http2: false,
+    preHandler: authentificate
+});
+
+app.register(httpProxy, {
+    upstream: 'http://tower-defense:2246',
+    prefix: '/tower-defense',
+    http2: false,
+    preHandler: authentificate
 });
 
 app.register(httpProxy, {
@@ -89,13 +93,18 @@ app.register(httpProxy, {
     preHandler: authentificate
 });
 
-app.register(async function (instance) {
-    instance.register(fastifyStatic, {
-        root: join(import.meta.dirname, env.TRANS_ASSETS_PATH),
-        prefix: "/tower-defense/",
-        decorateReply: false, // 👈 empêche le conflit de sendFile
-    });
+app.register(httpProxy, {
+    upstream: 'http://tower-defense:2246/ws',
+    prefix: '/tower-defense/ws',
+    websocket: true
 });
+
+app.register(httpProxy, {
+    upstream: 'http://match-server:4443/ws',
+    prefix: '/match-server/ws',
+    websocket: true
+});
+
 
 app.get("/*", (req, res) => { // Route pour la page d'accueil
     const pagePath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, "index.html");

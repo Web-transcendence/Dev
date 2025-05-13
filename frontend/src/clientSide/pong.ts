@@ -91,10 +91,10 @@ export function Pong(mode: string, room?: number) {
     let animLoop = 1;
 
     function getNick(): string {
-        let nick = localStorage.getItem('nickName');
+        let nick = sessionStorage.getItem('nickName');
         if (!nick) {
             nick = `guest${Math.floor(Math.random() * 10000)}`;
-            localStorage.setItem('nickName', nick);
+            sessionStorage.setItem('nickName', nick);
         }
         return (nick);
     }

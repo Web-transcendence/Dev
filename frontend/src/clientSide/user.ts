@@ -18,8 +18,9 @@ export function register(button: HTMLElement): void {
         })
         const result = await response.json()
         if (result.token) {
-            localStorage.setItem('token', result.token)
-            localStorage.setItem('nickName', result.nickName)
+            sessionStorage.setItem('id', result.id)
+            sessionStorage.setItem('token', result.token)
+            sessionStorage.setItem('nickName', result.nickName)
             await navigate('/connected')
             await getAvatar();
             await sseConnection()
@@ -44,11 +45,12 @@ export function login(button: HTMLElement): void {
 
         if (response.ok) {
             const data = await response.json()
-            localStorage.setItem('nickName', data.nickName)
+            sessionStorage.setItem('id', data.id)
+            sessionStorage.setItem('nickName', data.nickName)
             if (!data.token || data.token.empty) {
                 return await loadPart("/factor")
             }
-            localStorage.setItem('token', data.token)
+            sessionStorage.setItem('token', data.token)
             navigate('/connected')
             await getAvatar();
             await sseConnection()
@@ -62,7 +64,7 @@ export function login(button: HTMLElement): void {
 
 export async function profile() {
     try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         if (!token) {
             console.error('token missing')
             return
@@ -76,11 +78,11 @@ export async function profile() {
         })
         const data = await response.json()
         if (response.ok) {
-            localStorage.setItem('id', data.id)
-            localStorage.setItem('nickName', data.nickName)
-            localStorage.setItem('email', data.email)
+            sessionStorage.setItem('id', data.id)
+            sessionStorage.setItem('nickName', data.nickName)
+            sessionStorage.setItem('email', data.email)
             if (data.avatar)
-                localStorage.setItem('avatar', data.avatar)
+                sessionStorage.setItem('avatar', data.avatar)
             const nameInput = document.getElementById("profileNickName");
             if (nameInput instanceof HTMLInputElement) nameInput.value = data.nickName;
             const emailInput = document.getElementById("profileEmail");
@@ -101,7 +103,7 @@ export type UserData = {
 }
 
 export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> => {
-    const token = localStorage.getItem('token')
+    const token = sessionStorage.getItem('token')
     if (!token)
         throw new Error('token missing')
     if (!ids)
@@ -128,7 +130,7 @@ export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> =
 
 export async function init2fa() {
     try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         if (!token) {
             console.error('token missing')
             return
@@ -150,7 +152,7 @@ export async function init2fa() {
 
 export async function verify2fa(secret: string) {
     try {
-        const nickName = localStorage.getItem('nickName')
+        const nickName = sessionStorage.getItem('nickName')
         const response = await fetch(`/user-management/2faVerify`, {
         method: 'POST',
             headers: {
@@ -160,8 +162,8 @@ export async function verify2fa(secret: string) {
         })
         if (response.ok) {
             const result = await response.json()
-            localStorage.setItem('token', result.token)
-            localStorage.setItem('activeFA', 'true')
+            sessionStorage.setItem('token', result.token)
+            sessionStorage.setItem('activeFA', 'true')
             DispayNotification('You have enabled two-factor authentication.');
             navigate('/home')
         }
@@ -177,7 +179,7 @@ export async function verify2fa(secret: string) {
 
 export async function addFriend(friendNickName: string) {
     try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         const response = await fetch(`/social/add`, {
            method: 'POST',
             headers: {
@@ -206,7 +208,7 @@ export async function addFriend(friendNickName: string) {
 
 export async function removeFriend(friendNickName: string): Promise<boolean> {
     try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         const response = await fetch(`/social/remove`, {
         method: 'POST',
             headers: {
@@ -236,7 +238,7 @@ export type FriendIds = {
 }
 
 export async function getFriendList() : Promise<FriendIds> {
-    const token = localStorage.getItem('token')
+    const token = sessionStorage.getItem('token')
     const response = await fetch(`/social/list`, {
        method: 'GET',
         headers: {
@@ -267,7 +269,7 @@ export async function setAvatar(target: HTMLInputElement) {
             const file: File = target.files[0]
             const base64File: string = await toBase64(file) as string
 
-            const token = localStorage.getItem('token')
+            const token = sessionStorage.getItem('token')
             const response = await fetch(`/user-management/updatePicture`, {
                 method: 'POST',
                 headers: {
@@ -282,7 +284,7 @@ export async function setAvatar(target: HTMLInputElement) {
                 DispayNotification(error.error, { type: "error" })
             }
             else {
-                localStorage.setItem('avatar', base64File)
+                sessionStorage.setItem('avatar', base64File)
                 updateAvatar('avatarProfile', base64File);
                 updateAvatar('avatar', base64File);
                 DispayNotification('New Avatar !')
@@ -297,13 +299,13 @@ export async function setAvatar(target: HTMLInputElement) {
 export async function getAvatar() {
     try {
         const avatarImg = document.getElementById('avatar') as HTMLImageElement
-        const avatar = localStorage.getItem('avatar')
+        const avatar = sessionStorage.getItem('avatar')
         if (avatar) {
             avatarImg.src = avatar
             return ;
         }
 
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         const response = await fetch(`/user-management/getPicture`, {
            method: 'GET',
             headers: {
@@ -320,7 +322,7 @@ export async function getAvatar() {
         if (img.url) {
             avatarImg.src = img.url
             console.log('avatar', avatarImg.src)
-            localStorage.setItem('avatar', avatarImg.src)
+            sessionStorage.setItem('avatar', avatarImg.src)
         }
         else
             avatarImg.src = '../images/login.png'
@@ -332,7 +334,7 @@ export async function getAvatar() {
 
 export async function setPassword(newPassword: string) {
     try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         const response = await fetch(`/user-management/setPassword`, {
             method: 'POST',
             headers: {
@@ -354,7 +356,7 @@ export async function setPassword(newPassword: string) {
 
 export async function setNickName(newNickName: string) {
     try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         const response = await fetch(`/user-management/setNickName`, {
             method: 'POST',
             headers: {
@@ -384,31 +386,9 @@ export const updateAvatar = (id: string, src: string) => {
     }
 };
 
-
-
-export async function joinTournament() {
+export async function getTournamentList() {
     try {
-        const token = localStorage.getItem('token')
-        const response = await fetch(`/tournament/join`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
-            },
-        })
-
-        if (!response.ok) {
-            const error = await response.json()
-            console.error(error.error)
-        }
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-export async function getTournamentList(): Promise<string[] | undefined> {
-    try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         const response = await fetch(`/tournament/getList`, {
             method: 'GET',
             headers: {
@@ -419,6 +399,7 @@ export async function getTournamentList(): Promise<string[] | undefined> {
         if (!response.ok) {
             const error = await response.json()
             console.error(error.error)
+            DispayNotification("Register To join Tournaments", { type: "error" })
             return undefined
         }
         return await response.json()
@@ -429,7 +410,7 @@ export async function getTournamentList(): Promise<string[] | undefined> {
 
 export async function launchTournament() {
     try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         const response = await fetch(`/tournament/launch`, {
             method: 'POST',
             headers: {
