@@ -12,13 +12,6 @@ export async function   loadPart(page: string) {
         insertScript(page);
         activateBtn(page);
         activateGoogle(page);
-        const idT = sessionStorage.getItem('idTournaments')
-        if (idT && page != '/lobby') {
-            DispayNotification(`You left the Tournament`);
-            sessionStorage.removeItem('idTournaments');
-            sessionStorage.removeItem('nameTournaments');
-            await quitTournaments()
-        }
     } catch (error) {
         console.error(error);
         const container = document.getElementById('content') as HTMLElement;

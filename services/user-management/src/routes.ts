@@ -349,31 +349,9 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
-    app.get('/invitationGame/:id', (req: FastifyRequest, res: FastifyReply) => {
-        try {
-            const id: number = Number(req.headers.id)
-            const friendId = Number((req.params as {id: string}).id)
-
-            const response = fetch(`http://social:6500/checkFriend`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'authorization': `${INTERNAL_PASSWORD}`
-                },
-                body: JSON.stringify({id1: id, id2: friendId})
-            })
-
-            notifyUser([friendId], `invitationGame`, )
-
-            return res.status(200).send()
-        } catch (err) {
-            if (err instanceof MyError) {
-                console.error(err.message)
-                return res.status(err.code).send({error: err.toSend})
-            }
-            console.error(err)
-            return res.status(500).send()
-        }
+    app.get(`/test`, (req: FastifyRequest, res: FastifyReply) => {
+        logConnectedUser()
+        return res.status(200).send()
     })
 
 }

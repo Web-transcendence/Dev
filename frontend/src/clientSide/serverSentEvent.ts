@@ -2,6 +2,7 @@ import {addFriend, fetchUserInformation, removeFriend, UserData} from "./user.js
 import {Pong} from "./pong.js";
 import {DispayNotification} from "./notificationHandler.js";
 import {navigate} from "./front.js";
+import {loadPart} from "./insert.js";
 
 const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
     const result: Record<string, string> = {}
@@ -126,18 +127,21 @@ const notifyJoinTournament = async ({id, maxPlayer}: { id: number, maxPlayer: nu
         console.log('logname', nickName)
         span.innerText = nickName;
     }
+    console.log('query');
     const img = item.querySelector('img');
     if (img) {
+            console.log('queryrerjwighigbei');
         img.id = `imgId-${id}`;
-        img.src = avatar;
+        if (avatar) img.src = avatar;
+        else img.src = '../images/login.png';
     }
+    playerList.appendChild(item);
     const numberOfPlayer = document.getElementById(`numberOfPlayer`);
     if (numberOfPlayer) {
         const players = document.querySelectorAll("#playerList li");
         const number = players.length;
         numberOfPlayer.innerText = `${number}/${maxPlayer}`
     }
-    playerList.appendChild(item);
 }
 
 const notifyQuitTournament = ({id, maxPlayer}: { id: number, maxPlayer: number }) => {
@@ -152,8 +156,10 @@ const notifyQuitTournament = ({id, maxPlayer}: { id: number, maxPlayer: number }
    }
 }
 
-const notifyInvitationGame = ({id}: { id: number }) => {
+const notifyInvitationGame = async ({id}: { id: number }) => {
+    await loadPart('/pongRemote');
     Pong("remote", id)
+    // await loadPart('/scoreBoard');
 }
 
 

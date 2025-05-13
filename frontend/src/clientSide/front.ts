@@ -1,7 +1,8 @@
 import {getAvatar} from './user.js'
 import {loadPart} from './insert.js';
 import {sseConnection} from "./serverSentEvent.js";
-import {joinTournament} from "./tournaments.js";
+import {joinTournament, quitTournaments} from "./tournaments.js";
+import {DispayNotification} from "./notificationHandler.js";
 
 declare const tsParticles: any;
 declare const AOS: any;
@@ -163,5 +164,12 @@ export async function navigate(path: string, event?: MouseEvent): Promise<void> 
         path = "/profile";
     history.pushState({}, "", path);
     console.log("pushState :", path);
+    const idT = sessionStorage.getItem('idTournaments')
+    if (idT && path != '/lobby') {
+        DispayNotification(`You left the Tournament`);
+        sessionStorage.removeItem('idTournaments');
+        sessionStorage.removeItem('nameTournaments');
+        await quitTournaments()
+    }
     await loadPart(path);
 }

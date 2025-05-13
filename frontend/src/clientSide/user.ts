@@ -2,7 +2,6 @@ import {navigate} from "./front.js"
 import {loadPart} from "./insert.js"
 import {sseConnection} from "./serverSentEvent.js"
 import {DispayNotification} from "./notificationHandler.js"
-import {options} from "sanitize-html";
 
 export function register(button: HTMLElement): void {
     button.addEventListener("click", async () => {
@@ -403,26 +402,6 @@ export async function getTournamentList() {
             return undefined
         }
         return await response.json()
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-export async function launchTournament() {
-    try {
-        const token = sessionStorage.getItem('token')
-        const response = await fetch(`/tournament/launch`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
-            },
-        })
-
-        if (!response.ok) {
-            const error = await response.json()
-            console.error(error.error)
-        }
     } catch (error) {
         console.error(error)
     }

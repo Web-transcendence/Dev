@@ -3,6 +3,7 @@ import {tournamentSessions} from './api.js';
 import * as Schema from "./schema.js"
 import {ConflictError, InputError, MyError, ServerError} from "./error.js";
 import {authUser} from "./utils.js";
+import {tournament} from "./tournament.js";
 
 
 
@@ -81,19 +82,30 @@ export default async function tournamentRoutes(app: FastifyInstance) {
         }
     })
 
-    app.post('/launch', async (req: FastifyRequest, res: FastifyReply) => {
+    app.get('/launch', async (req: FastifyRequest, res: FastifyReply) => {
         try {
+            console.log('launch')
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
 
             await authUser(id);
 
-            const tournament = tournamentSessions.get(id)
+            let tournamentId: number = 0
+            for (const [tempId, tournament] of tournamentSessions) {
+                if (tournament.hasParticipant(id))
+                    tournamentId = tempId
+            }
+
+            if (!tournamentId)
+                throw new ConflictError(`there is no tournament with this id`, `you are not in a tournament`)
+
+            const tournament = tournamentSessions.get(tournamentId)
             if (!tournament)
-                throw new ConflictError(`there is no tournament with this id`, 'internal error system')
+                throw new ConflictError(`there is no tournament with this id`, `internal error system`)
 
             const result = await tournament.launch()
+
 
             return res.status(200).send({result: result})
         }
@@ -105,6 +117,13 @@ export default async function tournamentRoutes(app: FastifyInstance) {
             console.error(err)
             return res.status(500).send()
         }
+    })
+
+    app.get(`/test`, async (req: FastifyRequest, res: FastifyReply) => {
+        for (const [id, tournament] of tournamentSessions) {
+            console.log(`tournament player:`, tournament.getData())
+        }
+        return res.status(200).send()
     })
 
 }

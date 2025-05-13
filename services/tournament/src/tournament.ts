@@ -50,7 +50,7 @@ export class tournament {
             if (tournament.hasParticipant(participantId))
                 throw new ConflictError(`this user has already another tournament`, `you cannot participate to multiple tournament`)
 
-        await fetchNotifyUser(this.participantId, 'joinTournament', {id : participantId})
+        await fetchNotifyUser(this.participantId, 'joinTournament', {id: participantId, maxPlayer: this.maxPlayer})
         this.participantId.push(participantId)
     }
 

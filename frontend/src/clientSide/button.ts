@@ -1,4 +1,4 @@
-import {addFriend, login, profile, register, setAvatar, verify2fa, launchTournament} from "./user.js";
+import {addFriend, login, profile, register, setAvatar, verify2fa} from "./user.js";
 import { init2fa } from "./user.js";
 import { friendList } from "./friends.js";
 import { handleConnection, navigate } from "./front.js";
@@ -6,7 +6,7 @@ import { tdStop, TowerDefense } from "./td.js";
 import { editProfile } from "./editInfoProfile.js";
 import { DispayNotification } from "./notificationHandler.js";
 import { Pong } from "./pong.js";
-import { displayTournaments, joinTournament} from "./tournaments.js";
+import { displayTournaments, joinTournament, launchTournament} from "./tournaments.js";
 import { printMatchHistory } from "./matchHistory.js";
 
 const mapButton : {[key: string] : () => void} = {

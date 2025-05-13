@@ -91,3 +91,24 @@ export async function quitTournaments() {
         console.error(error.error)
     }
 }
+
+export async function launchTournament() {
+    try {
+        const token = sessionStorage.getItem('token')
+        const response = await fetch(`/tournament/launch`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token,
+            },
+        })
+
+        if (!response.ok) {
+            const error = await response.json()
+            console.error(error.error)
+            console.log(error)
+        }
+    } catch (error) {
+        console.error(error)
+    }
+}
