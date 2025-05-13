@@ -1,5 +1,4 @@
 services:
-
   frontend:
     container_name: frontend
     build:
@@ -26,7 +25,6 @@ services:
         - action: rebuild
           path: ./frontend/*.json
           target: app/
-
   user-management:
     container_name: user-management
     build:
@@ -47,7 +45,7 @@ services:
           target: /app/src/
         - action: rebuild
           path: ./services/user-management/package.json
-          target: app/
+          target: /app/
 
   match-server:
     container_name: match-server
@@ -69,7 +67,7 @@ services:
           target: /app/src/
         - action: rebuild
           path: ./services/match-server/package.json
-          target: app/
+          target: /app/
 
   tower-defense:
     container_name: tower-defense
@@ -152,7 +150,6 @@ services:
 #        - action: rebuild
 #          path: ./services/ai-opponent/package.json
 #          target: app/
-
 
 
 networks:
