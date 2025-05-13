@@ -1,15 +1,14 @@
-FROM node:lts-alpine3.20
+FROM alpine:3.18
 
 RUN adduser -D -s /bin/sh -u 1001 app
 USER app
 
+COPY src/core/AiServer/myDQN /app/myDQN
+COPY weights.json /app/weights.json
+COPY src/core/Client/myFactory /app/myFactory
+COPY supervisord.conf /etc/supervisord.conf
+COPY entrypoint.sh entrypoint.sh
 
 WORKDIR /app
 
-COPY --chown=app:app *.json .
-COPY --chown=app:app src/*.ts src/
-
-
-RUN npm install
-
-CMD ["npm", "run", "dev"]
+CMD ["./entrypoint.sh"]

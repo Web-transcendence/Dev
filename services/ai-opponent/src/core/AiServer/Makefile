@@ -6,7 +6,7 @@
 #    By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:21:22 by thibaud           #+#    #+#              #
-#    Updated: 2025/04/22 15:06:13 by thibaud          ###   ########.fr        #
+#    Updated: 2025/05/13 12:15:27 by thibaud          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,8 +25,8 @@ SRCS		=	main.cpp \
 OBJS		= $(SRCS:%.cpp=$(OBJS_DIR)%.o)
 DEPS		= $(SRCS:%.cpp=$(DEPS_DIR)%.d)
 
-CC		= c++
-CFLAGS	= -I$(HEADER) -I$(THIRDPARTY) # -Wall -Wextra -Werror -g3
+CXX		= c++
+CFLAGS	= -Wall -Wextra -Werror -I$(HEADER) -I$(THIRDPARTY)
 DFLAGS	= -MMD -MP -MT $@ -MF $(DEPS_DIR)$*.d
 RM		= rm -rf
 
@@ -40,7 +40,7 @@ run: all
 	./$(NAME)
 
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJS) && echo "compilation OK...\n"
+	$(CXX) $(CFLAGS) -o $(NAME) $(OBJS) && echo "compilation OK...\n"
 
 $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)
@@ -48,7 +48,7 @@ $(DEPS_DIR):
 	mkdir -p $(DEPS_DIR)
 
 $(OBJS): $(OBJS_DIR)%.o: $(SRCS_DIR)%.cpp | $(OBJS_DIR) $(DEPS_DIR)
-	$(CC) $(CFLAGS) $(DFLAGS) -c $< -o $@
+	$(CXX) $(CFLAGS) $(DFLAGS) -c $< -o $@
 
 clean:
 		$(RM) $(OBJS_DIR) $(DEPS_DIR) && echo "Objects cleared...\n"

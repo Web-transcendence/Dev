@@ -135,22 +135,13 @@ services:
           path: ./services/tournament/package.json
           target: app/
 
-#  ai-opponent:
-#    container_name: ai-opponent
-#    build:
-#      context: services/ai-opponent/
-#    networks:
-#      - transcendence
-#    restart: unless-stopped
-#    develop:
-#      watch:
-#        - action: sync
-#          path: ./services/ai-opponent/src/
-#          target: /app/src/
-#        - action: rebuild
-#          path: ./services/ai-opponent/package.json
-#          target: app/
-
+  ai-opponent:
+   container_name: ai-opponent
+   build:
+     context: services/ai-opponent/
+   networks:
+     - transcendence
+   restart: unless-stopped
 
 networks:
   transcendence:
