@@ -52,7 +52,7 @@ export class tournament {
                 throw new ConflictError(`this user has already another tournament`, `internal error system`)
             }
         console.log(`participant added`)
-        await fetchNotifyUser(this.participantId, 'joinTournament', {id : participantId})
+        await fetchNotifyUser(this.participantId, 'joinTournament', {id : participantId, maxPlayer: this.maxPlayer})
         this.participantId.push(participantId)
     }
 
@@ -66,13 +66,11 @@ export class tournament {
 
     async quit(id: number){
         if (this.status === 'started') {
-            console.log(`un joueur qui quitte une partie en cours n'est pas gere`)
-            //fetch match-server
+            return ;
         }
         else {
             this.participantId = this.participantId.filter(participantId => participantId !== id)
-            console.log(`participant after quit `, this.participantId, `et`, this.participantId.filter(participantId => participantId !== id))
-            await fetchNotifyUser(this.participantId, 'quitTournament', {id: id})
+            await fetchNotifyUser(this.participantId, 'quitTournament', {id: id, maxPlayer: this.maxPlayer})
         }
     }
 

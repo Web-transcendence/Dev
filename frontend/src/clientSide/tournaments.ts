@@ -24,8 +24,7 @@ export async function joinTournament(tournamentId: number) {
 }
 
 export async function displayTournaments(nbrTournament: number, nameTournament: string) {
-    console.log(`joinTournaments: ${nameTournament}`);
-    const name = document.getElementById('nameTournaments');
+    const name = document.getElementById('nameTournament');
     if (name) name.innerText = nameTournament;
     const tournamentList: {participants: number[], maxPlayer: number, status: string}[] | undefined = await getTournamentList()
     if (!tournamentList) {
@@ -33,14 +32,14 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
         await navigate('/home')
         return ;
     }
-    console.log('GTL', tournamentList)
     let player = 0;
+    const myId = Number(sessionStorage.getItem('id'))
     const playerList = document.getElementById('playerList')
     const playerTmp = document.getElementById('playerTemplate')  as HTMLTemplateElement | null;
     const section = tournamentList.find(s => s.maxPlayer === nbrTournament);
     if ( section && playerList && playerTmp ) {
-        for (const participants of section.participants) {
-            const [userData]: UserData[] = await fetchUserInformation(section.participants);
+        const userData: UserData[] = await fetchUserInformation(section.participants);
+        for (const {id, nickName, avatar} of userData) {
             const clone = playerTmp.content.cloneNode(true) as HTMLElement | null;
             if (!clone) {
                 DispayNotification('Error 1 occur, please refresh your page.');
@@ -51,36 +50,28 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
                 DispayNotification('Error 2 occur, please refresh your page.');
                 return;
             }
+            item.id = `itemId-${id}`
             const span = item.querySelector('span');
-            if (span) span.id = `friendId-${participants}`;
+            if (span) {
+                span.id = `spanId-${id}`;
+                console.log('logname', nickName)
+                span.innerText = nickName;
+            }
             const img = item.querySelector('img');
-            if (img) img.id = `friendId-${userData.id}`;
+            if (img) {
+                img.id = `imgId-${id}`;
+                if (avatar) img.src = avatar;
+                else img.src = '../images/login.png';
+            }
             playerList.appendChild(item);
             player++;
         }
     }
-    console.log(`joinTournaments: ${player}`);
-    for (; player < nbrTournament; player++) {
-        console.log('ndrPLAYER',player);
-        const emptySlotTmp = document.getElementById('emptySlotTemplate')  as HTMLTemplateElement | null;
-        if (!emptySlotTmp ) {
-            DispayNotification('Error 3 occur, please refresh your page.');
-            return ;
-        }
-        if (!playerTmp) {
-            DispayNotification('Error 4 occur, please refresh your page.');
-            return ;
-        }
-        if (!playerList) {
-            DispayNotification('Error 5 occur, please refresh your page.');
-            return ;
-        }
-        const clone = emptySlotTmp.content.cloneNode(true);
-        if (!clone) {
-            DispayNotification('Error 6 occur, please refresh your page.');
-            return ;
-        }
-        playerList.appendChild(clone);
+    const numberOfPlayer = document.getElementById(`numberOfPlayer`);
+    if (numberOfPlayer) {
+        const players = document.querySelectorAll("#playerList li");
+        const number = players.length;
+        numberOfPlayer.innerText = `${number}/${nbrTournament}`;
     }
     document.getElementById('launchTournamentBtn')?.addEventListener('click', event => navigate('/launchTournaments', event));
 }

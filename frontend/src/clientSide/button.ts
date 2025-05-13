@@ -148,15 +148,15 @@ function pongWatch() {
 
 function tournaments() {
     const tournaments : {id: number, name: string} []= [
-        {id: 4, name: 'junior'},
-        {id: 8, name: 'contender'},
-        {id: 16, name: 'major'},
-        {id: 32, name: 'worlds'}];
+        {id: 4, name: 'Junior'},
+        {id: 8, name: 'Contender'},
+        {id: 16, name: 'Major'},
+        {id: 32, name: 'Worlds'}];
     for (const parse of tournaments)
         document.getElementById(`${parse.id}`)
             ?.addEventListener("click", async (event) => {
                 sessionStorage.setItem('idTournaments', JSON.stringify(parse.id));
-                sessionStorage.setItem('nameTournaments', JSON.stringify(parse.name));
+                sessionStorage.setItem('nameTournaments', parse.name);
                 await joinTournament(parse.id)
                 await navigate('/lobby', event)
             });
@@ -166,7 +166,6 @@ async function lobby() {
     const id = sessionStorage.getItem('idTournaments');
     const name = sessionStorage.getItem('nameTournaments');
     if (!id || !name) {
-        console.log('CACAGAGRREG')
         DispayNotification("Missing tournament information.");
         await navigate("/home");
         return ;

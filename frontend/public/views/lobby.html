@@ -1,28 +1,23 @@
-<div class="min-h-screen flex flex-col justify-between  text-white p-6">
-    <header class="text-center">
-        <h1 id="nameTournament" class="text-4xl font-bold text-yellow-400">Summer Cup 2025</h1>
+<div class="flex flex-col justify-between  text-white p-6">
+    <header class="text-center m-10 mb-50">
+        <h1 id="nameTournament" class="text-7xl font-bold text-yellow-400"></h1>
     </header>
 
-    <main class="mt-10 flex flex-col items-center">
-        <ul id="playerList" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl w-full">
+    <main class="mt-10 flex flex-col items-center m-30">
+        <p class=" text-2xl p-2 rounded-full bg-transparent m-4 border-2 border-amber-50" id="numberOfPlayer"></p>
+        <ul id="playerList" class="mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-auto gap-4 max-w-4xl w-full">
         </ul>
 
         <template id="playerTemplate">
-            <li class="flex items-center justify-center h-16 w-full bg-green-700 rounded shadow text-lg font-semibold">
-                <span class="player-name" id="playerName">Player Name</span>
-                <img class="player-img" id="playerImg" alt=""></img>
-            </li>
-        </template>
-
-        <template id="emptySlotTemplate">
-            <li class="flex items-center justify-center h-16 w-full bg-gray-800 rounded shadow text-lg font-semibold text-gray-400">
-                <span class="text-sm">Empty Slot</span>
+            <li class="p-2  flex items-center  justify-center w-full bg-purple-700 rounded-full text-lg">
+                <img class="m-4 player-img h-15 w-15 rounded-full" id="playerImg" alt="">
+                <span class="player-name truncate" id="playerName">Empty Place</span>
             </li>
         </template>
     </main>
 
-    <footer class="mt-10 flex justify-center">
-        <button id="launchTournamentBtn" class="btn-primary">
+    <footer class="mt-10 flex justify-center m-10">
+        <button id="launchTournamentBtn" class="btn-primary text-2xl">
             Launch Tournament
         </button>
     </footer>

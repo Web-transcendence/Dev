@@ -14,7 +14,7 @@ export async function   loadPart(page: string) {
         activateGoogle(page);
         const idT = sessionStorage.getItem('idTournaments')
         if (idT && page != '/lobby') {
-            DispayNotification(`You left Tournaments ${idT}`);
+            DispayNotification(`You left the Tournament`);
             sessionStorage.removeItem('idTournaments');
             sessionStorage.removeItem('nameTournaments');
             await quitTournaments()
