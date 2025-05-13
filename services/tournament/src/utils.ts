@@ -12,13 +12,14 @@ export const authUser = async (id: number) => {
         },
     })
     if (!result.ok) {
-        console.log(result)
         throw new UnauthorizedError(`this id doesn't exist in database`, `internal server error`)
     }
+    if (!result.ok)
+        throw new UnauthorizedError(`this id doesn't exist in database`, `this client doesn't exist`)
 }
 
 export const fetchNotifyUser = async (ids: number[], event: string, data: any) => {
-    const response = await fetch('http://user-management:5000/notify', {
+    await fetch('http://user-management:5000/notify', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

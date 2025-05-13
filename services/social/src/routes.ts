@@ -5,6 +5,8 @@ import sanitizeHtml from "sanitize-html"
 import {addFriend, checkFriend, getFriendList, removeFriend} from "./friend.js";
 import {authUser, fetchId} from "./utils.js";
 import {INTERNAL_PASSWORD} from "./api.js";
+import {addFriend, getFriendList, removeFriend} from "./friend.js";
+import {authUser} from "./utils.js";
 
 const internalVerification = async (req, res) => {
     if (req.headers.authorization !== INTERNAL_PASSWORD)
@@ -18,10 +20,10 @@ export default async function socialRoutes(app: FastifyInstance) {
             console.log('add friend')
             const zod_result = Schema.manageFriendSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(zod_result.error.message, zod_result.error.message)
             let friendNickName = sanitizeHtml(zod_result.data.friendNickName)
             if (!friendNickName)
-                throw new InputError(`Empty nickname to add`)
+                throw new InputError(`empty nickname for the friend to had`, `empty nickname`)
 
             const id: number = Number(req.headers.id)
             if (!id)
@@ -69,10 +71,10 @@ export default async function socialRoutes(app: FastifyInstance) {
         try {
             const zod_result = Schema.manageFriendSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(zod_result.error.message, zod_result.error.message)
             let friendNickName = sanitizeHtml(zod_result.data.friendNickName)
             if (!friendNickName)
-                throw new InputError(`Empty nickname to remove from friendList`)
+                throw new InputError(`Empty nickname to remove from friendList`, `empty nickname`)
 
             const id: number = Number(req.headers.id)
             if (!id)

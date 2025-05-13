@@ -47,12 +47,10 @@ export class tournament {
             throw new ConflictError(`maxPlayer has already is reached`, `This tournament is full`)
 
         for (const [id, tournament] of tournamentSessions)
-            if (tournament.hasParticipant(participantId)) {
-                console.log(participantId, " et ", tournament.maxPlayer)
-                throw new ConflictError(`this user has already another tournament`, `internal error system`)
-            }
-        console.log(`participant added`)
-        await fetchNotifyUser(this.participantId, 'joinTournament', {id : participantId, maxPlayer: this.maxPlayer})
+            if (tournament.hasParticipant(participantId))
+                throw new ConflictError(`this user has already another tournament`, `you cannot participate to multiple tournament`)
+
+        await fetchNotifyUser(this.participantId, 'joinTournament', {id : participantId})
         this.participantId.push(participantId)
     }
 
@@ -99,9 +97,9 @@ export class tournament {
 
     async launch(): Promise<string> {
         if (this.status === 'started')
-            throw new ConflictError(`this tournament has already started`, `internal error system`)
+            throw new ConflictError(`this tournament has already started`, `cannot launch this tournament`)
         if (this.participantId.length !== this.maxPlayer)
-            throw new ConflictError(`participant have to be 4, 8, 16 or 32`, `internal error system`)
+            throw new ConflictError(`participant have to be 4, 8, 16 or 32`, `cannot launch this tournament without ${this.maxPlayer} participant`)
 
         const arr = [...this.participantId]
         for (let i = arr.length - 1; i > 0; i--) {

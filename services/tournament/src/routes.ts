@@ -12,12 +12,12 @@ export default async function tournamentRoutes(app: FastifyInstance) {
         try {
             const zod_result = Schema.tournamentIdSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(`this id of tournament doesn't exist`)
             let idTournament = zod_result.data.tournamentId
             console.log('id is tournament', idTournament);
 
             if (!idTournament)
-                throw new InputError(`Empty tournament input`)
+                throw new InputError(`Empty tournament id`)
 
             const id: number = Number(req.headers.id)
             console.log('id is user', id);
@@ -28,7 +28,7 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 
             const tournament = tournamentSessions.get(idTournament)
             if (!tournament)
-                throw new ConflictError(`there is no tournament with this id`, 'internal error system')
+                throw new ConflictError(`there is no tournament with this id`, `this id of tournament doesn't exist`)
 
             await tournament.addParticipant(id)
 
