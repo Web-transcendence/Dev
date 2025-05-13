@@ -10,10 +10,10 @@ export function editProfile() {
             console.log("New nickname:", newNickName);
             console.log("New email:", newEmail);
             setNickName(newNickName);
-            localStorage.setItem("nickName", newNickName);
+            sessionStorage.setItem("nickName", newNickName);
             // setPassword();
             // setEmail();
-            // localStorage.setItem("email", newEmail);
+            // sessionStorage.setItem("email", newEmail);
         }
     });
 }

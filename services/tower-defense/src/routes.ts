@@ -10,6 +10,7 @@ export default async function tdRoutes(fastify: FastifyInstance) {
 
     fastify.get('/getMatchHistory', async (req: FastifyRequest, res: FastifyReply) => {
         try {
+            console.log('I HAVE BEEEEN CALLED !!!!')
             const id = Number(req.headers.id);
             const MatchResult: MatchResult[] = getMatchHistory(id);
             return (res.status(200).send(MatchResult));

@@ -14,10 +14,13 @@ export default async function tournamentRoutes(app: FastifyInstance) {
             if (!zod_result.success)
                 throw new InputError(`Cannot parse the input`)
             let idTournament = zod_result.data.tournamentId
+            console.log('id is tournament', idTournament);
+
             if (!idTournament)
                 throw new InputError(`Empty tournament input`)
 
             const id: number = Number(req.headers.id)
+            console.log('id is user', id);
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
 
@@ -52,17 +55,19 @@ export default async function tournamentRoutes(app: FastifyInstance) {
         return res.status(200).send(tournamentList)
     })
 
-    app.post('/quit', async (req: FastifyRequest, res: FastifyReply) => {
+    app.get('/quit', async (req: FastifyRequest, res: FastifyReply) => {
         try {
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
 
             await authUser(id);
-
-            for (const [id, tournament] of tournamentSessions)
-                if (tournament.hasParticipant(id))
+            console.log('qqqqqqqqqqqqqq')
+            for (const [tournamentId, tournament] of tournamentSessions)
+                if (tournament.hasParticipant(id)) {
+                    console.log('quit tournament')
                     await tournament.quit(id)
+                }
 
             return res.status(200).send()
         }

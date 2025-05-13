@@ -1,15 +1,24 @@
 import {activateBtn} from "./button.js";
 import {tdStop} from "./td.js";
 import {pongStop} from "./pong.js";
+import {quitTournaments} from "./tournaments.js";
+import {DispayNotification} from "./notificationHandler.js";
 
 export async function   loadPart(page: string) {
     try {
-        localStorage.setItem('path', page);
+        sessionStorage.setItem('path', page);
         console.log("setItem path :", page);
         await insertTag(`part${page}`);
         insertScript(page);
         activateBtn(page);
         activateGoogle(page);
+        const idT = sessionStorage.getItem('idTournaments')
+        if (idT && page != '/lobby') {
+            DispayNotification(`You left Tournaments ${idT}`);
+            sessionStorage.removeItem('idTournaments');
+            sessionStorage.removeItem('nameTournaments');
+            await quitTournaments()
+        }
     } catch (error) {
         console.error(error);
         const container = document.getElementById('content') as HTMLElement;

@@ -2,15 +2,14 @@ import { navigate } from './front.js'
 import {fetchUserInformation, getTournamentList, UserData} from "./user.js";
 import {DispayNotification} from "./notificationHandler.js";
 
-export async function joinTournament(tournamentId: number, userId: number) {
+export async function joinTournament(tournamentId: number) {
     try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         const response = await fetch(`/tournament/join`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'authorization': 'Bearer ' + token,
-                'id': userId.toString(),
             },
             body: JSON.stringify({ tournamentId })
         })
@@ -84,4 +83,20 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
         playerList.appendChild(clone);
     }
     document.getElementById('launchTournamentBtn')?.addEventListener('click', event => navigate('/launchTournaments', event));
+}
+
+export async function quitTournaments() {
+    const token = sessionStorage.getItem('token')
+
+    const response = await  fetch(`/tournament/quit`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': 'Bearer ' + token
+        }
+    })
+    if (!response.ok) {
+        const error = await response.json()
+        console.error(error.error)
+    }
 }

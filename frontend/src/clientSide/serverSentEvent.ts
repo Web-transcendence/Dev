@@ -1,7 +1,6 @@
 import {addFriend, fetchUserInformation, removeFriend} from "./user.js";
 import {Pong} from "./pong.js";
 
-
 const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
     const result: Record<string, string> = {}
     const lines = raw.split('\n')
@@ -15,12 +14,12 @@ const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
 
 export async function sseConnection() {
     try {
-        const token = localStorage.getItem('token')
+        const token = sessionStorage.getItem('token')
         const res = await fetch(`/user-management/sse`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'text/event-stream',
-                'Authorization': `Bearer ${token}`
+                'authorization': 'Bearer ' + token
             }
         })
         if (res.status === 100)
@@ -31,6 +30,7 @@ export async function sseConnection() {
             //notifyhandling
             return ;
         }
+
         console.log('sse connection')
         const reader = res.body?.pipeThrough(new TextDecoderStream()).getReader() ?? null;
         while (reader) {

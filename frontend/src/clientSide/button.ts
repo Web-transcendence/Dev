@@ -47,7 +47,7 @@ function loginBtn() {
 
 async function profileBtn() {
     const avatarImg = document.getElementById('avatarProfile') as HTMLImageElement
-    const avatar = localStorage.getItem('avatar')
+    const avatar = sessionStorage.getItem('avatar')
     if (avatar)
         avatarImg.src = avatar
     await profile();
@@ -61,7 +61,7 @@ async function profileBtn() {
             await addFriend(addFriendIpt.value);
             await friendList();
         });
-    const activeFA = localStorage.getItem('activeFA');
+    const activeFA = sessionStorage.getItem('activeFA');
     if (activeFA) {
         document.getElementById('totalFactor')?.classList.add("hidden")
         document.getElementById('activeFactor')?.classList.remove("hidden")
@@ -155,10 +155,10 @@ function tournaments() {
     for (const parse of tournaments)
         document.getElementById(`${parse.id}`)
             ?.addEventListener("click", async (event) => {
-                await navigate('/lobby', event)
                 sessionStorage.setItem('idTournaments', JSON.stringify(parse.id));
                 sessionStorage.setItem('nameTournaments', JSON.stringify(parse.name));
-                await joinTournament(parse.id, Number(parse.name))
+                await joinTournament(parse.id)
+                await navigate('/lobby', event)
             });
 }
 
@@ -166,6 +166,7 @@ async function lobby() {
     const id = sessionStorage.getItem('idTournaments');
     const name = sessionStorage.getItem('nameTournaments');
     if (!id || !name) {
+        console.log('CACAGAGRREG')
         DispayNotification("Missing tournament information.");
         await navigate("/home");
         return ;

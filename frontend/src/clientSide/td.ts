@@ -169,10 +169,10 @@ export function TowerDefense(room?: number) {
     let id = -1;
 
     function getNick(): string {
-        let nick = localStorage.getItem('nickName');
+        let nick = sessionStorage.getItem('nickName');
         if (!nick) {
             nick = `guest${Math.floor(Math.random() * 10000)}`;
-            localStorage.setItem('nickName', nick);
+            sessionStorage.setItem('nickName', nick);
         }
         return (nick);
     }
@@ -611,7 +611,7 @@ export function TowerDefense(room?: number) {
 
     // Communication with backend
     try {
-        const socketTd = new WebSocket("http://localhost:2246/ws");
+        const socketTd = new WebSocket("tower-defense/ws");
         tdConnect = true;
         socketTd.onopen = function () {
             console.log("Connected to TD server");

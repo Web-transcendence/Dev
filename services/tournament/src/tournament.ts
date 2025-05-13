@@ -47,9 +47,11 @@ export class tournament {
             throw new ConflictError(`maxPlayer has already is reached`, `This tournament is full`)
 
         for (const [id, tournament] of tournamentSessions)
-            if (tournament.hasParticipant(participantId))
+            if (tournament.hasParticipant(participantId)) {
+                console.log(participantId, " et ", tournament.maxPlayer)
                 throw new ConflictError(`this user has already another tournament`, `internal error system`)
-
+            }
+        console.log(`participant added`)
         await fetchNotifyUser(this.participantId, 'joinTournament', {id : participantId})
         this.participantId.push(participantId)
     }
@@ -68,7 +70,8 @@ export class tournament {
             //fetch match-server
         }
         else {
-            this.participantId.filter(participantId => participantId !== id)
+            this.participantId = this.participantId.filter(participantId => participantId !== id)
+            console.log(`participant after quit `, this.participantId, `et`, this.participantId.filter(participantId => participantId !== id))
             await fetchNotifyUser(this.participantId, 'quitTournament', {id: id})
         }
     }
