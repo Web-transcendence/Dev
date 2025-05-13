@@ -18,12 +18,6 @@ export class ServerError extends MyError {
     }
 }
 
-export class DataBaseError extends MyError {
-    constructor(log: string, toSend: string, code: number) {
-        super(`DataBase error: ${log}`, toSend, code);
-    }
-}
-
 export class NotFoundError extends MyError {
     constructor(log: string, toSend: string) {
         super(`Data doesn't exist: ${log}`, toSend, 404);
@@ -43,8 +37,7 @@ export class UnauthorizedError extends MyError {
 }
 
 export class InputError extends MyError {
-    constructor(log: string) {
-        super(`Input error: ${log}`,'bad Input', 400);
-
+    constructor(log: string, toSend: string) {
+        super(`Input error: ${log}`,toSend, 400);
     }
 }

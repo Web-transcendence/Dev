@@ -24,6 +24,12 @@ export class DataBaseError extends MyError {
     }
 }
 
+export class NotFoundError extends MyError {
+    constructor(log: string, toSend: string) {
+        super(`Data doesn't exist: ${log}`, toSend, 404);
+    }
+}
+
 export class ConflictError extends MyError {
     constructor(log: string, toSend: string) {
         super(`Conflict error: ${log}`, toSend, 409);
@@ -37,8 +43,7 @@ export class UnauthorizedError extends MyError {
 }
 
 export class InputError extends MyError {
-    constructor(log: string) {
-        super(`Input error: ${log}`,'bad Input', 400);
-
+    constructor(log: string, toSend: string) {
+        super(`Input error: ${log}`,toSend, 400);
     }
 }

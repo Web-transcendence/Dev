@@ -25,7 +25,6 @@ export const disconnect = async (id: number ) => {
             'id': `${id}`
         }
     })
-    // fetch game disconnection
 }
 
 export const connection = async (id: number ) => {

@@ -26,11 +26,11 @@ export default async function userRoutes(app: FastifyInstance) {
         try {
             const zod_result = Schema.signUpSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(zod_result.error.message, zod_result.error.message)
 
             let {nickName, email, password} = {nickName: sanitizeHtml(zod_result.data.nickName), email: sanitizeHtml(zod_result.data.email), password: sanitizeHtml(zod_result.data.password)}
             if (!nickName || !email || !password)
-                throw new InputError(`Empty user data`)
+                throw new InputError(`Empty user data`, `empty value`)
 
             const token = await User.addClient(nickName, email, password)
 
@@ -51,14 +51,14 @@ export default async function userRoutes(app: FastifyInstance) {
         try {
             const zod_result = Schema.signInSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(zod_result.error.message, zod_result.error.message)
 
-            let {nickName, password} = {
+            const {nickName, password} = {
                 nickName: sanitizeHtml(zod_result.data.nickName),
                 password: sanitizeHtml(zod_result.data.password)
             }
             if (!nickName || !password)
-                throw new InputError(`Empty user data`)
+                throw new InputError(`Empty user data`, `empty value`)
 
             const token = await User.login(nickName, password)
             return res.status(200).send({token: token, nickName: nickName})
@@ -97,13 +97,13 @@ export default async function userRoutes(app: FastifyInstance) {
         try {
             const zod_result = Schema.verifySchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(zod_result.error.message, zod_result.error.message)
             let {secret, nickName} = {
                 secret : sanitizeHtml(zod_result.data.secret),
                 nickName: sanitizeHtml(zod_result.data.nickName),
             }
             if (!secret || !nickName)
-                throw new InputError(`empty userData for 2fa`)
+                throw new InputError(`Empty user data`, `empty value`)
             const id = User.getIdbyNickName(nickName)
 
             const user = new User(id)
@@ -145,7 +145,7 @@ export default async function userRoutes(app: FastifyInstance) {
         try {
             const zod_result = Schema.idArraySchema.safeParse(req.body)
             if (!zod_result.success) {
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(`an array of ids is needed to fetch theses informations`, `error 400`)
             }
             const ids: number[] = zod_result.data.ids
 
@@ -193,10 +193,10 @@ export default async function userRoutes(app: FastifyInstance) {
         try {
             const zod_result = Schema.pictureSchema.safeParse(req.body);
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(`bad format of picture to update`, zod_result.error.message)
             let pictureURL = sanitizeHtml(zod_result.data.pictureURL);
             if (!pictureURL)
-                throw new InputError(`empty pictureURL`)
+                throw new InputError(`empty url to update`, `empty picture`)
 
             const id = Number(req.headers.id);
             if (!id)
@@ -240,7 +240,7 @@ export default async function userRoutes(app: FastifyInstance) {
         try {
             const zod_result = passwordSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(zod_result.error.message, zod_result.error.message)
             const newPassword = zod_result.data.password
 
             const id = Number(req.headers.id);
@@ -265,9 +265,10 @@ export default async function userRoutes(app: FastifyInstance) {
         try {
             const zod_result = nickNameSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
+                throw new InputError(zod_result.error.message, zod_result.error.message)
             const newNickName = sanitizeHtml(zod_result.data.nickName)
-
+            if (!newNickName)
+                throw new InputError('empty nickname given to set', `empty nickname`)
             const id = Number(req.headers.id);
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
@@ -293,10 +294,9 @@ export default async function userRoutes(app: FastifyInstance) {
             const numericId = Number(id)
 
             if (isNaN(numericId))
-                throw new InputError('invalidId')
+                throw new InputError(`id isn't a number`, `the given id is not a number`)
 
             new User(numericId)
-
 
             return res.status(200).send()
         } catch (err) {
@@ -313,7 +313,7 @@ export default async function userRoutes(app: FastifyInstance) {
         try {
             const { nickName }  = req.params as { nickName: string }
             if (!nickName)
-                throw new InputError('nickname')
+                throw new InputError('empty nickname in the param of the idByNickName', `empty nickname`)
 
             const id = User.getIdbyNickName(nickName)
 
@@ -331,11 +331,13 @@ export default async function userRoutes(app: FastifyInstance) {
     app.post('/notify', {preHandler: internalVerification}, (req: FastifyRequest, res: FastifyReply) => {
         try {
             const zod_result = Schema.notifySchema.safeParse(req.body);
-            if (!zod_result.success) {
-                throw new InputError(`Cannot parse the input`)
-            }
+            if (!zod_result.success)
+                throw new InputError(`Bad format to notify client`, `internal error system`)
+
             const data = zod_result.data
+
             notifyUser(data.ids, data.event, data.data);
+
             return res.status(200).send()
         } catch (err) {
             if (err instanceof MyError) {
