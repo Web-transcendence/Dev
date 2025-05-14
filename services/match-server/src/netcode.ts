@@ -1,5 +1,16 @@
 // Netcode
-import {Ball, gameState, hazardGenerator, moveBall, moveHazard, movePaddle, Player, Room, timerCheck} from "./api.js";
+import {
+    Ball,
+    gameState,
+    hazardGenerator,
+    INTERNAL_PASSWORD,
+    moveBall,
+    moveHazard,
+    movePaddle,
+    Player,
+    Room,
+    timerCheck
+} from "./api.js";
 import {getWinnerId, insertMatchResult} from "./database.js";
 import {fetchNotifyUser} from "./utils.js";
 
@@ -182,6 +193,14 @@ export async function waitForMatchEnd(roomId: number, playerA_id: number, player
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
     const roomId = generateRoom();
     await fetchNotifyUser([playerA_id, playerB_id], `invitationGame`, {roomId: roomId})
-    const winnerId = await waitForMatchEnd(roomId, playerA_id, playerB_id);
-    return (winnerId);
+    waitForMatchEnd(roomId, playerA_id, playerB_id).then(async (winnerId) => {
+        if (winnerId)
+            await fetch(`http://tournament:7000/userWin/${winnerId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${INTERNAL_PASSWORD}`
+                }
+            })
+    })
 }
