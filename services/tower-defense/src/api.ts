@@ -9,12 +9,13 @@ import {clearInterval} from "node:timers";
 import {getMatchHistory, insertMatchResult} from "./database.js";
 import {fetchIdByNickName} from "./utils.js";
 import tdRoutes from "./routes.js";
+import {changeRoomSpec, joinRoomSpec, leaveRoomSpec} from "./spectator.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const fastify = Fastify({ logger: true });
 const inputSchema = z.object({ player: z.number(), button: z.number() });
-const towerSchema = z.object({ t1: z.number(), t2: z.number(), t3: z.number(), t4: z.number(), t5: z.number() });
+const towerSchema = z.object({ mode: z.string(), t1: z.number(), t2: z.number(), t3: z.number(), t4: z.number(), t5: z.number() });
 const initSchema = z.object({ nick: z.string(), room: z.number() });
 
 class Game {
@@ -74,7 +75,7 @@ class Timer {
     }
 }
 
-class Player {
+export class Player {
     name: string;
     dbId: number = -1;
     id: number;
@@ -230,9 +231,13 @@ class Enemy {
 
 export class RoomTd {
     id: number;
+    type: string = "default";
     players: Player[] = [];
-    constructor (id: number) {
+    specs: Player[] = [];
+    constructor (id: number, type?: string) {
         this.id = id;
+        if (type)
+            this.type = type;
     }
 }
 
@@ -490,7 +495,7 @@ function joinRoomTd(player: Player, roomId: number) {
         }
     } else { // Basic random matchmaking
         for (; i < roomsTd.length; i++) {
-            if (roomsTd[i].players.length === 1) {
+            if (roomsTd < 1000 && roomsTd[i].players.length === 1) {
                 roomsTd[i].players.push(player);
                 id = roomsTd[i].id;
                 break;
@@ -510,13 +515,20 @@ function joinRoomTd(player: Player, roomId: number) {
             clearInterval(intervalId);
             return;
         }
+        const payload = {
+            class: 'gameUpdate',
+            player1: rooms[i].players[0].players[0],
+            player2: rooms[i].players[1].players[1],
+            game: game
+        };
         if (roomsTd[i].players.length === 2) {
-            roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[0]));
-            roomsTd[i].players[0].ws.send(JSON.stringify(roomsTd[i].players[1]));
-            roomsTd[i].players[0].ws.send(JSON.stringify(game));
-            roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[1]));
-            roomsTd[i].players[1].ws.send(JSON.stringify(roomsTd[i].players[0]));
-            roomsTd[i].players[1].ws.send(JSON.stringify(game));
+            roomsTd[i].players[0].ws.send(JSON.stringify(payload));
+            roomsTd[i].players[1].ws.send(JSON.stringify(payload));
+            rooms[i].specs.forEach(spec => {
+                if (game.state < 2) {
+                    spec.ws.send(JSON.stringify(JSON.stringify(payload));
+                }
+            });
         }
     }, 10);
     game.state = 1;
@@ -533,6 +545,7 @@ fastify.register(async function (fastify) {
         console.log("Client connected");
         let init = false;
         let room: number = -1;
+        let mode = "default";
         const userId = generateId();
         socket.send(JSON.stringify({ class: "Id", id: userId }));
         let player = new Player("Default", userId, socket);
@@ -562,19 +575,23 @@ fastify.register(async function (fastify) {
                     console.log(error);
                     return;
                 }
-                switch (data.button) {
-                    case 5:
-                        player.spawnTower();
-                        break;
-                    case 4:
-                    case 3:
-                    case 2:
-                    case 1:
-                    case 0:
-                        player.upTowerRank(data.button);
-                        break;
-                    default:
-                        break;
+                if (mode !== "spec") {
+                    switch (data.button) {
+                        case 5:
+                            player.spawnTower();
+                            break;
+                        case 4:
+                        case 3:
+                        case 2:
+                        case 1:
+                        case 0:
+                            player.upTowerRank(data.button);
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    changeRoomSpec(userId);
                 }
             } else if (init && msg.event === "towerInit") {
                 const {data, success, error} = towerSchema.safeParse(JSON.parse(message.toString()));
@@ -582,18 +599,25 @@ fastify.register(async function (fastify) {
                     console.log(error);
                     return;
                 }
-                player.deck.splice(0, player.deck.length);
-                player.deck.push(allTowers[data.t1].clone());
-                player.deck.push(allTowers[data.t2].clone());
-                player.deck.push(allTowers[data.t3].clone());
-                player.deck.push(allTowers[data.t4].clone());
-                player.deck.push(allTowers[data.t5].clone());
-                joinRoomTd(player, room);
+                mode = data.mode;
+                if (data.mode !== "spec") {
+                    player.deck.splice(0, player.deck.length);
+                    player.deck.push(allTowers[data.t1].clone());
+                    player.deck.push(allTowers[data.t2].clone());
+                    player.deck.push(allTowers[data.t3].clone());
+                    player.deck.push(allTowers[data.t4].clone());
+                    player.deck.push(allTowers[data.t5].clone());
+                    joinRoomTd(player, room);
+                } else
+                    joinRoomSpec(player, room);
             }
         });
 
         socket.on("close", () => {
-            leaveRoom(userId);
+            if (room != spec)
+                leaveRoom(userId);
+            else
+                leaveRoomSpec(userId);
             console.log("Client disconnected");
         });
     });

@@ -1,156 +1,7 @@
-// Classes
-export class Bullet {
-    type: string;
-    rank: number;
-    pos: number;
-    target: number;
-    travel: number;
-
-    constructor(type: string, rank: number, pos: number, target: number, travel: number) {
-        this.type = type;
-        this.rank = rank;
-        this.pos = pos;
-        this.target = target;
-        this.travel = travel;
-    }
-}
-
-export class GameTd {
-    level: number = 0;
-    timer: number = 4;
-    start: boolean = false;
-    state: number = 0;
-    boss: boolean = false;
-}
-
-export class Enemy {
-    type: string;
-    hp: number;
-    pos: number;
-
-    constructor(type: string, hp: number, pos: number) {
-        this.type = type;
-        this.hp = hp;
-        this.pos = pos;
-    }
-}
-
-export class Player {
-    name: string;
-    hp: number = 3;
-    mana: number = 210;
-    cost: number = 60;
-    enemies: Enemy[] = [];
-    deck: Tower[] = [];
-    board: Board[] = [];
-    bullets: Bullet[] = [];
-
-    constructor(name: string) {
-        this.name = name;
-    }
-
-    addEnemy(enemy: Enemy) {
-        this.enemies.push(enemy);
-    }
-
-    addBullet(bullet: Bullet) {
-        this.bullets.push(bullet);
-    }
-}
-
-export class Tower {
-    type: string;
-    speed: number;
-    damages: number;
-    area: number;
-    effect: string;
-    level: number;
-    pos: number = 0;
-
-    constructor(type: string, speed: number, damages: number, area: number, effect: string, level: number) {
-        this.type = type;
-        this.speed = speed;
-        this.damages = damages;
-        this.area = area;
-        this.effect = effect;
-        this.level = level;
-    }
-}
-
-export class Board {
-    pos: number;
-    tower: Tower;
-
-    constructor(pos: number, tower: Tower) {
-        this.tower = tower;
-        this.pos = pos;
-    }
-}
-
-export class AssetsTd {
-    images: Record<string, HTMLImageElement> = {};
-
-    async load(): Promise<void> {
-        const assetsFolder = "./assets/tower-defense/";
-        const imageNames = ["black1.png", "black2.png", "black3.png", "black4.png",
-            "blue1.png", "blue2.png", "blue3.png", "blue4.png",
-            "green1.png", "green2.png", "green3.png", "green4.png",
-            "orange1.png", "orange2.png", "orange3.png", "orange4.png",
-            "pink1.png", "pink2.png", "pink3.png", "pink4.png",
-            "red1.png", "red2.png", "red3.png", "red4.png",
-            "violet1.png", "violet2.png", "violet3.png", "violet4.png",
-            "white1.png", "white2.png", "white3.png", "white4.png",
-            "yellow1.png", "yellow2.png", "yellow3.png", "yellow4.png",
-            "ygreen1.png", "ygreen2.png", "ygreen3.png", "ygreen4.png",
-            "main.png", "addTower.png", "hp.png", "mana.png", "random.png", "randomh.png",
-            "map0.png", "map1.png", "map2.png", "map3.png", "map4.png",
-            "poop0.png", "poop1.png",
-            "bslime0.png", "bslime1.png",
-            "gslime0.png", "gslime1.png",
-            "yslime0.png", "yslime1.png",
-            "rslime0.png", "rslime1.png",
-            "pslime0.png", "pslime1.png",
-            "dslime0.png", "dslime1.png",
-            "kslime0.png", "kslime1.png"];
-
-        const promises = imageNames.map(name => {
-            return new Promise<void>((resolve, reject) => {
-                const key = name.split(".")[0];
-                const img = new Image();
-                img.src = `${assetsFolder}${name}`;
-                img.onload = () => {
-                    this.images[key] = img;
-                    resolve();
-                };
-                img.onerror = (err) => {
-                    console.error(`Erreur de chargement pour l'image ${name}`, err);
-                    reject(err);
-                };
-            });
-        });
-
-        await Promise.all(promises);
-    }
-
-    getImage(name: string): HTMLImageElement | undefined {
-        return this.images[name];
-    }
-
-    getAnImage(name: string): HTMLImageElement | undefined {
-        if (frame % 30 < 15 && this.images[`${name}0`]) {
-            return this.images[`${name}0`];
-        } else if (this.images[`${name}1`]) {
-            return this.images[`${name}1`];
-        }
-        return this.images[name];
-    }
-}
-
-export let frame: number = 0;
-export let tdConnect: boolean;
-
 // Main function
-export function TowerDefense(room?: number) {
+import {AssetsTd, Board, Bullet, Enemy, frame, GameTd, Player, tdConnect, Tower} from "./td";
+
+export function TowerDefenseSpec(room?: number) {
     // Global Variables
     if (!room)
         room = -1;
@@ -184,12 +35,6 @@ export function TowerDefense(room?: number) {
         return ("mono dmg");
     }
 
-    function isSelected(i: number) {
-        if (selected.includes(i))
-            return ("#b329d1");
-        return ("#eaeaea");
-    }
-
     function dots() {
         if (frame % 120 < 30)
             return (".");
@@ -215,27 +60,6 @@ export function TowerDefense(room?: number) {
         ctxTd.font = "64px 'Press Start 2P'";
         ctxTd.strokeText("Slime Defender", canvasTd.width * 0.545, canvasTd.height * 0.25, canvasTd.width * 0.6);
         ctxTd.fillText("Slime Defender", canvasTd.width * 0.545, canvasTd.height * 0.25, canvasTd.width * 0.6);
-        // Tower Selection
-        for (let i = 0; i < allTowers.length; i++) {
-            let centerx = (0.18 + Math.floor(i % 5) * 0.16) * canvasTd.width;
-            let centery = (0.54 + Math.floor(i / 5) * 0.16) * canvasTd.height;
-            drawRawButton(centerx, centery, canvasTd.width * 0.15, canvasTd.height * 0.15, isSelected(i));
-            ctxTd.drawImage(assetsTd.getImage(`${allTowers[i].type}4`)!, centerx - tile * 1.1, centery - tile * 0.6, canvasTd.height * 0.11, canvasTd.height * 0.11);
-            ctxTd.fillStyle = "#eaeaea";
-            ctxTd.textAlign = "left";
-            ctxTd.font = `${tile / 5}px 'Press Start 2P'`;
-            ctxTd.fillText(`atk: ${allTowers[i].damages}`, centerx, centery - tile * 0.35, canvasTd.width * 0.06);
-            ctxTd.fillText(`spd: ${allTowers[i].speed}`, centerx, centery - tile * 0.05, canvasTd.width * 0.06);
-            ctxTd.fillText(aoeornot(allTowers[i].area), centerx, centery + tile * 0.25, canvasTd.width * 0.06);
-            if (allTowers[i].effect !== "none")
-                ctxTd.fillText(allTowers[i].effect, centerx, centery + tile * 0.55, canvasTd.width * 0.06);
-        }
-        // Random button
-        drawRawButton(canvasTd.width * 0.63, canvasTd.height * 0.9, canvasTd.width * 0.06, canvasTd.height * 0.06, "#eaeaea");
-        if (rdmhover)
-            ctxTd.drawImage(assetsTd.getImage("randomh")!, canvasTd.width * 0.634, canvasTd.height * 0.9 - tile * 0.125, tile * 0.25, tile * 0.25);
-        else
-            ctxTd.drawImage(assetsTd.getImage("random")!, canvasTd.width * 0.634, canvasTd.height * 0.9 - tile * 0.125, tile * 0.25, tile * 0.25);
         // Start button
         ctxTd.textAlign = "center";
         ctxTd.font = `${tile / 4.2}px 'Press Start 2P'`;
@@ -243,12 +67,9 @@ export function TowerDefense(room?: number) {
             drawRawButton(canvasTd.width * 0.5, canvasTd.height * 0.9, canvasTd.width * 0.26, canvasTd.height * 0.1, "#b329d1");
             ctxTd.fillText("Waiting for opponent", canvasTd.width * 0.5, canvasTd.height * 0.91, canvasTd.width * 0.22);
             ctxTd.fillText(dots(), canvasTd.width * 0.5, canvasTd.height * 0.935);
-        } else if (selected.length === 5) {
+        } else {
             drawRawButton(canvasTd.width * 0.5, canvasTd.height * 0.9, canvasTd.width * 0.26, canvasTd.height * 0.1, "#b329d1");
             ctxTd.fillText("Click to start", canvasTd.width * 0.5, canvasTd.height * 0.91, canvasTd.width * 0.22);
-        } else {
-            drawRawButton(canvasTd.width * 0.5, canvasTd.height * 0.9, canvasTd.width * 0.26, canvasTd.height * 0.1, "#eaeaea");
-            ctxTd.fillText("Select 5 rocks", canvasTd.width * 0.5, canvasTd.height * 0.91, canvasTd.width * 0.22);
         }
     }
 
@@ -498,37 +319,6 @@ export function TowerDefense(room?: number) {
         });
     }
 
-    function drawGrid() {
-        let sq = true;
-        for (let i = 0; i < canvasTd.width; i += tile) {
-            let j = 0;
-            sq = !sq;
-            for (; j < canvasTd.height; j += tile) {
-                if (sq) {
-                    ctxTd.fillStyle = "#364153";
-                    sq = false;
-                } else {
-                    ctxTd.fillStyle = "#101828";
-                    sq = true;
-                }
-                ctxTd.fillRect(i, j, tile, tile);
-            }
-        }
-    }
-
-    function drawTemplate() {
-        ctxTd.fillStyle = "red";
-        ctxTd.fillRect(0, tile * 0.5, tile * 6.5, tile * 8);
-        ctxTd.fillStyle = "blue";
-        ctxTd.strokeRect(0, tile, 6 * tile, 7 * tile);
-        ctxTd.fillStyle = "brown";
-        ctxTd.fillRect(tile * 0.5, tile * 1.5, tile * 5, tile * 6);
-        ctxTd.fillStyle = "red";
-        ctxTd.fillRect(0, tile * 7.5, tile, tile);
-        ctxTd.fillStyle = "green";
-        ctxTd.fillRect(tile, tile * 2, tile * 4, tile * 5);
-    }
-
     function drawGameTd() {
         ctxTd.drawImage(assetsTd.getImage(`map${nmap}`)!, 0, 0, canvasTd.width, canvasTd.height);
         //drawGrid(); // for debug use only
@@ -538,6 +328,10 @@ export function TowerDefense(room?: number) {
         drawButtons();
         drawTowers();
         drawBullets();
+        ctxTd.fillStyle = "#fcc800";
+        ctxTd.font = `45px 'Press Start 2P'`;
+        ctxTd.textAlign = "center"
+        ctxTd.fillText("Spectator Mode", canvasTd.width * 0.5, canvasTd.height * 0.95);
     }
 
     // EndScreen
@@ -610,8 +404,8 @@ export function TowerDefense(room?: number) {
     });
 
     // Communication with backend
-    function updatePlayer(data: Player) {
-        const player = data.id === id ? player1 : player2;
+    function updatePlayer(data: Player, nPlayer: number) {
+        const player = nPlayer === 1 ? player1 : player2;
         player.name = data.name;
         player.hp = data.hp;
         player.mana = data.mana;
@@ -661,8 +455,8 @@ export function TowerDefense(room?: number) {
             switch (data.class) {
                 case "gameUpdate":
                     updateGame(data.game)
-                    updatePlayer(data.player1);
-                    updatePlayer(data.player2)
+                    updatePlayer(data.player1, 1);
+                    updatePlayer(data.player2, 2);
                     break;
                 case "Tower":
                     allTowers.push(new Tower(data.type, data.speed, data.damages, data.area, data.effect, data.level));
@@ -687,57 +481,25 @@ export function TowerDefense(room?: number) {
             const y = (event.clientY - rect.top) * scaleY;
             switch (gameTd.state) {
                 case 0:
-                    if (x >= 0.1 * canvasTd.width && x < canvasTd.width * 0.9 && y >= 0.46 * canvasTd.height && y < 0.78 * canvasTd.height) {
-                        const select = Math.floor((x - 0.1 * canvasTd.width) / (canvasTd.width * 0.16)) + 5 * Math.floor((y - 0.46 * canvasTd.height) / (canvasTd.height * 0.16));
-                        if (selected.includes(select)) {
-                            const index = selected.indexOf(select);
-                            if (index !== -1) {
-                                selected.splice(index, 1);
-                            }
-                        } else if (selected.length < 5)
-                            selected.push(select);
-                    }
-                    if (selected.length === 5 && x >= 0.37 * canvasTd.width && x < 0.63 * canvasTd.width && y >= 0.85 * canvasTd.height && y < 0.95 * canvasTd.height) {
+                    if (x >= 0.37 * canvasTd.width && x < 0.63 * canvasTd.width && y >= 0.85 * canvasTd.height && y < 0.95 * canvasTd.height) {
                         socketTd.send(JSON.stringify({
                             event: "towerInit",
-                            mode: "default",
-                            t1: selected[0],
-                            t2: selected[1],
-                            t3: selected[2],
-                            t4: selected[3],
-                            t5: selected[4]
+                            mode: "spec",
+                            t1: 0,
+                            t2: 1,
+                            t3: 2,
+                            t4: 3,
+                            t5: 4
                         }));
                         gameTd.state = 0.5;
                     }
-                    if (x >= 0.63 * canvasTd.width && x < 0.66 * canvasTd.width && y >= 0.87 * canvasTd.height && y < 0.93 * canvasTd.height) {
-                        selected.splice(0, selected.length);
-                        while (selected.length < 5) {
-                            const add = Math.floor(Math.random() * 10);
-                            if (!selected.includes(add))
-                                selected.push(add);
-                        }
-                    }
                     break;
                 case 1:
-                    if (y >= canvasTd.height - tile * 1.25 && y < canvasTd.height - tile * 0.25) {
-                        if (x >= 0 && x < tile * 5)
-                            socketTd.send(JSON.stringify({event: "click", player: 1, button: Math.floor(x / tile)}));
-                        else if (x >= tile * 6 && x < tile * 7) {
-                            socketTd.send(JSON.stringify({event: "click", player: 1, button: 5}));
-                        }
-                    }
+                    socketTd.send(JSON.stringify({event: "click", player: 1, button: 0}));
                     break;
                 default:
                     break;
             }
-        });
-
-        canvasTd.addEventListener("mousemove", (event) => {
-            const rect = canvasTd.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-
-            rdmhover = x >= 0.63 * canvasTd.width && x < 0.66 * canvasTd.width && y >= 0.87 * canvasTd.height && y < 0.93 * canvasTd.height;
         });
 
         socketTd.onclose = function () {
