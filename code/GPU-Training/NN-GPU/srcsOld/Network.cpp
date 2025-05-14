@@ -83,7 +83,7 @@ void	Network::backprop(std::vector<double>& input, std::vector<double>& expected
 	delete cd;
 	delete sp;
 	for (unsigned int i_l = 2; i_l <= lSize; i_l++) {
-		sp = this->_layers.at(lSize-i_l+1)->callPrimeActFunc(*zs.at(lSize- i_l));
+		sp = this->_layers.at(lSize-i_l)->callPrimeActFunc(*zs.at(lSize-i_l));
 		auto nDelta = this->_layers.at(lSize-i_l+1)->calcDelta(*delta, *sp);
 		delete delta;
 		delta = nDelta;

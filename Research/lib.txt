@@ -23,15 +23,15 @@ https://docs.nvidia.com/deeplearning/performance/dl-performance-matrix-multiplic
 https://docs.nvidia.com/deeplearning/performance/dl-performance-gpu-background/index.html#gpu-arch__fig2
 https://docs.nvidia.com/deeplearning/performance/dl-performance-fully-connected/index.html#:~:text=As%20fully,twice%20the%20time%20to%20calculate
 
-https://salykova.github.io/sgemm-gpu
+https://salykova.github.iœo/sgemm-gpu
 	https://developer.nvidia.com/blog/easy-introduction-cuda-c-and-c/
 	https://developer.nvidia.com/blog/how-implement-performance-metrics-cuda-cc/
 	https://developer.nvidia.com/blog/how-access-global-memory-efficiently-cuda-c-kernels/
 	https://developer.nvidia.com/blog/how-query-device-properties-and-handle-errors-cuda-cc/
 	https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/
 	https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/
-
 	https://developer.nvidia.com/blog/how-access-global-memory-efficiently-cuda-c-kernels/
+
 	https://developer.nvidia.com/blog/using-shared-memory-cuda-cc/
 	https://developer.nvidia.com/blog/efficient-matrix-transpose-cuda-cc/
 	https://developer.nvidia.com/blog/finite-difference-methods-cuda-cc-part-1/
