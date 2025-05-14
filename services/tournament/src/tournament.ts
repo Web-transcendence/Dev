@@ -13,11 +13,6 @@ async function fetchMatch(id1: number, id2: number) {
         },
         body: JSON.stringify({id1: id1, id2: id2})
     })
-    if (response.ok) {
-        const winner = await response.json()
-        return winner.id
-    }
-    throw new Error(`CREATE A REAL ERROR MESSAGE`)
 }
 
 export class tournament {

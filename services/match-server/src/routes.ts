@@ -149,4 +149,5 @@ export default async function pongRoutes(fastify: FastifyInstance) {
             return res.status(500).send()
         }
     })
+
 }
