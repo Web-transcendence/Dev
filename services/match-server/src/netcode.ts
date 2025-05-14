@@ -181,7 +181,7 @@ export async function waitForMatchEnd(roomId: number, playerA_id: number, player
 
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
     const roomId = generateRoom();
-    await fetchNotifyUser([playerA_id, playerB_id], `invitationGame`, roomId)
+    await fetchNotifyUser([playerA_id, playerB_id], `invitationGame`, {roomId: roomId})
     const winnerId = await waitForMatchEnd(roomId, playerA_id, playerB_id);
     return (winnerId);
 }

@@ -156,9 +156,10 @@ const notifyQuitTournament = ({id, maxPlayer}: { id: number, maxPlayer: number }
    }
 }
 
-const notifyInvitationGame = async ({id}: { id: number }) => {
+const notifyInvitationGame = async ({roomId}: { roomId: number }) => {
     await loadPart('/pongRemote');
-    Pong("remote", id)
+    console.log(`join room ${roomId}`)
+    Pong("remote", roomId)
     // await loadPart('/scoreBoard');
 }
 
