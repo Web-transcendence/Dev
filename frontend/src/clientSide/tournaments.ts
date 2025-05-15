@@ -1,6 +1,6 @@
 import { navigate } from './front.js'
 import {fetchUserInformation, getTournamentList, UserData} from "./user.js";
-import {DispayNotification} from "./notificationHandler.js";
+import {displayNotification} from "./notificationHandler.js";
 
 export async function joinTournament(tournamentId: number) {
     try {
@@ -28,7 +28,7 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
     if (name) name.innerText = nameTournament;
     const tournamentList: {participants: number[], maxPlayer: number, status: string}[] | undefined = await getTournamentList()
     if (!tournamentList) {
-        DispayNotification(`Error Can't find Tournaments`);
+        displayNotification(`Error Can't find Tournaments`);
         await navigate('/home')
         return ;
     }
@@ -42,12 +42,12 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
         for (const {id, nickName, avatar} of userData) {
             const clone = playerTmp.content.cloneNode(true) as HTMLElement | null;
             if (!clone) {
-                DispayNotification('Error 1 occur, please refresh your page.');
+                displayNotification('Error 1 occur, please refresh your page.');
                 return;
             }
             const item = clone.querySelector("li");
             if (!item) {
-                DispayNotification('Error 2 occur, please refresh your page.');
+                displayNotification('Error 2 occur, please refresh your page.');
                 return;
             }
             item.id = `itemId-${id}`
@@ -110,5 +110,59 @@ export async function launchTournament() {
         }
     } catch (error) {
         console.error(error)
+    }
+}
+
+export async function getBrackets(nbrPlayer: number) {
+    const brackets = document.getElementById("brackets");
+    for (let nbr: number = nbrPlayer; nbr >= 2;) {
+        const playerListTmp = document.getElementById('playerListTemplate')
+        if (!brackets) {
+            displayNotification(`Error from html1`);
+            await navigate('/home')
+            return;
+        }
+        if (!playerListTmp) {
+            displayNotification(`Error from html2`);
+            await navigate('/home')
+            return;
+        }
+        const clone = playerListTmp.cloneNode(true) as HTMLElement | null;
+        if (!clone) {
+            displayNotification(`Error from html3`);
+            await navigate('/home')
+            return;
+        }
+        clone.id = `playerList-${nbr}`;
+        brackets.appendChild(clone);
+        nbr = nbr / 2
+    }
+    const players = [
+        'Alice', 'Bob',
+        'Charlie', 'David',
+    ];
+    for (const player of players) {
+        const playerList = document.getElementById(`playerList-${nbrPlayer}`)
+        const playerTmp = document.getElementById('playerTemplate')
+        if (!playerList || !playerTmp) {
+            displayNotification(`Error from html4`);
+            await navigate('/home')
+            return;
+        }
+        const clone = playerList.cloneNode(true) as HTMLElement | null;
+        if (!clone) {
+            displayNotification(`Error from html5`);
+            await navigate('/home')
+            return;
+        }
+        const item = clone.querySelector('#player');
+        if (!item) {
+            displayNotification(`Error from html6`);
+            await navigate('/home')
+            return;
+        }
+        item.innerHTML = player;
+        item.id = player;
+        playerList.appendChild(item);
     }
 }

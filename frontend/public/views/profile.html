@@ -42,15 +42,37 @@
 
             <div class="border border-gray-300 my-4"></div>
 
-            <div id="myModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-                <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md relative">
-                    <h2 class="text-xl font-semibold mb-4">Titre du Modal</h2>
-                    <p class="mb-4">Contenu du modal ici.</p>
-                    <div class="flex justify-end">
-                        <button id="closeModalBtn" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Fermer</button>
+            <div id="myModal"
+                 class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-0 items-center justify-center">
+                <!-- Modal Content -->
+                <div id="modalContent"
+                     class="opacity-0 translate-y-full transition-all duration-500 transform
+                bg-gray-700 text-white text-2xl p-8 relative w-[90%] max-w-3xl rounded-xl flex flex-col gap-6 shadow-lg">
+                    <button id="closeModalBtn"
+                            class="absolute top-4 right-4 text-xl hover:scale-110 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="w-5 h-5 opacity-25 hover:opacity-100 transition-opacity duration-200"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    <div id="nameFriend" class="text-center tracking-wide"></div>
+
+                    <div class="flex justify-center gap-10">
+                        <button id="invitePong"
+                                class="bg-red-600 text-white px-6 py-3 rounded-full hover:bg-red-700 hover:scale-105 transition duration-300 ease-in-out">
+                            Pong
+                        </button>
+                        <button id="inviteTowerDefense"
+                                class="bg-red-600 text-white px-6 py-3 rounded-full hover:bg-red-700 hover:scale-105 transition duration-300 ease-in-out">
+                            Tower Defense
+                        </button>
                     </div>
                 </div>
             </div>
+
+
 
             <ul id="acceptedList" class="p-2 space-y-2 w-full max-h-60 overflow-y-auto custom-scrollbar" role="list">
             </ul>
@@ -66,10 +88,9 @@
                             <p class="text-lg font-medium text-gray-900 dark:text-white name"></p>
                         </div>
                     </div>
-                        <button id="inviteBtn"
-                                class="absolute inset-y-0 right-0 btn-primary m-4">
-                            Invite to Play
-                        </button>
+                    <button class="inviteFriend hidden absolute inset-y-0 right-0 btn-primary m-4">
+                        Invite to Play
+                    </button>
                 </li>
             </template>
 
@@ -133,7 +154,7 @@
                         <!-- Boutons d'action -->
                         <div class="flex space-x-2 mr-5">
                             <button
-                                    class="accept-btn group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-pink-500 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none accept-btn">
+                                    class="accept-btn group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-green-600 text-white rounded-full transition-transform duration-300 hover:scale-110 focus:outline-none accept-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                      class="w-5 h-5 opacity-25 group-hover:opacity-100  transition-opacity duration-500"
                                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -141,7 +162,7 @@
                                 </svg>
                             </button>
                             <button
-                                    class="decline-btn group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-pink-500 text-white rounded-full transition-transform duration-600 hover:scale-110 focus:outline-none decline-btn">
+                                    class="decline-btn group relative w-10 h-10 flex items-center justify-center bg-gray-500 hover:bg-red-600 text-white rounded-full transition-transform duration-600 hover:scale-110 focus:outline-none decline-btn">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                      class="w-5 h-5 opacity-25 group-hover:opacity-100 transition-opacity duration-200"
                                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -200,7 +221,7 @@
                         inputmode="numeric"
                         pattern="\d{6}"
                         maxlength="6"
-                        class="w-1/2 px-2 py-2 my-2 border border-gray-300 rounded-lg text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        class="w-1/2 px-2 py-2 my-2 border border-gray-300 rounded-lg text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-red-600"
                         placeholder="123456"
                     />
                 </label>
@@ -221,7 +242,7 @@
     </div>
 
     <div class="text-center">
-        <button id="logout" class="bg-pink-500 btn-primary">
+        <button id="logout" class="bg-red-600 btn-primary">
             Logout
         </button>
     </div>

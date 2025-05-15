@@ -3,6 +3,7 @@ import {Pong} from "./pong.js";
 import {displayNotification} from "./notificationHandler.js";
 import {navigate} from "./front.js";
 import {loadPart} from "./insert.js";
+import {openModal} from "./modal.js";
 
 const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
     const result: Record<string, string> = {}
@@ -65,12 +66,16 @@ export const CreateFriendLi = async (id: number, key: string, tmpName: string)=>
         const name = clone.querySelector(".name");
         if (name) name.textContent = userData.nickName;
         console.log('logOnline :', userData.online);
-        if (userData.online && key === "acceptedList")
+        if (userData.online && key === "acceptedList") {
             clone.querySelector(".online")?.classList.remove('hidden');
+            clone.querySelector(".inviteFriend")?.classList.remove('hidden');
+        }
         if (key === "receivedList") {
             clone.querySelector(".accept-btn")?.addEventListener("click", () => addFriend(userData.nickName));
             clone.querySelector(".decline-btn")?.addEventListener("click", () => removeFriend(userData.nickName));
         }
+        if (key === "acceptedList")
+            clone.querySelector(".inviteFriend")?.addEventListener("click", async () => openModal(userData.nickName));
         list.appendChild(clone);
     }
 }
@@ -110,13 +115,19 @@ const notifyFriendRemoved = ({id}: { id: number }) => {
 const notifyDisconnection = ({id}: { id: number }) => {
     console.log(`this friend have to be marked as unconnected`)
     const list = document.getElementById(`friendId-${id}`);
-    if (list) list.querySelector(".online")?.classList.add('hidden');
+    if (list) {
+        list.querySelector(".online")?.classList.add('hidden');
+        list.querySelector(".inviteFriend")?.classList.add('hidden');
+    }
 }
 
 const notifyConnection = ({id}: { id: number }) => {
     console.log(`this friend have to be marked as connected`)
     const list = document.getElementById(`friendId-${id}`);
-    if (list) list.querySelector(".online")?.classList.remove('hidden');
+    if (list) {
+        list.querySelector(".online")?.classList.remove('hidden');
+        list.querySelector(".inviteFriend")?.classList.remove('hidden');
+    }
 }
 
 const notifyJoinTournament = async ({id, maxPlayer}: { id: number, maxPlayer: number }) => {
