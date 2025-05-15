@@ -1,6 +1,6 @@
 import {addFriend, fetchUserInformation, removeFriend, UserData} from "./user.js";
 import {Pong} from "./pong.js";
-import {DispayNotification} from "./notificationHandler.js";
+import {displayNotification} from "./notificationHandler.js";
 import {navigate} from "./front.js";
 import {loadPart} from "./insert.js";
 
@@ -81,10 +81,25 @@ const notifyNewFriend = async ({id}: { id: number }) => {
     await CreateFriendLi(id, "acceptedList", "acceptedTemplate")
 }
 
-const notifyFriendInvitation = async ({id}: {id: number}) => {
-    console.log(`this friend have to be add in the invitation list`)
-    await CreateFriendLi(id, "receivedList", "receivedTemplate")
-}
+const notifyFriendInvitation = async ({ id }: { id: number }) => {
+    console.log(`this friend has to be added in the invitation list`);
+    await CreateFriendLi(id, "receivedList", "receivedTemplate");
+
+    const [userData] = await fetchUserInformation([id])
+    displayNotification('New friend request!', {
+        type: "invitation",
+        onAccept: async () => {
+            if (await addFriend(userData.nickName)) {
+                await CreateFriendLi(userData.id, "acceptedList", "acceptedTemplate");
+            }
+        },
+        onRefuse: async () => {
+            if (await removeFriend(userData.nickName)) {
+                document.getElementById(`friendId-${userData.id}`)?.remove();
+            }
+        }
+    }, userData);
+};
 
 const notifyFriendRemoved = ({id}: { id: number }) => {
     console.log(`this friend have to be supressed from the friendlist`)
@@ -110,14 +125,18 @@ const notifyJoinTournament = async ({id, maxPlayer}: { id: number, maxPlayer: nu
     const playerTmp = document.getElementById('playerTemplate')  as HTMLTemplateElement | null;
     const [{nickName, avatar}]: UserData[] = await fetchUserInformation([id]);
     if (!playerList || !playerTmp) {
-        DispayNotification(`Error Can't find Tournaments`);
+        displayNotification(`Error Can't find Tournaments`);
         await navigate('/home')
         return ;
     }
     const clone = playerTmp.content.cloneNode(true) as HTMLElement | null;
+    if (!clone) {
+        displayNotification('Error 1.2 occur, please refresh your page.');
+        return;
+    }
     const item = clone.querySelector("li");
     if (!item) {
-        DispayNotification('Error 2 occur, please refresh your page.');
+        displayNotification('Error 2 occur, please refresh your page.');
         return;
     }
     item.id = `itemId-${id}`

@@ -37,6 +37,7 @@ export async function routes(fastify: FastifyInstance) {
         "lobby",
         "factor",
         "matchHistory",
+        "brackets",
     ];
 
     // Route dynamique pour chaque page définie

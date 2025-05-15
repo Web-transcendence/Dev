@@ -4,7 +4,7 @@ import { friendList } from "./friends.js";
 import { handleConnection, navigate } from "./front.js";
 import { tdStop, TowerDefense } from "./td.js";
 import { editProfile } from "./editInfoProfile.js";
-import { DispayNotification } from "./notificationHandler.js";
+import { displayNotification } from "./notificationHandler.js";
 import { Pong } from "./pong.js";
 import { displayTournaments, joinTournament, launchTournament} from "./tournaments.js";
 import { printMatchHistory } from "./matchHistory.js";
@@ -58,8 +58,12 @@ async function profileBtn() {
     const addFriendIpt = document.getElementById("friendNameIpt") as HTMLButtonElement;
     if (addFriendBtn && addFriendIpt)
         addFriendBtn.addEventListener("click", async () => {
-            await addFriend(addFriendIpt.value);
-            await friendList();
+            if (addFriendIpt.value.length >= 3) {
+                await addFriend(addFriendIpt.value);
+                await friendList();
+            } else {
+                displayNotification('Name of 3 characters minimum', {type: "error"})
+            }
         });
     const activeFA = sessionStorage.getItem('activeFA');
     if (activeFA) {
@@ -166,12 +170,12 @@ async function lobby() {
     const id = sessionStorage.getItem('idTournaments');
     const name = sessionStorage.getItem('nameTournaments');
     if (!id || !name) {
-        DispayNotification("Missing tournament information.");
+        displayNotification("Missing tournament information.");
         await navigate("/home");
         return ;
     }
     const toIntId = Number.parseInt(id);
-    if (isNaN(toIntId)) DispayNotification("Invalid tournament ID.");
+    if (isNaN(toIntId)) displayNotification("Invalid tournament ID.");
     await displayTournaments(toIntId, name);
     document.getElementById("launchTournamentBtn")?.addEventListener("click", async () => {
         await launchTournament();

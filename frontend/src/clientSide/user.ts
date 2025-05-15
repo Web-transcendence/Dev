@@ -1,7 +1,7 @@
 import {navigate} from "./front.js"
 import {loadPart} from "./insert.js"
 import {sseConnection} from "./serverSentEvent.js"
-import {DispayNotification} from "./notificationHandler.js"
+import {displayNotification} from "./notificationHandler.js"
 
 export function register(button: HTMLElement): void {
     button.addEventListener("click", async () => {
@@ -24,7 +24,7 @@ export function register(button: HTMLElement): void {
             await getAvatar();
             await sseConnection()
         } else {
-            DispayNotification(result.error , { type: "error" });
+            displayNotification(result.error , { type: "error" });
         }
     })
 }
@@ -55,7 +55,7 @@ export function login(button: HTMLElement): void {
             await sseConnection()
         } else {
             const errorData = await response.json()
-            DispayNotification('Wrong password or nickname', { type: "error" });
+            displayNotification('Wrong password or nickname', { type: "error" });
         }
     })
 }
@@ -163,7 +163,7 @@ export async function verify2fa(secret: string) {
             const result = await response.json()
             sessionStorage.setItem('token', result.token)
             sessionStorage.setItem('activeFA', 'true')
-            DispayNotification('You have enabled two-factor authentication.');
+            displayNotification('You have enabled two-factor authentication.');
             navigate('/home')
         }
         else {
@@ -194,10 +194,10 @@ export async function addFriend(friendNickName: string) {
         if (!response.ok) {
             const error = await response.json()
             console.error('ERROR addFriend', error.error)
-            DispayNotification(error.error, { type: "error" })
+            displayNotification(error.error, { type: "error" })
             return false
         }
-        DispayNotification('Successfully Invited')
+        displayNotification('Successfully Invited')
         return true
     } catch (error) {
         console.error(error)
@@ -222,7 +222,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
             console.error(error.error)
             return false
         }
-        DispayNotification('Successfully Removed')
+        displayNotification('Successfully Removed')
         return true
     } catch (error) {
         console.error(error)
@@ -280,17 +280,17 @@ export async function setAvatar(target: HTMLInputElement) {
             if (!response.ok) {
                 const error = await response.json()
                 console.error(error.error)
-                DispayNotification(error.error, { type: "error" })
+                displayNotification(error.error, { type: "error" })
             }
             else {
                 sessionStorage.setItem('avatar', base64File)
                 updateAvatar('avatarProfile', base64File);
                 updateAvatar('avatar', base64File);
-                DispayNotification('New Avatar !')
+                displayNotification('New Avatar !')
             }
         }
     } catch (err) {
-        DispayNotification('Not a File', { type: "error" })
+        displayNotification('Not a File', { type: "error" })
     }
 }
 
@@ -366,10 +366,10 @@ export async function setNickName(newNickName: string) {
         })
         if (!response.ok) {
             console.error('failed')
-            DispayNotification('Bad input', { type: "error" } )
+            displayNotification('Bad input', { type: "error" } )
         } else {
             console.log('success')
-            DispayNotification('New Nickname')
+            displayNotification('New Nickname')
         }
     } catch (error) {
         console.error(error)
@@ -398,7 +398,7 @@ export async function getTournamentList() {
         if (!response.ok) {
             const error = await response.json()
             console.error(error.error)
-            DispayNotification("Register To join Tournaments", { type: "error" })
+            displayNotification("Register To join Tournaments", { type: "error" })
             return undefined
         }
         return await response.json()

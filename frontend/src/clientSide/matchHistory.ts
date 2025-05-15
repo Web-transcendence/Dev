@@ -1,4 +1,4 @@
-import {DispayNotification} from "./notificationHandler.js";
+import {displayNotification} from "./notificationHandler.js";
 import {fetchUserInformation, UserData} from "./user.js";
 import {navigate} from "./front.js";
 
@@ -16,7 +16,7 @@ function addMatchEntry(game: string, opponent: string, opponentAvatar: string, s
     const template = document.getElementById('matchTemplate') as HTMLTemplateElement;
     const list = document.getElementById('matchHistoryList');
     if (!template || !list) {
-        DispayNotification('Can-t find html code', { type: "error" })
+        displayNotification('Can-t find html code', { type: "error" })
         return;
     }
 
@@ -49,7 +49,7 @@ function addMatchEntry(game: string, opponent: string, opponentAvatar: string, s
 async function getElementsOfMatch(MatchResult: MatchResult[] | undefined, id: number, game: string) {
     try {
         if (MatchResult === undefined) {
-            DispayNotification(`You Didn't played a single game of ${game}`, { type: "error" })
+            displayNotification(`You Didn't played a single game of ${game}`, { type: "error" })
             return;
         }
         for (const match of MatchResult) {
@@ -71,7 +71,7 @@ async function getElementsOfMatch(MatchResult: MatchResult[] | undefined, id: nu
         }
     } catch (e) {
         console.error(e)
-        DispayNotification('Could not find match result', { type: "error" })
+        displayNotification('Could not find match result', { type: "error" })
         return ;
     }
 }
@@ -90,7 +90,7 @@ export async function getGameHistory (id: string, game: string): Promise<MatchRe
         if (!response.ok) {
             const error = await response.json()
             console.error(error.error)
-            DispayNotification(`${game} History not loaded`, { type: "error" })
+            displayNotification(`${game} History not loaded`, { type: "error" })
             return undefined
         }
         return await response.json()
@@ -103,7 +103,7 @@ export async function printMatchHistory() {
     const id = sessionStorage.getItem('id');
     if (!id) {
         await navigate('/home')
-        DispayNotification('Could not find your match result', { type: "error" })
+        displayNotification('Could not find your match result', { type: "error" })
         return;
     }
     const pongMH: MatchResult[] | undefined = await getGameHistory(id, 'match-server');

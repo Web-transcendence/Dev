@@ -1,8 +1,8 @@
 import {getAvatar} from './user.js'
 import {loadPart} from './insert.js';
 import {sseConnection} from "./serverSentEvent.js";
-import {joinTournament, quitTournaments} from "./tournaments.js";
-import {DispayNotification} from "./notificationHandler.js";
+import {joinTournament, quitTournaments, getBrackets} from "./tournaments.js";
+import {displayNotification} from "./notificationHandler.js";
 
 declare const tsParticles: any;
 declare const AOS: any;
@@ -92,7 +92,10 @@ function constantButton() {
     document.getElementById('connect')?.addEventListener("click", (event: MouseEvent) => navigate("/connect", event));
     document.getElementById('profile')?.addEventListener("click", (event: MouseEvent) => navigate("/profile", event));
     //navigation page
-    document.getElementById('home')?.addEventListener("click", (event: MouseEvent) => navigate("/home", event));
+    document.getElementById('home')?.addEventListener("click", async (event: MouseEvent) => {
+        await navigate("/brackets", event)
+        await getBrackets(4);
+    });
     document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate("/pongMode", event));
     document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate("/towerMode", event));
     document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate("/tournaments", event));
@@ -166,7 +169,7 @@ export async function navigate(path: string, event?: MouseEvent): Promise<void> 
     console.log("pushState :", path);
     const idT = sessionStorage.getItem('idTournaments')
     if (idT && path != '/lobby') {
-        DispayNotification(`You left the Tournament`);
+        displayNotification(`You left the Tournament`);
         sessionStorage.removeItem('idTournaments');
         sessionStorage.removeItem('nameTournaments');
         await quitTournaments()

@@ -38,6 +38,24 @@ export async function friendList() {
                                 document.getElementById(`friendId-${userData.id}`)?.remove();
                         });
                     }
+                    if (key === "acceptedIds") {
+                        clone.querySelector(".inviteBtn")?.addEventListener("click", async () => {
+                            const modal = document.getElementById("myModal") as HTMLDivElement | undefined;
+                            if (!modal) return ;
+                            modal.classList.remove("hidden");
+                            modal.classList.add("flex");
+                            modal.addEventListener("click", (event) => {
+                                if (event.target === modal) {
+                                    modal.classList.remove("flex");
+                                    modal.classList.add("hidden");
+                                }
+                            });
+                            document.getElementById("closeModalBtn")?.addEventListener("click", () => {
+                                modal.classList.remove("flex");
+                                modal.classList.add("hidden");
+                            });
+                        });
+                    }
                     list.appendChild(clone);
                 }
             }
