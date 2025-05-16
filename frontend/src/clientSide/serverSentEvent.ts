@@ -217,6 +217,20 @@ const notifyInvitationTowerDefense = async ({roomId, id}: { roomId: number, id: 
     }, userData);
 }
 
+const winBracket = async ({id}: { id: number }) => {
+    await loadPart('/lobby');
+}
+
+const winTournament = async ({id}: { id: number }) => {
+    await loadPart('/home');
+}
+
+const loseTournament = async ({id}: { id: number }) => {
+    await loadPart('/home');
+}
+
+
+
 const mapEvent : {[key: string] : (data: any) => void} = {
     "joinTournament" : notifyJoinTournament,
     "quitTournament" : notifyQuitTournament,
@@ -227,4 +241,7 @@ const mapEvent : {[key: string] : (data: any) => void} = {
     "disconnection" : notifyDisconnection,
     "invitationPong" : notifyInvitationPong,
     "invitationTowerDefense" : notifyInvitationTowerDefense,
+    "loseTournament" : loseTournament,
+    "winTournament" : winTournament,
+    "winBracket" : winBracket,
 }

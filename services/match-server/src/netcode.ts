@@ -8,15 +8,16 @@ import {
     moveHazard,
     movePaddle,
     Player,
-    Room,
+    Room, Timer,
     timerCheck
 } from "./api.js";
 import {getWinnerId, insertMatchResult} from "./database.js";
-import {fetchNickNameById, fetchNotifyUser} from "./utils.js";
+import {fetchNickNameById, fetchNotifyUser, fetchPlayerWin} from "./utils.js";
+import {isFunction} from "node:util";
 
 export let rooms: Room[] = [];
 
-function checkId(id: number) {
+export function checkId(id: number) {
     for (const room of rooms) {
         if (room.id === id)
             return (false);
@@ -34,8 +35,6 @@ export function generateRoom(mode?: string) {
 }
 
 function checkRoom(room: Room, game: gameState) {
-    if (game.state === 2)
-        room.ended = true;
     if (room.players.length !== 2) {
         game.state = 2;
         room.players.forEach(player => {
@@ -47,7 +46,7 @@ function checkRoom(room: Room, game: gameState) {
     setTimeout(() => checkRoom(room, game), 100);
 }
 
-export function leaveRoom(userId: number) {
+export async function leaveRoom(userId: number) {
     for (let i = 0; i < rooms.length; i++) {
         const room = rooms[i];
         const playerIndex = room.players.findIndex(player => player.id === userId);
@@ -60,6 +59,8 @@ export function leaveRoom(userId: number) {
                 const scoreB = Number(playerB.paddle.score);
                 const winnerIndex = room.players.findIndex(player => player.id !== userId);
                 const winner = room.players[winnerIndex];
+                if (room.type === "tournament")
+                    await fetchPlayerWin(winner.dbId);
                 insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
                 room.specs.forEach(spec => {
                     spec.ws.send(JSON.stringify({ type: "gameEnd", winner: winner.name }));
@@ -172,11 +173,6 @@ export function joinRoom(player: Player, roomId: number) {
     checkRoom(rooms[i], game);
 }
 
-function isTournamentMatchEnded(roomId: number): boolean {
-    const room = rooms.find(room => room.id === roomId);
-    return room ? room.ended : true;
-}
-
 export async function startInviteMatch(userId: number, opponent: number) {
     const roomId = generateRoom();
 
@@ -184,13 +180,11 @@ export async function startInviteMatch(userId: number, opponent: number) {
     return (roomId);
 }
 
-export async function waitForMatchEnd(roomId: number, playerA_id: number, playerB_id: number): Promise<number | null> {
-    while (true) {
-        if (isTournamentMatchEnded(roomId)) {
-            return getWinnerId(playerA_id, playerB_id);
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
+function waitForMatchEnd(roomId: number, playerA_id: number, playerB_id: number) {
+    const count = 0;
+    const intervalle = setInterval((count, roomId: number, playerA_id: number, playerB_id: number) => {
+
+    }, 1000)
 }
 
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {

@@ -42,3 +42,13 @@ export const fetchNotifyUser = async (ids: number[], event: string, data: any) =
         body: JSON.stringify({ids: ids, event: event, data: data }),
     })
 }
+
+export const fetchPlayerWin = async (winnerId: number) => {
+    await fetch(`http://tournament:7000/userWin/${winnerId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `${INTERNAL_PASSWORD}`
+        }
+    })
+}

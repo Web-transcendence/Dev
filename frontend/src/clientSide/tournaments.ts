@@ -73,7 +73,7 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
         const number = players.length;
         numberOfPlayer.innerText = `${number}/${nbrTournament}`;
     }
-    document.getElementById('launchTournamentBtn')?.addEventListener('click', event => navigate('/launchTournaments', event));
+    document.getElementById('launchTournamentBtn')?.addEventListener('click', event => launchTournament());
 }
 
 export async function quitTournaments() {

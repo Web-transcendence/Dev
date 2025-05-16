@@ -4,6 +4,7 @@ import { WebSocket } from "ws";
 import { z } from "zod";
 import { insertMatchResult, getMatchHistory } from "./database.js";
 import pongRoutes from "./routes.js";
+import {fetchPlayerWin} from "./utils.js";
 
 export const inputSchema = z.object({ state: z.string(), key: z.string() });
 export const initSchema = z.object({ nick: z.string(), room: z.number() });
@@ -96,7 +97,6 @@ export class Room {
     type: string = "default";
     players: Player[] = [];
     specs: Player[] = [];
-    ended = false;
     constructor (id: number, type?: string) {
         this.id = id;
         if (type)
@@ -176,7 +176,7 @@ export function resetInput(Input: keyInput) {
     Input.arrowUp = false;
 }
 
-export function resetGame(ball: Ball, player1: Player, player2: Player, game: gameState, room: Room) {
+export async function resetGame(ball: Ball, player1: Player, player2: Player, game: gameState, room: Room) {
     game.start = false;
     game.timer = new Timer (0, 2);
     if (ball.x < 0)
@@ -204,6 +204,8 @@ export function resetGame(ball: Ball, player1: Player, player2: Player, game: ga
                 spec.ws.send(JSON.stringify({ type: "gameEnd", winner: player2.paddle.name }));
             });
         }
+        if (room.type === "tournament")
+            await fetchPlayerWin(winner === 0 ? player1.dbId : player2.dbId);
         insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score), winner);
         game.state = 2;
         game.score1 = player1.paddle.score;
