@@ -40,7 +40,7 @@ export class User {
     // AUTHENTIFICATION AND CONNECTION //
 
 
-    static async addClient(nickName: string, email: string, password: string): Promise<string> {
+    static async addClient(nickName: string, email: string, password: string): Promise<number> {
         if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(nickName))
             throw new ConflictError(`${nickName} is already taken`, `This nickname is already taken`)
         if (Client_db.prepare("SELECT * FROM Client WHERE email = ?").get(email))
@@ -53,12 +53,12 @@ export class User {
         if (res.changes === 0)
             throw new DataBaseError(`client couldn't be inserted`, 'error 500 : internal error system', 500)
 
-        const id : number = Number(res.lastInsertRowid)
 
-        return this.makeToken(id)
+
+        return Number(res.lastInsertRowid)
     }
 
-    static async login(nickName: string, password: string): Promise<string | null> {
+    static async login(nickName: string, password: string): Promise<number | null> {
         const id: number = this.getIdbyNickName(nickName)
 
         const client = new User(id)
@@ -74,7 +74,7 @@ export class User {
             throw new DataBaseError(`User with ID ${id} not found`, `internal error system`, 500)
         if (data.activated2fa)
             return null
-        return User.makeToken(client.id)
+        return client.id
     }
 
     async isPasswordValid(password: string): Promise<boolean> {
@@ -83,11 +83,6 @@ export class User {
             throw new DataBaseError(`User with ID ${this.id} not found`, 'internal error system', 500)
 
         return await bcrypt.compare(password, userData.password)
-    }
-
-    static makeToken(id: number): string {
-        const token = app.jwt.sign({id: id})
-        return (token)
     }
 
     async generateSecretKey(): Promise<string> {
@@ -114,7 +109,7 @@ export class User {
         return await QRCode.toDataURL(secret.otpauth_url)
     }
 
-    verify(token: string): string {
+    verify(token: string): number {
         const secret = Client_db.prepare("SELECT secret_key FROM Client WHERE id = ?").get(this.id) as { secret_key: string } | undefined
         if (!secret)
             throw new DataBaseError(`secret key not found for id: ${this.id}`, 'internal error system', 500)
@@ -130,7 +125,7 @@ export class User {
         if (!verified)
             throw new UnauthorizedError(`invalid secret key for 2fa`, 'wrong code')
         Client_db.prepare(`UPDATE Client SET activated2fa = ? WHERE id = ?`).run(1, this.id)
-        return User.makeToken(this.id)
+        return this.id
     }
 
     // SETTER AND GETTER //
@@ -143,8 +138,11 @@ export class User {
     }
 
     async setNickname(newNickName: string) {
-        if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(newNickName))
+        const userData = Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(newNickName)
+        if (userData) {
+            if (userData.id === this.id)
             throw new ConflictError("An user try to set his nickName to an already used nickname", "Nickname already used")
+        }
 
         if (!Client_db.prepare("UPDATE Client set nickName = ? where id = ?").run(newNickName, this.id))
             throw new DataBaseError('cannot insert new password', 'internal error system', 500)

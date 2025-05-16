@@ -28,8 +28,13 @@ export async function googleAuth(request: FastifyRequest, reply: FastifyReply) {
         const userData = Client_db.prepare("SELECT id FROM Client WHERE email = ?").get(payload.email) as {id: number} | undefined;
         if (!userData)
             throw new DataBaseError('cannot recover id from user connected by google', 'Internal server error', 500)
-        User.makeToken(userData.id)
-        return reply.send({valid: true, nickName: payload.given_name, avatar: payload.picture});
+        const token = await reply.jwtSign({id: userData.id})
+        return reply.status(200).setCookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/'
+        }).send({valid: true, nickName: payload.given_name, avatar: payload.picture});
     } catch (error) {
         console.log('Error verifying Google token:', error);
         reply.status(400).send({ valid: false, error: 'Invalid token' });

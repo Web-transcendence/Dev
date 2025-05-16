@@ -58,6 +58,7 @@ export async function addFriend(id: number, nickName: string) {
     return `Friend invitation sent successfully`
 }
 
+
 /**
  * recover the id of the client, remove it. if there wasn't friend nothing happens (checkstatus.changes set to 0)
  *

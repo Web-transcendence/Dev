@@ -22,7 +22,10 @@ export const idArraySchema = z.object({
 
 export const signUpSchema = z.object({
     nickName: z.string().min(3, "3 character or more for the nickname")
-        .regex(/^[a-zA-Z0-9]+$/, "only alphanumeric character accepted for the nickname"),
+        .regex(/^[a-zA-Z0-9]+$/, "only alphanumeric character accepted for the nickname")
+        .refine(val => !val.toLowerCase().includes("guest"), {
+            message: "the nickname cannot include 'guest'",
+        }),
     email: z.string().email("Invalid email format"),
     password: z.string().min(6, "6 character or more for the password"),
 });

@@ -32,7 +32,9 @@ export default async function userRoutes(app: FastifyInstance) {
             if (!nickName || !email || !password)
                 throw new InputError(`Empty user data`, `empty value`)
 
-            const token = await User.addClient(nickName, email, password)
+            const id = await User.addClient(nickName, email, password)
+
+            const token = await res.jwtSign({id: id})
 
             return res.status(201).setCookie('token', token, {
                 httpOnly: true,
@@ -65,9 +67,10 @@ export default async function userRoutes(app: FastifyInstance) {
             if (!nickName || !password)
                 throw new InputError(`Empty user data`, `empty value`)
 
-            const token = await User.login(nickName, password)
-            if (!token)
+            const id = await User.login(nickName, password)
+            if (!id)
                 return res.status(200).send({nickName: nickName, id: User.getIdbyNickName(nickName), connected: false})
+            const token = await res.jwtSign({id: id})
             return res.status(200).setCookie('token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -106,7 +109,7 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
-    app.post("/2faVerify", (req: FastifyRequest, res: FastifyReply) => {
+    app.post("/2faVerify", async (req: FastifyRequest, res: FastifyReply) => {
         try {
             const zod_result = Schema.verifySchema.safeParse(req.body)
             if (!zod_result.success)
@@ -121,8 +124,15 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const user = new User(id)
 
-            const jwt = user.verify(secret)
-            return res.status(200).send({nickName: nickName})
+            user.verify(secret)
+
+            const token = await res.jwtSign({id: id})
+            return res.status(200).setCookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                path: '/'
+            }).send({nickName: nickName})
         }
         catch(err) {
             if (err instanceof MyError) {
@@ -289,6 +299,7 @@ export default async function userRoutes(app: FastifyInstance) {
             const user = new User(id);
             user.setNickname(newNickName);
 
+
             return res.status(200).send();
         } catch (err) {
             if (err instanceof MyError) {
@@ -302,10 +313,11 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.get('/authId/:id', {preHandler: internalVerification} ,  (req: FastifyRequest, res: FastifyReply) => {
         try {
+            console.log('ssss')
             const { id } = req.params as { id: string }
 
             const numericId = Number(id)
-
+``
             if (isNaN(numericId))
                 throw new InputError(`id isn't a number`, `the given id is not a number`)
 

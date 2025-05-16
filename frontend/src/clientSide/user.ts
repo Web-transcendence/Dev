@@ -16,7 +16,9 @@ export function register(button: HTMLElement): void {
             body: JSON.stringify(data)
         })
         const result = await response.json()
-        if (result.nickname) {
+        console.log( result)
+        if (result.nickName) {
+            console.log(`yyyyyyyyyyyyy`)
             sessionStorage.setItem('id', result.id)
             sessionStorage.setItem('nickName', result.nickName)
             await navigate('/connected')
@@ -33,6 +35,7 @@ export function login(button: HTMLElement): void {
         const myForm = document.getElementById("myForm") as HTMLFormElement
         const formData = new FormData(myForm)
         const data = Object.fromEntries(formData as unknown as Iterable<readonly any[]>)
+        console.log(`sssssssssss`)
         const response = await fetch(`/user-management/login`, {
            method: 'POST',
             headers: {
@@ -61,11 +64,6 @@ export function login(button: HTMLElement): void {
 
 export async function profile() {
     try {
-        const token = sessionStorage.getItem('token')
-        if (!token) {
-            console.error('token missing')
-            return
-        }
         const response = await fetch(`/user-management/privateProfile`, {
         method: 'GET',
             headers: {
@@ -98,9 +96,6 @@ export type UserData = {
 }
 
 export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> => {
-    const token = sessionStorage.getItem('token')
-    if (!token)
-        throw new Error('token missing')
     if (!ids)
         throw new Error('ids missing')
     const response = await fetch(`/user-management/userInformation`, {
@@ -123,11 +118,6 @@ export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> =
 
 export async function init2fa() {
     try {
-        const token = sessionStorage.getItem('token')
-        if (!token) {
-            console.error('token missing')
-            return
-        }
         const response = await fetch(`/user-management/2faInit`, {
            method: 'GET',
             headers: {
@@ -168,7 +158,6 @@ export async function verify2fa(secret: string) {
 
 export async function addFriend(friendNickName: string) {
     try {
-        const token = sessionStorage.getItem('token')
         const response = await fetch(`/social/add`, {
            method: 'POST',
             headers: {
@@ -196,7 +185,6 @@ export async function addFriend(friendNickName: string) {
 
 export async function removeFriend(friendNickName: string): Promise<boolean> {
     try {
-        const token = sessionStorage.getItem('token')
         const response = await fetch(`/social/remove`, {
         method: 'POST',
             headers: {
@@ -225,7 +213,6 @@ export type FriendIds = {
 }
 
 export async function getFriendList() : Promise<FriendIds> {
-    const token = sessionStorage.getItem('token')
     const response = await fetch(`/social/list`, {
        method: 'GET',
         headers: {
@@ -255,7 +242,6 @@ export async function setAvatar(target: HTMLInputElement) {
             const file: File = target.files[0]
             const base64File: string = await toBase64(file) as string
 
-            const token = sessionStorage.getItem('token')
             const response = await fetch(`/user-management/updatePicture`, {
                 method: 'POST',
                 headers: {
@@ -290,7 +276,6 @@ export async function getAvatar() {
             return ;
         }
 
-        const token = sessionStorage.getItem('token')
         const response = await fetch(`/user-management/getPicture`, {
            method: 'GET',
             headers: {
@@ -318,7 +303,6 @@ export async function getAvatar() {
 
 export async function setPassword(newPassword: string) {
     try {
-        const token = sessionStorage.getItem('token')
         const response = await fetch(`/user-management/setPassword`, {
             method: 'POST',
             headers: {
@@ -339,7 +323,6 @@ export async function setPassword(newPassword: string) {
 
 export async function setNickName(newNickName: string) {
     try {
-        const token = sessionStorage.getItem('token')
         const response = await fetch(`/user-management/setNickName`, {
             method: 'POST',
             headers: {
@@ -370,7 +353,6 @@ export const updateAvatar = (id: string, src: string) => {
 
 export async function getTournamentList() {
     try {
-        const token = sessionStorage.getItem('token')
         const response = await fetch(`/tournament/getList`, {
             method: 'GET',
             headers: {
