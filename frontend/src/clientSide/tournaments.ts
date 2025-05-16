@@ -4,12 +4,10 @@ import {DispayNotification} from "./notificationHandler.js";
 
 export async function joinTournament(tournamentId: number) {
     try {
-        const token = sessionStorage.getItem('token')
         const response = await fetch(`/tournament/join`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
             },
             body: JSON.stringify({ tournamentId })
         })
@@ -77,13 +75,10 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 }
 
 export async function quitTournaments() {
-    const token = sessionStorage.getItem('token')
-
     const response = await  fetch(`/tournament/quit`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'authorization': 'Bearer ' + token
         }
     })
     if (!response.ok) {
@@ -94,12 +89,10 @@ export async function quitTournaments() {
 
 export async function launchTournament() {
     try {
-        const token = sessionStorage.getItem('token')
         const response = await fetch(`/tournament/launch`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
             },
         })
 

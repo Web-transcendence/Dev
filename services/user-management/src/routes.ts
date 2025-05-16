@@ -22,7 +22,7 @@ const internalVerification = async (req, res) => {
 
 export default async function userRoutes(app: FastifyInstance) {
 
-    app.post('/register', async (req, res) => {
+    app.post('/register', async (req: FastifyRequest, res: FastifyReply) => {
         try {
             const zod_result = Schema.signUpSchema.safeParse(req.body)
             if (!zod_result.success)
@@ -34,7 +34,12 @@ export default async function userRoutes(app: FastifyInstance) {
 
             const token = await User.addClient(nickName, email, password)
 
-            return res.status(201).send({token: token, nickName: nickName, redirect: "post/login"})
+            return res.status(201).setCookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                path: '/'
+            }).send({nickName: nickName, id: User.getIdbyNickName(nickName)})
         }
         catch(err) {
             if (err instanceof MyError) {
@@ -61,7 +66,14 @@ export default async function userRoutes(app: FastifyInstance) {
                 throw new InputError(`Empty user data`, `empty value`)
 
             const token = await User.login(nickName, password)
-            return res.status(200).send({token: token, nickName: nickName})
+            if (!token)
+                return res.status(200).send({nickName: nickName, id: User.getIdbyNickName(nickName), connected: false})
+            return res.status(200).setCookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                path: '/'
+            }).send({nickName: nickName, id: User.getIdbyNickName(nickName), connected: true})
         }
         catch(err) {
             if (err instanceof MyError) {
@@ -72,6 +84,7 @@ export default async function userRoutes(app: FastifyInstance) {
             return res.status(500).send()
         }
     })
+
 
     app.get("/2faInit", async (req: FastifyRequest, res: FastifyReply) => {
         try {
@@ -109,7 +122,7 @@ export default async function userRoutes(app: FastifyInstance) {
             const user = new User(id)
 
             const jwt = user.verify(secret)
-            return res.status(200).send({token: jwt, nickName: nickName})
+            return res.status(200).send({nickName: nickName})
         }
         catch(err) {
             if (err instanceof MyError) {

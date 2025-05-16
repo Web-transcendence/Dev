@@ -26,8 +26,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         duration: 800,
     });
     // Reconnect User
-    const token = sessionStorage.getItem("token");
-    if (token && await checkForToken()) {
+    if (await checkForToken()) {
         await getAvatar();
         handleConnection(true);
     }
@@ -67,12 +66,10 @@ tsParticles.load("tsparticles", {
 
 async function checkForToken(): Promise<boolean>  {
     try {
-        const token = sessionStorage.getItem('token');
         const response = await fetch(`/authJWT`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
             },
         });
         if (!response.ok) {

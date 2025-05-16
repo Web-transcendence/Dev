@@ -1,7 +1,7 @@
 import Fastify, {FastifyReply, FastifyRequest} from "fastify";
 import httpProxy from '@fastify/http-proxy';
-// import cors from "@fastify/cors";
-import jwt, {JwtPayload} from 'jsonwebtoken';
+import fastifyCookie from '@fastify/cookie';
+import fastifyJwt from '@fastify/jwt';
 import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import fastifyStatic from "@fastify/static";
@@ -15,41 +15,35 @@ const httpsOptions = {
     },
 };
 
-const SECRET_KEY = process.env.SECRET_KEY;
+
+const INTERNAL_PASSWORD = process.env.SECRET_KEY;
 
 const app = Fastify(httpsOptions);
 
-// app.register(cors, {
-//     origin: "*",
-//     methods: ["GET", "POST", "PUT", "DELETE"]
-// })
+app.register(fastifyCookie);
+app.register(fastifyJwt, {
+    secret: INTERNAL_PASSWORD,
+    cookie: {
+        cookieName: 'token',
+        signed: false
+    }
+});
 
 async function authentificate (req: FastifyRequest, reply: FastifyReply) {
     if (req.url === "/user-management/login" || req.url === "/user-management/register" || req.url === "/user-management/auth/google" || req.url === "/user-management/2faVerify")
         return;
     try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader)
-            return reply.status(401).send({ error: "Unauthorized - No token provided" });
-
-        const token = authHeader.split(" ")[1];
+        const token = req.cookies.token;
         if (!token)
-            return reply.status(401).send({ error: "Unauthorized - No token provided" });
-
-        const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;
-        req.headers.id = decoded.id;
+            return reply.status(401).send({ error: "Unauthorized - invalid token" });
+        await req.jwt.verify(token)
     }
     catch (error) {
         return reply.status(401).send({ error: "Unauthorized - invalid token" });
     }
 }
 
-app.get('/authJWT', (req: FastifyRequest, res: FastifyReply) => {
-    authentificate(req, res);
-    if (!req.headers.id)
-        return res.status(401).send({ message: "Unauthorized - No token provided" });
-    return res.status(200).send({message: "Authentication successfull"});
-})
+app.get('/authJWT', authentificate);
 
 app.register(fastifyStatic, {
     root: join(import.meta.dirname, "..", "..", "public"),

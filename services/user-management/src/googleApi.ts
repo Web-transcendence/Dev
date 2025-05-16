@@ -5,7 +5,7 @@ import {DataBaseError} from "./error.js";
 
 const client = new OAuth2Client("562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com");
 
-export async function googleAuth(request: FastifyRequest, reply: FastifyReply):Promise<void> {
+export async function googleAuth(request: FastifyRequest, reply: FastifyReply) {
     const { credential } = request.body as { credential: string };
     try {
         const ticket = await client.verifyIdToken({
@@ -28,8 +28,8 @@ export async function googleAuth(request: FastifyRequest, reply: FastifyReply):P
         const userData = Client_db.prepare("SELECT id FROM Client WHERE email = ?").get(payload.email) as {id: number} | undefined;
         if (!userData)
             throw new DataBaseError('cannot recover id from user connected by google', 'Internal server error', 500)
-        const token = User.makeToken(userData.id)
-        return reply.send({token, valid: true, nickName: payload.given_name, avatar: payload.picture});
+        User.makeToken(userData.id)
+        return reply.send({valid: true, nickName: payload.given_name, avatar: payload.picture});
     } catch (error) {
         console.log('Error verifying Google token:', error);
         reply.status(400).send({ valid: false, error: 'Invalid token' });

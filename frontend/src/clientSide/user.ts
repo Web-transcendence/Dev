@@ -16,9 +16,8 @@ export function register(button: HTMLElement): void {
             body: JSON.stringify(data)
         })
         const result = await response.json()
-        if (result.token) {
+        if (result.nickname) {
             sessionStorage.setItem('id', result.id)
-            sessionStorage.setItem('token', result.token)
             sessionStorage.setItem('nickName', result.nickName)
             await navigate('/connected')
             await getAvatar();
@@ -46,10 +45,9 @@ export function login(button: HTMLElement): void {
             const data = await response.json()
             sessionStorage.setItem('id', data.id)
             sessionStorage.setItem('nickName', data.nickName)
-            if (!data.token || data.token.empty) {
+            if (data.connected === false) {
                 return await loadPart("/factor")
             }
-            sessionStorage.setItem('token', data.token)
             navigate('/connected')
             await getAvatar();
             await sseConnection()
@@ -71,9 +69,7 @@ export async function profile() {
         const response = await fetch(`/user-management/privateProfile`, {
         method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token
-            }
+                'Content-Type': 'application/json'         }
         })
         const data = await response.json()
         if (response.ok) {
@@ -110,9 +106,7 @@ export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> =
     const response = await fetch(`/user-management/userInformation`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'authorization': 'Bearer ' + token
-        },
+            'Content-Type': 'application/json'},
         body: JSON.stringify({ids})
     })
     if (response.ok) {
@@ -137,9 +131,7 @@ export async function init2fa() {
         const response = await fetch(`/user-management/2faInit`, {
            method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token
-            }
+                'Content-Type': 'application/json'            }
         })
         if (response.ok)
             return await response.text()
@@ -160,11 +152,9 @@ export async function verify2fa(secret: string) {
             body: JSON.stringify({secret: secret, nickName: nickName})
         })
         if (response.ok) {
-            const result = await response.json()
-            sessionStorage.setItem('token', result.token)
             sessionStorage.setItem('activeFA', 'true')
             DispayNotification('You have enabled two-factor authentication.');
-            navigate('/home')
+            await navigate('/home')
         }
         else {
             const errorData = await response.json()
@@ -182,8 +172,7 @@ export async function addFriend(friendNickName: string) {
         const response = await fetch(`/social/add`, {
            method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({friendNickName: friendNickName})
         })
@@ -211,8 +200,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
         const response = await fetch(`/social/remove`, {
         method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({friendNickName: friendNickName}),
         })
@@ -242,7 +230,6 @@ export async function getFriendList() : Promise<FriendIds> {
        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'authorization': 'Bearer ' + token,
         },
     })
     if (!response.ok) {
@@ -272,8 +259,7 @@ export async function setAvatar(target: HTMLInputElement) {
             const response = await fetch(`/user-management/updatePicture`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({pictureURL: base64File})
             })
@@ -309,7 +295,6 @@ export async function getAvatar() {
            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
             },
         })
         if (!response.ok) {
@@ -337,8 +322,7 @@ export async function setPassword(newPassword: string) {
         const response = await fetch(`/user-management/setPassword`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({password: newPassword}),
         })
@@ -359,8 +343,7 @@ export async function setNickName(newNickName: string) {
         const response = await fetch(`/user-management/setNickName`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({nickName: newNickName}),
         })
@@ -392,7 +375,6 @@ export async function getTournamentList() {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
             },
         })
         if (!response.ok) {

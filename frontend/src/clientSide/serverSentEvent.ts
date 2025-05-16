@@ -17,12 +17,10 @@ const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
 
 export async function sseConnection() {
     try {
-        const token = sessionStorage.getItem('token')
         const res = await fetch(`/user-management/sse`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'text/event-stream',
-                'authorization': 'Bearer ' + token
             }
         })
         if (res.status === 100)

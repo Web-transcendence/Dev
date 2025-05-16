@@ -1,7 +1,6 @@
 import Database from "better-sqlite3"
 import bcrypt from "bcrypt"
-import jwt from 'jsonwebtoken'
-import {connectedUsers, INTERNAL_PASSWORD} from "./api.js"
+import {connectedUsers, app} from "./api.js"
 import speakeasy, {GeneratedSecret} from "speakeasy"
 import QRCode from "qrcode"
 import {ConflictError, DataBaseError, NotFoundError, ServerError, UnauthorizedError} from "./error.js";
@@ -59,7 +58,7 @@ export class User {
         return this.makeToken(id)
     }
 
-    static async login(nickName: string, password: string): Promise<string> {
+    static async login(nickName: string, password: string): Promise<string | null> {
         const id: number = this.getIdbyNickName(nickName)
 
         const client = new User(id)
@@ -74,7 +73,7 @@ export class User {
         if (!data)
             throw new DataBaseError(`User with ID ${id} not found`, `internal error system`, 500)
         if (data.activated2fa)
-            return ''
+            return null
         return User.makeToken(client.id)
     }
 
@@ -87,7 +86,7 @@ export class User {
     }
 
     static makeToken(id: number): string {
-        const token = jwt.sign({id: id}, INTERNAL_PASSWORD, {expiresIn: '1h'})
+        const token = app.jwt.sign({id: id})
         return (token)
     }
 

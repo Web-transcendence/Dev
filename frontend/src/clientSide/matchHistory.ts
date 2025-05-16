@@ -78,12 +78,10 @@ async function getElementsOfMatch(MatchResult: MatchResult[] | undefined, id: nu
 
 export async function getGameHistory (id: string, game: string): Promise<MatchResult[] | undefined> {
     try {
-        const token = sessionStorage.getItem('token')
         const response = await fetch(`/${game}/getMatchHistory`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
                 'id': id ?? '',
             },
         })
