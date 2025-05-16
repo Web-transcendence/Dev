@@ -97,10 +97,10 @@ export default async function socialRoutes(app: FastifyInstance) {
 
     app.post('/checkFriend', {preHandler: internalVerification}, async (req: FastifyRequest, res: FastifyReply) => {
         try {
+
             const zod_result = Schema.checkFriendSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`Cannot parse the input`)
-
+                throw new InputError(`Cannot parse the input`, `id have to be a number`)
             checkFriend(zod_result.data)
             return res.status(200).send()
         } catch (err) {

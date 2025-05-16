@@ -108,23 +108,28 @@ export default async function pongRoutes(fastify: FastifyInstance) {
         }
     })
 
+
+
+
     fastify.get('/invitationGame/:id', async (req: FastifyRequest, res: FastifyReply) => {
         try {
-            const id: number = Number(req.headers.id)
-            const stringId = req.params as { id: string };
-            const friendId = Number(stringId.id);
-            if (!friendId)
-                throw new Error("id must be a number");
-            const response = fetch(`http://social:6500/checkFriend`, {
+            const params = req.params as { id: string }
+            const oppId = Number(params.id)
+            const id = Number(req.headers.id);
+
+            const response = await fetch(`http://social:6500/checkFriend`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'authorization': `${INTERNAL_PASSWORD}`
                 },
-                body: JSON.stringify({id1: id, id2: friendId})
+                body: JSON.stringify({id1: id, id2: oppId})
             })
+            if (!response.ok) {
+                res.status(409).send({message: `this user isn't in your friendlist`})
+            }
 
-            const roomID = await startInviteMatch(id, friendId);
+            const roomID = await startInviteMatch(id, oppId);
             return res.status(200).send({roomId: roomID});
         } catch (err) {
             console.error(err)

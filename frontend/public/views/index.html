@@ -62,12 +62,12 @@
   <ul id="notificationList" class="fixed top-20 right-0 flex flex-col items-end space-y-4 z-50"></ul>
 
   <template id="notificationBanner">
-      <li class="notifyList transform translate-x-full w-80 p-4 rounded-l-lg shadow-lg  text-white flex flex-col gap-2 transition-transform duration-500 ease-in-out">
-          <span id="notificationMessage" class="flex-1"></span>
-          <span id="nameInvite" class="flex-1 truncate max-w-[10rem]"></span>
-          <div class="flex gap-2 justify-end">
+      <li class="notifyList transform translate-x-full p-4 max-w-96 rounded-l-lg shadow-lg  text-white flex flex-col gap-2 transition-transform duration-500 ease-in-out">
+          <span id="notificationMessage" class="text-nowrap truncate"></span>
+          <span id="nameInvite" class="truncate w-full text-wrap"></span>
+          <div class="flex gap-2 *:w-full w-full">
               <button id="notificationActionAccept"
-                      class="text-white px-3 py-1 rounded-lg hidden bg-red-600 hover:bg-red-700 transition hover:scale-105">
+                      class="text-white px-3 py-1 rounded-lg hidden bg-green-600 hover:bg-green-700 transition hover:scale-105">
                   Accept
               </button>
               <button id="notificationActionReject"

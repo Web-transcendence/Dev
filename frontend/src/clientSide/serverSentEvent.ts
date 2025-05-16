@@ -75,7 +75,7 @@ export const CreateFriendLi = async (id: number, key: string, tmpName: string)=>
             clone.querySelector(".decline-btn")?.addEventListener("click", () => removeFriend(userData.nickName));
         }
         if (key === "acceptedList")
-            clone.querySelector(".inviteFriend")?.addEventListener("click", async () => openModal(userData.nickName));
+            clone.querySelector(".inviteFriend")?.addEventListener("click", async () => openModal(userData.nickName, userData.id));
         list.appendChild(clone);
     }
 }
@@ -91,7 +91,7 @@ const notifyFriendInvitation = async ({ id }: { id: number }) => {
     await CreateFriendLi(id, "receivedList", "receivedTemplate");
 
     const [userData] = await fetchUserInformation([id])
-    displayNotification('New friend request!', {
+    displayNotification('New  friend request!', {
         type: "invitation",
         onAccept: async () => {
             if (await addFriend(userData.nickName)) {
@@ -186,10 +186,19 @@ const notifyQuitTournament = ({id, maxPlayer}: { id: number, maxPlayer: number }
    }
 }
 
-const notifyInvitationGame = async ({id}: { id: number }) => {
-    await loadPart('/pongRemote');
-    Pong("remote", id)
-    // await loadPart('/scoreBoard');
+const notifyInvitationPong = async ({roomId, id}: { roomId: number, id: number }) => {
+    const [userData] = await fetchUserInformation([id])
+    displayNotification('Invitation Pong', {
+        type: "invitation",
+        onAccept: async () => {
+            await loadPart('/pongRemote');
+            Pong("remote", roomId)
+            console.log('Accepted invite')
+        },
+        onRefuse: async () => {
+            console.log('Close invite because refused')
+        }
+    }, userData);
 }
 
 
@@ -201,5 +210,5 @@ const mapEvent : {[key: string] : (data: any) => void} = {
     "friendRemoved": notifyFriendRemoved,
     "connection" : notifyConnection,
     "disconnection" : notifyDisconnection,
-    "invitationGame" : notifyInvitationGame
+    "invitationPong" : notifyInvitationPong,
 }

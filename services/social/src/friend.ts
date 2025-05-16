@@ -76,6 +76,7 @@ export async function removeFriend(id: number, nickName: string) {
 }
 
 export function checkFriend({id1, id2}: {id1: number, id2: number}) {
+    console.log(id1, id2)
     if (!Friend_db.prepare("SELECT * FROM FriendList WHERE (userA_id = ? AND userB_id = ?) OR (userB_id = ? AND userA_id = ?)").run(id1, id2, id1, id2))
         throw new NotFoundError(`theses users arn't friends`, `theses users arn't friends`)
 }

@@ -42,6 +42,12 @@ export const nickNameSchema = z.object({
         .regex(/^[a-zA-Z0-9]+$/, "only alphanumeric character accepted for the nickname"),
 })
 
+export const invitationGameSchema = z.object({
+    id: z.number(),
+    roomId: z.number(),
+    game: z.enum([`pong`, `towerDefense`])
+})
+
 export const notifySchema = z.object({
     ids: z.array(z.number()),
     event: z.string(),

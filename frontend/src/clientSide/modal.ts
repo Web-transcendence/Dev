@@ -3,32 +3,33 @@ import {displayNotification} from "./notificationHandler.js";
 import {Pong} from "./pong.js";
 import {TowerDefense} from "./td.js";
 import {loadPart} from "./insert.js";
+import {fetchInvitation} from "./invitation.js";
 
+//
+// export async function getRoomId (game: string): Promise<number | undefined> {
+//     try {
+//         const token = sessionStorage.getItem('token')
+//         const response = await fetch(`/${game}/generateRoom`, {
+//             method: 'GET',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'authorization': 'Bearer ' + token,
+//             },
+//         })
+//         if (!response.ok) {
+//             const error = await response.json()
+//             console.error(error.error)
+//             displayNotification(`${game} didn't send a room id`, { type: "error" })
+//             await loadPart('/home')
+//             return undefined
+//         }
+//         return await response.json()
+//     } catch (error) {
+//         console.error(error)
+//     }
+// }
 
-export async function getRoomId (game: string): Promise<number | undefined> {
-    try {
-        const token = sessionStorage.getItem('token')
-        const response = await fetch(`/${game}/generateRoom`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token,
-            },
-        })
-        if (!response.ok) {
-            const error = await response.json()
-            console.error(error.error)
-            displayNotification(`${game} didn't send a room id`, { type: "error" })
-            await loadPart('/home')
-            return undefined
-        }
-        return await response.json()
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-export async function openModal(nickname: string): Promise<void> {
+export async function openModal(nickname: string, id: number): Promise<void> {
     const modal = document.getElementById("myModal") as HTMLDivElement | undefined;
     const app = document.getElementById("app") as HTMLDivElement | undefined;
     const modalContent = document.getElementById("modalContent") as HTMLDivElement | undefined;
@@ -47,25 +48,17 @@ export async function openModal(nickname: string): Promise<void> {
     });
 
     nameFriend.innerHTML = `Which game you want to play with ${nickname} ?`;
-    document.getElementById('inviteTowerDefense')?.addEventListener("click", async () => {
-        const room: number | undefined = await getRoomId('tower-defense')
-        if (!room) {
-            closeModal()
-            return ;
-        }
-        await loadPart('/pongRemote')
-        Pong('remote', room)
-        displayNotification('Invitation send to ${nickname} !')
-    });
     document.getElementById('invitePong')?.addEventListener("click", async () => {
-        const room: number | undefined = await getRoomId('match-server')
-        if (!room) {
-            closeModal()
-            return ;
-        }
-        await loadPart('/towerRemote')
-        TowerDefense(room)
+        const roomId = await fetchInvitation('match-server', id);
         displayNotification('Invitation send to ${nickname} !')
+        await loadPart('/pongRemote')
+        Pong('remote', roomId)
+    });
+    document.getElementById('inviteTowerDefense')?.addEventListener("click", async () => {
+        const roomId = await fetchInvitation('tower-defense', id);
+        displayNotification('Invitation send to ${nickname} !')
+        await loadPart('/towerRemote')
+        TowerDefense(roomId)
     });
     modal.addEventListener("click", () => {
         closeModal()

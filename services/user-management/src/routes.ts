@@ -5,7 +5,7 @@ import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
 import {connectedUsers, INTERNAL_PASSWORD} from "./api.js"
 import {InputError, MyError, ServerError, UnauthorizedError} from "./error.js";
 import {notifyUser} from "./serverSentEvent.js";
-import {nickNameSchema, passwordSchema} from "./schema.js";
+import {invitationGameSchema, nickNameSchema, passwordSchema} from "./schema.js";
 
 
 export function logConnectedUser() {
@@ -349,10 +349,33 @@ export default async function userRoutes(app: FastifyInstance) {
         }
     })
 
-    app.get(`/test`, (req: FastifyRequest, res: FastifyReply) => {
-        logConnectedUser()
-        return res.status(200).send()
+    app.post(`/notifyInvitationGame`, (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const zod_result = invitationGameSchema.safeParse(req.body)
+            if (!zod_result.success)
+                throw new InputError(zod_result.error.message, zod_result.error.message)
+
+            const id = Number(req.headers.id);
+            if (!id)
+                throw new ServerError(`cannot parse id, which should not happen`, 500)
+
+            const user = new User(id)
+
+            const {nickName} = user.getProfile()
+
+            notifyUser([zod_result.data.id], zod_result.data.game, {nickname: nickName, roomId: zod_result.data.roomId})
+
+            return res.status(200).send();
+        } catch (err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.toSend})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
     })
+
 
 }
 

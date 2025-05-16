@@ -1,7 +1,7 @@
 // Netcode
 import {Ball, gameState, hazardGenerator, moveBall, moveHazard, movePaddle, Player, Room, timerCheck} from "./api.js";
 import {getWinnerId, insertMatchResult} from "./database.js";
-import {fetchNotifyUser} from "./utils.js";
+import {fetchNickNameById, fetchNotifyUser} from "./utils.js";
 
 export let rooms: Room[] = [];
 
@@ -164,9 +164,10 @@ function isTournamentMatchEnded(roomId: number): boolean {
     return room ? room.ended : true;
 }
 
-export async function startInviteMatch(requester: number, opponent: number) {
+export async function startInviteMatch(userId: number, opponent: number) {
     const roomId = generateRoom();
-    await fetchNotifyUser([opponent], `invitationGame`, roomId);
+
+    await fetchNotifyUser([opponent], `invitationPong`, {roomId: roomId, id: userId});
     return (roomId);
 }
 

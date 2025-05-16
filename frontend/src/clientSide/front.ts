@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     constantButton(); // Constant button on the Single Page Application
     // animate slides on scroll
     AOS.init({
-        once: false,
+        once: true,
         duration: 800,
     });
     // Reconnect User

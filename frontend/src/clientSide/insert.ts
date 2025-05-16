@@ -9,7 +9,7 @@ export async function   loadPart(page: string) {
         sessionStorage.setItem('path', page);
         console.log("setItem path :", page);
         await insertTag(`part${page}`);
-        insertScript(page);
+        stopGame(page);
         activateBtn(page);
         activateGoogle(page);
     } catch (error) {
@@ -77,28 +77,7 @@ export function activateGoogle(page: string) {
         googleID.remove();
 }
 
-export function insertScript(page: string): void {
-    const scripts: Record<string, string> = {
-        "/pongRemote": "/static/dist/pong.js",
-        "/towerRemote": "/static/dist/td.js",
-    };
-
-    const currentScriptSrc = scripts[page];
-
-    // Supprime tous les scripts sauf celui qui correspond à la page actuelle
-    Object.entries(scripts).forEach(([_, src]) => {
-        if (src !== currentScriptSrc) {
-            const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
-            if (existing) existing.remove();
-        }
-    });
-    // Si nécessaire, insère le script correspondant
-    if (currentScriptSrc && !document.querySelector(`script[src="${currentScriptSrc}"]`)) {
-        const script = document.createElement('script');
-        script.src = currentScriptSrc;
-        // console.log(script);
-        document.body.appendChild(script);
-    }
+export function stopGame(page: string): void {
     if (page != "/towerRemote")
         tdStop()
     if (page != '/pongRemote')

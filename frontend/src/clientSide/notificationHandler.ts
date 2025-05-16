@@ -36,7 +36,7 @@ export function displayNotification(message: string, options?: {
     } else if (options?.type === "invitation") {
         if (userData && nameInvite) nameInvite.innerText = `From ${userData.nickName}`;
         const idOfInvite = idNotify;
-        item.classList.add("bg-blue-600");
+        item.classList.add("bg-gray-600");
         acceptBtn.classList.remove("hidden");
         rejectBtn.classList.remove("hidden");
         acceptBtn.onclick = async () => {
