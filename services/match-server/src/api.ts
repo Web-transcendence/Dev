@@ -93,11 +93,14 @@ export class gameState {
 
 export class Room {
     id: number;
+    type: string = "default";
     players: Player[] = [];
     specs: Player[] = [];
     ended = false;
-    constructor (id: number) {
+    constructor (id: number, type?: string) {
         this.id = id;
+        if (type)
+            this.type = type;
     }
 }
 

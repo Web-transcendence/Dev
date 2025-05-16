@@ -234,6 +234,7 @@ export class RoomTd {
     type: string = "default";
     players: Player[] = [];
     specs: Player[] = [];
+    ended: boolean = false;
     constructor (id: number, type?: string) {
         this.id = id;
         if (type)
@@ -451,6 +452,8 @@ function mainLoop (player1: Player, player2: Player, game: Game) {
 }
 
 function checkRoom(room: RoomTd, intervalId: ReturnType<typeof setInterval>, game: Game) {
+    if (game.state === 2)
+        room.ended = true;
     if (room.players.length !== 2) {
         game.state = 2;
         clearInterval(intervalId);
@@ -485,7 +488,7 @@ function joinRoomTd(player: Player, roomId: number) {
     let i : number = 0;
     if (roomId !== -1) { // Joining a defined room (invite or tournaments)
         for (; i < roomsTd.length; i++) {
-            if (roomsTd[i].id === roomId) {
+            if (roomsTd[i].id === roomId && roomsTd[i].players.length < 2) {
                 roomsTd[i].players.push(player);
                 if (roomsTd[i].players.length === 2)
                     break ;
@@ -495,7 +498,7 @@ function joinRoomTd(player: Player, roomId: number) {
         }
     } else { // Basic random matchmaking
         for (; i < roomsTd.length; i++) {
-            if (roomsTd[i].id < 1000 && roomsTd[i].players.length === 1) {
+            if (roomsTd[i].id < 1000 && roomsTd[i].players.length < 2 && roomsTd[i].players.length === 1) {
                 roomsTd[i].players.push(player);
                 id = roomsTd[i].id;
                 break;
@@ -508,6 +511,8 @@ function joinRoomTd(player: Player, roomId: number) {
             return;
         }
     }
+    if (i === roomsTd.length)
+        return ;
     let game = new Game(new Timer(0, 4));
     const intervalId = setInterval(() => {
         let i = roomsTd.findIndex(room => room.id === id);

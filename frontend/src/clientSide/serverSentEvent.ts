@@ -4,6 +4,7 @@ import {displayNotification} from "./notificationHandler.js";
 import {navigate} from "./front.js";
 import {loadPart} from "./insert.js";
 import {openModal} from "./modal.js";
+import {TowerDefense} from "./td.js";
 
 const parseSSEMessage  = (raw: string): {event: string, stringData: string} => {
     const result: Record<string, string> = {}
@@ -188,7 +189,7 @@ const notifyQuitTournament = ({id, maxPlayer}: { id: number, maxPlayer: number }
 
 const notifyInvitationPong = async ({roomId, id}: { roomId: number, id: number }) => {
     const [userData] = await fetchUserInformation([id])
-    displayNotification('Invitation Pong', {
+    displayNotification('Invitation to play Pong', {
         type: "invitation",
         onAccept: async () => {
             await loadPart('/pongRemote');
@@ -201,6 +202,20 @@ const notifyInvitationPong = async ({roomId, id}: { roomId: number, id: number }
     }, userData);
 }
 
+const notifyInvitationTowerDefense = async ({roomId, id}: { roomId: number, id: number }) => {
+    const [userData] = await fetchUserInformation([id])
+    displayNotification('Invitation to Play Tower-Defense', {
+        type: "invitation",
+        onAccept: async () => {
+            await loadPart('/towerRemote');
+            TowerDefense(roomId)
+            console.log('Accepted invite')
+        },
+        onRefuse: async () => {
+            console.log('Close invite because refused')
+        }
+    }, userData);
+}
 
 const mapEvent : {[key: string] : (data: any) => void} = {
     "joinTournament" : notifyJoinTournament,
@@ -211,4 +226,5 @@ const mapEvent : {[key: string] : (data: any) => void} = {
     "connection" : notifyConnection,
     "disconnection" : notifyDisconnection,
     "invitationPong" : notifyInvitationPong,
+    "invitationTowerDefense" : notifyInvitationTowerDefense,
 }

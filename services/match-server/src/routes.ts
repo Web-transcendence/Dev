@@ -16,7 +16,6 @@ import {generateRoom, joinRoom, leaveRoom, startInviteMatch, startTournamentMatc
 import {z} from "zod";
 import {changeRoomSpec, joinRoomSpec, leaveRoomSpec} from "./spectator.js";
 
-
 const internalVerification = async (req, res) => {
     if (req.headers.authorization !== INTERNAL_PASSWORD)
         throw new Error(`only server can reach this endpoint`)
@@ -94,6 +93,11 @@ export default async function pongRoutes(fastify: FastifyInstance) {
 
     fastify.post('/generateRoom', async (req: FastifyRequest, res: FastifyReply) => {
         const roomId = generateRoom();
+        return (res.status(200).send({roomId: roomId}));
+    })
+
+    fastify.post('/generateTournamentRoom', async (req: FastifyRequest, res: FastifyReply) => {
+        const roomId = generateRoom("tournament");
         return (res.status(200).send({roomId: roomId}));
     })
 

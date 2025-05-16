@@ -51,3 +51,15 @@ export function getMatchHistory(userId: number): MatchResult[] {
         ORDER BY match_time DESC
     `).all(userId, userId) as MatchResult[];
 }
+
+export function getWinnerId(playerA_id: number, playerB_id: number): number | null {
+    const matches = getMatchHistory(playerA_id).filter(
+        (match) =>
+            (match.playerA_id === playerA_id && match.playerB_id === playerB_id) ||
+            (match.playerA_id === playerB_id && match.playerB_id === playerA_id)
+    );
+    if (matches.length === 0)
+        return null;
+    const lastMatch = matches[0];
+    return (lastMatch.winner_id);
+}

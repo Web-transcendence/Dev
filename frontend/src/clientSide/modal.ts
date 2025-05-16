@@ -5,30 +5,6 @@ import {TowerDefense} from "./td.js";
 import {loadPart} from "./insert.js";
 import {fetchInvitation} from "./invitation.js";
 
-//
-// export async function getRoomId (game: string): Promise<number | undefined> {
-//     try {
-//         const token = sessionStorage.getItem('token')
-//         const response = await fetch(`/${game}/generateRoom`, {
-//             method: 'GET',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'authorization': 'Bearer ' + token,
-//             },
-//         })
-//         if (!response.ok) {
-//             const error = await response.json()
-//             console.error(error.error)
-//             displayNotification(`${game} didn't send a room id`, { type: "error" })
-//             await loadPart('/home')
-//             return undefined
-//         }
-//         return await response.json()
-//     } catch (error) {
-//         console.error(error)
-//     }
-// }
-
 export async function openModal(nickname: string, id: number): Promise<void> {
     const modal = document.getElementById("myModal") as HTMLDivElement | undefined;
     const app = document.getElementById("app") as HTMLDivElement | undefined;
