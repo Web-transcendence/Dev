@@ -141,6 +141,7 @@ export class User {
         const userData = Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(newNickName)
         if (userData) {
             if (userData.id === this.id)
+                throw new ConflictError(`user try to set his nickname with the same nickname`, `same nickname`)
             throw new ConflictError("An user try to set his nickName to an already used nickname", "Nickname already used")
         }
 

@@ -315,9 +315,9 @@ export default async function userRoutes(app: FastifyInstance) {
         try {
             console.log('ssss')
             const { id } = req.params as { id: string }
+            console.log(id)
 
             const numericId = Number(id)
-``
             if (isNaN(numericId))
                 throw new InputError(`id isn't a number`, `the given id is not a number`)
 
