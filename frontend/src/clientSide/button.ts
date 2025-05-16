@@ -8,6 +8,7 @@ import { DispayNotification } from "./notificationHandler.js";
 import { Pong } from "./pong.js";
 import { displayTournaments, joinTournament, launchTournament} from "./tournaments.js";
 import { printMatchHistory } from "./matchHistory.js";
+import {TowerDefenseSpec} from "./tdspec.js";
 
 const mapButton : {[key: string] : () => void} = {
     "/connect" : connectBtn,
@@ -21,6 +22,7 @@ const mapButton : {[key: string] : () => void} = {
     "/pongRemote" : pongRemote,
     "/pongLocal" : pongLocal,
     "/pongWatch" : pongWatch,
+    "/towerWatch" : towerWatch,
     "/tournaments" : tournaments,
     "/lobby" : lobby,
     "/matchHistory" : matchHistory
@@ -127,6 +129,7 @@ function pongMode() {
 
 function towerMode() {
     document.getElementById("towerRemote")?.addEventListener("click", (event: MouseEvent) => navigate("/towerRemote", event));
+    document.getElementById("towerWatch")?.addEventListener("click", (event: MouseEvent) => navigate("/towerWatch", event));
 }
 
 function towerRemote() {
@@ -144,6 +147,10 @@ function pongRemote() {
 
 function pongWatch() {
     Pong("spec")
+}
+
+function towerWatch() {
+    TowerDefenseSpec()
 }
 
 function tournaments() {

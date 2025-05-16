@@ -495,7 +495,7 @@ function joinRoomTd(player: Player, roomId: number) {
         }
     } else { // Basic random matchmaking
         for (; i < roomsTd.length; i++) {
-            if (roomsTd < 1000 && roomsTd[i].players.length === 1) {
+            if (roomsTd[i].id < 1000 && roomsTd[i].players.length === 1) {
                 roomsTd[i].players.push(player);
                 id = roomsTd[i].id;
                 break;
@@ -517,16 +517,16 @@ function joinRoomTd(player: Player, roomId: number) {
         }
         const payload = {
             class: 'gameUpdate',
-            player1: rooms[i].players[0].players[0],
-            player2: rooms[i].players[1].players[1],
+            player1: roomsTd[i].players[0],
+            player2: roomsTd[i].players[1],
             game: game
         };
         if (roomsTd[i].players.length === 2) {
             roomsTd[i].players[0].ws.send(JSON.stringify(payload));
             roomsTd[i].players[1].ws.send(JSON.stringify(payload));
-            rooms[i].specs.forEach(spec => {
+            roomsTd[i].specs.forEach(spec => {
                 if (game.state < 2) {
-                    spec.ws.send(JSON.stringify(JSON.stringify(payload));
+                    spec.ws.send(JSON.stringify(payload));
                 }
             });
         }
@@ -561,10 +561,12 @@ fastify.register(async function (fastify) {
                     return;
                 }
                 player.name = data.nick;
-                try {
-                    player.dbId = await fetchIdByNickName(data.nick);
-                } catch (error) {
-                    console.log(error);
+                if (data.nick.includes("guest")) {
+                    try {
+                        player.dbId = await fetchIdByNickName(data.nick);
+                    } catch (error) {
+                        console.log(error);
+                    }
                 }
                 if (data.room)
                     room = data.room;
@@ -591,7 +593,7 @@ fastify.register(async function (fastify) {
                             break;
                     }
                 } else {
-                    changeRoomSpec(userId);
+                    changeRoomSpec(player);
                 }
             } else if (init && msg.event === "towerInit") {
                 const {data, success, error} = towerSchema.safeParse(JSON.parse(message.toString()));
@@ -614,7 +616,7 @@ fastify.register(async function (fastify) {
         });
 
         socket.on("close", () => {
-            if (room != spec)
+            if (mode != "spec")
                 leaveRoom(userId);
             else
                 leaveRoomSpec(userId);

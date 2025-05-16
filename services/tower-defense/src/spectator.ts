@@ -2,6 +2,7 @@ import {Player, roomsTd} from "./api.js";
 
 
 export function joinRoomSpec(player: Player, roomId: number) {
+    console.log("prout");
     if (roomId !== -1) { // Joining a defined room (invite or tournaments)
         for (const room of roomsTd) {
             if (room.id === roomId) {

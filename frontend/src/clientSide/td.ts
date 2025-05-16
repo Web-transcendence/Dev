@@ -37,6 +37,7 @@ export class Enemy {
 
 export class Player {
     name: string;
+    id: number = -1;
     hp: number = 3;
     mana: number = 210;
     cost: number = 60;
@@ -89,7 +90,7 @@ export class Board {
 
 export class AssetsTd {
     images: Record<string, HTMLImageElement> = {};
-
+    frame: number = 0;
     async load(): Promise<void> {
         const assetsFolder = "./assets/tower-defense/";
         const imageNames = ["black1.png", "black2.png", "black3.png", "black4.png",
@@ -137,7 +138,7 @@ export class AssetsTd {
     }
 
     getAnImage(name: string): HTMLImageElement | undefined {
-        if (frame % 30 < 15 && this.images[`${name}0`]) {
+        if (this.frame % 30 < 15 && this.images[`${name}0`]) {
             return this.images[`${name}0`];
         } else if (this.images[`${name}1`]) {
             return this.images[`${name}1`];
@@ -146,7 +147,6 @@ export class AssetsTd {
     }
 }
 
-export let frame: number = 0;
 export let tdConnect: boolean;
 
 // Main function
@@ -166,7 +166,6 @@ export function TowerDefense(room?: number) {
     const allTowers: Tower[] = [];
     const selected: number[] = [];
     let rdmhover = false;
-    let id = -1;
 
     function getNick(): string {
         let nick = sessionStorage.getItem('nickName');
@@ -191,11 +190,11 @@ export function TowerDefense(room?: number) {
     }
 
     function dots() {
-        if (frame % 120 < 30)
+        if (assetsTd.frame % 120 < 30)
             return (".");
-        if (frame % 120 < 60)
+        if (assetsTd.frame % 120 < 60)
             return ("..");
-        if (frame % 120 < 90)
+        if (assetsTd.frame % 120 < 90)
             return ("...");
         return ("");
     }
@@ -207,7 +206,7 @@ export function TowerDefense(room?: number) {
         ctxTd.drawImage(assetsTd.getAnImage("rslime")!, canvasTd.width * 0.1, canvasTd.height * 0.06, 170, 170);
         ctxTd.drawImage(assetsTd.getAnImage("gslime")!, canvasTd.width * 0.18, canvasTd.height * 0.17, 80, 80);
         ctxTd.drawImage(assetsTd.getAnImage("pslime")!, canvasTd.width * 0.11, canvasTd.height * 0.18, 80, 80);
-        frame += 0.75;
+        assetsTd.frame += 0.75;
         ctxTd.fillStyle = "#b329d1";
         ctxTd.strokeStyle = "#0d0d0d";
         ctxTd.lineWidth = tile / 4;
@@ -388,7 +387,7 @@ export function TowerDefense(room?: number) {
             ctxTd.textAlign = "center";
             ctxTd.fillText(enemy.hp.toString(), enemyPosx(enemy.pos, 2), enemyPosy(enemy.pos) + 28);
         });
-        frame += 1;
+        assetsTd.frame += 1;
     }
 
     function getTowerColor(type: string) {
@@ -611,17 +610,19 @@ export function TowerDefense(room?: number) {
 
     // Communication with backend
     function updatePlayer(data: Player) {
-        const player = data.id === id ? player1 : player2;
+        let board: Board;
+        let i: number;
+        const player = data.id === player1.id ? player1 : player2;
         player.name = data.name;
         player.hp = data.hp;
         player.mana = data.mana;
         player.cost = data.cost;
-        player.enemies.splice(0, player2.enemies.length);
+        player.enemies.splice(0, player.enemies.length);
         data.enemies.forEach((enemy: Enemy) => {
             if (enemy)
                 player.enemies.push(new Enemy(enemy.type, enemy.hp, enemy.pos));
         });
-        player.deck.splice(0, player2.deck.length);
+        player.deck.splice(0, player.deck.length);
         data.deck.forEach((tower: Tower) => {
             player.deck.push(new Tower(tower.type, tower.speed, tower.damages, tower.area, tower.effect, tower.level));
         });
@@ -629,14 +630,14 @@ export function TowerDefense(room?: number) {
             board = data.board[i];
             player.board.push(new Board(board.pos, new Tower(board.tower.type, board.tower.speed, board.tower.damages, board.tower.area, board.tower.effect, board.tower.level)));
         }
-        player.bullets.splice(0, player2.bullets.length);
+        player.bullets.splice(0, player.bullets.length);
         data.bullets.forEach((bullet: Bullet) => {
             if (bullet)
                 player.bullets.push(new Bullet(bullet.type, bullet.rank, bullet.pos, bullet.target, bullet.travel));
         });
     }
 
-    function updateGame(data: Game) {
+    function updateGame(data: GameTd) {
         gameTd.level = data.level;
         gameTd.timer = data.timer;
         gameTd.start = data.start;
@@ -656,13 +657,11 @@ export function TowerDefense(room?: number) {
         };
         socketTd.onmessage = function (event) {
             const data = JSON.parse(event.data);
-            let board: Board;
-            let i: number;
             switch (data.class) {
                 case "gameUpdate":
-                    updateGame(data.game)
+                    updateGame(data.game);
                     updatePlayer(data.player1);
-                    updatePlayer(data.player2)
+                    updatePlayer(data.player2);
                     break;
                 case "Tower":
                     allTowers.push(new Tower(data.type, data.speed, data.damages, data.area, data.effect, data.level));
@@ -672,7 +671,7 @@ export function TowerDefense(room?: number) {
                         gameTd.state = 2.5;
                     break;
                 case "Id":
-                    id = data.id;
+                    player1.id = data.id;
                     break;
                 default:
                     console.warn("Unknown type received:", data);

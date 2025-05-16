@@ -1,5 +1,7 @@
 // Main function
-import {AssetsTd, Board, Bullet, Enemy, frame, GameTd, Player, tdConnect, Tower} from "./td";
+import {AssetsTd, Board, Bullet, Enemy, GameTd, Player, Tower} from "./td.js";
+
+let tdSpecConnect = false;
 
 export function TowerDefenseSpec(room?: number) {
     // Global Variables
@@ -15,9 +17,6 @@ export function TowerDefenseSpec(room?: number) {
     const player2 = new Player("Player 2");
     const nmap = Math.floor(Math.random() * 5);
     const allTowers: Tower[] = [];
-    const selected: number[] = [];
-    let rdmhover = false;
-    let id = -1;
 
     function getNick(): string {
         let nick = sessionStorage.getItem('nickName');
@@ -36,11 +35,11 @@ export function TowerDefenseSpec(room?: number) {
     }
 
     function dots() {
-        if (frame % 120 < 30)
+        if (assetsTd.frame % 120 < 30)
             return (".");
-        if (frame % 120 < 60)
+        if (assetsTd.frame % 120 < 60)
             return ("..");
-        if (frame % 120 < 90)
+        if (assetsTd.frame % 120 < 90)
             return ("...");
         return ("");
     }
@@ -52,7 +51,7 @@ export function TowerDefenseSpec(room?: number) {
         ctxTd.drawImage(assetsTd.getAnImage("rslime")!, canvasTd.width * 0.1, canvasTd.height * 0.06, 170, 170);
         ctxTd.drawImage(assetsTd.getAnImage("gslime")!, canvasTd.width * 0.18, canvasTd.height * 0.17, 80, 80);
         ctxTd.drawImage(assetsTd.getAnImage("pslime")!, canvasTd.width * 0.11, canvasTd.height * 0.18, 80, 80);
-        frame += 0.75;
+        assetsTd.frame += 0.75;
         ctxTd.fillStyle = "#b329d1";
         ctxTd.strokeStyle = "#0d0d0d";
         ctxTd.lineWidth = tile / 4;
@@ -209,7 +208,7 @@ export function TowerDefenseSpec(room?: number) {
             ctxTd.textAlign = "center";
             ctxTd.fillText(enemy.hp.toString(), enemyPosx(enemy.pos, 2), enemyPosy(enemy.pos) + 28);
         });
-        frame += 1;
+        assetsTd.frame += 1;
     }
 
     function getTowerColor(type: string) {
@@ -384,12 +383,12 @@ export function TowerDefenseSpec(room?: number) {
             default:
                 break;
         }
-        if (tdConnect)
+        if (tdSpecConnect)
             requestAnimationFrame(mainLoopTd);
     }
 
     function connectionCheck(socket: WebSocket) {
-        if (!tdConnect)
+        if (!tdSpecConnect)
             socket.close();
         else
             setTimeout(() => connectionCheck(socket), 10);
@@ -405,6 +404,8 @@ export function TowerDefenseSpec(room?: number) {
 
     // Communication with backend
     function updatePlayer(data: Player, nPlayer: number) {
+        let board: Board;
+        let i: number;
         const player = nPlayer === 1 ? player1 : player2;
         player.name = data.name;
         player.hp = data.hp;
@@ -430,7 +431,7 @@ export function TowerDefenseSpec(room?: number) {
         });
     }
 
-    function updateGame(data: Game) {
+    function updateGame(data: GameTd) {
         gameTd.level = data.level;
         gameTd.timer = data.timer;
         gameTd.start = data.start;
@@ -443,18 +444,16 @@ export function TowerDefenseSpec(room?: number) {
 
     try {
         const socketTd = new WebSocket("tower-defense/ws");
-        tdConnect = true;
+        tdSpecConnect = true;
         socketTd.onopen = function () {
             console.log("Connected to TD server");
             socketTd.send(JSON.stringify({event: "socketInit", nick: nick, room: room}));
         };
         socketTd.onmessage = function (event) {
             const data = JSON.parse(event.data);
-            let board: Board;
-            let i: number;
             switch (data.class) {
                 case "gameUpdate":
-                    updateGame(data.game)
+                    updateGame(data.game);
                     updatePlayer(data.player1, 1);
                     updatePlayer(data.player2, 2);
                     break;
@@ -466,7 +465,6 @@ export function TowerDefenseSpec(room?: number) {
                         gameTd.state = 2.5;
                     break;
                 case "Id":
-                    id = data.id;
                     break;
                 default:
                     console.warn("Unknown type received:", data);
@@ -511,6 +509,6 @@ export function TowerDefenseSpec(room?: number) {
     }
 }
 
-export function tdStop() {
-    tdConnect = false;
+export function tdSpecStop() {
+    tdSpecConnect = false;
 }
