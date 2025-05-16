@@ -1,11 +1,14 @@
 import { FastifyReply, FastifyRequest, FastifyInstance } from "fastify"
-import {tournamentSessions} from './api.js';
+import {INTERNAL_PASSWORD, tournamentSessions} from './api.js';
 import * as Schema from "./schema.js"
-import {ConflictError, InputError, MyError, ServerError} from "./error.js";
+import {ConflictError, InputError, MyError, ServerError, UnauthorizedError} from "./error.js";
 import {authUser} from "./utils.js";
-import {tournament} from "./tournament.js";
 
 
+const internalVerification = async (req, res) => {
+    if (req.headers.authorization !== INTERNAL_PASSWORD)
+        throw new UnauthorizedError(`bad internal password to access to this url: ${req.url}`, `internal server error`)
+}
 
 export default async function tournamentRoutes(app: FastifyInstance) {
 
@@ -13,12 +16,12 @@ export default async function tournamentRoutes(app: FastifyInstance) {
         try {
             const zod_result = Schema.tournamentIdSchema.safeParse(req.body)
             if (!zod_result.success)
-                throw new InputError(`this id of tournament doesn't exist`)
+                throw new InputError(`this id of tournament doesn't exist`, `the tournament id have to be a number`)
             let idTournament = zod_result.data.tournamentId
             console.log('id is tournament', idTournament);
 
             if (!idTournament)
-                throw new InputError(`Empty tournament id`)
+                throw new InputError(`Empty tournament id`, `tournamentId is empty`)
 
             const id: number = Number(req.headers.id)
             console.log('id is user', id);
@@ -104,12 +107,66 @@ export default async function tournamentRoutes(app: FastifyInstance) {
             if (!tournament)
                 throw new ConflictError(`there is no tournament with this id`, `internal error system`)
 
-            const result = await tournament.launch()
+            tournament.launch().then(() => {
+                console.log('launch done');
+            });
 
-
-            return res.status(200).send({result: result})
+            return res.status(200).send()
         }
         catch(err) {
+            if (err instanceof MyError) {
+                console.error(err.message)
+                return res.status(err.code).send({error: err.toSend})
+            }
+            console.error(err)
+            return res.status(500).send()
+        }
+    })
+
+    // app.get(`/RunningTournamentInformation/:id`, async (req: FastifyRequest, res: FastifyReply) => {
+    //     try {
+    //         const {id} = req.params as { id: string }
+    //
+    //         const numericId = Number(id)
+    //
+    //         if (isNaN(numericId))
+    //             throw new InputError(`the id isn't a number`, `id have to be a number`)
+    //
+    //         const tournament = tournamentSessions.get(numericId)
+    //         if (!tournament)
+    //             throw new InputError(`this id of tournament doesn't exist`, `only these id of tournament exist : 4,8,16,32`)
+    //
+    //         return res.status(200).send(tournament.sessionData())
+    //
+    //     } catch (err) {
+    //         if (err instanceof MyError) {
+    //             console.error(err.message)
+    //             return res.status(err.code).send({error: err.toSend})
+    //         }
+    //         console.error(err)
+    //         return res.status(500).send()
+    //     }
+    // })
+
+    app.get(`/userWin/:id`, {preHandler: internalVerification} , async (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const {id} = req.params as { id: string }
+
+            const numericId = Number(id)
+
+            if (isNaN(numericId))
+                throw new InputError(`the id isn't a number`, `id have to be a number`)
+
+            // tournamentSession.
+
+            for (const [tournamentId, tournament] of tournamentSessions) {
+                if (tournament.hasPlayer(numericId)) {
+                    await tournament.bracketWon(numericId)
+                    return res.status(200).send()
+                }
+            }
+            return res.status(404).send()
+        } catch (err) {
             if (err instanceof MyError) {
                 console.error(err.message)
                 return res.status(err.code).send({error: err.toSend})

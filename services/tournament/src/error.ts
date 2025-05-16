@@ -37,8 +37,8 @@ export class UnauthorizedError extends MyError {
 }
 
 export class InputError extends MyError {
-    constructor(log: string) {
-        super(`Input error: ${log}`,'bad Input', 400);
+    constructor(log: string, toSend: string) {
+        super(`Input error: ${log}`, toSend, 400);
 
     }
 }

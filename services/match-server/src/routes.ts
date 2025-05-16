@@ -149,12 +149,14 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                 id2: z.number()
             }).parse(req.body)
 
-            const winnerId = await startTournamentMatch(ids.id1, ids.id2);
+            console.log(`match ${ids.id1} VS ${ids.id2} dans tournamentGame matchServer`)
+            await startTournamentMatch(ids.id1, ids.id2);
 
-            return res.status(200).send({id: winnerId});
+            return res.status(200).send();
         } catch (err) {
             console.error(err)
             return res.status(500).send()
         }
     })
+
 }
