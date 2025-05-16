@@ -8,6 +8,11 @@ export default async function tdRoutes(fastify: FastifyInstance) {
         return (res.status(200).send({roomId: roomId}));
     })
 
+    fastify.post('/generateTournamentRoom', async (req: FastifyRequest, res: FastifyReply) => {
+        const roomId = generateRoom("tournament");
+        return (res.status(200).send({roomId: roomId}));
+    })
+
     fastify.get('/getMatchHistory', async (req: FastifyRequest, res: FastifyReply) => {
         try {
             console.log('I HAVE BEEEEN CALLED !!!!')

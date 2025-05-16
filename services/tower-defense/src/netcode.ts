@@ -8,11 +8,11 @@ function checkId(id: number) {
     return true;
 }
 
-export function generateRoom() {
+export function generateRoom(mode?: string) {
     let roomId: number;
     do {
         roomId = Math.floor(Math.random() * 9000 + 1000);
     } while (!checkId(roomId));
-    roomsTd.push(new RoomTd(roomId));
+    roomsTd.push(new RoomTd(roomId, mode));
     return (roomId);
 }
