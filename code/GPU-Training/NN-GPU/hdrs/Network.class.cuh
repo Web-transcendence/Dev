@@ -2,7 +2,7 @@
 #ifndef NETWORK_CLASS_HPP
 # define NETWORK_CLASS_HPP
 
-#include "define.hpp"
+#include "define.cuh"
 
 #include <vector>
 
@@ -25,6 +25,8 @@ private:
 
 	size_t	bitsWeights;
 	size_t	bitsBiais;
+
+	size_t	maxSizeInput;
 
 	float	*d_trainingData;
 };

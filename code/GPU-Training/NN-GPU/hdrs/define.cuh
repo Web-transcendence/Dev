@@ -23,6 +23,7 @@
 #define SIZE_TRAININGDATA_BATCH ()
 
 #include <exception>
+#include <array>
 #include <stdio.h>
 
 class CudaMallocException : std::exception {
@@ -36,6 +37,21 @@ class MallocException : std::exception {
 		return "Malloc failed";
 	}
 };
+
+typedef struct	s_lArch {
+	unsigned int	n_Layer;
+	unsigned int	neurons;
+	unsigned int	weights;
+
+	unsigned int	s_idxWeights;
+	unsigned int	s_idxBiais;
+
+	void	set(std::array<unsigned int, 3>	const & val) {
+		n_Layer = val[0];
+		neurons = val[1];
+		weights = val[2];
+	}; 
+}	t_lArch;
 
 typedef struct  s_tuple {
     float	*input;
