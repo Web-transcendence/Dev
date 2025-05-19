@@ -58,9 +58,11 @@ export async function leaveRoom(userId: number) {
                 const scoreA = Number(playerA.paddle.score);
                 const scoreB = Number(playerB.paddle.score);
                 const winnerIndex = room.players.findIndex(player => player.id !== userId);
+                console.log(`winner: ${winnerIndex}`);
                 const winner = room.players[winnerIndex];
                 if (room.type === "tournament")
                     await fetchPlayerWin(winner.dbId);
+                console.log(`A: ${playerA.dbId} B: ${playerB.dbId} Windex: ${winnerIndex}`);
                 insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
                 room.specs.forEach(spec => {
                     spec.ws.send(JSON.stringify({ type: "gameEnd", winner: winner.name }));
@@ -180,24 +182,7 @@ export async function startInviteMatch(userId: number, opponent: number) {
     return (roomId);
 }
 
-function waitForMatchEnd(roomId: number, playerA_id: number, playerB_id: number) {
-    const count = 0;
-    const intervalle = setInterval((count, roomId: number, playerA_id: number, playerB_id: number) => {
-
-    }, 1000)
-}
-
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
-    const roomId = generateRoom();
+    const roomId = generateTournamentRoom();
     await fetchNotifyUser([playerA_id, playerB_id], `invitationGame`, {roomId: roomId})
-    waitForMatchEnd(roomId, playerA_id, playerB_id).then(async (winnerId) => {
-        if (winnerId)
-            await fetch(`http://tournament:7000/userWin/${winnerId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `${INTERNAL_PASSWORD}`
-                }
-            })
-    })
 }

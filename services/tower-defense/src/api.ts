@@ -566,12 +566,11 @@ fastify.register(async function (fastify) {
                     return;
                 }
                 player.name = data.nick;
-                if (data.nick.includes("guest")) {
-                    try {
+                try {
+                    if (!data.nick.includes("guest"))
                         player.dbId = await fetchIdByNickName(data.nick);
-                    } catch (error) {
-                        console.log(error);
-                    }
+                } catch (error) {
+                    console.log(error);
                 }
                 if (data.room)
                     room = data.room;
