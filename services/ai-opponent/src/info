@@ -14,3 +14,5 @@ idea:
 Delete place holders (cause data race)
 
 les infos envoyées sont incompletes
+
+faut surement close la connection avec le serv IA

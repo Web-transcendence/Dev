@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:46:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/07 14:44:50 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/19 21:56:41 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,8 @@ private:
 	std::mutex			stateMutex;
 
 	std::atomic<bool>	active;
+
+	std::atomic<bool>	promiseSet;
 	std::promise<bool>	promise;
 	std::future<bool>	future;
 

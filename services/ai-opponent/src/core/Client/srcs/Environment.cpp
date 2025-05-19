@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/07 14:47:43 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/19 21:29:21 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ Environment::Environment( void ) : \
 	ball(std::array<double, 6>{WIDTH/2,HEIGHT,2,0,10,10}), \
 	rPaddle(std::array<double, 5>{WIDTH-30,HEIGHT/2,20,200,10}), \
 	lPaddle(std::array<double, 5>{30,HEIGHT/2,20,200,10}) {
+    this->reset(this->ball, this->lPaddle, this->rPaddle);
 	return ;
 }
 

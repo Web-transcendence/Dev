@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/17 12:31:29 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/19 21:16:05 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ void	Factory::createGame(int const gameId) {
 		if (this->_connectedClients[gameId])
 			throw DuplicateGameException();
 		this->_connectedClients[gameId] = c;
+		std::cout << "client created" << std::endl;
 		std::thread	t([c]() {c->run();});
 		t.detach();
 	} catch (std::exception const & e) {

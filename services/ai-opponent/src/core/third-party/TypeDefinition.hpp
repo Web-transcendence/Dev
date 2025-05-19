@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   TypeDefinition.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:15:27 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/13 15:16:34 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/19 22:05:22 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 # define AI_SERVER_PORT 9090
 # define FACTORY_SERVER_PORT 16016
 # define CLIENT_INPUT_TIME_SPAN 100
-# define CLIENT_MAX_SPAN_STATE 3.0
+# define CLIENT_MAX_SPAN_STATE 3000.0
 # include <atomic>
 # include <vector>
 # include <cstring>

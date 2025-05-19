@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 16:09:55 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/19 18:58:46 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/19 20:58:55 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ void	initServer(server & myServ) {
 		while (true) {
 			nlohmann::json	j;
 			
+			j["source"] = "game";
 			j["type"] = "gameUpdate";
 			j["paddle1"]["x"] = 30.;
 			j["paddle1"]["y"] = HEIGHT / 2.;
@@ -80,6 +81,8 @@ void	initServer(server & myServ) {
 int	main( void ) {
 	server	myServ;
 
+	initServer(myServ);
+	
 	httplib::Client cli("http://0.0.0.0:16016");
 
 	auto res = cli.Get("/createAI/130");
