@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/13 15:12:12 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/19 19:06:14 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ Client::Client(std::string const & wsGameServer, int const gameId) :\
 	auto res = this->factoryServer.Get("/ping");
 	if (!res)
 		throw DisconnectedFactoryException();
-
 	this->c.init_asio();
 	this->c.set_message_handler([this](websocketpp::connection_hdl hdl, client::message_ptr msg){this->on_message(hdl, msg);});
 	this->c.set_fail_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){this->promise.set_value(false);});
@@ -83,26 +82,26 @@ void	Client::on_message_gameServer(nlohmann::json const & data) {
 	std::vector<double>	temp(N_RAW_STATE);
 
 	t_ball	ball(std::array<double, 6>{\
-		data["Ball"]["x"],\
-		data["Ball"]["y"],\
-		data["Ball"]["angle"],\
-		data["Ball"]["speed"],\
-		data["Ball"]["ispeed"],\
-		data["Ball"]["radius"]\
+		data["ball"]["x"],\
+		data["ball"]["y"],\
+		data["ball"]["angle"],\
+		data["ball"]["speed"],\
+		data["ball"]["ispeed"],\
+		data["ball"]["radius"]
 	});
 	t_paddle rPaddle(std::array<double, 5>{\
-		data["rPaddle"]["x"],\
-		data["rPaddle"]["x"],\
-		data["rPaddle"]["width"],\
-		data["rPaddle"]["height"],\
-		data["rPaddle"]["speed"]
+		data["paddle1"]["x"],\
+		data["paddle1"]["x"],\
+		data["paddle1"]["width"],\
+		data["paddle1"]["height"],\
+		data["paddle1"]["speed"]
 	});
 	t_paddle lPaddle(std::array<double, 5>{\
-		data["lPaddle"]["x"],\
-		data["lPaddle"]["x"],\
-		data["lPaddle"]["width"],\
-		data["lPaddle"]["height"],\
-		data["lPaddle"]["speed"]
+		data["paddle2"]["x"],\
+		data["paddle2"]["x"],\
+		data["paddle2"]["width"],\
+		data["paddle2"]["height"],\
+		data["paddle2"]["speed"]
 	});
 	this->stateMutex.lock();
 	this->localPong.reset(ball, lPaddle, rPaddle);

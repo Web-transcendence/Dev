@@ -1,0 +1,94 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   test.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/19 16:09:55 by thibaud           #+#    #+#             */
+/*   Updated: 2025/05/19 18:58:46 by thibaud          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+# include "third-party/websocketpp/config/asio_no_tls.hpp"
+# include "third-party/websocketpp/server.hpp"
+# include "third-party/json.hpp"
+# include <httplib.h>
+# include <iostream>
+# include <thread>
+# include <chrono>
+
+#define	PORT 6363 
+
+#define	HEIGHT 800
+#define WIDTH 1200
+
+typedef websocketpp::server<websocketpp::config::asio> server;
+
+typedef server::message_ptr message_ptr;
+typedef server::connection_ptr connection_ptr;
+
+void	initServer(server & myServ) {
+	myServ.set_access_channels(websocketpp::log::alevel::all);
+	myServ.clear_access_channels(websocketpp::log::alevel::frame_payload);
+	
+	myServ.set_open_handler([&myServ](websocketpp::connection_hdl hdl){
+		std::cout << "log: new client connected" << std::endl;
+
+		while (true) {
+			nlohmann::json	j;
+			
+			j["type"] = "gameUpdate";
+			j["paddle1"]["x"] = 30.;
+			j["paddle1"]["y"] = HEIGHT / 2.;
+			j["paddle1"]["width"] = 20.;
+			j["paddle1"]["height"] = 200.;
+			j["paddle2"]["speed"] = 0.;
+			j["paddle2"]["x"] = WIDTH - 30.;
+			j["paddle2"]["y"] = HEIGHT / 2.;
+			j["paddle2"]["width"] = 20.;
+			j["paddle2"]["height"] = 200.;
+			j["paddle2"]["speed"] = 0.;
+			j["ball"]["x"] = HEIGHT / 2;
+			j["ball"]["y"] = WIDTH / 2;
+			j["ball"]["radius"] = 12.;
+			j["ball"]["speed"] = 12.;
+			j["ball"]["ispeed"] = 12.;
+			j["ball"]["angle"] = M_PI;
+			myServ.send(hdl, j.dump(), websocketpp::frame::opcode::TEXT);
+			std::cout << "log: new message send" << std::endl;
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+		}
+	});
+
+	myServ.set_message_handler([](websocketpp::connection_hdl hdl, message_ptr msg) {
+		std::cout << "log: new message received: " << msg->get_payload() << std::endl;
+	});
+	
+	myServ.init_asio();
+	
+	myServ.listen(PORT);
+
+	myServ.start_accept();
+
+	std::thread	t([&myServ]() {myServ.run();});
+	t.detach();
+
+	std::cout << "log: server is running on ws://0.0.0.0:" << PORT << std::endl;
+}
+
+int	main( void ) {
+	server	myServ;
+
+	httplib::Client cli("http://0.0.0.0:16016");
+
+	auto res = cli.Get("/createAI/130");
+
+    if (res && res->status == 200) {
+        std::cout << res->body << std::endl;
+    }
+
+	while (true);
+
+	return 0;
+}
