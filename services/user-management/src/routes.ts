@@ -331,6 +331,7 @@ export default async function userRoutes(app: FastifyInstance) {
             }
             console.error(err)
             return res.status(500).send()
+
         }
     })
 
