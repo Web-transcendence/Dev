@@ -8,12 +8,11 @@ import {
     moveHazard,
     movePaddle,
     Player,
-    Room, Timer,
+    Room,
     timerCheck
 } from "./api.js";
-import {getWinnerId, insertMatchResult} from "./database.js";
-import {fetchNickNameById, fetchNotifyUser, fetchPlayerWin} from "./utils.js";
-import {isFunction} from "node:util";
+import {insertMatchResult} from "./database.js";
+import {fetchNotifyUser, fetchPlayerWin} from "./utils.js";
 
 export let rooms: Room[] = [];
 
@@ -183,6 +182,6 @@ export async function startInviteMatch(userId: number, opponent: number) {
 }
 
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
-    const roomId = generateTournamentRoom();
+    const roomId = generateRoom("tournament");
     await fetchNotifyUser([playerA_id, playerB_id], `invitationGame`, {roomId: roomId})
 }

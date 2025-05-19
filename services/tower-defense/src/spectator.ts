@@ -14,7 +14,7 @@ export function joinRoomSpec(player: Player, roomId: number) {
     }
     // Basic random matchmaking
     for (let room of roomsTd) {
-        if (room.players.length === 2) {
+        if (room.players.length === 2 && !room.ended) {
             room.specs.push(player);
             console.log(player.name, "joined room", room.id, "as spectator");
             return ;

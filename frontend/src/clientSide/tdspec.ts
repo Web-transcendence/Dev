@@ -17,6 +17,7 @@ export function TowerDefenseSpec(room?: number) {
     const player2 = new Player("Player 2");
     const nmap = Math.floor(Math.random() * 5);
     const allTowers: Tower[] = [];
+    let winner = "none";
 
     function getNick(): string {
         let nick = sessionStorage.getItem('nickName');
@@ -250,9 +251,6 @@ export function TowerDefenseSpec(room?: number) {
         ctxTd.fillStyle = "#fcc800";
         ctxTd.font = "16px 'Press Start 2P'";
         ctxTd.textAlign = "center";
-        // addTower
-        ctxTd.drawImage(assetsTd.getImage("addTower")!, tile * 6.5 - 35, canvasTd.height - tile * 0.75 - 35, 70, 70);
-        ctxTd.fillText(player1.cost.toString(), tile * 6.5, canvasTd.height - tile * 0.75 + 22);
         // stats
         drawRawButton(tile * 5.5, canvasTd.height - tile * 0.75, tile * 0.9, tile * 0.9, "#0096ff");
         ctxTd.drawImage(assetsTd.getImage("mana")!, tile * 5.35, canvasTd.height - tile * 1.05, tile * 0.3, tile * 0.3);
@@ -320,17 +318,16 @@ export function TowerDefenseSpec(room?: number) {
 
     function drawGameTd() {
         ctxTd.drawImage(assetsTd.getImage(`map${nmap}`)!, 0, 0, canvasTd.width, canvasTd.height);
-        //drawGrid(); // for debug use only
-        //drawTemplate(); // for debug use only
         drawTimer();
         drawEnemies();
         drawButtons();
         drawTowers();
         drawBullets();
         ctxTd.fillStyle = "#fcc800";
-        ctxTd.font = `45px 'Press Start 2P'`;
+        ctxTd.font = `${tile / 3}px 'Press Start 2P'`;
         ctxTd.textAlign = "center"
-        ctxTd.fillText("Spectator Mode", canvasTd.width * 0.5, canvasTd.height * 0.95);
+        ctxTd.fillText("Spectator", canvasTd.width * 0.5, canvasTd.height * 0.92);
+        ctxTd.fillText("Mode", canvasTd.width * 0.5, canvasTd.height * 0.97);
     }
 
     // EndScreen
@@ -343,27 +340,13 @@ export function TowerDefenseSpec(room?: number) {
         ctxTd.lineWidth = tile * 0.2;
         ctxTd.font = `${tile}px 'Press Start 2P'`;
         ctxTd.textAlign = "center"
-        if (gameTd.state === 2.5) {
-            ctxTd.fillStyle = "#17b645";
-            ctxTd.strokeText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
-            ctxTd.fillText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
-            ctxTd.font = `${tile / 2}px 'Press Start 2P'`;
-            ctxTd.lineWidth = tile * 0.1;
-            ctxTd.strokeText("Opponent disconnected", canvasTd.width * 0.5, canvasTd.height * 0.6);
-            ctxTd.fillText("Opponent disconnected", canvasTd.width * 0.5, canvasTd.height * 0.6);
-        } else if (player1.hp > player2.hp) {
-            ctxTd.fillStyle = "#17b645";
-            ctxTd.strokeText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
-            ctxTd.fillText("You win!", canvasTd.width * 0.5, canvasTd.height * 0.5);
-        } else if (player2.hp > player1.hp) {
-            ctxTd.fillStyle = "#ab1e00";
-            ctxTd.strokeText("You lose!", canvasTd.width * 0.5, canvasTd.height * 0.5);
-            ctxTd.fillText("You lose!", canvasTd.width * 0.5, canvasTd.height * 0.5);
-        } else {
-            ctxTd.fillStyle = "#0075ab";
-            ctxTd.strokeText("Draw!", canvasTd.width * 0.5, canvasTd.height * 0.5);
-            ctxTd.fillText("Draw!", canvasTd.width * 0.5, canvasTd.height * 0.5);
-        }
+        ctxTd.fillStyle = "#17b645";
+        ctxTd.strokeText(`${winner} won !`, canvasTd.width * 0.5, canvasTd.height * 0.5, tile * 12);
+        ctxTd.fillText(`${winner} won !`, canvasTd.width * 0.5, canvasTd.height * 0.5, tile * 12);
+        ctxTd.font = `${tile / 4}px 'Press Start 2P'`;
+        ctxTd.lineWidth = tile * 0.1;
+        ctxTd.strokeText("Clic to spectate another game", canvasTd.width * 0.5, canvasTd.height * 0.6);
+        ctxTd.fillText("Clic to spectate another game", canvasTd.width * 0.5, canvasTd.height * 0.6);
     }
 
     // Loop
@@ -411,20 +394,20 @@ export function TowerDefenseSpec(room?: number) {
         player.hp = data.hp;
         player.mana = data.mana;
         player.cost = data.cost;
-        player.enemies.splice(0, player2.enemies.length);
+        player.enemies.splice(0, player.enemies.length);
         data.enemies.forEach((enemy: Enemy) => {
             if (enemy)
                 player.enemies.push(new Enemy(enemy.type, enemy.hp, enemy.pos));
         });
-        player.deck.splice(0, player2.deck.length);
+        player.deck.splice(0, player.deck.length);
         data.deck.forEach((tower: Tower) => {
             player.deck.push(new Tower(tower.type, tower.speed, tower.damages, tower.area, tower.effect, tower.level));
         });
-        for (i = player.board.length; i < data.board.length; i++) {
-            board = data.board[i];
+        player.board.splice(0, player.board.length);
+        data.board.forEach((board: Board) => {
             player.board.push(new Board(board.pos, new Tower(board.tower.type, board.tower.speed, board.tower.damages, board.tower.area, board.tower.effect, board.tower.level)));
-        }
-        player.bullets.splice(0, player2.bullets.length);
+        });
+        player.bullets.splice(0, player.bullets.length);
         data.bullets.forEach((bullet: Bullet) => {
             if (bullet)
                 player.bullets.push(new Bullet(bullet.type, bullet.rank, bullet.pos, bullet.target, bullet.travel));
@@ -466,6 +449,10 @@ export function TowerDefenseSpec(room?: number) {
                     break;
                 case "Id":
                     break;
+                case "gameEnd":
+                    gameTd.state = 2;
+                    winner = data.winner;
+                    break;
                 default:
                     console.warn("Unknown type received:", data);
             }
@@ -494,6 +481,10 @@ export function TowerDefenseSpec(room?: number) {
                     break;
                 case 1:
                     socketTd.send(JSON.stringify({event: "click", player: 1, button: 0}));
+                    break;
+                case 2:
+                    socketTd.send(JSON.stringify({event: "click", player: 1, button: 0}));
+                    gameTd.state = 0.5;
                     break;
                 default:
                     break;
