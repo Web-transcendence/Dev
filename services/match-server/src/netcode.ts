@@ -85,15 +85,14 @@ export function joinRoom(player: Player, roomId: number) {
     if (roomId !== -1) { // Joining a defined room (invite or tournaments)
         for (; i < rooms.length; i++) {
             if (rooms[i].id === roomId && rooms[i].players.length < 2) {
-                if (rooms[i].players.length === 0) {
+                if (rooms[i].players.length === 0)
                     player.paddle.x = 30;
-                    rooms[i].players.push(player);
-                    return ;
-                } else {
+                else
                     player.paddle.x = 1200 - 30;
-                    rooms[i].players.push(player);
-                    break ;
-                }
+                rooms[i].players.push(player);
+                id = rooms[i].id;
+                console.log(player.paddle.name, "joined room", rooms[i].id);
+                break ;
             }
         }
     } else { // Basic random matchmaking
@@ -115,9 +114,9 @@ export function joinRoom(player: Player, roomId: number) {
             return;
         }
     }
-    if (i === rooms.length)
+    if (i === rooms.length || rooms[i].players.length !== 2)
         return ;
-    console.log(rooms[i].players.length);
+    console.log(`room ${rooms[i].id}'s game has started`);
     const ball = new Ball (1200 / 2, 800 / 2, 0, 8, 12, "#fcc800");
     const game = new gameState();
     const freq1 = rooms[i].players[0].frequency;
