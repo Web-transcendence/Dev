@@ -101,7 +101,6 @@ export async function routes(fastify: FastifyInstance) {
         'ballup.png',
         'bardown.png',
         'barup.png',
-        'pong.png'
     ]);
 
     fastify.get('/assets/pong/:imageName', async (req: FastifyRequest<{ Params: { imageName: string } }>, reply: FastifyReply) => {

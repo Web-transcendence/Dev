@@ -55,6 +55,7 @@ async function getElementsOfMatch(MatchResult: MatchResult[] | undefined, id: nu
         }
         for (const match of MatchResult) {
             let opponent: UserData[] = [];
+            console.log('opponent:', opponent);
             const oppId=  match.playerA_id === id ? match.playerB_id : match.playerA_id;
             console.log('matchtd', match.playerA_id, match.playerB_id);
             if (oppId !== -1)
@@ -67,7 +68,7 @@ async function getElementsOfMatch(MatchResult: MatchResult[] | undefined, id: nu
                     avatar: '../images/login.png'
                 }];
             let result: string = 'DEFEAT';
-            if (id != match.winner_id)
+            if (id == match.winner_id)
                 result = 'VICTORY';
             addMatchEntry(game, opponent[0].nickName, opponent[0].avatar, match.scoreA, match.scoreB, result, match.match_time)
         }
@@ -109,7 +110,6 @@ export async function printMatchHistory() {
     }
     const pongMH: MatchResult[] | undefined = await getGameHistory(id, 'match-server');
     const tdMH: MatchResult[] | undefined = await getGameHistory(id, 'tower-defense');
-    console.log('grego', tdMH);
     const idNum = Number(id)
     await getElementsOfMatch(pongMH, idNum, 'Pong')
     await getElementsOfMatch(tdMH, idNum, 'Tower-Defense')
