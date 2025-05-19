@@ -143,7 +143,7 @@ export class User {
             throw new DataBaseError('cannot insert new password', 'internal error system', 500)
     }
 
-    async setNickname(newNickName: string) {
+    setNickname(newNickName: string) {
         if (Client_db.prepare("SELECT * FROM Client WHERE nickName = ?").get(newNickName))
             throw new ConflictError("An user try to set his nickName to an already used nickname", "Nickname already used")
 

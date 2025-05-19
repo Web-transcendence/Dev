@@ -6,6 +6,7 @@ import {connectedUsers, INTERNAL_PASSWORD} from "./api.js"
 import {InputError, MyError, ServerError, UnauthorizedError} from "./error.js";
 import {notifyUser} from "./serverSentEvent.js";
 import {invitationGameSchema, nickNameSchema, passwordSchema} from "./schema.js";
+import {LoginTicket} from "google-auth-library";
 
 
 export function logConnectedUser() {
@@ -75,6 +76,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.get("/2faInit", async (req: FastifyRequest, res: FastifyReply) => {
         try {
+            console.log(`2fa init`)
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
@@ -95,6 +97,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
     app.post("/2faVerify", (req: FastifyRequest, res: FastifyReply) => {
         try {
+            console.log(`2fa init`)
             const zod_result = Schema.verifySchema.safeParse(req.body)
             if (!zod_result.success)
                 throw new InputError(zod_result.error.message, zod_result.error.message)
@@ -276,12 +279,17 @@ export default async function userRoutes(app: FastifyInstance) {
             const user = new User(id);
             user.setNickname(newNickName);
 
+            console.log('sssss')
             return res.status(200).send();
         } catch (err) {
+
+            console.log(err)
             if (err instanceof MyError) {
+                console.log('hehehe')
                 console.error(err.message)
                 return res.status(err.code).send({error: err.toSend})
             }
+            console.log('uuuuuu')
             console.error(err)
             return res.status(500).send()
         }
