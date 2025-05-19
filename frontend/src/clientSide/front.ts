@@ -101,8 +101,7 @@ function constantButton() {
     document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate("/tournaments", event));
     document.getElementById("matchHistory")?.addEventListener("click", (event: MouseEvent) => navigate("/matchHistory", event));
     // Footer
-    document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate("/about", event));
-    document.getElementById("contact")?.addEventListener("click", (event: MouseEvent) => navigate("/contact", event));
+    document.getElementById("toKnow")?.addEventListener("click", (event: MouseEvent) => navigate("/toKnow", event));
 }
 
 
@@ -146,7 +145,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
                     sessionStorage.setItem('id', reply.id)
                 if (reply.nickName)
                     sessionStorage.setItem('nickName', reply.nickName)
-                navigate('/connected');
+                navigate('/toKnow');
                 await getAvatar();
                 await sseConnection()
             }

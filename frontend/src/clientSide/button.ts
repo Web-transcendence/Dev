@@ -1,7 +1,7 @@
 import {addFriend, login, profile, register, setAvatar, verify2fa} from "./user.js";
 import { init2fa } from "./user.js";
 import { friendList } from "./friends.js";
-import { handleConnection, navigate } from "./front.js";
+import {connected, handleConnection, navigate} from "./front.js";
 import { tdStop, TowerDefense } from "./td.js";
 import { editProfile } from "./editInfoProfile.js";
 import { displayNotification } from "./notificationHandler.js";
@@ -25,7 +25,8 @@ const mapButton : {[key: string] : () => void} = {
     "/towerWatch" : towerWatch,
     "/tournaments" : tournaments,
     "/lobby" : lobby,
-    "/matchHistory" : matchHistory
+    "/matchHistory" : matchHistory,
+    "/toKnow" : toKnow
 }
 
 export function activateBtn(page: string) {
@@ -84,8 +85,9 @@ async function profileBtn() {
                 if (insertQrcode) {
                     const img = document.createElement("img");
                     img.src = qrcode;
-                    img.classList.add("h-3/4", "w-3/4", "p-4", "rounded-lg");
+                    img.classList.add("h-3/4", "w-3/4", "p-4");
                     insertQrcode.innerHTML = "";
+                    initFa.classList.add("hidden");
                     insertQrcode.appendChild(img);
                     const label = document.getElementById("codeFaInput");
                     if (label)
@@ -191,4 +193,16 @@ async function lobby() {
 
 async function matchHistory() {
     await printMatchHistory();
+}
+
+function toKnow(){
+    const img = document.getElementById("imgToknow") as HTMLImageElement | null;
+    if (img) {
+        if (connected) {
+            const avatar = sessionStorage.getItem('avatar');
+            if (avatar) img.src = avatar;
+            else img.src = "../images/login.png";
+        }
+        else img.src = "../images/logout.png";
+    }
 }

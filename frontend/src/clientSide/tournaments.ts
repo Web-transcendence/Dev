@@ -73,7 +73,6 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
         const number = players.length;
         numberOfPlayer.innerText = `${number}/${nbrTournament}`;
     }
-    document.getElementById('launchTournamentBtn')?.addEventListener('click', event => launchTournament());
 }
 
 export async function quitTournaments() {
@@ -95,6 +94,7 @@ export async function quitTournaments() {
 export async function launchTournament() {
     try {
         const token = sessionStorage.getItem('token')
+        console.log('qqqqqqqqqqqqqqqqqq')
         const response = await fetch(`/tournament/launch`, {
             method: 'GET',
             headers: {
@@ -102,7 +102,6 @@ export async function launchTournament() {
                 'authorization': 'Bearer ' + token,
             },
         })
-
         if (!response.ok) {
             const error = await response.json()
             console.error(error.error)

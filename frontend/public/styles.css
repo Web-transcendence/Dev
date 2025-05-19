@@ -20,7 +20,7 @@
     }
     .btn-slide {
         @apply absolute top-1/2 -right-6 -translate-x-11 h-10 -translate-y-1/2  rounded-r-none
-         w-0 bg-red-600 ease-in-out cursor-pointer text-black group-hover:px-6 group-hover:pr-10
+         w-0 bg-red-600 ease-in-out cursor-pointer text-white group-hover:px-6 group-hover:pr-10
          rounded-full text-sm group-hover:w-38 transition-[all,width] overflow-hidden duration-300
          group-hover:delay-0 z-10;
     }

@@ -2,6 +2,7 @@ import {navigate} from "./front.js"
 import {loadPart} from "./insert.js"
 import {sseConnection} from "./serverSentEvent.js"
 import {displayNotification} from "./notificationHandler.js"
+import {type} from "node:os";
 
 export function register(button: HTMLElement): void {
     button.addEventListener("click", async () => {
@@ -20,7 +21,7 @@ export function register(button: HTMLElement): void {
             sessionStorage.setItem('id', result.id)
             sessionStorage.setItem('token', result.token)
             sessionStorage.setItem('nickName', result.nickName)
-            await navigate('/connected')
+            await navigate('/toKnow')
             await getAvatar();
             await sseConnection()
         } else {
@@ -50,7 +51,7 @@ export function login(button: HTMLElement): void {
                 return await loadPart("/factor")
             }
             sessionStorage.setItem('token', data.token)
-            navigate('/connected')
+            navigate('/toKnow')
             await getAvatar();
             await sseConnection()
         } else {
@@ -85,7 +86,7 @@ export async function profile() {
             const nameInput = document.getElementById("profileNickName");
             if (nameInput instanceof HTMLInputElement) nameInput.value = data.nickName;
             const emailInput = document.getElementById("profileEmail");
-            if (emailInput instanceof HTMLInputElement) emailInput.value = data.email;
+            if (emailInput instanceof HTMLSpanElement) emailInput.innerText = data.email;
         }
     }
     catch (err) {
@@ -168,7 +169,8 @@ export async function verify2fa(secret: string) {
         }
         else {
             const errorData = await response.json()
-            console.error('errorDisplay', errorData)
+            console.log('errorMESAe', errorData.error)
+            displayNotification('Bad code or outdated', {type: 'error'});
         }
     } catch (err) {
         console.error(err)

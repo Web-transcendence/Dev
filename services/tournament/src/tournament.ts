@@ -15,6 +15,7 @@ async function fetchMatch(id1: number, id2: number) {
     })
 }
 
+
 export class tournament {
 
     private participantId: number[]
@@ -71,6 +72,7 @@ export class tournament {
             await fetchNotifyUser(this.participantId, 'quitTournament', {id: id, maxPlayer: this.maxPlayer})
         }
     }
+
 
     async bracketHandler() {
         if (this.alonePlayerId) {
@@ -150,6 +152,7 @@ export class tournament {
     }
 
     cleanTournament() {
+        console.log(`lsssss`)
         this.participantId = []
         this.status = 'waiting'
         this.actualParticipant = []

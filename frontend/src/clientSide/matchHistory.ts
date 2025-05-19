@@ -49,12 +49,14 @@ function addMatchEntry(game: string, opponent: string, opponentAvatar: string, s
 async function getElementsOfMatch(MatchResult: MatchResult[] | undefined, id: number, game: string) {
     try {
         if (MatchResult === undefined) {
+            console.log('No match found.', game);
             displayNotification(`You Didn't played a single game of ${game}`, { type: "error" })
             return;
         }
         for (const match of MatchResult) {
             let opponent: UserData[] = [];
             const oppId=  match.playerA_id === id ? match.playerB_id : match.playerA_id;
+            console.log('matchtd', match.playerA_id, match.playerB_id);
             if (oppId !== -1)
                 opponent = await fetchUserInformation([oppId]);
             else
@@ -84,7 +86,6 @@ export async function getGameHistory (id: string, game: string): Promise<MatchRe
             headers: {
                 'Content-Type': 'application/json',
                 'authorization': 'Bearer ' + token,
-                'id': id ?? '',
             },
         })
         if (!response.ok) {
@@ -108,6 +109,7 @@ export async function printMatchHistory() {
     }
     const pongMH: MatchResult[] | undefined = await getGameHistory(id, 'match-server');
     const tdMH: MatchResult[] | undefined = await getGameHistory(id, 'tower-defense');
+    console.log('grego', tdMH);
     const idNum = Number(id)
     await getElementsOfMatch(pongMH, idNum, 'Pong')
     await getElementsOfMatch(tdMH, idNum, 'Tower-Defense')

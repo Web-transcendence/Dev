@@ -54,7 +54,6 @@ export async function routes(fastify: FastifyInstance) {
         });
     });
 
-        // Route par défaut : redirige toute autre page sur index.html
         fastify.get('/part/:name', (req, reply) => {
             try {
                 const fullPath = join(import.meta.dirname, env.TRANS_VIEWS_PATH, 'index.html');
@@ -71,7 +70,9 @@ export async function routes(fastify: FastifyInstance) {
         'favicon.png',
         'favicon.ico',
         'fourRobots.png',
+        'eightRobots.png',
         'sixteenRobots.png',
+        'biggest.png',
         'login.png',
         'logout.png',
         'BigLock.png',
@@ -94,11 +95,40 @@ export async function routes(fastify: FastifyInstance) {
              reply.code(404).send("Fichier non trouvé");
          }
      });
+
      //Pong assets
-    // const pongImages = new Set([
-    //     'ballup.png',
-    //     'bardown.png',
-    //     'barup.png',
-    //     'pong.png'
-    // ]);
+    const pongImages = new Set([
+        'ballup.png',
+        'bardown.png',
+        'barup.png',
+        'pong.png'
+    ]);
+
+    fastify.get('/assets/pong/:imageName', async (req: FastifyRequest<{ Params: { imageName: string } }>, reply: FastifyReply) => {
+        const {imageName} = req.params;
+
+        if (!pongImages.has(imageName)) {
+            return reply.code(404).send("Image non autorisée");
+        }
+
+        try {
+            const filePath = join(import.meta.dirname, env.TRANS_IMG_PATH, imageName);
+            const fileData = readFileSync(filePath);
+            reply.type('image/png').send(fileData);
+        } catch {
+            reply.code(404).send("Fichier non trouvé");
+        }
+    });
+
+    // TowerDefense
+    fastify.get('/assets/tower-defense/:filename', async (req: FastifyRequest<{ Params: { filename: string } }>, reply: FastifyReply) => {
+        try {
+            const { filename } = req.params;
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, 'tower-defense', filename);
+            const file = readFileSync(frontPath);
+            reply.code(224).type('image/png').send(file);
+        } catch (error) {
+            reply.code(404).send(`Fichier ${req.params.filename} non trouvé`);
+        }
+    });
 }

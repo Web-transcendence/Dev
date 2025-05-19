@@ -230,6 +230,11 @@ const loseTournament = async ({id}: { id: number }) => {
 }
 
 
+const notifyInvitationTournamentPong = async ({roomId}: {roomId: number}) => {
+    console.log('roomIDDDD', roomId);
+    await loadPart('/pongRemote');
+    Pong("remote", roomId)
+}
 
 const mapEvent : {[key: string] : (data: any) => void} = {
     "joinTournament" : notifyJoinTournament,
@@ -240,6 +245,7 @@ const mapEvent : {[key: string] : (data: any) => void} = {
     "connection" : notifyConnection,
     "disconnection" : notifyDisconnection,
     "invitationPong" : notifyInvitationPong,
+    "invitationTournamentPong" : notifyInvitationTournamentPong,
     "invitationTowerDefense" : notifyInvitationTowerDefense,
     "loseTournament" : loseTournament,
     "winTournament" : winTournament,

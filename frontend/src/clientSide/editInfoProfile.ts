@@ -3,17 +3,10 @@ import {setNickName} from "./user.js";
 export function editProfile() {
     document.getElementById("editProfileButton")?.addEventListener("click", () => {
         const nickInput = document.getElementById("profileNickName") as HTMLInputElement | null;
-        const emailInput = document.getElementById("profileEmail") as HTMLInputElement | null;
-        if (nickInput && emailInput) {
+        if (nickInput) {
             const newNickName = nickInput.value.trim();
-            const newEmail = emailInput.value.trim();
-            console.log("New nickname:", newNickName);
-            console.log("New email:", newEmail);
             setNickName(newNickName);
             sessionStorage.setItem("nickName", newNickName);
-            // setPassword();
-            // setEmail();
-            // sessionStorage.setItem("email", newEmail);
         }
     });
 }

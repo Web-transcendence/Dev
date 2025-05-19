@@ -204,8 +204,10 @@ export async function resetGame(ball: Ball, player1: Player, player2: Player, ga
                 spec.ws.send(JSON.stringify({ type: "gameEnd", winner: player2.paddle.name }));
             });
         }
-        if (room.type === "tournament")
-            await fetchPlayerWin(winner === 0 ? player1.dbId : player2.dbId);
+        if (room.type === "tournament") {
+            console.log(`win brackent : ${player1.dbId} ey ${player2.dbId}`);
+            await fetchPlayerWin(winner === 0 ? player1.dbId : player2.dbId)
+        };
         insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score), winner);
         game.state = 2;
         game.score1 = player1.paddle.score;

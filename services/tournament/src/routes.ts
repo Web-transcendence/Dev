@@ -87,7 +87,7 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 
     app.get('/launch', async (req: FastifyRequest, res: FastifyReply) => {
         try {
-            console.log('launch')
+            console.log('call tournament')
             const id: number = Number(req.headers.id)
             if (!id)
                 throw new ServerError(`cannot parse id, which should not happen`, 500)
@@ -108,9 +108,10 @@ export default async function tournamentRoutes(app: FastifyInstance) {
                 throw new ConflictError(`there is no tournament with this id`, `internal error system`)
 
             tournament.launch().then(() => {
-                console.log('launch done');
+                console.log('launc      h done');
             });
 
+            console.log('launch reponse');
             return res.status(200).send()
         }
         catch(err) {
@@ -122,7 +123,6 @@ export default async function tournamentRoutes(app: FastifyInstance) {
             return res.status(500).send()
         }
     })
-
     // app.get(`/RunningTournamentInformation/:id`, async (req: FastifyRequest, res: FastifyReply) => {
     //     try {
     //         const {id} = req.params as { id: string }
