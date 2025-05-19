@@ -169,11 +169,15 @@ export function inputHandler(key: string, state: string, input: keyInput) {
         input.arrowDown = down;
 }
 
-export function resetInput(Input: keyInput) {
-    Input.arrowUp = false;
-    Input.arrowDown = false;
-    Input.w = false;
-    Input.arrowUp = false;
+export function resetInput(Input: keyInput, mode: string) {
+    if (mode === "right" || mode === "all") {
+        Input.arrowUp = false;
+        Input.arrowDown = false;
+    }
+    if (mode === "left" || mode === "all") {
+        Input.w = false;
+        Input.arrowUp = false;
+    }
 }
 
 export async function resetGame(ball: Ball, player1: Player, player2: Player, game: gameState, room: Room) {

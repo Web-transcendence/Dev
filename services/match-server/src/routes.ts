@@ -59,12 +59,17 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                     console.error(error);
                     return ;
                 }
-                if (mode === "local")
+                if (mode === "local" && (data.key === "w" || data.key === "s")) {
+                    resetInput(player.input, "left");
                     inputHandler(data.key, data.state, player.input);
+                } else if (mode === "local" && (data.key === "arrowUp" || data.key === "arrowDown")) {
+                    resetInput(player.input, "right");
+                    inputHandler(data.key, data.state, player.input);
+                }
                 else if (mode === "spec" && data.state === "down")
                     changeRoomSpec(player);
                 else {
-                    resetInput(player.input);
+                    resetInput(player.input, "all");
                     inputHandler(data.key, data.state, player.input);
                 }
             } else if (init && msg.type === "ready") {

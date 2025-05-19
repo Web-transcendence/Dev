@@ -117,6 +117,7 @@ export function joinRoom(player: Player, roomId: number) {
     }
     if (i === rooms.length)
         return ;
+    console.log(rooms[i].players.length);
     const ball = new Ball (1200 / 2, 800 / 2, 0, 8, 12, "#fcc800");
     const game = new gameState();
     const freq1 = rooms[i].players[0].frequency;
