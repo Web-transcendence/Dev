@@ -155,13 +155,11 @@ const notifyJoinTournament = async ({id, maxPlayer}: { id: number, maxPlayer: nu
     const span = item.querySelector('span');
     if (span) {
         span.id = `spanId-${id}`;
-        console.log('logname', nickName)
         span.innerText = nickName;
     }
     console.log('query');
     const img = item.querySelector('img');
     if (img) {
-            console.log('queryrerjwighigbei');
         img.id = `imgId-${id}`;
         if (avatar) img.src = avatar;
         else img.src = '../images/login.png';
@@ -192,7 +190,7 @@ const notifyInvitationPong = async ({roomId, id}: { roomId: number, id: number }
     displayNotification('Invitation to play Pong', {
         type: "invitation",
         onAccept: async () => {
-            await loadPart('/pongRemote');
+            await loadPart('/pongFriend');
             Pong("remote", roomId)
             console.log('Accepted invite')
         },
@@ -207,7 +205,7 @@ const notifyInvitationTowerDefense = async ({roomId, id}: { roomId: number, id: 
     displayNotification('Invitation to Play Tower-Defense', {
         type: "invitation",
         onAccept: async () => {
-            await loadPart('/towerRemote');
+            await loadPart('/towerFriend');
             TowerDefense(roomId)
             console.log('Accepted invite')
         },
@@ -232,7 +230,7 @@ const loseTournament = async ({id}: { id: number }) => {
 
 const notifyInvitationTournamentPong = async ({roomId}: {roomId: number}) => {
     console.log('roomIDDDD', roomId);
-    await loadPart('/pongRemote');
+    await loadPart('/pongTournament');
     Pong("remote", roomId)
 }
 

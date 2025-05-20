@@ -27,13 +27,13 @@ export async function openModal(nickname: string, id: number): Promise<void> {
     document.getElementById('invitePong')?.addEventListener("click", async () => {
         const roomId = await fetchInvitation('match-server', id);
         displayNotification('Invitation send to ${nickname} !')
-        await loadPart('/pongRemote')
+        await loadPart('/pongFriend')
         Pong('remote', roomId)
     });
     document.getElementById('inviteTowerDefense')?.addEventListener("click", async () => {
         const roomId = await fetchInvitation('tower-defense', id);
         displayNotification('Invitation send to ${nickname} !')
-        await loadPart('/towerRemote')
+        await loadPart('/towerFriend')
         TowerDefense(roomId)
     });
     modal.addEventListener("click", () => {
