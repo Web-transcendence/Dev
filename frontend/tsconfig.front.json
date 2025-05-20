@@ -9,7 +9,12 @@
     "skipLibCheck": true,
     "outDir": "public/dist",
     "rootDir": "src/clientSide",
-    "lib": ["dom", "ESNext"]
+    "lib": [
+      "DOM",
+      "ESNext"
+    ]
   },
-  "include": ["src/clientSide/**/*"]
+  "include": [
+    "src/clientSide/**/*"
+  ]
 }
