@@ -270,14 +270,15 @@ const allTowers: Tower[] = loadTowers(path.join(__dirname, "../resources/towers.
 const ids = new Set<number>();
 export const roomsTd: RoomTd[] = [];
 
-function checkGameOver(player1: Player, player2: Player, game: Game) {
+function checkGameOver(player1: Player, player2: Player, game: Game, room: RoomTd) {
     if (player1.hp <= 0 || player2.hp <= 0) {
-        let winner = 2;
-        if (player1.hp > player2.hp)
-            winner = 0;
-        else if (player1.hp < player2.hp)
-            winner = 1;
+        const winner = player1.hp > player2.hp ? 0 : 1;
+        const winnerName = winner === 0 ? player1.name : player2.name;
+        room.ended = true;
         insertMatchResult(player1.dbId, player2.dbId, player1.hp, player2.hp, winner);
+        room.specs.forEach(spec => {
+            spec.ws.send(JSON.stringify({class: "gameEnd", winner: winnerName}));
+        });
         game.state = 2;
         player1.board.forEach((board: Board) => {
             board.tower.stopAttack()
@@ -351,7 +352,7 @@ function bulletLoop(player1: Player, player2: Player) {
     player2.clearBullet();
 }
 
-function enemyLoop(player1: Player, player2: Player, game: Game) {
+function enemyLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
     player1.enemies.forEach(enemy => {
         if (!enemy.stun)
             enemy.pos += enemy.speed * enemy.slow;
@@ -386,13 +387,13 @@ function enemyLoop(player1: Player, player2: Player, game: Game) {
         }
     });
     player2.clearDeadEnemies();
-    checkGameOver(player1, player2, game);
+    checkGameOver(player1, player2, game, room);
 }
 
-function gameLoop(player1: Player, player2: Player, game: Game) {
+function gameLoop(player1: Player, player2: Player, game: Game, room: roomTd) {
     if (game.start) {
         if (game.timer.timeLeft !== 0) {
-            enemyLoop(player1, player2, game);
+            enemyLoop(player1, player2, game, room);
             bulletLoop(player1, player2);
             game.boss = false;
         } else {
@@ -406,7 +407,7 @@ function gameLoop(player1: Player, player2: Player, game: Game) {
                 player1.enemies.push(new Enemy("kslime", 1000 + 100 * p1Board, 1, 2)); // Boss here
                 player2.enemies.push(new Enemy("kslime", 1000 + 100 * p2Board, 1, 2));
             }
-            enemyLoop(player1, player2, game);
+            enemyLoop(player1, player2, game, room);
             bulletLoop(player1, player2);
             if (player1.enemies.length === 0 && player2.enemies.length === 0) {
                 game.level += 1;
@@ -425,7 +426,7 @@ function gameLoop(player1: Player, player2: Player, game: Game) {
     }
     if (game.state !== 1)
         return ;
-    setTimeout(() => gameLoop(player1, player2, game), 10);
+    setTimeout(() => gameLoop(player1, player2, game, room), 10);
 }
 
 function gameInit(player1: Player, player2: Player, game: Game) {
@@ -440,15 +441,15 @@ function gameInit(player1: Player, player2: Player, game: Game) {
         setTimeout(() => gameInit(player1, player2, game), 100);
 }
 
-function mainLoop (player1: Player, player2: Player, game: Game) {
+function mainLoop (player1: Player, player2: Player, game: Game, room: roomTd) {
     if (game.state === 1) {
         game.timer.start();
         gameInit(player1, player2, game);
-        gameLoop(player1, player2, game);
+        gameLoop(player1, player2, game, room);
         enemySpawner(player1, player2, game);
     }
     else
-        setTimeout(() => mainLoop(player1, player2, game), 100);
+        setTimeout(() => mainLoop(player1, player2, game, room), 100);
 }
 
 function checkRoom(room: RoomTd, intervalId: ReturnType<typeof setInterval>, game: Game) {
@@ -470,8 +471,13 @@ function leaveRoom(userId: number) {
     for (let i = 0 ; i < roomsTd.length; i++) {
         for (let j = 0; j < roomsTd[i].players.length; j++) {
             if (roomsTd[i].players[j].id === userId) {
-                if (roomsTd[i].players.length === 2 && roomsTd[i].players[0].hp > 0 && roomsTd[i].players[1].hp > 0)
+                if (roomsTd[i].players.length === 2 && roomsTd[i].players[0].hp > 0 && roomsTd[i].players[1].hp > 0) {
+                    roomsTd[i].ended = true;
                     insertMatchResult(roomsTd[i].players[0].dbId, roomsTd[i].players[1].dbId, roomsTd[i].players[0].hp, roomsTd[i].players[1].hp, j === 0 ? 1 : 0);
+                    roomsTd[i].specs.forEach(spec => {
+                        spec.ws.send(JSON.stringify({ type: "gameEnd", winner: winner.name }));
+                    });
+                }
                 console.log("player: ", roomsTd[i].players[j].name, " with id: ", userId, " left room ", roomsTd[i].id);
                 roomsTd[i].players.splice(j, 1);
                 if (roomsTd[i].players.length === 0)
@@ -530,14 +536,14 @@ function joinRoomTd(player: Player, roomId: number) {
             roomsTd[i].players[0].ws.send(JSON.stringify(payload));
             roomsTd[i].players[1].ws.send(JSON.stringify(payload));
             roomsTd[i].specs.forEach(spec => {
-                if (game.state < 2) {
-                    spec.ws.send(JSON.stringify(payload));
-                }
+            if (game.state < 2) {
+                spec.ws.send(JSON.stringify(payload));
+            }
             });
         }
     }, 10);
     game.state = 1;
-    mainLoop(roomsTd[i].players[0], roomsTd[i].players[1], game);
+    mainLoop(roomsTd[i].players[0], roomsTd[i].players[1], game, roomsTd[i]);
     checkRoom(roomsTd[i], intervalId, game);
 }
 
@@ -566,12 +572,11 @@ fastify.register(async function (fastify) {
                     return;
                 }
                 player.name = data.nick;
-                if (data.nick.includes("guest")) {
-                    try {
+                try {
+                    if (!data.nick.includes("guest"))
                         player.dbId = await fetchIdByNickName(data.nick);
-                    } catch (error) {
-                        console.log(error);
-                    }
+                } catch (error) {
+                    console.log(error);
                 }
                 if (data.room)
                     room = data.room;

@@ -45,7 +45,8 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                     player.dbId = -2;
                 }
                 try {
-                    player.dbId = await fetchIdByNickName(data.nick);
+                    if (!player.name.includes("guest"))
+                        player.dbId = await fetchIdByNickName(data.nick);
                 } catch (error) {
                     console.log(error);
                 }
@@ -58,11 +59,19 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                     console.error(error);
                     return ;
                 }
-                if (mode !== "spec") {
-                    resetInput(player.input);
+                if (mode === "local" && (data.key === "w" || data.key === "s")) {
+                    resetInput(player.input, "left");
                     inputHandler(data.key, data.state, player.input);
-                } else if (data.state === "down")
+                } else if (mode === "local" && (data.key === "arrowUp" || data.key === "arrowDown")) {
+                    resetInput(player.input, "right");
+                    inputHandler(data.key, data.state, player.input);
+                }
+                else if (mode === "spec" && data.state === "down")
                     changeRoomSpec(player);
+                else {
+                    resetInput(player.input, "all");
+                    inputHandler(data.key, data.state, player.input);
+                }
             } else if (init && msg.type === "ready") {
                 const {data, success, error} = readySchema.safeParse(JSON.parse(message.toString()));
                 if (!success || !data) {
@@ -81,6 +90,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
             }
         });
         socket.on("close", () => {
+            console.log(`id: ${userId}`);
             if (mode === "local")
                 solo = false;
             else if (mode === "remote")

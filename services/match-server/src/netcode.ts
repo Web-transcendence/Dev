@@ -8,12 +8,11 @@ import {
     moveHazard,
     movePaddle,
     Player,
-    Room, Timer,
+    Room,
     timerCheck
 } from "./api.js";
-import {getWinnerId, insertMatchResult} from "./database.js";
-import {fetchNickNameById, fetchNotifyUser, fetchPlayerWin} from "./utils.js";
-import {isFunction} from "node:util";
+import {insertMatchResult} from "./database.js";
+import {fetchNotifyUser, fetchPlayerWin} from "./utils.js";
 
 export let rooms: Room[] = [];
 
@@ -58,11 +57,11 @@ export async function leaveRoom(userId: number) {
                 const scoreA = Number(playerA.paddle.score);
                 const scoreB = Number(playerB.paddle.score);
                 const winnerIndex = room.players.findIndex(player => player.id !== userId);
+                console.log(`winner: ${winnerIndex}`);
                 const winner = room.players[winnerIndex];
-                if (room.type === "tournament") {
-                    console.log(`win brackent : ${winner.dbId}`);
+                if (room.type === "tournament")
                     await fetchPlayerWin(winner.dbId);
-                }
+                console.log(`A: ${playerA.dbId} B: ${playerB.dbId} Windex: ${winnerIndex}`);
                 insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
                 room.specs.forEach(spec => {
                     spec.ws.send(JSON.stringify({ type: "gameEnd", winner: winner.name }));
@@ -85,15 +84,14 @@ export function joinRoom(player: Player, roomId: number) {
     if (roomId !== -1) { // Joining a defined room (invite or tournaments)
         for (; i < rooms.length; i++) {
             if (rooms[i].id === roomId && rooms[i].players.length < 2) {
-                if (rooms[i].players.length === 0) {
+                if (rooms[i].players.length === 0)
                     player.paddle.x = 30;
-                    rooms[i].players.push(player);
-                    return ;
-                } else {
+                else
                     player.paddle.x = 1200 - 30;
-                    rooms[i].players.push(player);
-                    break ;
-                }
+                rooms[i].players.push(player);
+                id = rooms[i].id;
+                console.log(player.paddle.name, "joined room", rooms[i].id);
+                break ;
             }
         }
     } else { // Basic random matchmaking
@@ -115,8 +113,9 @@ export function joinRoom(player: Player, roomId: number) {
             return;
         }
     }
-    if (i === rooms.length)
+    if (i === rooms.length || rooms[i].players.length !== 2)
         return ;
+    console.log(`room ${rooms[i].id}'s game has started`);
     const ball = new Ball (1200 / 2, 800 / 2, 0, 8, 12, "#fcc800");
     const game = new gameState();
     const freq1 = rooms[i].players[0].frequency;
@@ -183,6 +182,6 @@ export async function startInviteMatch(userId: number, opponent: number) {
 }
 
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
-    const roomId = generateRoom();
-    await fetchNotifyUser([playerA_id, playerB_id], `invitationTournamentPong`, {roomId: roomId})
+    const roomId = generateRoom("tournament");
+    await fetchNotifyUser([playerA_id, playerB_id], `invitationGame`, {roomId: roomId})
 }

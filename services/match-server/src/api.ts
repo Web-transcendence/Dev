@@ -169,11 +169,15 @@ export function inputHandler(key: string, state: string, input: keyInput) {
         input.arrowDown = down;
 }
 
-export function resetInput(Input: keyInput) {
-    Input.arrowUp = false;
-    Input.arrowDown = false;
-    Input.w = false;
-    Input.arrowUp = false;
+export function resetInput(Input: keyInput, mode: string) {
+    if (mode === "right" || mode === "all") {
+        Input.arrowUp = false;
+        Input.arrowDown = false;
+    }
+    if (mode === "left" || mode === "all") {
+        Input.w = false;
+        Input.arrowUp = false;
+    }
 }
 
 export async function resetGame(ball: Ball, player1: Player, player2: Player, game: gameState, room: Room) {
@@ -191,33 +195,17 @@ export async function resetGame(ball: Ball, player1: Player, player2: Player, ga
     player2.paddle.y = 0.5 * 800;
     game.hazard.type = "Default";
     if (player1.paddle.score === game.maxScore || player2.paddle.score === game.maxScore) {
-        let winner = 2;
-        if (player1.paddle.score > player2.paddle.score) {
-            winner = 0;
-            room.specs.forEach(spec => {
-                spec.ws.send(JSON.stringify({ type: "gameEnd", winner: player1.paddle.name }));
-            });
-        }
-        else if (player1.paddle.score < player2.paddle.score) {
-            winner = 1;
-            room.specs.forEach(spec => {
-                spec.ws.send(JSON.stringify({ type: "gameEnd", winner: player2.paddle.name }));
-            });
-        }
-        if (room.type === "tournament") {
-            console.log(`win brackent : ${player1.dbId} ey ${player2.dbId}`);
-            await fetchPlayerWin(winner === 0 ? player1.dbId : player2.dbId)
-        };
+        const winner = player1.paddle.score > player2.paddle.score ? 0 : 1;
+        game.winner = winner === 0 ? player1.name : player2.name;
+        room.specs.forEach(spec => {
+            spec.ws.send(JSON.stringify({type: "gameEnd", winner: game.winner}));
+        });
+        if (room.type === "tournament")
+            await fetchPlayerWin(winner === 0 ? player1.dbId : player2.dbId);
         insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score), winner);
         game.state = 2;
         game.score1 = player1.paddle.score;
         game.score2 = player2.paddle.score;
-        if (player1.paddle.score > player2.paddle.score)
-            game.winner = player1.name;
-        else
-            game.winner = player2.name;
-        player1.paddle.score = "0";
-        player2.paddle.score = "0";
         console.log(getMatchHistory(player1.dbId));
     }
     resetInput(player1.input);

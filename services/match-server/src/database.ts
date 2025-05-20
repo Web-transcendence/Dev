@@ -38,6 +38,7 @@ export function insertMatchResult(
         winner_id = playerA_id;
     else if (winner === 1)
         winner_id = playerB_id;
+    console.log(`winner id: ${winner_id}`);
     Pong_Hist_db.prepare(`
         INSERT INTO MatchResult (playerA_id, playerB_id, scoreA, scoreB, winner_id)
         VALUES (?, ?, ?, ?, ?)
