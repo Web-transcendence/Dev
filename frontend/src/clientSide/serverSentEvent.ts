@@ -158,10 +158,8 @@ const notifyJoinTournament = async ({id, maxPlayer}: { id: number, maxPlayer: nu
         console.log('logname', nickName)
         span.innerText = nickName;
     }
-    console.log('query');
     const img = item.querySelector('img');
     if (img) {
-            console.log('queryrerjwighigbei');
         img.id = `imgId-${id}`;
         if (avatar) img.src = avatar;
         else img.src = '../images/login.png';
