@@ -46,40 +46,27 @@ function addMatchEntry(game: string, opponent: string, opponentAvatar: string, s
     list.appendChild(clone);
 }
 
-async function getElementsOfMatch(MatchResult: MatchResult[] | undefined, id: number, game: string) {
-    try {
-        if (MatchResult === undefined) {
-            console.log('No match found.', game);
-            displayNotification(`You Didn't played a single game of ${game}`, { type: "error" })
-            return;
+async function displayCombinedMatchHistory(matches: { match: MatchResult, game: string }[], id: number) {
+    for (const { match, game } of matches) {
+        let opponent: UserData[] = [];
+        const oppId = match.playerA_id === id ? match.playerB_id : match.playerA_id;
+
+        if (oppId !== -1) {
+            opponent = await fetchUserInformation([oppId]);
+        } else {
+            opponent = [{
+                id: -1,
+                online: true,
+                nickName: 'Guest',
+                avatar: '../images/login.png'
+            }];
         }
-        for (const match of MatchResult) {
-            let opponent: UserData[] = [];
-            console.log('opponent:', opponent);
-            const oppId=  match.playerA_id === id ? match.playerB_id : match.playerA_id;
-            console.log('matchtd', match.playerA_id, match.playerB_id);
-            if (oppId !== -1)
-                opponent = await fetchUserInformation([oppId]);
-            else
-                opponent = [{
-                    id: -1,
-                    online: true,
-                    nickName: 'Guest',
-                    avatar: '../images/login.png'
-                }];
-            let result: string = 'DEFEAT';
-            if (id == match.winner_id)
-                result = 'VICTORY';
-            addMatchEntry(game, opponent[0].nickName, opponent[0].avatar, match.scoreA, match.scoreB, result, match.match_time)
-        }
-    } catch (e) {
-        console.error(e)
-        displayNotification('Could not find match result', { type: "error" })
-        return ;
+        let result: string = (id === match.winner_id) ? 'VICTORY' : 'DEFEAT';
+        addMatchEntry(game, opponent[0].nickName, opponent[0].avatar, match.scoreA, match.scoreB, result, match.match_time);
     }
 }
 
-export async function getGameHistory (id: string, game: string): Promise<MatchResult[] | undefined> {
+export async function getGameHistory (game: string): Promise<MatchResult[] | undefined> {
     try {
         const token = sessionStorage.getItem('token')
         const response = await fetch(`/${game}/getMatchHistory`, {
@@ -108,10 +95,15 @@ export async function printMatchHistory() {
         displayNotification('Could not find your match result', { type: "error" })
         return;
     }
-    const pongMH: MatchResult[] | undefined = await getGameHistory(id, 'match-server');
-    const tdMH: MatchResult[] | undefined = await getGameHistory(id, 'tower-defense');
+    const pongMH: MatchResult[] | undefined = await getGameHistory('match-server');
+    const tdMH: MatchResult[] | undefined = await getGameHistory('tower-defense');
     const idNum = Number(id)
-    await getElementsOfMatch(pongMH, idNum, 'Pong')
-    await getElementsOfMatch(tdMH, idNum, 'Tower-Defense')
+    const combined: { match: MatchResult, game: string }[] = [];
+
+    (pongMH || []).forEach(match => combined.push({ match, game: 'Pong' }));
+    (tdMH || []).forEach(match => combined.push({ match, game: 'Tower-Defense' }));
+    combined.sort((a, b) => new Date(b.match.match_time).getTime() - new Date(a.match.match_time).getTime());
+
+    await displayCombinedMatchHistory(combined, idNum);
 }
 
