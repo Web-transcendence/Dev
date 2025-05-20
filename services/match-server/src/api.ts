@@ -30,7 +30,7 @@ export class Ball {
         this.color = color;
     }
     toJSON() {
-        return {type: "Ball", x: this.x, y: this.y,radius: this.radius, color: this.color};
+        return {type: "Ball", x: this.x, y: this.y, speed: this.speed, ispeed: this.ispeed, radius: this.radius, color: this.color};
     }
 }
 
@@ -52,7 +52,7 @@ export class Paddle {
         this.color = color;
     }
     toJSON() {
-        return {type: "Paddle", name: this.name, x: this.x, y: this.y, width: this.width, height: this.height, color: this.color, score: this.score};
+        return {type: "Paddle", name: this.name, x: this.x, y: this.y, width: this.width, height: this.height, speed: this.speed, color: this.color, score: this.score};
     }
 }
 
