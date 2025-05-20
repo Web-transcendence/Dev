@@ -196,7 +196,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
 	})
 
-	app.post('/updatePicture', (req: FastifyRequest, res: FastifyReply) => {
+	app.post('/updatePicture', async (req: FastifyRequest, res: FastifyReply) => {
 		try {
 			const zod_result = Schema.pictureSchema.safeParse(req.body)
 			if (!zod_result.success) {
@@ -210,6 +210,7 @@ export default async function userRoutes(app: FastifyInstance) {
 			const id = Number(req.headers.id)
 			if (!id)
 				throw new ServerError(`cannot parse id, which should not happen`, 500)
+
 
 			const user = new User(id)
 

@@ -264,6 +264,11 @@ export async function setAvatar(target: HTMLInputElement) {
 			const file: File = target.files[0]
 			const base64File: string = await toBase64(file) as string
 
+			if (base64File.length > 700000) {
+				displayNotification('File too big', { type: 'error' })
+				return
+			}
+
 			const token = sessionStorage.getItem('token')
 			const response = await fetch(`/user-management/updatePicture`, {
 				method: 'POST',
