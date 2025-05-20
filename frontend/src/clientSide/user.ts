@@ -146,7 +146,7 @@ export async function init2fa() {
 	}
 }
 
-export async function verify2fa(secret: string) {
+export async function verify2fa(secret: string, message: string) {
 	try {
 		const nickName = sessionStorage.getItem('nickName')
 		const response = await fetch(`/user-management/2faVerify`, {
@@ -160,7 +160,6 @@ export async function verify2fa(secret: string) {
 			const result = await response.json()
 			sessionStorage.setItem('token', result.token)
 			sessionStorage.setItem('activeFA', 'true')
-			displayNotification('You have enabled two-factor authentication.')
 			await navigate('/home')
 			await getAvatar()
 			await sseConnection()

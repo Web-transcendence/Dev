@@ -9,6 +9,7 @@ import { displayTournaments, joinTournament, launchTournament } from './tourname
 import { printMatchHistory } from './matchHistory.js'
 import { TowerDefenseSpec } from './tdspec.js'
 import { closeSSEConnection } from './serverSentEvent.js'
+import {type} from "node:os";
 
 const mapButton: { [key: string]: () => void } = {
 	'/connect': connectBtn,
@@ -96,7 +97,7 @@ async function profileBtn() {
 
 					input.addEventListener('keydown', async (event: KeyboardEvent) => {
 						if (event.key === 'Enter') {
-							await verify2fa(input.value)
+							await verify2fa(input.value, 'You have enabled two-factor authentication.')
 						}
 					})
 				}
@@ -111,19 +112,23 @@ async function profileBtn() {
 
 function logoutBtn() {
 	handleConnection(false)
-	const avatar = document.getElementById('avatar') as HTMLImageElement
+	const avatar = document.getElementById('avatar') as HTMLImageElement | null
 	if (avatar) avatar.src = '../images/logout.png'
-	const nickName = document.getElementById('nickName') as HTMLSpanElement
+	const nickName = document.getElementById('nickName') as HTMLSpanElement | null
 	if (nickName) nickName.textContent = ''
 	closeSSEConnection()
 }
 
 function factor() {
-	const input = document.getElementById('inputVerify') as HTMLInputElement
-
-	input.addEventListener('keydown', async (event: KeyboardEvent) => {
-		if (event.key === 'Enter')
-			await verify2fa(input.value)
+	console.log('factor have been called !')
+	document.getElementById('checkCode')?.addEventListener('click', async () => {
+		const input = document.getElementById('inputVerify') as HTMLInputElement | null
+		if (!input) {
+			await navigate('/logout')
+			displayNotification('Error from client, try again!', {type: 'error'})
+			return ;
+		}
+		await verify2fa(input.value, 'The validity of your code has been confirmed')
 	})
 }
 
