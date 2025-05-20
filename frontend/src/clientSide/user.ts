@@ -268,7 +268,7 @@ export async function setAvatar(target: HTMLInputElement) {
 			const base64File: string = await toBase64(file) as string
 
 			if (base64File.length > 700000) {
-				displayNotification('File too big', { type: 'error' })
+				displayNotification('File to big', { type: 'error' })
 				return
 			}
 
@@ -366,8 +366,9 @@ export async function setNickName(newNickName: string) {
 			body: JSON.stringify({ nickName: newNickName }),
 		})
 		if (!response.ok) {
-			console.error('failed')
-			displayNotification('Bad input', { type: 'error' })
+			const error = await response.json()
+			console.log(error.error)
+			displayNotification(error.error, { type: 'error' })
 		} else {
 			console.log('success')
 			displayNotification('New Nickname')
