@@ -63,6 +63,7 @@ export async function leaveRoom(userId: number) {
                     await fetchPlayerWin(winner.dbId);
                 console.log(`A: ${playerA.dbId} B: ${playerB.dbId} Windex: ${winnerIndex}`);
                 insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
+                room.ended = true;
                 room.specs.forEach(spec => {
                     spec.ws.send(JSON.stringify({ type: "gameEnd", winner: winner.name }));
                 });

@@ -97,6 +97,7 @@ export class Room {
     type: string = "default";
     players: Player[] = [];
     specs: Player[] = [];
+    ended: boolean = false;
     constructor (id: number, type?: string) {
         this.id = id;
         if (type)
@@ -203,6 +204,7 @@ export async function resetGame(ball: Ball, player1: Player, player2: Player, ga
         if (room.type === "tournament")
             await fetchPlayerWin(winner === 0 ? player1.dbId : player2.dbId);
         insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score), winner);
+        room.ended = true;
         game.state = 2;
         game.score1 = player1.paddle.score;
         game.score2 = player2.paddle.score;

@@ -13,7 +13,7 @@ export function joinRoomSpec(player: Player, roomId: number) {
     }
     // Basic random matchmaking
     for (let room of rooms) {
-        if (room.players.length === 2) {
+        if (room.players.length === 2 && !room.ended) {
             room.specs.push(player);
             console.log(player.paddle.name, "joined room", room.id, "as spectator");
             return ;
@@ -40,7 +40,7 @@ export function leaveRoomSpec(userId: number) {
 export function changeRoomSpec(player: Player) {
     const roomId = leaveRoomSpec(player.id);
     for (const room of rooms) {
-        if (room.id !== roomId) {
+        if (room.id !== roomId && room.players.length === 2 && !room.ended) {
             room.specs.push(player);
             console.log(player.paddle.name, "joined room", room.id, "as spectator");
             return ;
