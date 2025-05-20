@@ -134,6 +134,8 @@ export class tournament {
         if (!loser || !winner)
             throw new ServerError(`internal server error, it doesn't happen`, 500)
 
+        console.log('THIS : ', this.actualParticipant.length)
+        console.log('alonPLaeu : ', this.alonePlayerId)
         if (this.actualParticipant.length === 2 && this.alonePlayerId == 0)
             winnerEvent = `winTournament`
 

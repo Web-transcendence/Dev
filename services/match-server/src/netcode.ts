@@ -122,60 +122,61 @@ export function joinRoom(player: Player, roomId: number) {
     const freq1 = rooms[i].players[0].frequency;
     const freq2 = rooms[i].players[1].frequency
     const intervalId1 = setInterval(() => {
-        let i = rooms.findIndex(room => room.id === id);
-        if (i === -1) {
+        const room = rooms.find(room => room.id === id);
+        if (room === undefined) {
             clearInterval(intervalId1);
             return;
         }
-        if (rooms[i].players.length === 2) {
+        if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: rooms[i].players[0].paddle,
-                paddle2: rooms[i].players[1].paddle,
+                paddle1: room.players[0].paddle,
+                paddle2: room.players[1].paddle,
                 ball: ball,
                 game: game
             };
-            rooms[i].players[0].ws.send(JSON.stringify(payload));
+            room.players[0].ws.send(JSON.stringify(payload));
         } else
             clearInterval(intervalId1);
     }, freq1); //Send game info to player 1
     const intervalId2 = setInterval(() => {
-        let i = rooms.findIndex(room => room.id === id);
-        if (i === -1) {
-            clearInterval(intervalId2);
+        const room = rooms.find(room => room.id === id);
+        if (room === undefined) {
+            clearInterval(intervalId1);
             return;
         }
-        if (rooms[i].players.length === 2) {
+        if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: rooms[i].players[0].paddle,
-                paddle2: rooms[i].players[1].paddle,
+                paddle1: room.players[0].paddle,
+                paddle2: room.players[1].paddle,
                 ball: ball,
                 game: game
             };
-            rooms[i].players[1].ws.send(JSON.stringify(payload));
+            room.players[1].ws.send(JSON.stringify(payload));
         } else
-            clearInterval(intervalId2);
+            clearInterval(intervalId1);
     }, freq2); //Send game info to player 2
     const intervalId3 = setInterval(() => {
-        let i = rooms.findIndex(room => room.id === id);
-        if (i === -1) {
-            clearInterval(intervalId3);
+        const room = rooms.find(room => room.id === id);
+        if (room === undefined) {
+            clearInterval(intervalId1);
             return;
         }
-        const payload = {
-            type: "gameUpdate",
-            paddle1: rooms[i].players[0].paddle,
-            paddle2: rooms[i].players[1].paddle,
-            ball: ball,
-            game: game
-        };
-        rooms[i].specs.forEach(spec => {
-            if (rooms[i].players.length === 2 && game.state < 2) {
+        if (room.players.length === 2) {
+            const payload = {
+                type: "gameUpdate",
+                paddle1: room.players[0].paddle,
+                paddle2: room.players[1].paddle,
+                ball: ball,
+                game: game
+            };
+        room.specs.forEach(spec => {
+            if (room.players.length === 2 && game.state < 2) {
                 spec.ws.send(JSON.stringify(payload));
             }
         });
-        if (rooms[i].players.length !== 2)
+        } else
             clearInterval(intervalId3);
     }, 10); //Send game info to spectators
     game.state = 1;

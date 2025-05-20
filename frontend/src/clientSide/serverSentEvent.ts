@@ -240,20 +240,24 @@ const notifyInvitationTowerDefense = async ({ roomId, id }: { roomId: number, id
 }
 
 const winBracket = async ({ id }: { id: number }) => {
+	displayNotification('You win the game the tournament continue !')
 	await loadPart('/lobby')
 }
 
 const winTournament = async ({ id }: { id: number }) => {
+	const [userData] = await fetchUserInformation([id])
+	displayNotification(`Congratulations ${userData.nickName}, you win the tournament !!!`)
 	await loadPart('/home')
 }
 
 const loseTournament = async ({ id }: { id: number }) => {
+	displayNotification('You have lost the tournament :/', {type: 'error'});
 	await loadPart('/home')
 }
 
 
 const notifyInvitationTournamentPong = async ({ roomId }: { roomId: number }) => {
-	console.log('roomIDDDD', roomId)
+	console.log('RoomId', roomId)
 	await loadPart('/pongTournament')
 	Pong('remote', roomId)
 }

@@ -1,5 +1,5 @@
     import {addFriend, fetchUserInformation, FriendIds, getFriendList, removeFriend, UserData} from "./user.js";
-    import {CreateFriendLi, removeNotifyInvite} from "./serverSentEvent.js";
+    import {CreateFriendLi} from "./serverSentEvent.js";
     import { openModal } from "./modal.js";
 
     export async function friendList() {
@@ -33,16 +33,12 @@
                         }
                         if (key === "receivedIds") {
                             clone.querySelector(".accept-btn")?.addEventListener("click", async () => {
-                                if (await addFriend(userData.nickName)) {
+                                if (await addFriend(userData.nickName))
                                     await CreateFriendLi(userData.id, "acceptedList", "acceptedTemplate")
-                                    await removeNotifyInvite(userData);
-                                }
                             });
                             clone.querySelector(".decline-btn")?.addEventListener("click", async () => {
-                                if (await removeFriend(userData.nickName)) {
+                                if (await removeFriend(userData.nickName))
                                     document.getElementById(`friendId-${userData.id}`)?.remove();
-                                    await removeNotifyInvite(userData);
-                                }
                             });
                         }
                         if (key === "acceptedIds") {
