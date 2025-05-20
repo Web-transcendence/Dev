@@ -3,23 +3,24 @@ import {loadPart} from './insert.js';
 import {sseConnection} from "./serverSentEvent.js";
 import {joinTournament, quitTournaments, getBrackets} from "./tournaments.js";
 import {displayNotification} from "./notificationHandler.js";
+import { setupModalListeners } from "./modal.js";
 
 declare const tsParticles: any;
 declare const AOS: any;
 
 export let connected = false;
 
-window.addEventListener("popstate", (event) => {
-    if ((window.location.pathname === '/connect' || window.location.pathname === '/login') && connected ) {
+window.addEventListener("popstate", async (event) => {
+    if ((window.location.pathname === '/connect' || window.location.pathname === '/login') && connected) {
         history.replaceState(null, '', '/home');
-        loadPart('/home')
-    }
-    else
-        loadPart(window.location.pathname)
+        await loadPart('/home')
+    } else
+        await loadPart(window.location.pathname)
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
     constantButton(); // Constant button on the Single Page Application
+    setupModalListeners(); // Setup global mobal
     // animate slides on scroll
     AOS.init({
         once: true,
@@ -92,10 +93,7 @@ function constantButton() {
     document.getElementById('connect')?.addEventListener("click", (event: MouseEvent) => navigate("/connect", event));
     document.getElementById('profile')?.addEventListener("click", (event: MouseEvent) => navigate("/profile", event));
     //navigation page
-    document.getElementById('home')?.addEventListener("click", async (event: MouseEvent) => {
-        await navigate("/brackets", event)
-        await getBrackets(4);
-    });
+    document.getElementById('home')?.addEventListener("click", async (event: MouseEvent) => navigate("/home", event));
     document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate("/pongMode", event));
     document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate("/towerMode", event));
     document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate("/tournaments", event));

@@ -73,7 +73,7 @@ export async function routes(fastify: FastifyInstance) {
         'fourRobots.png',
         'eightRobots.png',
         'sixteenRobots.png',
-        'biggest.png',
+        'Biggest.png',
         'login.png',
         'logout.png',
         'BigLock.png',
@@ -98,25 +98,31 @@ export async function routes(fastify: FastifyInstance) {
      });
 
      //Pong assets
-    const pongImages = new Set([
-        'ballup.png',
-        'bardown.png',
-        'barup.png',
-    ]);
-
-    fastify.get('/assets/pong/:imageName', async (req: FastifyRequest<{ Params: { imageName: string } }>, reply: FastifyReply) => {
-        const {imageName} = req.params;
-
-        if (!pongImages.has(imageName)) {
-            return reply.code(404).send("Image non autorisée");
-        }
-
+    fastify.get('/assets/pong/ballup.png', function (req, reply) {
         try {
-            const filePath = join(import.meta.dirname, env.TRANS_IMG_PATH, imageName);
-            const fileData = readFileSync(filePath);
-            reply.type('image/png').send(fileData);
-        } catch {
-            reply.code(404).send("Fichier non trouvé");
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "pong/ballup.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier ballup non trouvé");
+        }
+    });
+    fastify.get('/assets/pong/bardown.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "pong/bardown.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier bardown non trouvé");
+        }
+    });
+    fastify.get('/assets/pong/barup.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_ASSETS_PATH, "pong/barup.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier barup non trouvé");
         }
     });
 

@@ -32,7 +32,7 @@
         p-0 overflow-hidden transform transition-transform duration-300 hover:scale-105 ;
     }
     .box-tournament {
-        @apply flex items-center justify-between bg-gray-600 p-6 rounded-lg relative
+        @apply flex items-center justify-between bg-gray-600 p-6 rounded-xl relative
          hover:scale-105 transform transition-transform duration-300 ;
     }
     .box-home {
@@ -50,6 +50,9 @@
     .avatar-img {
         @apply w-50 h-50 object-cover rounded-full;
         flex-shrink: 0;
+    }
+    .name-tournament {
+        @apply text-yellow-500 font-bold text-5xl mx-auto;
     }
 }
 

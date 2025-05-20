@@ -1,6 +1,6 @@
 import {addFriend, fetchUserInformation, removeFriend, UserData} from "./user.js";
 import {Pong} from "./pong.js";
-import {displayNotification} from "./notificationHandler.js";
+import {displayNotification, hideNotification} from "./notificationHandler.js";
 import {navigate} from "./front.js";
 import {loadPart} from "./insert.js";
 import {openModal} from "./modal.js";
@@ -51,9 +51,12 @@ export async function sseConnection() {
     }
 }
 
+export const removeNotifyInvite = async (userData: UserData) => {
+    console.log('BITCH :', `${userData.id}-idFriend`)
+}
+
 export const CreateFriendLi = async (id: number, key: string, tmpName: string)=> {
     console.log(`this id ${id} have to be add in the friendlist`)
-    document.getElementById(`friendId-${id}`)?.remove();
     const list = document.getElementById(key);
     const [userData] = await fetchUserInformation([id])
     const template = document.getElementById(tmpName) as HTMLTemplateElement | null;
@@ -72,15 +75,23 @@ export const CreateFriendLi = async (id: number, key: string, tmpName: string)=>
             clone.querySelector(".inviteFriend")?.classList.remove('hidden');
         }
         if (key === "receivedList") {
-            clone.querySelector(".accept-btn")?.addEventListener("click", () => addFriend(userData.nickName));
-            clone.querySelector(".decline-btn")?.addEventListener("click", () => removeFriend(userData.nickName));
+            clone.querySelector(".accept-btn")?.addEventListener("click", () => {
+                addFriend(userData.nickName)
+                document.getElementById(`friendId-${id}`)?.remove();
+                hideNotification(0, id);
+                CreateFriendLi(id, "acceptedList", "acceptedTemplate")
+            });
+            clone.querySelector(".decline-btn")?.addEventListener("click", () => {
+                removeFriend(userData.nickName)
+                document.getElementById(`friendId-${id}`)?.remove();
+                hideNotification(0, id);
+            });
         }
         if (key === "acceptedList")
             clone.querySelector(".inviteFriend")?.addEventListener("click", async () => openModal(userData.nickName, userData.id));
         list.appendChild(clone);
     }
 }
-
 
 const notifyNewFriend = async ({id}: { id: number }) => {
     console.log(`this id ${id} have to be add in the friendlist`)
