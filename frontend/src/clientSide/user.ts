@@ -161,7 +161,9 @@ export async function verify2fa(secret: string) {
 			sessionStorage.setItem('token', result.token)
 			sessionStorage.setItem('activeFA', 'true')
 			displayNotification('You have enabled two-factor authentication.')
-			navigate('/home')
+			await navigate('/home')
+			await getAvatar()
+			await sseConnection()
 		} else {
 			const errorData = await response.json()
 			console.error('errorDisplay', errorData)
@@ -320,7 +322,6 @@ export async function getAvatar() {
 		const img = await response.json()
 		if (img.url) {
 			avatarImg.src = img.url
-			console.log('avatar', avatarImg.src)
 			sessionStorage.setItem('avatar', avatarImg.src)
 		} else
 			avatarImg.src = '../images/login.png'
