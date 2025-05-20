@@ -179,7 +179,7 @@ async function lobby() {
     const id = sessionStorage.getItem('idTournaments');
     const name = sessionStorage.getItem('nameTournaments');
     if (!id || !name) {
-        displayNotification("Missing tournament information.");
+        displayNotification("Please connect to an account.");
         await navigate("/home");
         return ;
     }

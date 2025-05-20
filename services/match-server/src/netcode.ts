@@ -184,5 +184,5 @@ export async function startInviteMatch(userId: number, opponent: number) {
 
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
     const roomId = generateRoom("tournament");
-    await fetchNotifyUser([playerA_id, playerB_id], `invitationGame`, {roomId: roomId})
+    await fetchNotifyUser([playerA_id, playerB_id], `invitationTournamentPong`, {roomId: roomId})
 }
