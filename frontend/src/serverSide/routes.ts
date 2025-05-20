@@ -80,7 +80,8 @@ export async function routes(fastify: FastifyInstance) {
         'BigLock.png',
         'solo.png',
         'vsia.png',
-        'remote.png'
+        'remote.png',
+        'watchRobots.png'
     ]);
      fastify.get('/images/:imageName', async (req: FastifyRequest<{ Params: { imageName: string } }>, reply: FastifyReply) => {
          const { imageName } = req.params;
