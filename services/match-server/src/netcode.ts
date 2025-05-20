@@ -195,7 +195,27 @@ export async function startInviteMatch(userId: number, opponent: number) {
     return (roomId);
 }
 
+async function roomWatcher(roomId: number, clock: number) {
+    if (clock <= 60) // Time needed to consider the player afk
+        setTimeout(() => roomWatcher(roomId, clock + 1), 1000); // Check every second
+    else {
+        const room = rooms.find(room => room.id === roomId);
+        if (!room || room.players.length >= 2)
+            return;
+        else if (room.players.length === 1) {
+            await fetchPlayerWin(room.players[0].dbId); // Inform the tournament service that remaining player won by forfeit
+            room.players.forEach(player => {
+                player.ws.send(JSON.stringify({ type: "Disconnected" }));
+                player.ws.close();
+            });
+        } else { // Case where no player joined the room (i.e. double loss)
+            return ;
+        }
+    }
+}
+
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
     const roomId = generateRoom("tournament");
     await fetchNotifyUser([playerA_id, playerB_id], `invitationTournamentPong`, {roomId: roomId})
+    await roomWatcher(roomId, 0);
 }
