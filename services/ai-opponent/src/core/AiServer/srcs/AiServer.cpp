@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/19 22:19:39 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/20 07:17:55 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,9 @@ void	AiServer::start( void ) {
 	this->_myServer.listen(AI_SERVER_PORT);
 
 	this->_myServer.start_accept();
+
+	std::cout << "AI server running on ws://0.0.0.0:9090" << std::endl;
+
 	this->_myServer.run();
 	return ;
 }

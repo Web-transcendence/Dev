@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:15:27 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/19 22:05:22 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/20 09:45:13 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,11 @@
 # define N_NEURON_HIDDEN 25
 # define N_RAW_STATE 6
 # define AI_SERVER_PORT 9090
+# define AI_SERVER_ADDRESS "ws://0.0.0.0:9090"
 # define FACTORY_SERVER_PORT 16016
+# define FACTORY_SERVER_ADDRESS "http://0.0.0.0:16016"
 # define CLIENT_INPUT_TIME_SPAN 100
-# define CLIENT_MAX_SPAN_STATE 3000.0
+# define CLIENT_MAX_SPAN_STATE 3.0
 # include <atomic>
 # include <vector>
 # include <cstring>

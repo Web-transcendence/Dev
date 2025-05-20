@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/19 22:16:31 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/20 09:46:00 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,25 @@
 
 Client::Client(std::string const & wsGameServer, int const gameId) :\
 		gameId(gameId),\
-		factoryServer("http://0.0.0.0:16016"),\
+		factoryServer(FACTORY_SERVER_ADDRESS),\
 		allInput(std::array<std::string, 3>{UP, DOWN, NOTHING}) {
 	auto res = this->factoryServer.Get("/ping");
 	if (!res)
 		throw DisconnectedFactoryException();
+	this->c.clear_access_channels(websocketpp::log::alevel::all);
+	this->c.clear_error_channels(websocketpp::log::elevel::all);		
 	this->c.init_asio();
 	this->c.set_message_handler([this](websocketpp::connection_hdl hdl, client::message_ptr msg){this->on_message(hdl, msg);});
-	this->c.set_fail_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){if (!this->promiseSet.load())this->promise.set_value(false);});
-	this->c.set_open_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){if (!this->promiseSet.load())this->promise.set_value(true);});
+	this->c.set_fail_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){
+		try {this->promise.set_value(false);}
+		catch (std::exception & e) {std::cout << "Error: " << e.what() << std::endl;}
+	});
+	this->c.set_open_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){
+		try {this->promise.set_value(true);}
+		catch (std::exception & e) {std::cout << "Error: " << e.what() << std::endl;}
+	});
 	websocketpp::lib::error_code	ec;
-	this->aiServer = this->c.get_connection("ws://0.0.0.0:9090", ec);
+	this->aiServer = this->c.get_connection(AI_SERVER_ADDRESS, ec);
 	this->gameServer = this->c.get_connection(wsGameServer, ec);
 	if (ec) {
 		std::cout << "Error: " << ec.message() << std::endl;
@@ -40,7 +48,6 @@ Client::Client(std::string const & wsGameServer, int const gameId) :\
 	this->c.connect(this->aiServer);
 	this->c.connect(this->gameServer);
 	lastKey = NOTHING;
-	this->promiseSet.store(false);
 	return ;
 }
 
@@ -50,14 +57,10 @@ Client::~Client( void ) {
 
 void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
 	auto	data = nlohmann::json::parse(msg->get_payload());
-	if (data["source"] == "ai") {
-		std::cout << "ai" << std::endl;
+	if (data["source"] == "ai")
 		this->on_message_aiServer(data);
-	}
-	else if (data["source"] == "game") {
-		std::cout << "game" << std::endl;
-		this->on_message_gameServer(data); 
-	}
+	else if (data["source"] == "game")
+		this->on_message_gameServer(data);
 	(void)hdl;
 	return ;
 }
@@ -108,6 +111,7 @@ void	Client::on_message_gameServer(nlohmann::json const & data) {
 		data["paddle2"]["height"],\
 		data["paddle2"]["speed"]
 	});
+	std::cout << "LOG: onMessage GS" << std::endl;
 	this->stateMutex.lock();
 	this->localPong.reset(ball, lPaddle, rPaddle);
 	this->stateMutex.unlock();
@@ -151,7 +155,6 @@ bool	Client::giveArrow(std::string const & key, nlohmann::json & j) {
 bool	Client::checkTime( void ) {
 	auto	t2 = std::chrono::steady_clock::now();
 	auto	timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - this->t1.load());
-	std::cout << timeSpan.count() << std::endl;
 	if (timeSpan.count() >= CLIENT_MAX_SPAN_STATE)
 		return false;
 	return true;
@@ -165,7 +168,6 @@ void	Client::run( void ) {
 	std::thread	t([this](){this->c.run();});
 	t.detach();
 	bool	success = future.get();
-	this->promiseSet.store(true);
 	if (success)
 		this->loop();
 	this->stop();

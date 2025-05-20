@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/19 21:16:05 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/20 08:30:06 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,17 +102,13 @@ void	Factory::settlingMessage(unsigned int const sizePool) {
 }
 
 void	Factory::createGame(int const gameId) {
-	try {
-		auto	c = std::make_shared<Client>(this->_gameServerWs ,gameId);
-		if (this->_connectedClients[gameId])
-			throw DuplicateGameException();
-		this->_connectedClients[gameId] = c;
-		std::cout << "client created" << std::endl;
-		std::thread	t([c]() {c->run();});
-		t.detach();
-	} catch (std::exception const & e) {
-		std::cout << e.what() << std::endl;
-	}
+	auto	c = std::make_shared<Client>(this->_gameServerWs ,gameId);
+	if (this->_connectedClients[gameId])
+		throw DuplicateGameException();
+	this->_connectedClients[gameId] = c;
+	std::cout << "client created" << std::endl;
+	std::thread	t([c]() {c->run();});
+	t.detach();
 	return ;
 }
 
