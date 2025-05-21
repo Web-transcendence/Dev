@@ -5,6 +5,12 @@ import {joinTournament, quitTournaments} from './tournaments.js'
 import {displayNotification} from './notificationHandler.js'
 import {setupModalListeners} from './modal.js'
 
+declare global {
+	interface Window { // For Google authenticator
+		CredentialResponse: (credit: { credential: string }) => Promise<void>;
+	}
+}
+
 declare const tsParticles: any
 declare const AOS: any
 
