@@ -195,9 +195,9 @@ export async function startInviteMatch(userId: number, opponent: number) {
     return (roomId);
 }
 
-async function roomWatcher(roomId: number, clock: number) {
+async function roomWatcher(roomId: number, clock: number, playerA_id: number) {
     if (clock <= 60) // Time needed to consider the player afk
-        setTimeout(() => roomWatcher(roomId, clock + 1), 1000); // Check every second
+        setTimeout(() => roomWatcher(roomId, clock + 1, playerA_id), 1000); // Check every second
     else {
         const room = rooms.find(room => room.id === roomId);
         if (!room || room.players.length >= 2)
@@ -209,7 +209,9 @@ async function roomWatcher(roomId: number, clock: number) {
                 player.ws.close();
             });
         } else { // Case where no player joined the room (i.e. double loss)
-            return ;
+            await fetchPlayerWin(playerA_id * -1);
+            const i = rooms.findIndex(room => room.id === roomId);
+            rooms.splice(i, 1);
         }
     }
 }
@@ -217,5 +219,5 @@ async function roomWatcher(roomId: number, clock: number) {
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
     const roomId = generateRoom("tournament");
     await fetchNotifyUser([playerA_id, playerB_id], `invitationTournamentPong`, {roomId: roomId})
-    await roomWatcher(roomId, 0);
+    await roomWatcher(roomId, 0, playerA_id);
 }
