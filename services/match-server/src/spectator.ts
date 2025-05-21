@@ -20,7 +20,8 @@ export function joinRoomSpec(player: Player, roomId: number) {
         }
     }
     console.log("No room available for spectator");
-    setTimeout(() => {joinRoomSpec(player, roomId);}, 5000);
+    if (player.ws.readyState !== WebSocket.CLOSED)
+        setTimeout(() => {joinRoomSpec(player, roomId);}, 5000);
 }
 
 export function leaveRoomSpec(userId: number) {
