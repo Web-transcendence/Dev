@@ -1,6 +1,7 @@
 import { activateBtn } from './button.js'
 import { tdStop } from './td.js'
 import { pongStop } from './pong.js'
+import {tdSpecStop} from "./tdspec.js";
 
 export async function loadPart(page: string) {
 	try {
@@ -81,4 +82,6 @@ export function stopGame(page: string): void {
 		pongStop()
 	if (page != '/pongLocal')
 		pongStop()
+	if (page != '/towerWatch')
+		tdSpecStop()
 }
