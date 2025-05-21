@@ -170,8 +170,9 @@ export async function getBrackets(nbrPlayer: number) {
 
 }
 
-export async function fetchTournamentBrackets(tournamentId: number) {
+export async function fetchTournamentBrackets(tournamentId: number): Promise<{id1: number, id2:number }[] | undefined > {
 	const token = sessionStorage.getItem('token')
+    console.log('TOUR nbr id:', tournamentId)
 	const response = await fetch(`/tournament/logTournamentStep/${tournamentId}`, {
 		method: 'GET',
 		headers: {
@@ -183,6 +184,11 @@ export async function fetchTournamentBrackets(tournamentId: number) {
 		const error = await response.json()
 		console.error(error.error)
 		displayNotification(error.error)
+        return undefined
 	}
-	return response.json()
+    console.log('Success fetchTournamentBrackets')
+    const ret = await response.json()
+    console.log(ret)
+    return ret
+	// return response.json()
 }

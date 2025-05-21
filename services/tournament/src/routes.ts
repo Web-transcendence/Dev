@@ -124,6 +124,7 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 			const { id } = req.params as { id: string }
 
 			const numericId = Number(id)
+			console.log('numereic ID:', numericId)
 
 			if (isNaN(numericId))
 				throw new InputError(`the id isn't a number`, `id have to be a number`)

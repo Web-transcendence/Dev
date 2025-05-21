@@ -1,15 +1,19 @@
-<div id="brackets" class=" text-white py-12 px-4">
-    <template id="playerListTemplate">
-        <ul id="playerList"
-            role="list"
-            class="p-2 space-y-2 w-full max-h-60 overflow-y-auto custom-scrollbar">
-        </ul>
-    </template>
+<div id="brackets" class="text-white py-12 px-4">
+    <ul id="playerList"
+        role="list"
+        class="p-2 space-y-2 w-full max-h-60 overflow-y-auto custom-scrollbar">
+    </ul>
 
-    <template id="playerTemplate">
-        <li id="player" class="p-2  flex items-center  justify-center w-full bg-purple-700 rounded-full text-lg">
-            <img class="m-4 player-img h-15 w-15 rounded-full" id="playerImg" alt="">
-            <span class="player-name truncate" id="playerName">Empty Place</span>
+    <template id="bracketsTmp">
+        <li class="bracket-item p-2 flex items-center justify-center w-full bg-purple-700 rounded-full text-lg">
+            <div class="player player-one flex items-center">
+                <img class="player-img m-4 h-15 w-15 rounded-full player-one-img" alt="">
+                <span class="player-name truncate player-one-name">Empty Place</span>
+            </div>
+            <div class="player player-two flex items-center">
+                <img class="player-img m-4 h-15 w-15 rounded-full player-two-img" alt="">
+                <span class="player-name truncate player-two-name">Empty Place</span>
+            </div>
         </li>
     </template>
 </div>

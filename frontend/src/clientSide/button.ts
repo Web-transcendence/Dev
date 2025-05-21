@@ -1,11 +1,11 @@
-import {addFriend, init2fa, login, profile, register, setAvatar, verify2fa} from './user.js'
+import {addFriend, fetchUserInformation, init2fa, login, profile, register, setAvatar, verify2fa} from './user.js'
 import {friendList} from './friends.js'
 import {connected, handleConnection, navigate} from './front.js'
 import {tdStop, TowerDefense} from './td.js'
 import {editProfile} from './editInfoProfile.js'
 import {displayNotification} from './notificationHandler.js'
 import {Pong} from './pong.js'
-import {displayTournaments, joinTournament, launchTournament} from './tournaments.js'
+import {displayTournaments, fetchTournamentBrackets, joinTournament, launchTournament} from './tournaments.js'
 import {printMatchHistory} from './matchHistory.js'
 import {TowerDefenseSpec} from './tdspec.js'
 import {closeSSEConnection} from './serverSentEvent.js'
@@ -27,6 +27,7 @@ const mapButton: { [key: string]: () => void } = {
 	'/lobby': lobby,
 	'/matchHistory': matchHistory,
 	'/About': About,
+	'/brackets': Brackets,
 }
 
 export function activateBtn(page: string) {
@@ -207,5 +208,40 @@ function About() {
 			if (avatar) img.src = avatar
 			else img.src = '../images/login.png'
 		} else img.src = '../images/logout.png'
+	}
+}
+
+async function Brackets() {
+	try {
+		const idTournament = sessionStorage.getItem('idTournaments')
+		if (!idTournament) throw new Error('No ID Tournament found!')
+		const bracketsData = await fetchTournamentBrackets(Number(idTournament));
+		console.log('BRACKETS DATA', bracketsData);
+		if (!bracketsData) throw new Error("No brackets data");
+
+		const template = document.getElementById("bracketsTmp") as HTMLTemplateElement | null;
+		const list = document.getElementById("playerList") as HTMLUListElement | null;
+
+		if (!template || !list) throw new Error("Missing template or list");
+
+		for (const bracket of bracketsData) {
+			const userData = await fetchUserInformation([bracket.id1, bracket.id2]);
+			if (!userData) continue;
+
+			const clone = template.content.cloneNode(true) as DocumentFragment;
+
+			const playerOneImg = clone.querySelector(".player-one-img") as HTMLImageElement | null;
+			const playerOneName = clone.querySelector(".player-one-name") as HTMLElement | null;
+			const playerTwoImg = clone.querySelector(".player-two-img") as HTMLImageElement | null;
+			const playerTwoName = clone.querySelector(".player-two-name") as HTMLElement | null;
+			if (playerOneImg && userData[0].avatar) playerOneImg.src = userData[0].avatar;
+			if (playerOneName) playerOneName.innerText = userData[0].nickName;
+			if (playerTwoImg && userData[1].avatar) playerTwoImg.src = userData[1].avatar;
+			if (playerTwoName) playerTwoName.innerText = userData[1].nickName;
+			list.appendChild(clone);
+		}
+	} catch (error) {
+		console.log('Brackets Error: ', error);
+		displayNotification("Can't show phase of tournament", { type: "error" });
 	}
 }
