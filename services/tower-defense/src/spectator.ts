@@ -21,7 +21,8 @@ export function joinRoomSpec(player: Player, roomId: number) {
         }
     }
     console.log("No room available for spectator");
-    setTimeout(() => {joinRoomSpec(player, roomId);}, 5000);
+    if (player.ws.readyState !== WebSocket.CLOSED)
+        setTimeout(() => {joinRoomSpec(player, roomId);}, 5000);
 }
 
 export function leaveRoomSpec(userId: number) {
@@ -41,7 +42,7 @@ export function leaveRoomSpec(userId: number) {
 export function changeRoomSpec(player: Player) {
     const roomId = leaveRoomSpec(player.id);
     for (const room of roomsTd) {
-        if (room.id !== roomId) {
+        if (room.id !== roomId && room.players.length === 2 && !room.ended) {
             room.specs.push(player);
             console.log(player.name, "joined room", room.id, "as spectator");
             return ;
