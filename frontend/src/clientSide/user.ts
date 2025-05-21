@@ -20,7 +20,7 @@ export function register(button: HTMLElement): void {
 			sessionStorage.setItem('id', result.id)
 			sessionStorage.setItem('token', result.token)
 			sessionStorage.setItem('nickName', result.nickName)
-			await navigate('/toKnow')
+			await navigate('/About')
 			await getAvatar()
 			await sseConnection()
 		} else {
@@ -50,7 +50,7 @@ export function login(button: HTMLElement): void {
 				return await loadPart('/factor')
 			}
 			sessionStorage.setItem('token', data.token)
-			await navigate('/toKnow')
+			await navigate('/About')
 			await getAvatar()
 			await sseConnection()
 		} else {

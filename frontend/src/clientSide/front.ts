@@ -1,69 +1,69 @@
-import { getAvatar } from './user.js'
-import { loadPart } from './insert.js'
-import { sseConnection } from './serverSentEvent.js'
-import { joinTournament, quitTournaments } from './tournaments.js'
-import { displayNotification } from './notificationHandler.js'
-import {  setupModalListeners } from './modal.js'
+import {getAvatar} from './user.js'
+import {loadPart} from './insert.js'
+import {sseConnection} from './serverSentEvent.js'
+import {joinTournament, quitTournaments} from './tournaments.js'
+import {displayNotification} from './notificationHandler.js'
+import {setupModalListeners} from './modal.js'
 
 declare const tsParticles: any
 declare const AOS: any
 
 export let connected = false
 
-window.addEventListener('popstate', async (event) => {
-    if ((window.location.pathname === '/connect' || window.location.pathname === '/login') && connected) {
-        history.replaceState(null, '', '/home')
-        await loadPart('/home')
-    } else
-        await loadPart(window.location.pathname)
+window.addEventListener('popstate', async () => {
+	if ((window.location.pathname === '/connect' || window.location.pathname === '/login') && connected) {
+		history.replaceState(null, '', '/home')
+		await loadPart('/home')
+	} else
+		await loadPart(window.location.pathname)
 })
 
 document.addEventListener('DOMContentLoaded', async () => {
-    constantButton() // Constant button on the Single Page Application
-    setupModalListeners() // Setup global mobal
-    // animate slides on scroll
-    AOS.init({
-        once: true,
-        duration: 800,
-    })
-    // Reconnect User
-    const token = sessionStorage.getItem('token')
-    if (token && await checkForToken()) {
-        await getAvatar()
-        handleConnection(true)
-    }
-    else
-        handleConnection(false)
-    // For Client Connection
-    document.getElementById('avatar')?.addEventListener('click', () => {
-        if (connected)
-            document.getElementById('profile')?.click()
-        else
-            document.getElementById('connect')?.click()
-    })
-    const tournamentId = sessionStorage.getItem('idTournaments')
-    if (tournamentId)
-        await joinTournament(Number(tournamentId))
-    const path = sessionStorage.getItem('path')
-    if (path && !(!connected && path === '/profile'))
-        await loadPart(path)
-    else
-        await loadPart('/home')
-    await sseConnection()
-});
+	constantButton() // Constant button on the Single Page Application
+	setupModalListeners() // Setup global mobal
+	// animate slides on scroll
+	AOS.init({
+		once: true,
+		duration: 800,
+	})
+	// Reconnect User
+	const token = sessionStorage.getItem('token')
+	console.log('token', token)
+	if (token && await checkForToken()) {
+		await getAvatar()
+		handleConnection(true)
+	} else
+		handleConnection(false)
+	// For Client Connection
+	document.getElementById('avatar')?.addEventListener('click', () => {
+		if (connected)
+			document.getElementById('profile')?.click()
+		else
+			document.getElementById('connect')?.click()
+	})
+	const tournamentId = sessionStorage.getItem('idTournaments')
+	if (tournamentId)
+		await joinTournament(Number(tournamentId))
+	const path = sessionStorage.getItem('path')
+	if (path && !(!connected && path === '/profile'))
+		await loadPart(path)
+	else
+		await loadPart('/home')
+	await sseConnection()
+})
 
 tsParticles.load('tsparticles', {
-	fullScreen: { enable: false },
+	fullScreen: {enable: false},
 	particles: {
-		number: { value: 100 },
-		size: { value: 6 },
-		move: { enable: true, speed: 1 },
-		opacity: { value: 0.5 },
-		color: { value: '#ffffff' },
+		number: {value: 100},
+		size: {value: 6},
+		move: {enable: true, speed: 1},
+		opacity: {value: 0.5},
+		color: {value: '#ffffff'},
 	},
 	background: {
-		color: '#000000'
-	}
+		color: '#000000',
+	},
 })
 
 async function checkForToken(): Promise<boolean> {
@@ -89,17 +89,17 @@ async function checkForToken(): Promise<boolean> {
 }
 
 function constantButton() {
-    //Duo Button
-    document.getElementById('connect')?.addEventListener("click", (event: MouseEvent) => navigate("/connect", event));
-    document.getElementById('profile')?.addEventListener("click", (event: MouseEvent) => navigate("/profile", event));
-    //navigation page
-    document.getElementById('home')?.addEventListener("click", async (event: MouseEvent) => navigate("/home", event));
-    document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate("/pongMode", event));
-    document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate("/towerMode", event));
-    document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate("/tournaments", event));
-    document.getElementById("matchHistory")?.addEventListener("click", (event: MouseEvent) => navigate("/matchHistory", event));
-    // Footer
-    document.getElementById("toKnow")?.addEventListener("click", (event: MouseEvent) => navigate("/toKnow", event));
+	//Duo Button
+	document.getElementById('connect')?.addEventListener('click', (event: MouseEvent) => navigate('/connect', event))
+	document.getElementById('profile')?.addEventListener('click', (event: MouseEvent) => navigate('/profile', event))
+	//navigation page
+	document.getElementById('home')?.addEventListener('click', async (event: MouseEvent) => navigate('/home', event))
+	document.getElementById('pongMode')?.addEventListener('click', (event: MouseEvent) => navigate('/pongMode', event))
+	document.getElementById('towerDefense')?.addEventListener('click', (event: MouseEvent) => navigate('/towerMode', event))
+	document.getElementById('tournaments')?.addEventListener('click', (event: MouseEvent) => navigate('/tournaments', event))
+	document.getElementById('matchHistory')?.addEventListener('click', (event: MouseEvent) => navigate('/matchHistory', event))
+	// Footer
+	document.getElementById('About')?.addEventListener('click', (event: MouseEvent) => navigate('/About', event))
 }
 
 export function handleConnection(input: boolean) {
@@ -116,15 +116,14 @@ export function handleConnection(input: boolean) {
 	connected = input
 }
 
-// @ts-ignore
 window.CredentialResponse = async (credit: { credential: string }) => {
 	try {
 		const response = await fetch(`/user-management/auth/google`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ credential: credit.credential })
+			body: JSON.stringify({credential: credit.credential}),
 		})
 		if (!response.ok)
 			console.error('Error: From UserManager returned an error')
@@ -142,7 +141,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 					sessionStorage.setItem('id', reply.id)
 				if (reply.nickName)
 					sessionStorage.setItem('nickName', reply.nickName)
-				navigate('/toKnow')
+				await navigate('/About')
 				await getAvatar()
 				await sseConnection()
 			}

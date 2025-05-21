@@ -19,7 +19,7 @@ export async function routes(fastify: FastifyInstance) {
     // ROAD OF TAG
     const htmlRoutes = [
         "about",
-        "toKnow",
+        "About",
         "logout",
         "login",
         "register",

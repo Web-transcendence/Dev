@@ -27,7 +27,7 @@ const mapButton: { [key: string]: () => void } = {
 	'/tournaments': tournaments,
 	'/lobby': lobby,
 	'/matchHistory': matchHistory,
-	'/toKnow': toKnow
+	'/About': About
 }
 
 export function activateBtn(page: string) {
@@ -200,7 +200,7 @@ async function matchHistory() {
 	await printMatchHistory()
 }
 
-function toKnow() {
+function About() {
 	const img = document.getElementById('imgToknow') as HTMLImageElement | null
 	if (img) {
 		if (connected) {
