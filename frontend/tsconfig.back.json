@@ -8,7 +8,12 @@
     "strict": true,
     "skipLibCheck": true,
     "rootDir": "src/api.ts",
-    "lib": ["dom", "ESNext"]
+    "lib": [
+      "DOM",
+      "ESNext"
+    ]
   },
-  "include": ["src/servertSide/**/*"]
+  "include": [
+    "src/serverSide/**/*"
+  ]
 }
