@@ -270,7 +270,7 @@ const allTowers: Tower[] = loadTowers(path.join(__dirname, "../resources/towers.
 const ids = new Set<number>();
 export const roomsTd: RoomTd[] = [];
 
-function checkGameOver(player1: Player, player2: Player, game: Game, room: RoomTd) {
+async function checkGameOver(player1: Player, player2: Player, game: Game, room: RoomTd) {
     if (player1.hp <= 0 || player2.hp <= 0) {
         const winner = player1.hp > player2.hp ? 0 : 1;
         const winnerName = winner === 0 ? player1.name : player2.name;
@@ -392,7 +392,7 @@ function enemyLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
     checkGameOver(player1, player2, game, room);
 }
 
-function gameLoop(player1: Player, player2: Player, game: Game, room: roomTd) {
+function gameLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
     if (game.start) {
         if (game.timer.timeLeft !== 0) {
             enemyLoop(player1, player2, game, room);
@@ -443,7 +443,7 @@ function gameInit(player1: Player, player2: Player, game: Game) {
         setTimeout(() => gameInit(player1, player2, game), 100);
 }
 
-function mainLoop (player1: Player, player2: Player, game: Game, room: roomTd) {
+function mainLoop (player1: Player, player2: Player, game: Game, room: RoomTd) {
     if (game.state === 1) {
         game.timer.start();
         gameInit(player1, player2, game);

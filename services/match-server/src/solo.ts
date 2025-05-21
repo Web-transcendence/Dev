@@ -34,8 +34,8 @@ function resetGameSolo(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, game: gameS
         rPaddle.score = "0";
         lPaddle.score = "0";
     }
-    resetInput(lInput);
-    resetInput(rInput);
+    resetInput(lInput, "left");
+    resetInput(rInput, "right");
 }
 
 function moveBallSolo(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, lInput: keyInput, rInput: keyInput, game: gameState) {
