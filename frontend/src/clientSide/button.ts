@@ -1,15 +1,14 @@
-import { addFriend, init2fa, login, profile, register, setAvatar, verify2fa } from './user.js'
-import { friendList } from './friends.js'
-import { connected, handleConnection, navigate } from './front.js'
-import { tdStop, TowerDefense } from './td.js'
-import { editProfile } from './editInfoProfile.js'
-import { displayNotification } from './notificationHandler.js'
-import { Pong } from './pong.js'
-import { displayTournaments, joinTournament, launchTournament } from './tournaments.js'
-import { printMatchHistory } from './matchHistory.js'
-import { TowerDefenseSpec } from './tdspec.js'
-import { closeSSEConnection } from './serverSentEvent.js'
-import {type} from "node:os";
+import {addFriend, init2fa, login, profile, register, setAvatar, verify2fa} from './user.js'
+import {friendList} from './friends.js'
+import {connected, handleConnection, navigate} from './front.js'
+import {tdStop, TowerDefense} from './td.js'
+import {editProfile} from './editInfoProfile.js'
+import {displayNotification} from './notificationHandler.js'
+import {Pong} from './pong.js'
+import {displayTournaments, joinTournament, launchTournament} from './tournaments.js'
+import {printMatchHistory} from './matchHistory.js'
+import {TowerDefenseSpec} from './tdspec.js'
+import {closeSSEConnection} from './serverSentEvent.js'
 
 const mapButton: { [key: string]: () => void } = {
 	'/connect': connectBtn,
@@ -27,7 +26,7 @@ const mapButton: { [key: string]: () => void } = {
 	'/tournaments': tournaments,
 	'/lobby': lobby,
 	'/matchHistory': matchHistory,
-	'/toKnow': toKnow
+	'/About': About,
 }
 
 export function activateBtn(page: string) {
@@ -66,7 +65,7 @@ async function profileBtn() {
 				await addFriend(addFriendIpt.value)
 				await friendList()
 			} else {
-				displayNotification('Name of 3 characters minimum', { type: 'error' })
+				displayNotification('Name of 3 characters minimum', {type: 'error'})
 			}
 		})
 	const activeFA = sessionStorage.getItem('activeFA')
@@ -126,7 +125,7 @@ function factor() {
 		if (!input) {
 			await navigate('/logout')
 			displayNotification('Error from client, try again!', {type: 'error'})
-			return ;
+			return
 		}
 		await verify2fa(input.value, 'The validity of your code has been confirmed')
 	})
@@ -166,10 +165,10 @@ function towerWatch() {
 
 function tournaments() {
 	const tournaments: { id: number, name: string } [] = [
-		{ id: 4, name: 'Junior' },
-		{ id: 8, name: 'Contender' },
-		{ id: 16, name: 'Major' },
-		{ id: 32, name: 'Worlds' }]
+		{id: 4, name: 'Junior'},
+		{id: 8, name: 'Contender'},
+		{id: 16, name: 'Major'},
+		{id: 32, name: 'Worlds'}]
 	for (const parse of tournaments)
 		document.getElementById(`${parse.id}`)
 			?.addEventListener('click', async (event) => {
@@ -200,7 +199,7 @@ async function matchHistory() {
 	await printMatchHistory()
 }
 
-function toKnow() {
+function About() {
 	const img = document.getElementById('imgToknow') as HTMLImageElement | null
 	if (img) {
 		if (connected) {
