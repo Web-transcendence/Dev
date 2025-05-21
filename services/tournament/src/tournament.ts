@@ -186,8 +186,14 @@ export class tournament {
 			}
 		}
 
-		// if (this.actualParticipant.length === 2)
-		//     if ()
+		if (this.actualParticipant.length === 2) {
+			if (this.alonePlayerId !== 0)
+				await fetchNotifyUser([this.alonePlayerId], 'winTournament', {})
+			this.cleanTournament()
+		} else {
+			this.actualParticipant = this.actualParticipant.filter(id => id !== 0)
+			await this.bracketHandler()
+		}
 
 
 	}
