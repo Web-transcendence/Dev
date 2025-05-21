@@ -20,6 +20,7 @@ RUN openssl req -x509 -newkey rsa:4096 -nodes  \
 COPY --chown=app:app *.json .
 COPY --chown=app:app src/*.ts src/
 
+EXPOSE 4443 
 
 RUN npm install
 

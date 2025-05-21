@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/20 07:17:55 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/21 15:00:50 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,9 @@ AiServer::~AiServer( void ) {
 
 void	AiServer::start( void ) {
 	this->_myServer.set_access_channels(websocketpp::log::alevel::all);
-	this->_myServer.clear_access_channels(websocketpp::log::alevel::frame_payload);
-	
+	this->_myServer.clear_access_channels(websocketpp::log::alevel::all);
+	this->_myServer.clear_error_channels(websocketpp::log::elevel::all);
+
 	this->_myServer.set_message_handler([this](websocketpp::connection_hdl hdl, message_ptr msg) {this->on_message(hdl, msg);});
 	
 	this->_myServer.init_asio();

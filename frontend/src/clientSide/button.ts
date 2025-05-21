@@ -9,6 +9,7 @@ import { displayTournaments, joinTournament, launchTournament } from './tourname
 import { printMatchHistory } from './matchHistory.js'
 import { TowerDefenseSpec } from './tdspec.js'
 import { closeSSEConnection } from './serverSentEvent.js'
+import { pongAgainstAi } from './invitation.js'
 
 const mapButton: { [key: string]: () => void } = {
 	'/connect': connectBtn,
@@ -26,7 +27,8 @@ const mapButton: { [key: string]: () => void } = {
 	'/tournaments': tournaments,
 	'/lobby': lobby,
 	'/matchHistory': matchHistory,
-	'/toKnow': toKnow
+	'/toKnow': toKnow,
+	'/pongVsia': pongAgainstAi
 }
 
 export function activateBtn(page: string) {
@@ -131,6 +133,7 @@ function pongMode() {
 	document.getElementById('pongRemote')?.addEventListener('click', (event: MouseEvent) => navigate('/pongRemote', event))
 	document.getElementById('pongLocal')?.addEventListener('click', (event: MouseEvent) => navigate('/pongLocal', event))
 	document.getElementById('pongWatch')?.addEventListener('click', (event: MouseEvent) => navigate('/pongWatch', event))
+	document.getElementById('pongVsia')?.addEventListener('click', (event: MouseEvent) => navigate('/pongVsia', event))
 }
 
 function towerMode() {

@@ -86,9 +86,9 @@ export function joinRoom(player: Player, roomId: number) {
         for (; i < rooms.length; i++) {
             if (rooms[i].id === roomId && rooms[i].players.length < 2) {
                 if (rooms[i].players.length === 0)
-                    player.paddle.x = 30;
-                else
                     player.paddle.x = 1200 - 30;
+                else
+                    player.paddle.x = 30;
                 rooms[i].players.push(player);
                 id = rooms[i].id;
                 console.log(player.paddle.name, "joined room", rooms[i].id);

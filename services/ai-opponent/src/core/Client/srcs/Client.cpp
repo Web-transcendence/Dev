@@ -6,20 +6,21 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/20 09:46:00 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/21 15:03:50 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.class.hpp"
 
 #include "TypeDefinition.hpp"
+#include "Debug.namespace.hpp"
 
 #include <exception>
 #include <sstream>
 #include <ratio>
 #include <ctime>
 
-Client::Client(std::string const & wsGameServer, int const gameId) :\
+Client::Client(int const gameId) :\
 		gameId(gameId),\
 		factoryServer(FACTORY_SERVER_ADDRESS),\
 		allInput(std::array<std::string, 3>{UP, DOWN, NOTHING}) {
@@ -31,16 +32,32 @@ Client::Client(std::string const & wsGameServer, int const gameId) :\
 	this->c.init_asio();
 	this->c.set_message_handler([this](websocketpp::connection_hdl hdl, client::message_ptr msg){this->on_message(hdl, msg);});
 	this->c.set_fail_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){
-		try {this->promise.set_value(false);}
-		catch (std::exception & e) {std::cout << "Error: " << e.what() << std::endl;}
+		auto	con = this->c.get_con_from_hdl(hdl);
+		Debug::consoleLog("failed connection to: "+con.get()->get_uri()->str(), this->gameId);
+		if (con.get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
+			Debug::consoleLog("Game server connection failed", this->gameId);
+			this->promiseGS.set_value(false);
+		}
+		else if (con.get()->get_uri()->str() == AI_SERVER_ADDRESS) {
+			Debug::consoleLog("AI server connection failed", this->gameId);
+			this->promiseAI.set_value(false);
+		}
 	});
 	this->c.set_open_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){
-		try {this->promise.set_value(true);}
-		catch (std::exception & e) {std::cout << "Error: " << e.what() << std::endl;}
+		auto	con = this->c.get_con_from_hdl(hdl);
+		Debug::consoleLog("new connection from: "+con.get()->get_uri()->str(), this->gameId);
+		if (con.get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
+			Debug::consoleLog("Game server connection etablished", this->gameId);
+			this->promiseGS.set_value(true);
+		}
+		else if (con.get()->get_uri()->str() == AI_SERVER_ADDRESS) {
+			Debug::consoleLog("AI server connection etablished", this->gameId);
+			this->promiseAI.set_value(true);
+		}
 	});
 	websocketpp::lib::error_code	ec;
 	this->aiServer = this->c.get_connection(AI_SERVER_ADDRESS, ec);
-	this->gameServer = this->c.get_connection(wsGameServer, ec);
+	this->gameServer = this->c.get_connection(GAME_SERVER_ADDRESS, ec);
 	if (ec) {
 		std::cout << "Error: " << ec.message() << std::endl;
 		throw WsConnectionException();
@@ -57,6 +74,10 @@ Client::~Client( void ) {
 
 void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
 	auto	data = nlohmann::json::parse(msg->get_payload());
+	if (this->active.load() == WAITING) {
+		this->active.store(ON_GOING);
+		this->promiseGame.set_value(true);
+	}
 	if (data["source"] == "ai")
 		this->on_message_aiServer(data);
 	else if (data["source"] == "game")
@@ -120,8 +141,11 @@ void	Client::on_message_gameServer(nlohmann::json const & data) {
 }
 
 void	Client::loop( void ) {
+	auto	futureStart = this->promiseGame.get_future();
+	
+	futureStart.get();
 	this->t1.store(std::chrono::steady_clock::now());
-	while (this->active.load() == true) {
+	while (this->active.load() == ON_GOING) {
 		this->stateMutex.lock();
 		auto	input = this->localPong.getState();
 		this->stateMutex.unlock();
@@ -129,7 +153,7 @@ void	Client::loop( void ) {
 			return ;
 		this->aiServer->send(input->data(), sizeof(double)*N_NEURON_INPUT);
 		if (!checkTime())
-			this->active.store(false);
+			this->active.store(FINISHED);
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
 	return ;
@@ -160,17 +184,32 @@ bool	Client::checkTime( void ) {
 	return true;
 }
 
-bool	Client::getActive( void ) {return this->active.load();}
+t_state	Client::getActive( void ) {return this->active.load();}
 
 void	Client::run( void ) {
-	std::future<bool>	future = this->promise.get_future();
-	this->active.store(true);
+	Debug::consoleLog("start running client ", this->gameId);
+	std::future<bool>	futureGS = this->promiseGS.get_future();
+	std::future<bool>	futureAI = this->promiseAI.get_future();
+	this->active.store(WAITING);
 	std::thread	t([this](){this->c.run();});
 	t.detach();
-	bool	success = future.get();
-	if (success)
+	bool	successAI = futureAI.get();
+	bool	successGS = futureGS.get();
+	if (successGS && successAI) {
+		nlohmann::json	init;
+		init["type"] = "socketInit";
+		init["nick"] = "AI";
+		init["room"] = this->gameId;
+		this->gameServer->send(init.dump(), websocketpp::frame::opcode::text);
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		nlohmann::json	ready;
+		ready["type"] = "ready";
+		ready["mode"] = "remote";
+		this->gameServer->send(ready.dump(), websocketpp::frame::opcode::text);
 		this->loop();
+	}
 	this->stop();
+	Debug::consoleLog("stop running client", this->gameId);
 	this->factoryServer.Get("/deleteAI/"+this->gameId);
 	return ;
 }

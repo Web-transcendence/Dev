@@ -43,6 +43,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
 				if (player.name === 'AI') {
 					player.frequency = 1000
 					player.dbId = -2
+					console.log("IA player init");
 				}
 				try {
 					if (!player.name.includes('guest'))
@@ -77,6 +78,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
 					console.error(error)
 					return
 				}
+				console.log("player ready");
 				mode = data.mode
 				if (data.mode === 'remote')
 					joinRoom(player, room)
@@ -168,9 +170,9 @@ export default async function pongRoutes(fastify: FastifyInstance) {
 
 	fastify.get('/vsAi', async (req: FastifyRequest, res: FastifyReply) => {
 		try {
-			const roomId = generateRoom(/*ia mode*/)
-
-			const response = await fetch(`http://ai-opponent:16016/createAi/${roomId}`, {
+			const roomId = generateRoom()
+			
+			const response = await fetch(`http://ai-opponent:16016/createAI/${roomId}`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
@@ -180,11 +182,11 @@ export default async function pongRoutes(fastify: FastifyInstance) {
 			if (!response.ok) {
 				return res.status(400).send({ error: `can't create ai opponent` })
 			}
-
+			
 			return res.status(200).send({ roomId: roomId })
 		} catch (err) {
 			console.error(err)
-			return res.status(400).send(err)
+			return res.status(400).send({error: err})
 		}
 	})
 
