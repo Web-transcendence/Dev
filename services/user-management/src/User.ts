@@ -13,42 +13,17 @@ import { connection, disconnect } from './serverSentEvent.js'
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
 
+// language=SQL format=false
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client
     (
-        id
-        INTEGER
-        PRIMARY
-        KEY
-        AUTOINCREMENT,
-        nickName
-        TEXT
-        NOT
-        NULL,
-        email
-        UNIQUE
-        NOT
-        NULL
-        COLLATE
-        NOCASE,
-        password
-        TEXT
-        NOT
-        NULL,
-        google_id
-        INTEGER,
-        secret_key
-        TEXT
-        DEFAULT
-        NULL,
-        pictureProfile
-        TEXT
-        DEFAULT
-        NULL,
-        activated2fa
-        BOOLEAN
-        DEFAULT
-        NULL
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nickName TEXT NOT NULL,
+        email UNIQUE NOT NULL COLLATE NOCASE,
+        password TEXT NOT NULL,
+        google_id INTEGER, secret_key TEXT DEFAULT NULL,
+        pictureProfile TEXT DEFAULT NULL,
+        activated2fa BOOLEAN DEFAULT NULL
     )
 `)
 
@@ -62,6 +37,7 @@ export class User {
 			throw new NotFoundError(`Client not found`, `Client not found`)
 		}
 	}
+
 
 	// AUTHENTIFICATION AND CONNECTION //
 
