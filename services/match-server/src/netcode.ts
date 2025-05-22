@@ -117,16 +117,15 @@ export function joinRoom(player: Player, roomId: number) {
     if (i === rooms.length || rooms[i].players.length !== 2)
         return ;
     console.log(`room ${rooms[i].id}'s game has started`);
+    roomLoop(rooms[i]);
+}
+
+function roomLoop(room: Room) {
     const ball = new Ball (1200 / 2, 800 / 2, 0, 8, 12, "#fcc800");
     const game = new gameState();
-    const freq1 = rooms[i].players[0].frequency;
-    const freq2 = rooms[i].players[1].frequency
+    const freq1 = room.players[0].frequency;
+    const freq2 = room.players[1].frequency
     const intervalId1 = setInterval(() => {
-        const room = rooms.find(room => room.id === id);
-        if (room === undefined) {
-            clearInterval(intervalId1);
-            return;
-        }
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
@@ -140,11 +139,6 @@ export function joinRoom(player: Player, roomId: number) {
             clearInterval(intervalId1);
     }, freq1); //Send game info to player 1
     const intervalId2 = setInterval(() => {
-        const room = rooms.find(room => room.id === id);
-        if (room === undefined) {
-            clearInterval(intervalId1);
-            return;
-        }
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
@@ -155,14 +149,9 @@ export function joinRoom(player: Player, roomId: number) {
             };
             room.players[1].ws.send(JSON.stringify(payload));
         } else
-            clearInterval(intervalId1);
+            clearInterval(intervalId2);
     }, freq2); //Send game info to player 2
     const intervalId3 = setInterval(() => {
-        const room = rooms.find(room => room.id === id);
-        if (room === undefined) {
-            clearInterval(intervalId1);
-            return;
-        }
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
@@ -171,21 +160,21 @@ export function joinRoom(player: Player, roomId: number) {
                 ball: ball,
                 game: game
             };
-        room.specs.forEach(spec => {
-            if (room.players.length === 2 && game.state < 2) {
-                spec.ws.send(JSON.stringify(payload));
-            }
-        });
+            room.specs.forEach(spec => {
+                if (room.players.length === 2 && game.state < 2) {
+                    spec.ws.send(JSON.stringify(payload));
+                }
+            });
         } else
             clearInterval(intervalId3);
     }, 10); //Send game info to spectators
     game.state = 1;
-    moveBall(ball, rooms[i].players[0], rooms[i].players[1], game, rooms[i]);
-    movePaddle(rooms[i].players[0].input, rooms[i].players[1].input, rooms[i].players[0].paddle, rooms[i].players[1].paddle, game);
+    moveBall(ball, room.players[0], room.players[1], game, room);
+    movePaddle(room.players[0].input, room.players[1].input, room.players[0].paddle, room.players[1].paddle, game);
     moveHazard(game, ball);
     hazardGenerator(game);
     timerCheck(game);
-    checkRoom(rooms[i], game);
+    checkRoom(room, game);
 }
 
 export async function startInviteMatch(userId: number, opponent: number) {
