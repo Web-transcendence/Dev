@@ -130,8 +130,8 @@ export function joinRoom(player: Player, roomId: number) {
         if (rooms[i].players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: rooms[i].players[0].paddle,
-                paddle2: rooms[i].players[1].paddle,
+                paddle1: rooms[i].players[1].paddle,
+                paddle2: rooms[i].players[0].paddle,
                 ball: ball,
                 game: game
             };
@@ -148,8 +148,8 @@ export function joinRoom(player: Player, roomId: number) {
         if (rooms[i].players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: rooms[i].players[0].paddle,
-                paddle2: rooms[i].players[1].paddle,
+                paddle1: rooms[i].players[1].paddle,
+                paddle2: rooms[i].players[0].paddle,
                 ball: ball,
                 game: game
             };
@@ -165,8 +165,8 @@ export function joinRoom(player: Player, roomId: number) {
         }
         const payload = {
             type: "gameUpdate",
-            paddle1: rooms[i].players[0].paddle,
-            paddle2: rooms[i].players[1].paddle,
+            paddle1: rooms[i].players[1].paddle,
+            paddle2: rooms[i].players[0].paddle,
             ball: ball,
             game: game
         };
@@ -179,8 +179,8 @@ export function joinRoom(player: Player, roomId: number) {
             clearInterval(intervalId3);
     }, 10); //Send game info to spectators
     game.state = 1;
-    moveBall(ball, rooms[i].players[0], rooms[i].players[1], game, rooms[i]);
-    movePaddle(rooms[i].players[0].input, rooms[i].players[1].input, rooms[i].players[0].paddle, rooms[i].players[1].paddle, game);
+    moveBall(ball, rooms[i].players[1], rooms[i].players[0], game, rooms[i]);
+    movePaddle(rooms[i].players[1].input, rooms[i].players[0].input, rooms[i].players[1].paddle, rooms[i].players[0].paddle, game);
     moveHazard(game, ball);
     hazardGenerator(game);
     timerCheck(game);
