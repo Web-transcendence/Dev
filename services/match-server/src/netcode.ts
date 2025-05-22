@@ -1,7 +1,7 @@
 // Netcode
 import {
     Ball,
-    gameState,
+    gameState, generateId,
     hazardGenerator,
     INTERNAL_PASSWORD,
     moveBall,
@@ -14,6 +14,15 @@ import {
 import {insertMatchResult} from "./database.js";
 import {fetchNotifyUser, fetchPlayerWin} from "./utils.js";
 
+class waitingPlayer {
+    player: Player;
+    wait: number = 0;
+    constructor(player: Player) {
+        this.player = player;
+    }
+}
+
+const waitingList: waitingPlayer[] = [];
 export let rooms: Room[] = [];
 
 export function checkId(id: number) {
@@ -210,3 +219,46 @@ export async function startTournamentMatch(playerA_id: number, playerB_id: numbe
     await fetchNotifyUser([playerA_id, playerB_id], `invitationTournamentPong`, {roomId: roomId})
     await roomWatcher(roomId, 0, playerA_id);
 }
+
+function mmrRange(wait: number) {
+    return (150 * Math.log2(1 + wait / 600));
+}
+
+function canMatch(seeker: waitingPlayer, target: waitingPlayer): boolean {
+    if (target.player.mmr < seeker.player.mmr - mmrRange(seeker.wait) || target.player.mmr > seeker.player.mmr + mmrRange(seeker.wait)) // Check if target mmr is in seeker's range
+        return false;
+    if (seeker.player.mmr < target.player.mmr - mmrRange(target.wait) || seeker.player.mmr > target.player.mmr + mmrRange(target.wait)) // Reverse check
+        return false;
+    return true; // Players can be matched !
+}
+
+function removePlayer(player: waitingPlayer) {
+    const index = waitingList.indexOf(player);
+    if (index !== -1)
+        waitingList.splice(index, 1);
+}
+
+function matchMaking() {
+    for (const seeker of waitingList) {
+        seeker.wait += 1;
+        for (const target of waitingList) {
+            if (seeker === target || !canMatch(seeker, target))
+                continue;
+            const roomId = generateRoom();
+            const room = rooms.find(room => room.id === roomId);
+            if (!room)
+                break ;
+            seeker.player.paddle.x = 30;
+            target.player.paddle.x = 1200 - 30;
+            room.players.push(target.player);
+            room.players.push(seeker.player);
+            removePlayer(seeker);
+            removePlayer(target);
+            roomLoop(room);
+            break ;
+        }
+    }
+    setTimeout(() => matchMaking() ,100);
+}
+
+matchMaking();
