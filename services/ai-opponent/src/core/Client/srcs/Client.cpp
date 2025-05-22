@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/21 15:03:50 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/22 14:37:02 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,25 +33,25 @@ Client::Client(int const gameId) :\
 	this->c.set_message_handler([this](websocketpp::connection_hdl hdl, client::message_ptr msg){this->on_message(hdl, msg);});
 	this->c.set_fail_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){
 		auto	con = this->c.get_con_from_hdl(hdl);
-		Debug::consoleLog("failed connection to: "+con.get()->get_uri()->str(), this->gameId);
+		Debug::consoleLog("failed connection to: "+con.get()->get_uri()->str(), this->gameId, this->logMutex);
 		if (con.get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
-			Debug::consoleLog("Game server connection failed", this->gameId);
+			Debug::consoleLog("Game server connection failed", this->gameId, this->logMutex);
 			this->promiseGS.set_value(false);
 		}
 		else if (con.get()->get_uri()->str() == AI_SERVER_ADDRESS) {
-			Debug::consoleLog("AI server connection failed", this->gameId);
+			Debug::consoleLog("AI server connection failed", this->gameId, this->logMutex);
 			this->promiseAI.set_value(false);
 		}
 	});
 	this->c.set_open_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){
 		auto	con = this->c.get_con_from_hdl(hdl);
-		Debug::consoleLog("new connection from: "+con.get()->get_uri()->str(), this->gameId);
+		Debug::consoleLog("new connection from: "+con.get()->get_uri()->str(), this->gameId, this->logMutex);
 		if (con.get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
-			Debug::consoleLog("Game server connection etablished", this->gameId);
+			Debug::consoleLog("Game server connection etablished", this->gameId, this->logMutex);
 			this->promiseGS.set_value(true);
 		}
 		else if (con.get()->get_uri()->str() == AI_SERVER_ADDRESS) {
-			Debug::consoleLog("AI server connection etablished", this->gameId);
+			Debug::consoleLog("AI server connection etablished", this->gameId, this->logMutex);
 			this->promiseAI.set_value(true);
 		}
 	});
@@ -73,16 +73,20 @@ Client::~Client( void ) {
 }
 
 void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
-	auto	data = nlohmann::json::parse(msg->get_payload());
+	if (this->c.get_con_from_hdl(hdl).get()->get_uri()->str() == AI_SERVER_ADDRESS) {
+		auto	data = nlohmann::json::parse(msg->get_payload());
+		this->on_message_aiServer(data);
+	}
+	else if (this->c.get_con_from_hdl(hdl).get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
+		auto	data = nlohmann::json::parse(msg->get_payload());
+		this->on_message_gameServer(data);
+	}
+	else
+		return ;
 	if (this->active.load() == WAITING) {
 		this->active.store(ON_GOING);
 		this->promiseGame.set_value(true);
 	}
-	if (data["source"] == "ai")
-		this->on_message_aiServer(data);
-	else if (data["source"] == "game")
-		this->on_message_gameServer(data);
-	(void)hdl;
 	return ;
 }
 
@@ -95,44 +99,43 @@ void	Client::on_message_aiServer(nlohmann::json const & data) {
 		ss << data["data"][idx];
 		ss >> *it;
 	}
-	nlohmann::json	j;
 	int const	key = std::distance(o.begin(), std::max_element(o.begin(), o.end()));
 	this->stateMutex.lock();
 	this->localPong.action(key);
 	this->stateMutex.unlock();
+	nlohmann::json	j;
 	j["type"] = "input";
 	bool const	send = this->giveArrow(this->allInput.at(key), j);
-	if (send == true)
+	if (send == true) {
 		this->gameServer->send(j.dump());
+	}
 	return ;
 }
 
-void	Client::on_message_gameServer(nlohmann::json const & data) {
-	std::vector<double>	temp(N_RAW_STATE);
-
+void	Client::on_message_gameServer(nlohmann::json const & extData) {
+	nlohmann::json	data = extData;
 	t_ball	ball(std::array<double, 6>{\
 		data["ball"]["x"],\
 		data["ball"]["y"],\
 		data["ball"]["angle"],\
 		data["ball"]["speed"],\
 		data["ball"]["ispeed"],\
-		data["ball"]["radius"]
+		data["ball"]["radius"],
 	});
 	t_paddle rPaddle(std::array<double, 5>{\
-		data["paddle1"]["x"],\
-		data["paddle1"]["x"],\
-		data["paddle1"]["width"],\
-		data["paddle1"]["height"],\
-		data["paddle1"]["speed"]
-	});
-	t_paddle lPaddle(std::array<double, 5>{\
 		data["paddle2"]["x"],\
-		data["paddle2"]["x"],\
+		data["paddle2"]["y"],\
 		data["paddle2"]["width"],\
 		data["paddle2"]["height"],\
 		data["paddle2"]["speed"]
 	});
-	std::cout << "LOG: onMessage GS" << std::endl;
+	t_paddle lPaddle(std::array<double, 5>{\
+		data["paddle1"]["x"],\
+		data["paddle1"]["y"],\
+		data["paddle1"]["width"],\
+		data["paddle1"]["height"],\
+		data["paddle1"]["speed"]
+	});
 	this->stateMutex.lock();
 	this->localPong.reset(ball, lPaddle, rPaddle);
 	this->stateMutex.unlock();
@@ -149,8 +152,7 @@ void	Client::loop( void ) {
 		this->stateMutex.lock();
 		auto	input = this->localPong.getState();
 		this->stateMutex.unlock();
-		if (!input)
-			return ;
+		Debug::displayState(*input);
 		this->aiServer->send(input->data(), sizeof(double)*N_NEURON_INPUT);
 		if (!checkTime())
 			this->active.store(FINISHED);
@@ -165,7 +167,7 @@ bool	Client::giveArrow(std::string const & key, nlohmann::json & j) {
 	if (key != this->lastKey) {
 		j["key"] = lastKey;
 		j["state"] = RELEASE;
-		if (key != RELEASE) {	
+		if (key != NOTHING) {	
 			this->gameServer->send(j.dump());
 			j["key"] = key;
 			j["state"] = PRESS;
@@ -187,9 +189,9 @@ bool	Client::checkTime( void ) {
 t_state	Client::getActive( void ) {return this->active.load();}
 
 void	Client::run( void ) {
-	Debug::consoleLog("start running client ", this->gameId);
 	std::future<bool>	futureGS = this->promiseGS.get_future();
 	std::future<bool>	futureAI = this->promiseAI.get_future();
+
 	this->active.store(WAITING);
 	std::thread	t([this](){this->c.run();});
 	t.detach();
@@ -209,7 +211,6 @@ void	Client::run( void ) {
 		this->loop();
 	}
 	this->stop();
-	Debug::consoleLog("stop running client", this->gameId);
 	this->factoryServer.Get("/deleteAI/"+this->gameId);
 	return ;
 }

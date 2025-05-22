@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:46:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/21 14:52:01 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/22 11:22:42 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ private:
 
 	std::string	lastKey;
 	
-	std::mutex			stateMutex;
+	std::mutex	stateMutex;
 
 	std::atomic<t_state>	active;
 
@@ -82,6 +82,8 @@ private:
 	std::atomic<std::chrono::steady_clock::time_point>	t1;
 
 	std::array<std::string, 3> const	allInput;
+
+	std::mutex	logMutex;
 };
 
 

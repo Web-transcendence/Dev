@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/21 15:00:50 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/22 11:03:42 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void	AiServer::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
 	auto	input = std::vector<double>(_1, _1+16);
 	auto	oQNet = this->_QNet.feedForward(input);
 	nlohmann::json	j;
-	j["source"] = "ai";
+	j["type"] = "ai";
 	j["data"] = oQNet;
 	this->_myServer.send(hdl, j.dump(), websocketpp::frame::opcode::text);
 	return ;
