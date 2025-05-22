@@ -27,7 +27,7 @@ const mapButton: { [key: string]: () => void } = {
 	'/tournaments': tournaments,
 	'/lobby': lobby,
 	'/matchHistory': matchHistory,
-	'/toKnow': toKnow,
+//	'/toKnow': toKnow,
 	'/pongVsia': pongAgainstAi
 	'/About': About,
 	'/brackets': Brackets,

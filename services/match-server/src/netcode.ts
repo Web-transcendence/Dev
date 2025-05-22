@@ -129,8 +129,8 @@ function roomLoop(room: Room) {
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: rooms[i].players[1].paddle,
-                paddle2: rooms[i].players[0].paddle,
+                paddle1: room.players[1].paddle,
+                paddle2: room.players[0].paddle,
                 ball: ball,
                 game: game
             };
@@ -142,8 +142,8 @@ function roomLoop(room: Room) {
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: rooms[i].players[1].paddle,
-                paddle2: rooms[i].players[0].paddle,
+                paddle1: room.players[1].paddle,
+                paddle2: room.players[0].paddle,
                 ball: ball,
                 game: game
             };
