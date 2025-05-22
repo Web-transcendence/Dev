@@ -1,7 +1,7 @@
 // Main function
 import {AssetsTd, Board, Bullet, Enemy, GameTd, Player, Tower} from "./td.js";
 
-let tdSpecConnect = false;
+let tdSpecConnect : boolean;
 
 export function TowerDefenseSpec(room?: number) {
     // Global Variables

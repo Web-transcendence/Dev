@@ -1,10 +1,10 @@
-import { addFriend, fetchUserInformation, removeFriend, UserData } from './user.js'
-import { Pong } from './pong.js'
-import { displayNotification } from './notificationHandler.js'
-import { navigate } from './front.js'
-import { loadPart } from './insert.js'
-import { openModal } from './modal.js'
-import { TowerDefense } from './td.js'
+import {addFriend, fetchUserInformation, removeFriend, UserData} from './user.js'
+import {Pong} from './pong.js'
+import {displayNotification, hideNotification} from './notificationHandler.js'
+import {navigate} from './front.js'
+import {loadPart} from './insert.js'
+import {openModal} from './modal.js'
+import {TowerDefense} from './td.js'
 
 let abortController: AbortController | null = null
 
@@ -16,7 +16,7 @@ const parseSSEMessage = (raw: string): { event: string, stringData: string } => 
 		const [key, ...rest] = line.split(':')
 		result[key.trim()] = rest.join(':').trim()
 	}
-	return { event: result.event, stringData: result.data }
+	return {event: result.event, stringData: result.data}
 }
 
 export async function sseConnection() {
@@ -27,7 +27,7 @@ export async function sseConnection() {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'text/event-stream',
-				'authorization': 'Bearer ' + token
+				'authorization': 'Bearer ' + token,
 			},
 			signal: tempController.signal,
 		})
@@ -45,7 +45,7 @@ export async function sseConnection() {
 		console.log('sse connection')
 		const reader = res.body?.pipeThrough(new TextDecoderStream()).getReader() ?? null
 		while (reader) {
-			const { value, done } = await reader.read()
+			const {value, done} = await reader.read()
 			if (done) break
 			if (value.startsWith('retry: ')) continue
 			const parse = parseSSEMessage(value)
@@ -68,10 +68,8 @@ export function closeSSEConnection() {
 	}
 }
 
-
 export const CreateFriendLi = async (id: number, key: string, tmpName: string) => {
 	console.log(`this id ${id} have to be add in the friendlist`)
-	document.getElementById(`friendId-${id}`)?.remove()
 	const list = document.getElementById(key)
 	const [userData] = await fetchUserInformation([id])
 	const template = document.getElementById(tmpName) as HTMLTemplateElement | null
@@ -90,8 +88,17 @@ export const CreateFriendLi = async (id: number, key: string, tmpName: string) =
 			clone.querySelector('.inviteFriend')?.classList.remove('hidden')
 		}
 		if (key === 'receivedList') {
-			clone.querySelector('.accept-btn')?.addEventListener('click', () => addFriend(userData.nickName))
-			clone.querySelector('.decline-btn')?.addEventListener('click', () => removeFriend(userData.nickName))
+			clone.querySelector('.accept-btn')?.addEventListener('click', () => {
+				addFriend(userData.nickName)
+				document.getElementById(`friendId-${id}`)?.remove()
+				hideNotification(0, id)
+				CreateFriendLi(id, 'acceptedList', 'acceptedTemplate')
+			})
+			clone.querySelector('.decline-btn')?.addEventListener('click', () => {
+				removeFriend(userData.nickName)
+				document.getElementById(`friendId-${id}`)?.remove()
+				hideNotification(0, id)
+			})
 		}
 		if (key === 'acceptedList')
 			clone.querySelector('.inviteFriend')?.addEventListener('click', async () => openModal(userData.nickName, userData.id))
@@ -100,12 +107,12 @@ export const CreateFriendLi = async (id: number, key: string, tmpName: string) =
 }
 
 
-const notifyNewFriend = async ({ id }: { id: number }) => {
+const notifyNewFriend = async ({id}: { id: number }) => {
 	console.log(`this id ${id} have to be add in the friendlist`)
 	await CreateFriendLi(id, 'acceptedList', 'acceptedTemplate')
 }
 
-const notifyFriendInvitation = async ({ id }: { id: number }) => {
+const notifyFriendInvitation = async ({id}: { id: number }) => {
 	console.log(`this friend has to be added in the invitation list`)
 	await CreateFriendLi(id, 'receivedList', 'receivedTemplate')
 
@@ -121,17 +128,17 @@ const notifyFriendInvitation = async ({ id }: { id: number }) => {
 			if (await removeFriend(userData.nickName)) {
 				document.getElementById(`friendId-${userData.id}`)?.remove()
 			}
-		}
+		},
 	}, userData)
 }
 
-const notifyFriendRemoved = ({ id }: { id: number }) => {
+const notifyFriendRemoved = ({id}: { id: number }) => {
 	console.log(`this friend have to be supressed from the friendlist`)
 	const list = document.getElementById(`friendId-${id}`)
 	if (list) list.remove()
 }
 
-const notifyDisconnection = ({ id }: { id: number }) => {
+const notifyDisconnection = ({id}: { id: number }) => {
 	console.log(`this friend have to be marked as unconnected`)
 	const list = document.getElementById(`friendId-${id}`)
 	if (list) {
@@ -140,7 +147,7 @@ const notifyDisconnection = ({ id }: { id: number }) => {
 	}
 }
 
-const notifyConnection = ({ id }: { id: number }) => {
+const notifyConnection = ({id}: { id: number }) => {
 	console.log(`this friend have to be marked as connected`)
 	const list = document.getElementById(`friendId-${id}`)
 	if (list) {
@@ -149,11 +156,11 @@ const notifyConnection = ({ id }: { id: number }) => {
 	}
 }
 
-const notifyJoinTournament = async ({ id, maxPlayer }: { id: number, maxPlayer: number }) => {
+const notifyJoinTournament = async ({id, maxPlayer}: { id: number, maxPlayer: number }) => {
 	console.log(`the user with the id ${id} joined my tournament`)
 	const playerList = document.getElementById('playerList')
 	const playerTmp = document.getElementById('playerTemplate') as HTMLTemplateElement | null
-	const [{ nickName, avatar }]: UserData[] = await fetchUserInformation([id])
+	const [{nickName, avatar}]: UserData[] = await fetchUserInformation([id])
 	if (!playerList || !playerTmp) {
 		displayNotification(`Error Can't find Tournaments`)
 		await navigate('/home')
@@ -190,7 +197,7 @@ const notifyJoinTournament = async ({ id, maxPlayer }: { id: number, maxPlayer: 
 	}
 }
 
-const notifyQuitTournament = ({ id, maxPlayer }: { id: number, maxPlayer: number }) => {
+const notifyQuitTournament = ({id, maxPlayer}: { id: number, maxPlayer: number }) => {
 	console.log(`the user with the id ${id} Quit my tournament`)
 	const list = document.getElementById(`itemId-${id}`)
 	if (list) list.remove()
@@ -202,7 +209,7 @@ const notifyQuitTournament = ({ id, maxPlayer }: { id: number, maxPlayer: number
 	}
 }
 
-const notifyInvitationPong = async ({ roomId, id }: { roomId: number, id: number }) => {
+const notifyInvitationPong = async ({roomId, id}: { roomId: number, id: number }) => {
 	const [userData] = await fetchUserInformation([id])
 	displayNotification('Invitation to play Pong', {
 		type: 'invitation',
@@ -213,11 +220,11 @@ const notifyInvitationPong = async ({ roomId, id }: { roomId: number, id: number
 		},
 		onRefuse: async () => {
 			console.log('Close invite because refused')
-		}
+		},
 	}, userData)
 }
 
-const notifyInvitationTowerDefense = async ({ roomId, id }: { roomId: number, id: number }) => {
+const notifyInvitationTowerDefense = async ({roomId, id}: { roomId: number, id: number }) => {
 	const [userData] = await fetchUserInformation([id])
 	displayNotification('Invitation to Play Tower-Defense', {
 		type: 'invitation',
@@ -228,25 +235,35 @@ const notifyInvitationTowerDefense = async ({ roomId, id }: { roomId: number, id
 		},
 		onRefuse: async () => {
 			console.log('Close invite because refused')
-		}
+		},
 	}, userData)
 }
 
-const winBracket = async ({ id }: { id: number }) => {
-	await loadPart('/lobby')
+const winBracket = async ({id}: { id: number }) => {
+	displayNotification('You win the game the tournament continue !')
+	console.log('You win the game the tournament continue !')
+	await loadPart('/brackets')
 }
 
-const winTournament = async ({ id }: { id: number }) => {
+const winTournament = async () => {
+	displayNotification(`Congratulations, you win the tournament !!!`)
+	console.log(`Congratulations, you win the tournament !!!`)
+	sessionStorage.removeItem('idTournaments')
+	sessionStorage.removeItem('nameTournaments')
 	await loadPart('/home')
 }
 
-const loseTournament = async ({ id }: { id: number }) => {
+const loseTournament = async ({id}: { id: number }) => {
+	displayNotification('You have lost the tournament :/', {type: 'error'})
+	console.log('You have lost the tournament :/')
+	sessionStorage.removeItem('idTournaments')
+	sessionStorage.removeItem('nameTournaments')
 	await loadPart('/home')
 }
 
 
-const notifyInvitationTournamentPong = async ({ roomId }: { roomId: number }) => {
-	console.log('roomIDDDD', roomId)
+const notifyInvitationTournamentPong = async ({roomId}: { roomId: number }) => {
+	console.log('RoomId', roomId)
 	await loadPart('/pongTournament')
 	Pong('remote', roomId)
 }

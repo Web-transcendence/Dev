@@ -27,38 +27,50 @@ export function displayNotification(message: string, options?: {
         console.error("Notification elements missing");
         return;
     }
-    if (item) item.id = `idNotif-${idNotify}`
+    if (item) {
+        if (options?.type === "invitation") {
+            if (!userData) {
+                console.error("Notification elements missing");
+                return;
+            }
+            item.id = `${userData.id}-idFriend`
+        }
+        else
+            item.id = `idNotif-${idNotify}`
+    }
     messageSpan.textContent = message;
     if (options?.type === "error") { // Red for error | Blue for invite
         item.classList.add("bg-red-600");
         acceptBtn.classList.add("hidden");
         rejectBtn.classList.add("hidden");
     } else if (options?.type === "invitation") {
-        if (userData && nameInvite) nameInvite.innerText = `From ${userData.nickName}`;
-        const idOfInvite = idNotify;
+        if (!userData) {
+            console.error("Notification elements missing");
+            return;
+        }
+        if (nameInvite) nameInvite.innerText = `From ${userData.nickName}`;
         item.classList.add("bg-gray-600");
         acceptBtn.classList.remove("hidden");
         rejectBtn.classList.remove("hidden");
         acceptBtn.onclick = async () => {
             if (options.onAccept) options.onAccept();
-            hideNotification(idOfInvite);
+            hideNotification(0, userData.id);
+            document.getElementById(`friendId-${userData.id}`)?.remove();
         };
         rejectBtn.onclick = async () => {
             if (options.onRefuse) options.onRefuse();
-            hideNotification(idOfInvite);
+            hideNotification(0,  userData.id);
+            document.getElementById(`friendId-${userData.id}`)?.remove();
         };
     } else { // Default Green
         item.classList.remove("bg-red-600", "bg-blue-600");
-        item.classList.add("bg-green-800");
+        item.classList.add("bg-gray-800");
         acceptBtn.classList.add("hidden");
     }
 
     const notifys = notificationList.querySelectorAll("li");
-    console.log('notifys', notifys);
-    if (notifys && notifys.length >= 3) {
-        console.log("Notification to remove", notifys.length - 4);
+    if (notifys && notifys.length >= 3)
         hideNotification(idNotify - 3);
-    }
     idNotify++;
 
     notificationList.appendChild(clone);
@@ -80,13 +92,20 @@ export function displayNotification(message: string, options?: {
 
 }
 
-export function hideNotification(idNotify: number) {
+export function hideNotification(idNotify: number, idInvitation?: number) {
     console.log("hide notification", idNotify);
-    const item = document.getElementById(`idNotif-${idNotify}`);
-    if (!item) {
-        console.log('NOT FOUND BITA')
-        return;
+    if (idInvitation) {
+        const item = document.getElementById(`${idInvitation}-idFriend`);
+        if (!item)
+            return;
+        item.classList.remove("translate-x-0");
+        item.classList.add("translate-x-full");
+        setTimeout(() => item.remove(), 500);
+        return ;
     }
+    const item = document.getElementById(`idNotif-${idNotify}`);
+    if (!item)
+        return;
     item.classList.remove("translate-x-0");
     item.classList.add("translate-x-full");
     setTimeout(() => item.remove(), 500);

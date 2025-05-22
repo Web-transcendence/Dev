@@ -1,7 +1,7 @@
-import { navigate } from './front.js'
-import { loadPart } from './insert.js'
-import { sseConnection } from './serverSentEvent.js'
-import { displayNotification } from './notificationHandler.js'
+import {navigate} from './front.js'
+import {loadPart} from './insert.js'
+import {sseConnection} from './serverSentEvent.js'
+import {displayNotification} from './notificationHandler.js'
 
 export function register(button: HTMLElement): void {
 	button.addEventListener('click', async () => {
@@ -13,18 +13,18 @@ export function register(button: HTMLElement): void {
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify(data)
+			body: JSON.stringify(data),
 		})
 		const result = await response.json()
 		if (result.token) {
 			sessionStorage.setItem('id', result.id)
 			sessionStorage.setItem('token', result.token)
 			sessionStorage.setItem('nickName', result.nickName)
-			await navigate('/toKnow')
+			await navigate('/About')
 			await getAvatar()
 			await sseConnection()
 		} else {
-			displayNotification(result.error, { type: 'error' })
+			displayNotification(result.error, {type: 'error'})
 		}
 	})
 }
@@ -37,9 +37,9 @@ export function login(button: HTMLElement): void {
 		const response = await fetch(`/user-management/login`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify(data)
+			body: JSON.stringify(data),
 		})
 
 		if (response.ok) {
@@ -50,12 +50,12 @@ export function login(button: HTMLElement): void {
 				return await loadPart('/factor')
 			}
 			sessionStorage.setItem('token', data.token)
-			await navigate('/toKnow')
+			await navigate('/About')
 			await getAvatar()
 			await sseConnection()
 		} else {
 			const errorData = await response.json()
-			displayNotification(errorData.error, { type: 'error' })
+			displayNotification(errorData.error, {type: 'error'})
 		}
 	})
 }
@@ -72,8 +72,8 @@ export async function profile() {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
-				'authorization': 'Bearer ' + token
-			}
+				'authorization': 'Bearer ' + token,
+			},
 		})
 		const data = await response.json()
 		if (response.ok) {
@@ -109,12 +109,12 @@ export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> =
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			'authorization': 'Bearer ' + token
+			'authorization': 'Bearer ' + token,
 		},
-		body: JSON.stringify({ ids })
+		body: JSON.stringify({ids}),
 	})
 	if (response.ok) {
-		const { usersData } = await response.json() as { usersData: UserData[] }
+		const {usersData} = await response.json() as { usersData: UserData[] }
 		return usersData
 	} else {
 		const error = await response.json()
@@ -135,8 +135,8 @@ export async function init2fa() {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
-				'authorization': 'Bearer ' + token
-			}
+				'authorization': 'Bearer ' + token,
+			},
 		})
 		if (response.ok)
 			return await response.text()
@@ -146,28 +146,28 @@ export async function init2fa() {
 	}
 }
 
-export async function verify2fa(secret: string) {
+export async function verify2fa(secret: string, message: string) {
 	try {
 		const nickName = sessionStorage.getItem('nickName')
 		const response = await fetch(`/user-management/2faVerify`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ secret: secret, nickName: nickName })
+			body: JSON.stringify({secret: secret, nickName: nickName}),
 		})
 		if (response.ok) {
 			const result = await response.json()
 			sessionStorage.setItem('token', result.token)
 			sessionStorage.setItem('activeFA', 'true')
-			displayNotification('You have enabled two-factor authentication.')
 			await navigate('/home')
 			await getAvatar()
 			await sseConnection()
+			displayNotification(message)
 		} else {
 			const errorData = await response.json()
 			console.error(errorData.error, errorData)
-			displayNotification('Bad code or outdated', { type: 'error' })
+			displayNotification('Bad code or outdated', {type: 'error'})
 		}
 	} catch (err) {
 		console.error(err)
@@ -184,7 +184,7 @@ export async function addFriend(friendNickName: string) {
 				'Content-Type': 'application/json',
 				'authorization': 'Bearer ' + token,
 			},
-			body: JSON.stringify({ friendNickName: friendNickName })
+			body: JSON.stringify({friendNickName: friendNickName}),
 		})
 		//Clear input after use
 		const input = document.getElementById('friendNameIpt') as HTMLInputElement
@@ -193,7 +193,7 @@ export async function addFriend(friendNickName: string) {
 		if (!response.ok) {
 			const error = await response.json()
 			console.error('ERROR addFriend', error.error)
-			displayNotification(error.error, { type: 'error' })
+			displayNotification(error.error, {type: 'error'})
 			return false
 		}
 		displayNotification('Successfully Invited')
@@ -213,7 +213,7 @@ export async function removeFriend(friendNickName: string): Promise<boolean> {
 				'Content-Type': 'application/json',
 				'authorization': 'Bearer ' + token,
 			},
-			body: JSON.stringify({ friendNickName: friendNickName }),
+			body: JSON.stringify({friendNickName: friendNickName}),
 		})
 
 		if (!response.ok) {
@@ -268,7 +268,7 @@ export async function setAvatar(target: HTMLInputElement) {
 			const base64File: string = await toBase64(file) as string
 
 			if (base64File.length > 700000) {
-				displayNotification('File to big', { type: 'error' })
+				displayNotification('File too big', {type: 'error'})
 				return
 			}
 
@@ -279,12 +279,12 @@ export async function setAvatar(target: HTMLInputElement) {
 					'Content-Type': 'application/json',
 					'authorization': 'Bearer ' + token,
 				},
-				body: JSON.stringify({ pictureURL: base64File })
+				body: JSON.stringify({pictureURL: base64File}),
 			})
 			if (!response.ok) {
 				const error = await response.json()
 				console.error(error.error)
-				displayNotification(error.error, { type: 'error' })
+				displayNotification(error.error, {type: 'error'})
 			} else {
 				sessionStorage.setItem('avatar', base64File)
 				updateAvatar('avatarProfile', base64File)
@@ -293,7 +293,7 @@ export async function setAvatar(target: HTMLInputElement) {
 			}
 		}
 	} catch (err) {
-		displayNotification('Not a File', { type: 'error' })
+		displayNotification('Not a File', {type: 'error'})
 	}
 }
 
@@ -342,7 +342,7 @@ export async function setPassword(newPassword: string) {
 				'Content-Type': 'application/json',
 				'authorization': 'Bearer ' + token,
 			},
-			body: JSON.stringify({ password: newPassword }),
+			body: JSON.stringify({password: newPassword}),
 		})
 		if (!response.ok) {
 			console.error('failed')
@@ -363,12 +363,11 @@ export async function setNickName(newNickName: string) {
 				'Content-Type': 'application/json',
 				'authorization': 'Bearer ' + token,
 			},
-			body: JSON.stringify({ nickName: newNickName }),
+			body: JSON.stringify({nickName: newNickName}),
 		})
 		if (!response.ok) {
-			const error = await response.json()
-			console.log(error.error)
-			displayNotification(error.error, { type: 'error' })
+			console.error('failed')
+			displayNotification('Bad input', {type: 'error'})
 		} else {
 			console.log('success')
 			displayNotification('New Nickname')
@@ -400,7 +399,7 @@ export async function getTournamentList() {
 		if (!response.ok) {
 			const error = await response.json()
 			console.error(error.error)
-			displayNotification('Register To join Tournaments', { type: 'error' })
+			displayNotification('Register To join Tournaments', {type: 'error'})
 			return undefined
 		}
 		return await response.json()

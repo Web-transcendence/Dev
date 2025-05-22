@@ -210,8 +210,8 @@ export async function resetGame(ball: Ball, player1: Player, player2: Player, ga
         game.score2 = player2.paddle.score;
         console.log(getMatchHistory(player1.dbId));
     }
-    resetInput(player1.input);
-    resetInput(player2.input);
+    resetInput(player1.input, "all");
+    resetInput(player2.input, "all");
 }
 
 export function norAngle(ball: Ball) {

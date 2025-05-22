@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import { fileURLToPath } from "url";
 import {clearInterval} from "node:timers";
 import {getMatchHistory, insertMatchResult} from "./database.js";
-import {fetchIdByNickName} from "./utils.js";
+import {fetchIdByNickName, fetchNotifyUser, fetchPlayerWin} from "./utils.js";
 import tdRoutes from "./routes.js";
 import {changeRoomSpec, joinRoomSpec, leaveRoomSpec} from "./spectator.js";
 
@@ -270,12 +270,14 @@ const allTowers: Tower[] = loadTowers(path.join(__dirname, "../resources/towers.
 const ids = new Set<number>();
 export const roomsTd: RoomTd[] = [];
 
-function checkGameOver(player1: Player, player2: Player, game: Game, room: RoomTd) {
+async function checkGameOver(player1: Player, player2: Player, game: Game, room: RoomTd) {
     if (player1.hp <= 0 || player2.hp <= 0) {
         const winner = player1.hp > player2.hp ? 0 : 1;
         const winnerName = winner === 0 ? player1.name : player2.name;
         room.ended = true;
         insertMatchResult(player1.dbId, player2.dbId, player1.hp, player2.hp, winner);
+        if (room.type === "tournament")
+            await fetchPlayerWin(winner === 0 ? player1.dbId : player2.dbId);
         room.specs.forEach(spec => {
             spec.ws.send(JSON.stringify({class: "gameEnd", winner: winnerName}));
         });
@@ -390,7 +392,7 @@ function enemyLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
     checkGameOver(player1, player2, game, room);
 }
 
-function gameLoop(player1: Player, player2: Player, game: Game, room: roomTd) {
+function gameLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
     if (game.start) {
         if (game.timer.timeLeft !== 0) {
             enemyLoop(player1, player2, game, room);
@@ -441,7 +443,7 @@ function gameInit(player1: Player, player2: Player, game: Game) {
         setTimeout(() => gameInit(player1, player2, game), 100);
 }
 
-function mainLoop (player1: Player, player2: Player, game: Game, room: roomTd) {
+function mainLoop (player1: Player, player2: Player, game: Game, room: RoomTd) {
     if (game.state === 1) {
         game.timer.start();
         gameInit(player1, player2, game);
@@ -467,15 +469,17 @@ function checkRoom(room: RoomTd, intervalId: ReturnType<typeof setInterval>, gam
     setTimeout(() => checkRoom(room, intervalId, game), 100);
 }
 
-function leaveRoom(userId: number) {
+async function leaveRoom(userId: number) {
     for (let i = 0 ; i < roomsTd.length; i++) {
         for (let j = 0; j < roomsTd[i].players.length; j++) {
             if (roomsTd[i].players[j].id === userId) {
                 if (roomsTd[i].players.length === 2 && roomsTd[i].players[0].hp > 0 && roomsTd[i].players[1].hp > 0) {
                     roomsTd[i].ended = true;
                     insertMatchResult(roomsTd[i].players[0].dbId, roomsTd[i].players[1].dbId, roomsTd[i].players[0].hp, roomsTd[i].players[1].hp, j === 0 ? 1 : 0);
+                    if (roomsTd[i].type === "tournament")
+                        await fetchPlayerWin(roomsTd[i].players[j === 0 ? 1 : 0].dbId);
                     roomsTd[i].specs.forEach(spec => {
-                        spec.ws.send(JSON.stringify({ type: "gameEnd", winner: winner.name }));
+                        spec.ws.send(JSON.stringify({ type: "gameEnd", winner: roomsTd[i].players[j === 0 ? 1 : 0].name }));
                     });
                 }
                 console.log("player: ", roomsTd[i].players[j].name, " with id: ", userId, " left room ", roomsTd[i].id);

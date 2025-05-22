@@ -119,45 +119,47 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 		}
 	})
 
-	// app.get(`/RunningTournamentInformation/:id`, async (req: FastifyRequest, res: FastifyReply) => {
-	//     try {
-	//         const {id} = req.params as { id: string }
-	//
-	//         const numericId = Number(id)
-	//
-	//         if (isNaN(numericId))
-	//             throw new InputError(`the id isn't a number`, `id have to be a number`)
-	//
-	//         const tournament = tournamentSessions.get(numericId)
-	//         if (!tournament)
-	//             throw new InputError(`this id of tournament doesn't exist`, `only these id of tournament exist : 4,8,16,32`)
-	//
-	//         return res.status(200).send(tournament.sessionData())
-	//
-	//     } catch (err) {
-	//         if (err instanceof MyError) {
-	//             console.error(err.message)
-	//             return res.status(err.code).send({error: err.toSend})
-	//         }
-	//         console.error(err)
-	//         return res.status(500).send()
-	//     }
-	// })
+	app.get(`/logTournamentStep/:id`, async (req: FastifyRequest, res: FastifyReply) => {
+		try {
+			const { id } = req.params as { id: string }
+
+			const numericId = Number(id)
+			console.log('numereic ID:', numericId)
+
+			if (isNaN(numericId))
+				throw new InputError(`the id isn't a number`, `id have to be a number`)
+
+			const tournament = tournamentSessions.get(numericId)
+			if (!tournament)
+				throw new InputError(`this id of tournament doesn't exist`, `only these id of tournament exist : 4,8,16,32`)
+
+			return res.status(200).send(tournament.sessionData())
+
+		} catch (err) {
+			if (err instanceof MyError) {
+				console.error(err.message)
+				return res.status(err.code).send({ error: err.toSend })
+			}
+			console.error(err)
+			return res.status(500).send()
+		}
+	})
 
 	app.get(`/userWin/:id`, { preHandler: internalVerification }, async (req: FastifyRequest, res: FastifyReply) => {
 		try {
 			const { id } = req.params as { id: string }
 
-			const numericId = Number(id)
+			let numericId = Number(id)
 
 			if (isNaN(numericId))
 				throw new InputError(`the id isn't a number`, `id have to be a number`)
 
-			// tournamentSession.
-
 			for (const [tournamentId, tournament] of tournamentSessions) {
-				if (tournament.hasPlayer(numericId)) {
-					await tournament.bracketWon(numericId)
+				if (tournament.hasPlayer(Math.abs(numericId))) {
+					if (numericId > 0)
+						await tournament.bracketWon(numericId)
+					else
+						await tournament.bracketNotPlayed(-numericId)
 					return res.status(200).send()
 				}
 			}
@@ -173,9 +175,8 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 	})
 
 	app.get(`/test`, async (req: FastifyRequest, res: FastifyReply) => {
-		for (const [id, tournament] of tournamentSessions) {
-			console.log(`tournament player:`, tournament.getData())
-		}
+		console.log(tournamentSessions.get(4)?.sessionData())
+
 		return res.status(200).send()
 	})
 
