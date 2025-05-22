@@ -1,6 +1,27 @@
 <section class="w-full max-w-6xl mx-auto p-4">
   <h2 class="text-center text-2xl md:text-3xl font-bold text-yellow-400 mb-6">Match History</h2>
 
+  <!-- Cadres avec les Donut Charts -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <!-- Cadre 1 - Jeu principal -->
+    <div class="bg-gray-800 p-4 rounded-xl shadow-md flex flex-col items-center">
+      <h3 class="text-yellow-400 text-lg font-bold mb-2">Pong</h3>
+      <div class="relative w-40 h-40">
+        <canvas id="donutChartPong"></canvas>
+        <div class="absolute inset-0 flex items-center justify-center text-white text-3xl font-bold" id="mmrMain">N/A</div>
+      </div>
+    </div>
+
+    <!-- Cadre 2 - Tower-Defense -->
+    <div class="bg-gray-800 p-4 rounded-xl shadow-md flex flex-col items-center">
+      <h3 class="text-yellow-400 text-lg font-bold mb-2">Tower Defense</h3>
+      <div class="relative w-40 h-40">
+        <canvas id="donutChartTd"></canvas>
+        <div class="absolute inset-0 flex items-center justify-center text-white text-3xl font-bold" id="mmrTD">N/A</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Légende -->
   <div class="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm text-gray-300 border-b border-gray-600 p-2 mb-2 text-center">
     <div>Game</div>
