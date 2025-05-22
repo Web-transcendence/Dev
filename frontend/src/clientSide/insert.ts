@@ -82,6 +82,8 @@ export function stopGame(page: string): void {
 		pongStop()
 	if (page != '/pongLocal')
 		pongStop()
+	if (page != '/pongVsia')
+		pongStop()
 	if (page != '/towerWatch')
 		tdSpecStop()
 }

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:47:28 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/07 14:36:37 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/21 13:24:02 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,14 +41,12 @@ class Client;
 
 class Factory {
 public:
-	Factory(std::string const & serverWs);
+	Factory( void );
 	~Factory( void );
 
-	void	run(int const port);
+	void	run();
 
 private:
-	Factory( void ) {}
-	
 	void	createGame(int const gameId);
 	void	deleteGame(int const gameId);
 

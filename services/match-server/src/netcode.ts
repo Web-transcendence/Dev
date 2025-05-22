@@ -86,9 +86,9 @@ export function joinRoom(player: Player, roomId: number) {
         for (; i < rooms.length; i++) {
             if (rooms[i].id === roomId && rooms[i].players.length < 2) {
                 if (rooms[i].players.length === 0)
-                    player.paddle.x = 30;
-                else
                     player.paddle.x = 1200 - 30;
+                else
+                    player.paddle.x = 30;
                 rooms[i].players.push(player);
                 id = rooms[i].id;
                 console.log(player.paddle.name, "joined room", rooms[i].id);
@@ -129,8 +129,8 @@ function roomLoop(room: Room) {
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: room.players[0].paddle,
-                paddle2: room.players[1].paddle,
+                paddle1: rooms[i].players[1].paddle,
+                paddle2: rooms[i].players[0].paddle,
                 ball: ball,
                 game: game
             };
@@ -142,8 +142,8 @@ function roomLoop(room: Room) {
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: room.players[0].paddle,
-                paddle2: room.players[1].paddle,
+                paddle1: rooms[i].players[1].paddle,
+                paddle2: rooms[i].players[0].paddle,
                 ball: ball,
                 game: game
             };
@@ -155,8 +155,8 @@ function roomLoop(room: Room) {
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: room.players[0].paddle,
-                paddle2: room.players[1].paddle,
+                paddle1: room.players[1].paddle,
+                paddle2: room.players[0].paddle,
                 ball: ball,
                 game: game
             };
@@ -169,8 +169,8 @@ function roomLoop(room: Room) {
             clearInterval(intervalId3);
     }, 10); //Send game info to spectators
     game.state = 1;
-    moveBall(ball, room.players[0], room.players[1], game, room);
-    movePaddle(room.players[0].input, room.players[1].input, room.players[0].paddle, room.players[1].paddle, game);
+    moveBall(ball, room.players[1], room.players[0], game, room);
+    movePaddle(room.players[1].input, room.players[0].input, room.players[1].paddle, room.players[0].paddle, game);
     moveHazard(game, ball);
     hazardGenerator(game);
     timerCheck(game);

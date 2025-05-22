@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 15:41:00 by tmouche           #+#    #+#             */
-/*   Updated: 2025/05/13 12:55:15 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/21 13:58:20 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@ int	main( void ) {
 		server.start();
 	} catch (websocketpp::exception const & e) {
 		std::cout << e.what() << std::endl;
-	} catch ( ... ) {
-		std::cout << "An unexpected exception" << std::endl;
+	} catch (std::exception const & e ) {
+		std::cout << e.what() << std::endl;
 	}
 	return 0;
 }

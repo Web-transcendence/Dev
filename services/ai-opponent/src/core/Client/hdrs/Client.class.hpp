@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:46:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/20 08:38:47 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/21 14:52:01 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,16 +35,18 @@ typedef std::shared_ptr<websocketpp::connection<websocketpp::config::asio_client
 
 class Client {
 public:
-	Client(std::string const & wsGameServer, int const gameId);
+	Client(int const gameId);
 	~Client( void );
 
 	void	stop( void );
 	void	run( void );
 
-	bool	getActive( void );
+	t_state	getActive( void );
 
 private:
 	Client( void );
+
+
 	
 	void	on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);
 	void	on_message_aiServer(nlohmann::json const & data);
@@ -71,10 +73,11 @@ private:
 	
 	std::mutex			stateMutex;
 
-	std::atomic<bool>	active;
+	std::atomic<t_state>	active;
 
-	std::promise<bool>	promise;
-	std::future<bool>	future;
+	std::promise<bool>	promiseGS;
+	std::promise<bool>	promiseAI;
+	std::promise<bool>	promiseGame;
 
 	std::atomic<std::chrono::steady_clock::time_point>	t1;
 

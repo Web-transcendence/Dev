@@ -1,14 +1,15 @@
-import {addFriend, fetchUserInformation, init2fa, login, profile, register, setAvatar, verify2fa} from './user.js'
-import {friendList} from './friends.js'
-import {connected, handleConnection, navigate} from './front.js'
-import {tdStop, TowerDefense} from './td.js'
-import {editProfile} from './editInfoProfile.js'
-import {displayNotification} from './notificationHandler.js'
-import {Pong} from './pong.js'
-import {displayTournaments, fetchTournamentBrackets, joinTournament, launchTournament} from './tournaments.js'
-import {printMatchHistory} from './matchHistory.js'
-import {TowerDefenseSpec} from './tdspec.js'
-import {closeSSEConnection} from './serverSentEvent.js'
+import { addFriend, init2fa, login, profile, register, setAvatar, verify2fa } from './user.js'
+import { friendList } from './friends.js'
+import { connected, handleConnection, navigate } from './front.js'
+import { tdStop, TowerDefense } from './td.js'
+import { editProfile } from './editInfoProfile.js'
+import { displayNotification } from './notificationHandler.js'
+import { Pong } from './pong.js'
+import { displayTournaments, joinTournament, launchTournament } from './tournaments.js'
+import { printMatchHistory } from './matchHistory.js'
+import { TowerDefenseSpec } from './tdspec.js'
+import { closeSSEConnection } from './serverSentEvent.js'
+import { pongAgainstAi } from './invitation.js'
 
 const mapButton: { [key: string]: () => void } = {
 	'/connect': connectBtn,
@@ -26,6 +27,8 @@ const mapButton: { [key: string]: () => void } = {
 	'/tournaments': tournaments,
 	'/lobby': lobby,
 	'/matchHistory': matchHistory,
+	'/toKnow': toKnow,
+	'/pongVsia': pongAgainstAi
 	'/About': About,
 	'/brackets': Brackets,
 }
@@ -136,6 +139,7 @@ function pongMode() {
 	document.getElementById('pongRemote')?.addEventListener('click', (event: MouseEvent) => navigate('/pongRemote', event))
 	document.getElementById('pongLocal')?.addEventListener('click', (event: MouseEvent) => navigate('/pongLocal', event))
 	document.getElementById('pongWatch')?.addEventListener('click', (event: MouseEvent) => navigate('/pongWatch', event))
+	document.getElementById('pongVsia')?.addEventListener('click', (event: MouseEvent) => navigate('/pongVsia', event))
 }
 
 function towerMode() {
