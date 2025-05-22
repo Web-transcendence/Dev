@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/22 11:03:42 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/23 00:12:50 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,6 @@
 #include <cstdlib>
 #include <string>
 #include <chrono>
-
-double	_1[sizeof(double)*16]; //place holder input
 
 AiServer::AiServer(std::string const & QNetConfigFile) : _QNet(Network(QNetConfigFile)) {
 	return ;
@@ -50,8 +48,9 @@ void	AiServer::start( void ) {
 }
 
 void	AiServer::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
-	memcpy(_1, msg->get_payload().c_str(), sizeof(double)*16);
-	auto	input = std::vector<double>(_1, _1+16);
+	double	_1[sizeof(double)*N_NEURON_INPUT];
+	memcpy(_1, msg->get_payload().c_str(), sizeof(double)*N_NEURON_INPUT);
+	auto	input = std::vector<double>(_1, _1+N_NEURON_INPUT);
 	auto	oQNet = this->_QNet.feedForward(input);
 	nlohmann::json	j;
 	j["type"] = "ai";

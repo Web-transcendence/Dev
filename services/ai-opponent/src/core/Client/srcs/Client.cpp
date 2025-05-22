@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/22 14:37:02 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/23 00:22:54 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ void	Client::on_message_aiServer(nlohmann::json const & data) {
 	unsigned int		idx = 0;
 	std::vector<double>	o(N_NEURON_OUTPUT);
 
-	for (auto it = o.begin(); it != o.end(); it++) {
+	for (auto it = o.begin(); it != o.end(); it++, idx++) {
 		std::stringstream	ss;
 		ss << data["data"][idx];
 		ss >> *it;
@@ -152,7 +152,6 @@ void	Client::loop( void ) {
 		this->stateMutex.lock();
 		auto	input = this->localPong.getState();
 		this->stateMutex.unlock();
-		Debug::displayState(*input);
 		this->aiServer->send(input->data(), sizeof(double)*N_NEURON_INPUT);
 		if (!checkTime())
 			this->active.store(FINISHED);

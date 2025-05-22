@@ -13,8 +13,6 @@ idea:
 
 Delete place holders (cause data race)
 
-les infos envoyées sont incompletes
-
 faut surement close la connection avec le serv IA
 
-refacto la maniere dont promise et future sont use parce que la ca sert a rien
+reset des keys qui bug un peu 
