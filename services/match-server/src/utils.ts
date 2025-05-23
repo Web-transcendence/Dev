@@ -42,8 +42,10 @@ export async function updateMmr(playerA: Player, playerB: Player, resultA: numbe
     const newMmrA = Math.max(0, Math.round(playerA.mmr + K * (resultA - expectedA)));
     const newMmrB = Math.max(0, Math.round(playerB.mmr + K * (resultB - expectedB)));
 
-    await putNewMmr(playerA.dbId, newMmrA);
-    await putNewMmr(playerB.dbId, newMmrB);
+    await Promise.all([
+        putNewMmr(playerA.dbId, newMmrA),
+        putNewMmr(playerB.dbId, newMmrB)
+    ]);
 }
 
 export const putNewMmr = async (dbId: number, newMmr: number): Promise<void> => {
