@@ -395,5 +395,48 @@ export default async function userRoutes(app: FastifyInstance) {
 			return res.status(500).send()
 		}
 	})
+
+
+	app.get('/pong/mmrById/:id', { preHandler: internalVerification }, (req: FastifyRequest<{
+		Params: { id: string }
+	}>, res: FastifyReply) => {
+		try {
+			const id = Number(req.params.id)
+
+			const user = new User(id)
+
+			const mmr = user.getPongMmr()
+
+			return res.status(200).send({ mmr: mmr })
+		} catch (err) {
+			if (err instanceof MyError) {
+				console.error(err.message)
+				return res.status(err.code).send({ error: err.toSend })
+			}
+			console.error(err)
+			return res.status(500).send()
+		}
+	})
+
+	app.get('/td/mmrById/:id', { preHandler: internalVerification }, (req: FastifyRequest<{
+		Params: { id: string }
+	}>, res: FastifyReply) => {
+		try {
+			const id = Number(req.params.id)
+
+			const user = new User(id)
+
+			const mmr = user.getTdMmr()
+
+			return res.status(200).send({ mmr: mmr })
+		} catch (err) {
+			if (err instanceof MyError) {
+				console.error(err.message)
+				return res.status(err.code).send({ error: err.toSend })
+			}
+			console.error(err)
+			return res.status(500).send()
+		}
+	})
 }
 
