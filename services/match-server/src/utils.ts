@@ -1,4 +1,4 @@
-import {INTERNAL_PASSWORD, Player} from "./api.js";
+import {INTERNAL_PASSWORD} from "./api.js";
 
 export const fetchIdByNickName = async (nickName: string): Promise<number> => {
     if (nickName === "IA")
@@ -51,7 +51,7 @@ export async function updateMmr(playerA: Player, playerB: Player, resultA: numbe
 export const putNewMmr = async (dbId: number, newMmr: number): Promise<void> => {
     if (dbId === -1) // Si Guest, on ne fait rien
         return ;
-    const response = await fetch(`http://user-management:5000/mmrById/${dbId}`, {
+    const response = await fetch(`http://user-management:5000/pong/mmrById/${dbId}`, {
         method: 'PUT', // ou 'PATCH' selon ton API
         headers: {
             'Content-Type': 'application/json',

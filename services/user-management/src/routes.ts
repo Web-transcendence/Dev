@@ -1,5 +1,5 @@
 import * as Schema from './schema.js'
-import { invitationGameSchema, nickNameSchema, passwordSchema } from './schema.js'
+import { invitationGameSchema, mmrSchema, nickNameSchema, passwordSchema } from './schema.js'
 import sanitizeHtml from 'sanitize-html'
 import { User } from './User.js'
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
@@ -253,7 +253,7 @@ export default async function userRoutes(app: FastifyInstance) {
 				const message = zod_result.error.issues[0]?.message || 'Invalid input'
 				throw new InputError(message, message)
 			}
-			const Password = zod_result.data.password
+			const newPassword = zod_result.data.password
 
 			const id = Number(req.headers.id)
 			if (!id)
@@ -386,6 +386,97 @@ export default async function userRoutes(app: FastifyInstance) {
 			})
 
 			return res.status(200).send()
+		} catch (err) {
+			if (err instanceof MyError) {
+				console.error(err.message)
+				return res.status(err.code).send({ error: err.toSend })
+			}
+			console.error(err)
+			return res.status(500).send()
+		}
+	})
+
+
+	app.get('/pong/mmrById/:id', { preHandler: internalVerification }, (req: FastifyRequest<{
+		Params: { id: string }
+	}>, res: FastifyReply) => {
+		try {
+			const id = Number(req.params.id)
+
+			const user = new User(id)
+
+			const mmr = user.getPongMmr()
+
+			return res.status(200).send({ mmr: mmr })
+		} catch (err) {
+			if (err instanceof MyError) {
+				console.error(err.message)
+				return res.status(err.code).send({ error: err.toSend })
+			}
+			console.error(err)
+			return res.status(500).send()
+		}
+	})
+
+	app.get('/td/mmrById/:id', { preHandler: internalVerification }, (req: FastifyRequest<{
+		Params: { id: string }
+	}>, res: FastifyReply) => {
+		try {
+			const id = Number(req.params.id)
+
+			const user = new User(id)
+
+			const mmr = user.getTdMmr()
+
+			return res.status(200).send({ mmr: mmr })
+		} catch (err) {
+			if (err instanceof MyError) {
+				console.error(err.message)
+				return res.status(err.code).send({ error: err.toSend })
+			}
+			console.error(err)
+			return res.status(500).send()
+		}
+	})
+
+	app.put(`/pong/mmrById/:id`, (req: FastifyRequest<{ Params: { id: string } }>, res: FastifyReply) => {
+		try {
+			const id = Number(req.params.id)
+
+			const zod_result = mmrSchema.safeParse(req.body)
+			if (!zod_result.success) {
+				const message = zod_result.error.issues[0]?.message || 'Invalid input'
+				throw new InputError(message, message)
+			}
+			const user = new User(id)
+
+			const mmr = user.updatePongMmr(zod_result.data.mmr)
+
+			return res.status(200).send({ mmr: mmr })
+		} catch (err) {
+			if (err instanceof MyError) {
+				console.error(err.message)
+				return res.status(err.code).send({ error: err.toSend })
+			}
+			console.error(err)
+			return res.status(500).send()
+		}
+	})
+
+	app.put(`/td/mmrById/:id`, (req: FastifyRequest<{ Params: { id: string } }>, res: FastifyReply) => {
+		try {
+			const id = Number(req.params.id)
+
+			const zod_result = mmrSchema.safeParse(req.body)
+			if (!zod_result.success) {
+				const message = zod_result.error.issues[0]?.message || 'Invalid input'
+				throw new InputError(message, message)
+			}
+			const user = new User(id)
+
+			const mmr = user.updateTdMmr(zod_result.data.mmr)
+
+			return res.status(200).send({ mmr: mmr })
 		} catch (err) {
 			if (err instanceof MyError) {
 				console.error(err.message)
