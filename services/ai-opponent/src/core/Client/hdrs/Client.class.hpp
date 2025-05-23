@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:46:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/21 14:52:01 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/23 14:14:43 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,11 +46,14 @@ public:
 private:
 	Client( void );
 
-
-	
+	void	on_fail(websocketpp::connection_hdl hdl);
+	void	on_open(websocketpp::connection_hdl hdl);
+	void	on_close(websocketpp::connection_hdl hdl);
 	void	on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);
 	void	on_message_aiServer(nlohmann::json const & data);
 	void	on_message_gameServer(nlohmann::json const & data);
+	
+	void	resetEnv(nlohmann::json const & data);
 	
 	void	loop( void );
 	
@@ -68,10 +71,8 @@ private:
 	Environment	localPong;
 	
 	httplib::Client	factoryServer;
-
-	std::string	lastKey;
 	
-	std::mutex			stateMutex;
+	std::mutex	stateMutex;
 
 	std::atomic<t_state>	active;
 
@@ -82,6 +83,10 @@ private:
 	std::atomic<std::chrono::steady_clock::time_point>	t1;
 
 	std::array<std::string, 3> const	allInput;
+
+	std::string	lastKey;
+
+	std::mutex	logMutex;
 };
 
 

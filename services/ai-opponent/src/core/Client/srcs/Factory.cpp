@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/21 14:52:34 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/23 14:21:34 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,6 @@ Factory::Factory( void ) {
 		this->_mMutex.lock();
 		this->_messages.push(j.dump());
 		this->_mMutex.unlock();
-		httplib::Result	res;
-		res->status = 200;
 		return "OK";
 	});
 

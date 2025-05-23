@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:15:27 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/21 14:52:08 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/23 14:20:14 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@
 #define FACTORY_SERVER_ADDRESS "http://0.0.0.0:16016"
 #define GAME_SERVER_ADDRESS "ws://match-server:4443/ws"
 #define CLIENT_INPUT_TIME_SPAN 100
-#define CLIENT_MAX_SPAN_STATE 3000.0
+#define CLIENT_MAX_SPAN_STATE 3.0
+#define INPUT_TIMESTAMP 60
 
 #include <atomic>
 #include <vector>

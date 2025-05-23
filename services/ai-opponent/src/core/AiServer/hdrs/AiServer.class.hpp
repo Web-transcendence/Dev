@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AiServer.class.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmouche <tmouche@student.42.fr>            +#+  +:+       +#+        */
+/*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 10:33:19 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/13 14:43:08 by tmouche          ###   ########.fr       */
+/*   Updated: 2025/05/22 23:16:02 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 
 # include <websocketpp/config/asio_no_tls.hpp>
 # include <websocketpp/server.hpp>
+
+#include <thread>
 
 typedef websocketpp::server<websocketpp::config::asio> server;
 
@@ -37,6 +39,8 @@ private:
 	server	_myServer;
 	Network	_QNet;
 	
+	std::mutex	stateMutex;
+
 	void	on_open(websocketpp::connection_hdl hdl);
 	void	on_close(websocketpp::connection_hdl hdl);
 	void	on_message(websocketpp::connection_hdl hdl, message_ptr msg);
