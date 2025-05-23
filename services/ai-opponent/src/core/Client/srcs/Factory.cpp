@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/23 11:50:16 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/23 14:21:34 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,6 @@ void	Factory::run() {
 			} catch(std::exception & e) {
 				std::cout << "Error: " << e.what() << std::endl;
 			}
-			std::cout << "Clients online: " << this->_connectedClients.size() << std::endl;
 		}
 		this->app.stop();
 	});
