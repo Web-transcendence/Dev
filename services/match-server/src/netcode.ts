@@ -12,7 +12,7 @@ import {
     timerCheck
 } from "./api.js";
 import {insertMatchResult} from "./database.js";
-import {fetchNotifyUser, fetchPlayerWin} from "./utils.js";
+import {fetchNotifyUser, fetchPlayerWin, updateMmrById} from "./utils.js";
 
 export class waitingPlayer {
     player: Player;
@@ -70,6 +70,10 @@ export async function leaveRoom(userId: number) {
                 const winner = room.players[winnerIndex];
                 if (room.type === "tournament")
                     await fetchPlayerWin(winner.dbId);
+                if (room.type === "ranked") {
+                    await updateMmrById(playerA.dbId, playerA.mmr, winnerIndex === 0);
+                    await updateMmrById(playerB.dbId, playerB.mmr, winnerIndex === 1);
+                }
                 console.log(`A: ${playerA.dbId} B: ${playerB.dbId} Windex: ${winnerIndex}`);
                 insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
                 room.ended = true;

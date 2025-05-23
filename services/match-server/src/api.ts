@@ -4,7 +4,7 @@ import { WebSocket } from "ws";
 import { z } from "zod";
 import { insertMatchResult, getMatchHistory } from "./database.js";
 import pongRoutes from "./routes.js";
-import {fetchPlayerWin} from "./utils.js";
+import {fetchPlayerWin, updateMmrById} from "./utils.js";
 
 export const inputSchema = z.object({ state: z.string(), key: z.string() });
 export const initSchema = z.object({ nick: z.string(), room: z.number() });
@@ -204,6 +204,10 @@ export async function resetGame(ball: Ball, player1: Player, player2: Player, ga
         });
         if (room.type === "tournament")
             await fetchPlayerWin(winner === 0 ? player1.dbId : player2.dbId);
+        if (room.type === "ranked") {
+            await updateMmrById(player1.dbId, player1.mmr, winner === 0);
+            await updateMmrById(player2.dbId, player2.mmr, winner === 1);
+        }
         insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score), winner);
         room.ended = true;
         game.state = 2;
