@@ -12,7 +12,15 @@ import {
 } from "./api.js";
 import {getMatchHistory, MatchResult} from "./database.js"
 import {soloMode} from "./solo.js";
-import {generateRoom, joinRoom, leaveRoom, startInviteMatch, startTournamentMatch} from "./netcode.js";
+import {
+    generateRoom,
+    joinRoom,
+    leaveRoom, removeWaitingPlayer,
+    startInviteMatch,
+    startTournamentMatch,
+    waitingList,
+    waitingPlayer
+} from "./netcode.js";
 import {z} from "zod";
 import {changeRoomSpec, joinRoomSpec, leaveRoomSpec} from "./spectator.js";
 
@@ -47,11 +55,14 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                 try {
                     if (!player.name.includes("guest"))
                         player.dbId = await fetchIdByNickName(data.nick);
+                    if (data.room)
+                        room = msg.room;
+                    if (room === -1)
+                        player.mmr = await fetchMmrById(player.dbId);
                 } catch (error) {
                     console.log(error);
+                    return ;
                 }
-                if (data.room)
-                    room = msg.room;
                 init = true;
             } else if (msg.type === "input") {
                 const {data, success, error} = inputSchema.safeParse(JSON.parse(message.toString()));
@@ -79,8 +90,10 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                     return ;
                 }
                 mode = data.mode;
-                if (data.mode === "remote")
+                if (data.mode === "remote" && room !== -1)
                     joinRoom(player, room);
+                else if (data.mode === "remote")
+                    waitingList.push(new waitingPlayer(player));
                 else if (data.mode === "local") {
                     solo = true;
                     soloMode(player, solo);
@@ -93,8 +106,10 @@ export default async function pongRoutes(fastify: FastifyInstance) {
             console.log(`id: ${userId}`);
             if (mode === "local")
                 solo = false;
-            else if (mode === "remote")
+            else if (mode === "remote") {
+                removeWaitingPlayer(player);
                 leaveRoom(userId);
+            }
             else if (mode === "spec")
                 leaveRoomSpec(userId);
             console.log("Client disconnected");

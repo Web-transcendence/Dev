@@ -14,7 +14,7 @@ import {
 import {insertMatchResult} from "./database.js";
 import {fetchNotifyUser, fetchPlayerWin} from "./utils.js";
 
-class waitingPlayer {
+export class waitingPlayer {
     player: Player;
     wait: number = 0;
     constructor(player: Player) {
@@ -22,7 +22,7 @@ class waitingPlayer {
     }
 }
 
-const waitingList: waitingPlayer[] = [];
+export const waitingList: waitingPlayer[] = [];
 export let rooms: Room[] = [];
 
 export function checkId(id: number) {
@@ -232,10 +232,11 @@ function canMatch(seeker: waitingPlayer, target: waitingPlayer): boolean {
     return true; // Players can be matched !
 }
 
-function removePlayer(player: waitingPlayer) {
-    const index = waitingList.indexOf(player);
-    if (index !== -1)
+export function removeWaitingPlayer(player: Player) {
+    const index = waitingList.findIndex(wp => wp.player === player);
+    if (index !== -1) {
         waitingList.splice(index, 1);
+    }
 }
 
 function matchMaking() {
@@ -244,17 +245,11 @@ function matchMaking() {
         for (const target of waitingList) {
             if (seeker === target || !canMatch(seeker, target))
                 continue;
-            const roomId = generateRoom();
-            const room = rooms.find(room => room.id === roomId);
-            if (!room)
-                break ;
-            seeker.player.paddle.x = 30;
-            target.player.paddle.x = 1200 - 30;
-            room.players.push(target.player);
-            room.players.push(seeker.player);
-            removePlayer(seeker);
-            removePlayer(target);
-            roomLoop(room);
+            const roomId = generateRoom("ranked");
+            joinRoom(seeker.player, roomId);
+            joinRoom(target.player, roomId);
+            removeWaitingPlayer(seeker.player);
+            removeWaitingPlayer(target.player);
             break ;
         }
     }

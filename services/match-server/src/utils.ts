@@ -17,6 +17,23 @@ export const fetchIdByNickName = async (nickName: string): Promise<number> => {
     return id;
 }
 
+export const fetchMmrById = async (dbId: number): Promise<number> => {
+    if (dbId === -1)
+        return (1200);
+    const response = await fetch(`http://user-management:5000/mmrById/${dbId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': `${INTERNAL_PASSWORD}`
+        },
+    });
+    if(!response.ok) {
+        throw new Error(`this nickname doesn't exist`);
+    }
+    const {id} = await response.json() as {id: number};
+    return id;
+}
+
 export const fetchNotifyUser = async (ids: number[], event: string, data: any) => {
     const response = await fetch('http://user-management:5000/notify', {
         method: 'POST',

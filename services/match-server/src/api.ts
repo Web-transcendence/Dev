@@ -108,6 +108,7 @@ export class Room {
 export class Player {
     name: string = "Default";
     dbId: number = -1;
+    mmr: number = -1;
     id: number;
     ws: WebSocket;
     frequency: number = 10;
