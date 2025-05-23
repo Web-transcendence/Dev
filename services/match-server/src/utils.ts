@@ -1,4 +1,4 @@
-import {INTERNAL_PASSWORD} from "./api.js";
+import {INTERNAL_PASSWORD, Player} from "./api.js";
 
 export const fetchIdByNickName = async (nickName: string): Promise<number> => {
     if (nickName.includes("guest") || nickName.includes("Player "))
@@ -22,7 +22,7 @@ export const fetchIdByNickName = async (nickName: string): Promise<number> => {
 export const fetchMmrById = async (dbId: number): Promise<number> => {
     if (dbId === -1)
         return (1200);
-    const response = await fetch(`http://user-management:5000/mmrById/${dbId}`, {
+    const response = await fetch(`http://user-management:5000/pong/mmrById/${dbId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -32,11 +32,12 @@ export const fetchMmrById = async (dbId: number): Promise<number> => {
     if(!response.ok) {
         throw new Error(`this nickname doesn't exist`);
     }
-    const {id} = await response.json() as {id: number};
-    return id;
+    const {mmr} = await response.json() as {mmr: number};
+    return mmr;
 }
 
 export async function updateMmr(playerA: Player, playerB: Player, resultA: number, K = 32) {
+    resultA = resultA === 1 ? 0 : 1;
     const expectedA = 1 / (1 + 10 ** ((playerB.mmr - playerA.mmr) / 400));
     const expectedB = 1 - expectedA;
     const resultB = 1 - resultA;
@@ -54,7 +55,7 @@ export const putNewMmr = async (dbId: number, newMmr: number): Promise<void> => 
     if (dbId === -1) // Si Guest, on ne fait rien
         return ;
     const response = await fetch(`http://user-management:5000/pong/mmrById/${dbId}`, {
-        method: 'PUT', // ou 'PATCH' selon ton API
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             'authorization': `${INTERNAL_PASSWORD}`

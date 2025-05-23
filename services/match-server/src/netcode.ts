@@ -92,38 +92,16 @@ export async function leaveRoom(userId: number) {
 }
 
 export function joinRoom(player: Player, roomId: number) {
-    let id: number = -1;
     let i : number = 0;
-    if (roomId !== -1) { // Joining a defined room (invite or tournaments)
-        for (; i < rooms.length; i++) {
-            if (rooms[i].id === roomId && rooms[i].players.length < 2) {
-                if (rooms[i].players.length === 0)
-                    player.paddle.x = 30;
-                else
-                    player.paddle.x = 1200 - 30;
-                rooms[i].players.push(player);
-                id = rooms[i].id;
-                console.log(player.paddle.name, "joined room", rooms[i].id);
-                break ;
-            }
-        }
-    } else { // Basic random matchmaking
-        for (; i < rooms.length; i++) {
-            if (rooms[i].id < 1000 && rooms[i].players.length < 2 && rooms[i].players.length === 1) {
+    for (; i < rooms.length; i++) {
+        if (rooms[i].id === roomId && rooms[i].players.length < 2) {
+            if (rooms[i].players.length === 0)
                 player.paddle.x = 1200 - 30;
-                rooms[i].players.push(player);
-                id = rooms[i].id;
-                console.log(player.paddle.name, "joined room", rooms[i].id);
-                break;
-            }
-        }
-        if (id === -1) {
-            player.paddle.x = 30;
-            let room = new Room(rooms.length);
-            room.players.push(player);
-            rooms.push(room);
-            console.log(player.paddle.name, "created and joined room", rooms[i].id);
-            return;
+            else
+                player.paddle.x = 30;
+            rooms[i].players.push(player);
+            console.log(player.paddle.name, "joined room", rooms[i].id);
+            break ;
         }
     }
     if (i === rooms.length || rooms[i].players.length !== 2)
@@ -141,8 +119,8 @@ function roomLoop(room: Room) {
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: room.players[0].paddle,
-                paddle2: room.players[1].paddle,
+                paddle1: room.players[1].paddle,
+                paddle2: room.players[0].paddle,
                 ball: ball,
                 game: game
             };
@@ -154,8 +132,8 @@ function roomLoop(room: Room) {
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: room.players[0].paddle,
-                paddle2: room.players[1].paddle,
+                paddle1: room.players[1].paddle,
+                paddle2: room.players[0].paddle,
                 ball: ball,
                 game: game
             };
@@ -167,8 +145,8 @@ function roomLoop(room: Room) {
         if (room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
-                paddle1: room.players[0].paddle,
-                paddle2: room.players[1].paddle,
+                paddle1: room.players[1].paddle,
+                paddle2: room.players[0].paddle,
                 ball: ball,
                 game: game
             };
@@ -181,8 +159,8 @@ function roomLoop(room: Room) {
             clearInterval(intervalId3);
     }, 10); //Send game info to spectators
     game.state = 1;
-    moveBall(ball, room.players[0], room.players[1], game, room);
-    movePaddle(room.players[0].input, room.players[1].input, room.players[0].paddle, room.players[1].paddle, game);
+    moveBall(ball, room.players[1], room.players[0], game, room);
+    movePaddle(room.players[1].input, room.players[0].input, room.players[1].paddle, room.players[0].paddle, game);
     moveHazard(game, ball);
     hazardGenerator(game);
     timerCheck(game);
@@ -224,7 +202,7 @@ export async function startTournamentMatch(playerA_id: number, playerB_id: numbe
 }
 
 function mmrRange(wait: number) {
-    return (150 * Math.log2(1 + wait / 60));
+    return (300 * Math.log2(1 + wait / 60));
 }
 
 function canMatch(seeker: waitingPlayer, target: waitingPlayer): boolean {

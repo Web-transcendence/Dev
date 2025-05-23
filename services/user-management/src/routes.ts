@@ -406,7 +406,7 @@ export default async function userRoutes(app: FastifyInstance) {
 			const user = new User(id)
 
 			const mmr = user.getPongMmr()
-
+			console.log(`get pong mmr for user ${id} : ${mmr}`)
 			return res.status(200).send({ mmr: mmr })
 		} catch (err) {
 			if (err instanceof MyError) {
