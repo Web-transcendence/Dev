@@ -262,4 +262,16 @@ export class User {
 		}
 		return tdMmr
 	}
+
+	updatePongMmr(mmr: number) {
+		if (!Client_db.prepare('UPDATE Client set pongMmr = ? where id = ?').run(mmr, this.id)) {
+			throw new DataBaseError(`db fail to update pongMmr`, `internal server error`)
+		}
+	}
+
+	updateTdMmr(mmr: number) {
+		if (!Client_db.prepare('UPDATE Client set tdMmr = ? where id = ?').run(mmr, this.id)) {
+			throw new DataBaseError(`db fail to update tdMmr`, `internal server error`)
+		}
+	}
 }

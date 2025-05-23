@@ -35,13 +35,13 @@ export const fetchMmrById = async (dbId: number): Promise<number> => {
 }
 
 export const updateMmrById = async (dbId: number, currentMmr: number, win: boolean): Promise<void> => {
-	if (dbId === -1) // Si Guest, on ne fait rien
+	if (dbId === -1)
 		return
 	let newMmr = currentMmr + 10 * (win ? 1 : -1)
 	if (newMmr < 0)
 		newMmr = 0
-	const response = await fetch(`http://user-management:5000/mmrById/${dbId}`, {
-		method: 'PUT', // ou 'PATCH' selon ton API
+	const response = await fetch(`http://user-management:5000/pong/mmrById/${dbId}`, {
+		method: 'PUT',
 		headers: {
 			'Content-Type': 'application/json',
 			'authorization': `${INTERNAL_PASSWORD}`
@@ -51,10 +51,7 @@ export const updateMmrById = async (dbId: number, currentMmr: number, win: boole
 	if (!response.ok) {
 		throw new Error(`Failed to update MMR for player with id ${dbId}`)
 	}
-} // Attention c'est ChatGpt qui a fait ça, je ne sais pas si ça marche
-// En gros j'appelle cette fonction avec le id du joueur et son mmr actuel, et je lui dis si il a gagné ou perdu
-// Si lose il perd 10 de mmr, si win il en gagne 10
-// J'envoie le nouveau mmr a userManagement
+}
 
 export const fetchNotifyUser = async (ids: number[], event: string, data: any) => {
 	const response = await fetch('http://user-management:5000/notify', {
