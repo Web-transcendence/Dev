@@ -1,7 +1,9 @@
 import {INTERNAL_PASSWORD} from "./api.js";
 
 export const fetchIdByNickName = async (nickName: string): Promise<number> => {
-    if (nickName === "IA")
+    if (nickName.includes("guest") || nickName.includes("Player "))
+        return (-1);
+    if (nickName === "AI")
         return (-2);
     const response = await fetch(`http://user-management:5000/idByNickName/${nickName}`, {
         method: 'GET',

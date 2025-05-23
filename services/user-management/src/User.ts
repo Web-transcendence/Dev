@@ -25,7 +25,7 @@ Client_db.exec(`
 		secret_key TEXT DEFAULT NULL,
         pictureProfile TEXT DEFAULT NULL,
         activated2fa BOOLEAN DEFAULT NULL,
-        pongMmr INTEGER DEFAULT 1200
+        pongMmr INTEGER DEFAULT 1200,
         tdMmr INTEGER DEFAULT 1200
     )
 `)
