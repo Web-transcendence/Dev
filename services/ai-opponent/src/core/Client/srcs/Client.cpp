@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/23 00:22:54 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/23 12:36:04 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,10 @@ Client::Client(int const gameId) :\
 	this->c.clear_access_channels(websocketpp::log::alevel::all);
 	this->c.clear_error_channels(websocketpp::log::elevel::all);		
 	this->c.init_asio();
-	this->c.set_message_handler([this](websocketpp::connection_hdl hdl, client::message_ptr msg){this->on_message(hdl, msg);});
-	this->c.set_fail_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){
+	this->c.set_message_handler([this](websocketpp::connection_hdl hdl, client::message_ptr msg){
+		this->on_message(hdl, msg);
+	});
+	this->c.set_fail_handler([this](websocketpp::connection_hdl hdl){
 		auto	con = this->c.get_con_from_hdl(hdl);
 		Debug::consoleLog("failed connection to: "+con.get()->get_uri()->str(), this->gameId, this->logMutex);
 		if (con.get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
@@ -43,7 +45,7 @@ Client::Client(int const gameId) :\
 			this->promiseAI.set_value(false);
 		}
 	});
-	this->c.set_open_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){
+	this->c.set_open_handler([this](websocketpp::connection_hdl hdl){
 		auto	con = this->c.get_con_from_hdl(hdl);
 		Debug::consoleLog("new connection from: "+con.get()->get_uri()->str(), this->gameId, this->logMutex);
 		if (con.get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
@@ -53,6 +55,20 @@ Client::Client(int const gameId) :\
 		else if (con.get()->get_uri()->str() == AI_SERVER_ADDRESS) {
 			Debug::consoleLog("AI server connection etablished", this->gameId, this->logMutex);
 			this->promiseAI.set_value(true);
+		}
+		else
+			hdl.reset();
+	});
+	this->c.set_close_handler([this]([[maybe_unused]]websocketpp::connection_hdl hdl){
+		auto	con = this->c.get_con_from_hdl(hdl);
+		if (con.get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
+			Debug::consoleLog("Game server disconnected", this->gameId, this->logMutex);
+			if (this->active.load() == WAITING) this->promiseGS.set_value(false);
+			this->active.store(FINISHED);
+		}
+		else if (con.get()->get_uri()->str() == AI_SERVER_ADDRESS) {
+			Debug::consoleLog("AI server disconnected", this->gameId, this->logMutex);
+			this->active.store(FINISHED);
 		}
 	});
 	websocketpp::lib::error_code	ec;
@@ -81,11 +97,12 @@ void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg
 		auto	data = nlohmann::json::parse(msg->get_payload());
 		this->on_message_gameServer(data);
 	}
-	else
-		return ;
-	if (this->active.load() == WAITING) {
-		this->active.store(ON_GOING);
-		this->promiseGame.set_value(true);
+	else {
+		std::stringstream	ss;
+		ss << "message from an unknow connection ";
+		ss << this->c.get_con_from_hdl(hdl)->get_uri()->str();
+		ss << ": " << msg->get_payload();
+		Debug::consoleLog(ss.str(), this->gameId, this->logMutex);
 	}
 	return ;
 }
@@ -106,14 +123,46 @@ void	Client::on_message_aiServer(nlohmann::json const & data) {
 	nlohmann::json	j;
 	j["type"] = "input";
 	bool const	send = this->giveArrow(this->allInput.at(key), j);
-	if (send == true) {
-		this->gameServer->send(j.dump());
+	if (send == true) this->gameServer->send(j.dump());
+	return ;
+}
+
+void	Client::on_message_gameServer(nlohmann::json const & data) {
+	Debug::consoleLog(data.dump(), this->gameId, this->logMutex);
+	if (data["type"] == "Disconnected") {
+		this->active.store(FINISHED);
+	}
+	else if (data["type"] == "gameUpdate") {
+		this->resetEnv(data);
+		if (this->active.load() == WAITING) {
+			this->active.store(ON_GOING);
+			this->promiseGame.set_value(true);
+		}
+	}
+	else
+		Debug::consoleLog("Unknow token in gameServer message", this->gameId, this->logMutex); 	
+	this->t1.store(std::chrono::steady_clock::now());
+	return ;
+}
+
+void	Client::loop( void ) {
+	auto	futureStart = this->promiseGame.get_future();
+	
+	bool const	start = futureStart.get();
+	this->t1.store(std::chrono::steady_clock::now());
+	while (this->active.load() == ON_GOING && start) {
+		this->stateMutex.lock();
+		auto	input = this->localPong.getState();
+		this->stateMutex.unlock();
+		this->aiServer->send(input->data(), sizeof(double)*N_NEURON_INPUT);
+		if (!checkTime())
+			this->active.store(FINISHED);
+		std::this_thread::sleep_for(std::chrono::milliseconds(60));
 	}
 	return ;
 }
 
-void	Client::on_message_gameServer(nlohmann::json const & extData) {
-	nlohmann::json	data = extData;
+void	Client::resetEnv(nlohmann::json const & data) {
 	t_ball	ball(std::array<double, 6>{\
 		data["ball"]["x"],\
 		data["ball"]["y"],\
@@ -136,28 +185,10 @@ void	Client::on_message_gameServer(nlohmann::json const & extData) {
 		data["paddle1"]["height"],\
 		data["paddle1"]["speed"]
 	});
+	
 	this->stateMutex.lock();
 	this->localPong.reset(ball, lPaddle, rPaddle);
 	this->stateMutex.unlock();
-	this->t1.store(std::chrono::steady_clock::now());
-	return ;
-}
-
-void	Client::loop( void ) {
-	auto	futureStart = this->promiseGame.get_future();
-	
-	futureStart.get();
-	this->t1.store(std::chrono::steady_clock::now());
-	while (this->active.load() == ON_GOING) {
-		this->stateMutex.lock();
-		auto	input = this->localPong.getState();
-		this->stateMutex.unlock();
-		this->aiServer->send(input->data(), sizeof(double)*N_NEURON_INPUT);
-		if (!checkTime())
-			this->active.store(FINISHED);
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	}
-	return ;
 }
 
 bool	Client::giveArrow(std::string const & key, nlohmann::json & j) {
@@ -210,7 +241,9 @@ void	Client::run( void ) {
 		this->loop();
 	}
 	this->stop();
-	this->factoryServer.Get("/deleteAI/"+this->gameId);
+	std::stringstream	ss;
+	ss << "/deleteAI/" << this->gameId;
+	this->factoryServer.Get(ss.str());
 	return ;
 }
 

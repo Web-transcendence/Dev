@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:46:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/22 11:22:42 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/23 10:00:41 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ private:
 	void	on_message(websocketpp::connection_hdl hdl, client::message_ptr msg);
 	void	on_message_aiServer(nlohmann::json const & data);
 	void	on_message_gameServer(nlohmann::json const & data);
+	void	resetEnv(nlohmann::json const & data);
 	
 	void	loop( void );
 	

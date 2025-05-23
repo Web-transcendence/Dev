@@ -16,3 +16,7 @@ Delete place holders (cause data race)
 faut surement close la connection avec le serv IA
 
 reset des keys qui bug un peu 
+
+Faut arreter d envoyer des messages quand la game est end
+Toutes les resultats des games precedentes s ecrivent
+le ws se ferme pas quand le client quit
