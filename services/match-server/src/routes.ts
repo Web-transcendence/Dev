@@ -15,7 +15,7 @@ import {soloMode} from "./solo.js";
 import {
     generateRoom,
     joinRoom,
-    leaveRoom, removeWaitingPlayer,
+    leaveRoom, matchMaking, matchMakingUp, removeWaitingPlayer,
     startInviteMatch,
     startTournamentMatch,
     waitingList,
@@ -53,7 +53,8 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                     player.dbId = -2;
                 }
                 try {
-                    if (!player.name.includes("guest"))
+                    console.log(player.name);
+                    if (mode !== "local" && !player.name.includes("guest") && player.name !== "AI")
                         player.dbId = await fetchIdByNickName(data.nick);
                     if (data.room)
                         room = msg.room;
@@ -73,7 +74,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                 if (mode === "local" && (data.key === "w" || data.key === "s")) {
                     resetInput(player.input, "left");
                     inputHandler(data.key, data.state, player.input);
-                } else if (mode === "local" && (data.key === "arrowUp" || data.key === "arrowDown")) {
+                } else if (mode === "local" && (data.key === "ArrowUp" || data.key === "ArrowDown")) {
                     resetInput(player.input, "right");
                     inputHandler(data.key, data.state, player.input);
                 }
@@ -96,8 +97,11 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                         soloMode(player, solo);
                         break;
                     case "remote":
-                        if (room === -1)
+                        if (room === -1) {
                             waitingList.push(new waitingPlayer(player));
+                            if (!matchMakingUp)
+                                matchMaking();
+                        }
                         else
                             joinRoom(player, room);
                         break;

@@ -24,6 +24,7 @@ export class waitingPlayer {
 
 export const waitingList: waitingPlayer[] = [];
 export let rooms: Room[] = [];
+export let matchMakingUp: boolean = false;
 
 export function checkId(id: number) {
     for (const room of rooms) {
@@ -223,7 +224,7 @@ export async function startTournamentMatch(playerA_id: number, playerB_id: numbe
 }
 
 function mmrRange(wait: number) {
-    return (150 * Math.log2(1 + wait / 600));
+    return (150 * Math.log2(1 + wait / 60));
 }
 
 function canMatch(seeker: waitingPlayer, target: waitingPlayer): boolean {
@@ -241,7 +242,9 @@ export function removeWaitingPlayer(player: Player) {
     }
 }
 
-function matchMaking() {
+export function matchMaking() {
+    console.log("Matchmaking service running");
+    matchMakingUp = true;
     for (const seeker of waitingList) {
         seeker.wait += 1;
         for (const target of waitingList) {
@@ -252,10 +255,13 @@ function matchMaking() {
             joinRoom(target.player, roomId);
             removeWaitingPlayer(seeker.player);
             removeWaitingPlayer(target.player);
-            break ;
+            break;
         }
     }
-    setTimeout(() => matchMaking() ,100);
+    if (waitingList.length !== 0)
+        setTimeout(() => matchMaking(), 1000);
+    else {
+        matchMakingUp = false;
+        console.log("Matchmaking service stopped");
+    }
 }
-
-matchMaking();
