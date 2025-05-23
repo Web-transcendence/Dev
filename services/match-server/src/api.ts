@@ -178,7 +178,7 @@ export function resetInput(Input: keyInput, mode: string) {
     }
     if (mode === "left" || mode === "all") {
         Input.w = false;
-        Input.arrowUp = false;
+        Input.s = false;
     }
 }
 

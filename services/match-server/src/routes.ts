@@ -1,5 +1,5 @@
 import {FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
-import {fetchIdByNickName, fetchNotifyUser} from "./utils.js";
+import {fetchIdByNickName, fetchMmrById, fetchNotifyUser} from "./utils.js";
 import {
     generateId,
     initSchema,
@@ -90,28 +90,42 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                     return ;
                 }
                 mode = data.mode;
-                if (data.mode === "remote" && room !== -1)
-                    joinRoom(player, room);
-                else if (data.mode === "remote")
-                    waitingList.push(new waitingPlayer(player));
-                else if (data.mode === "local") {
-                    solo = true;
-                    soloMode(player, solo);
-                } else if (data.mode === "spec") {
-                    joinRoomSpec(player, room);
+                switch (mode) {
+                    case "local":
+                        solo = true;
+                        soloMode(player, solo);
+                        break;
+                    case "remote":
+                        if (room === -1)
+                            waitingList.push(new waitingPlayer(player));
+                        else
+                            joinRoom(player, room);
+                        break;
+                    case "spec":
+                        joinRoomSpec(player, room);
+                        break;
+                    default:
+                        break;
                 }
             }
         });
         socket.on("close", () => {
             console.log(`id: ${userId}`);
-            if (mode === "local")
-                solo = false;
-            else if (mode === "remote") {
-                removeWaitingPlayer(player);
-                leaveRoom(userId);
+            switch (mode) {
+                case "local":
+                    solo = false;
+                    break;
+                case "remote":
+                    if (room === -1)
+                        removeWaitingPlayer(player);
+                    leaveRoom(userId);
+                    break;
+                case "spec":
+                    leaveRoomSpec(userId);
+                    break;
+                default:
+                    break;
             }
-            else if (mode === "spec")
-                leaveRoomSpec(userId);
             console.log("Client disconnected");
         });
     });
