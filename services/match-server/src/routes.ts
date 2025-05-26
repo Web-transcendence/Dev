@@ -1,5 +1,5 @@
 import {FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
-import {fetchIdByNickName, fetchNotifyUser} from "./utils.js";
+import {fetchIdByNickName, fetchMmrById, fetchNotifyUser} from "./utils.js";
 import {
     generateId,
     initSchema,

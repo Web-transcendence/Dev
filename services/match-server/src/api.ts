@@ -4,7 +4,7 @@ import { WebSocket } from "ws";
 import { z } from "zod";
 import { insertMatchResult, getMatchHistory } from "./database.js";
 import pongRoutes from "./routes.js";
-import {fetchPlayerWin, updateMmr, updateMmrById} from "./utils.js";
+import {fetchPlayerWin, updateMmr} from "./utils.js";
 
 export const inputSchema = z.object({ state: z.string(), key: z.string() });
 export const initSchema = z.object({ nick: z.string(), room: z.number() });
