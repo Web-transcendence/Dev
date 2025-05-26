@@ -216,7 +216,6 @@ async function Brackets() {
 		const idTournament = sessionStorage.getItem('idTournaments')
 		if (!idTournament) throw new Error('No ID Tournament found!')
 		const bracketsData = await fetchTournamentBrackets(Number(idTournament));
-		console.log('BRACKETS DATA', bracketsData);
 		if (!bracketsData) throw new Error("No brackets data");
 
 		const template = document.getElementById("bracketsTmp") as HTMLTemplateElement | null;
@@ -225,19 +224,46 @@ async function Brackets() {
 		if (!template || !list) throw new Error("Missing template or list");
 
 		for (const bracket of bracketsData) {
-			const userData = await fetchUserInformation([bracket.id1, bracket.id2]);
-			if (!userData) continue;
+			const playerId: number[] = []
+			if (bracket.id1 !== 0) playerId.push(bracket.id1)
+			if (bracket.id2 !== 0) playerId.push(bracket.id2)
+			const userData = await fetchUserInformation(playerId);
+			if (!userData) {
+
+			}
 
 			const clone = template.content.cloneNode(true) as DocumentFragment;
-
 			const playerOneImg = clone.querySelector(".player-one-img") as HTMLImageElement | null;
+			const playerOne = clone.querySelector(".player-one") as HTMLElement | null;
 			const playerOneName = clone.querySelector(".player-one-name") as HTMLElement | null;
 			const playerTwoImg = clone.querySelector(".player-two-img") as HTMLImageElement | null;
+			const playerTwo = clone.querySelector(".player-two") as HTMLElement | null;
 			const playerTwoName = clone.querySelector(".player-two-name") as HTMLElement | null;
-			if (playerOneImg && userData[0].avatar) playerOneImg.src = userData[0].avatar;
-			if (playerOneName) playerOneName.innerText = userData[0].nickName;
-			if (playerTwoImg && userData[1].avatar) playerTwoImg.src = userData[1].avatar;
-			if (playerTwoName) playerTwoName.innerText = userData[1].nickName;
+			if (userData[0]) {
+				if (playerOneImg && userData[0].avatar) playerOneImg.src = userData[0].avatar
+				else if (playerOneImg) playerOneImg.src = '../images/login.png'
+				if (playerOneName) playerOneName.innerText = userData[0].nickName
+			}
+			else {
+				if (playerOneImg) playerOneImg.remove()
+				if (playerOne) {
+					playerOne.classList.remove('bg-purple-600')
+					playerOne.classList.add('bg-gray-600')
+				}
+			}
+			if (userData[1]) {
+				if (playerTwoImg && userData[1].avatar) playerTwoImg.src = userData[1].avatar
+				else if (playerTwoImg) playerTwoImg.src = '../images/login.png'
+				if (playerTwoName) playerTwoName.innerText = userData[1].nickName
+			}
+			else {
+				if (playerTwoImg) playerTwoImg.src = '../images/loser.png'
+				if (playerTwoName) playerTwoName.innerText = 'Loser'
+				if (playerTwo) {
+					playerTwo.classList.remove('bg-purple-600')
+					playerTwo.classList.add('bg-gray-600')
+				}
+			}
 			list.appendChild(clone);
 		}
 	} catch (error) {
