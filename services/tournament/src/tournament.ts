@@ -4,14 +4,14 @@ import { fetchNotifyUser } from './utils.js'
 
 
 async function fetchMatch(id1: number, id2: number) {
-    const response = await fetch(`http://match-server:4443/tournamentGame`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'authorization': `${INTERNAL_PASSWORD}`
-        },
-        body: JSON.stringify({id1: id1, id2: id2})
-    })
+	const response = await fetch(`http://match-server:4443/tournamentGame`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'authorization': `${INTERNAL_PASSWORD}`
+		},
+		body: JSON.stringify({ id1: id1, id2: id2 })
+	})
 }
 
 
@@ -42,19 +42,20 @@ export class tournament {
 		return this.actualParticipant.includes(userId)
 	}
 
-    async addParticipant(participantId: number) {
-        if (this.status === 'started')
-            throw new ConflictError(`this tournament has already started`, `This tournament is already started`)
-        if (this.participantId.length >= this.maxPlayer)
-            throw new ConflictError(`maxPlayer has already is reached`, `This tournament is full`)
+	async addParticipant(participantId: number) {
+		console.log(`participantId ${participantId} try to join, started is ${this.status}`)
+		if (this.status === 'started')
+			throw new ConflictError(`this tournament has already started`, `This tournament is already started`)
+		if (this.participantId.length >= this.maxPlayer)
+			throw new ConflictError(`maxPlayer has already is reached`, `This tournament is full`)
 
-        for (const [id, tournament] of tournamentSessions)
-            if (tournament.hasParticipant(participantId))
-                throw new ConflictError(`this user has already another tournament`, `you cannot participate to multiple tournament`)
-
-        await fetchNotifyUser(this.participantId, 'joinTournament', {id: participantId, maxPlayer: this.maxPlayer})
-        this.participantId.push(participantId)
-    }
+		for (const [id, tournament] of tournamentSessions)
+			if (tournament.hasParticipant(participantId))
+				throw new ConflictError(`this user has already another tournament`, `you cannot participate to multiple tournament`)
+		console.log(`participantId ${participantId} fetch tourtnament join`)
+		await fetchNotifyUser(this.participantId, 'joinTournament', { id: participantId, maxPlayer: this.maxPlayer })
+		this.participantId.push(participantId)
+	}
 
 	getData(): { participants: number[], maxPlayer: number, status: string } {
 		return {
@@ -65,16 +66,27 @@ export class tournament {
 	}
 
 	async quit(id: number) {
+		this.participantId = this.participantId.filter(participantId => participantId !== id)
 		if (this.status === 'started') {
-			return
+			if (this.alonePlayerId === id)
+				this.alonePlayerId = 0
+			else {
+				const indexLoser = this.actualParticipant.indexOf(id)
+				await this.bracketWon(indexLoser % 2 == 0 ? indexLoser + 1 : indexLoser - 1)
+			}
 		} else {
-			this.participantId = this.participantId.filter(participantId => participantId !== id)
 			await fetchNotifyUser(this.participantId, 'quitTournament', { id: id, maxPlayer: this.maxPlayer })
 		}
 	}
 
 
 	async bracketHandler() {
+		if (this.actualParticipant.length == 1) {
+			await fetchNotifyUser([this.actualParticipant[0]], 'winTournament', {})
+			this.cleanTournament()
+			return
+		}
+
 		if (this.alonePlayerId) {
 			this.actualParticipant.push(this.alonePlayerId)
 			this.alonePlayerId = 0
@@ -99,6 +111,7 @@ export class tournament {
 		if (this.participantId.length !== this.maxPlayer)
 			throw new ConflictError(`participant have to be 4, 8, 16 or 32`, `cannot launch this tournament without ${this.maxPlayer} participant`)
 
+		this.status = 'started'
 		this.alonePlayerId = 0
 
 		for (let i = this.participantId.length - 1; i > 0; i--) {
@@ -106,38 +119,46 @@ export class tournament {
 			[this.participantId[i], this.participantId[j]] = [this.participantId[j], this.participantId[i]]
 		}
 
-        this.actualParticipant = this.participantId
-        console.log(`launch tournament`)
-        await this.bracketHandler()
-    }
+		this.actualParticipant = this.participantId
+		console.log(`launch tournament`)
+		await this.bracketHandler()
+	}
 
-	async bracketWon(id: number) {
-		console.log(`${id} win a bracket`)
+	winnerLooserByBracket(id: number) {
 		let loser: number = 0
 		let winner: number = 0
-		let winnerEvent: string = `winBracket`
 		for (let i = 0; i < this.actualParticipant.length; i++) {
 			if (id === this.actualParticipant[i] && i % 2 === 0) {
 				loser = this.actualParticipant[i + 1]
-				this.actualParticipant[i + 1] = 0
-
 				winner = this.actualParticipant[i]
 				break
 			} else if (id === this.actualParticipant[i]) {
 				loser = this.actualParticipant[i - 1]
-				this.actualParticipant[i - 1] = 0
-
 				winner = this.actualParticipant[i]
 				break
 			}
 		}
-		if (!loser || !winner)
-			throw new ServerError(`internal server error, it doesn't happen`, 500)
+		return { winner: winner, loser: loser }
+	}
+
+	async bracketWon(id: number) {
+		console.log(`${id} win a bracket`)
+
+		let winnerEvent = `winBracket`
+
+		const { winner, loser } = this.winnerLooserByBracket(id)
+
+
+		if (!winner)
+			return
+		if (loser) {
+			this.actualParticipant = this.actualParticipant.map((participantId: number) => participantId === loser ? 0 : participantId)
+			await fetchNotifyUser([loser], 'loseTournament', {})
+		}
 
 		if (this.actualParticipant.length === 2 && this.alonePlayerId == 0)
 			winnerEvent = `winTournament`
 
-		await fetchNotifyUser([loser], 'loseTournament', {})
 		await fetchNotifyUser([winner], winnerEvent, {})
 
 		if (winnerEvent === 'winTournament') {

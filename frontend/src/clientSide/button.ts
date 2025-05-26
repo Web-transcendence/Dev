@@ -178,8 +178,8 @@ function tournaments() {
 			?.addEventListener('click', async (event) => {
 				sessionStorage.setItem('idTournaments', JSON.stringify(parse.id))
 				sessionStorage.setItem('nameTournaments', parse.name)
-				await joinTournament(parse.id)
-				await navigate('/lobby', event)
+				if (await joinTournament(parse.id))
+					await navigate('/lobby', event)
 			})
 }
 

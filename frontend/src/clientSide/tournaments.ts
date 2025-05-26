@@ -16,8 +16,12 @@ export async function joinTournament(tournamentId: number) {
 
 		if (!response.ok) {
 			const error = await response.json()
-			console.error(error.error)
+			displayNotification(error.error)
+			sessionStorage.removeItem('tournamentId')
+			await navigate('/home')
+			return false
 		}
+		return true
 	} catch (error) {
 		console.error(error)
 	}
@@ -170,9 +174,12 @@ export async function getBrackets(nbrPlayer: number) {
 
 }
 
-export async function fetchTournamentBrackets(tournamentId: number): Promise<{id1: number, id2:number }[] | undefined > {
+export async function fetchTournamentBrackets(tournamentId: number): Promise<{
+	id1: number,
+	id2: number
+}[] | undefined> {
 	const token = sessionStorage.getItem('token')
-    console.log('TOUR nbr id:', tournamentId)
+	console.log('TOUR nbr id:', tournamentId)
 	const response = await fetch(`/tournament/logTournamentStep/${tournamentId}`, {
 		method: 'GET',
 		headers: {
@@ -184,11 +191,11 @@ export async function fetchTournamentBrackets(tournamentId: number): Promise<{id
 		const error = await response.json()
 		console.error(error.error)
 		displayNotification(error.error)
-        return undefined
+		return undefined
 	}
-    console.log('Success fetchTournamentBrackets')
-    const ret = await response.json()
-    console.log(ret)
-    return ret
+	console.log('Success fetchTournamentBrackets')
+	const ret = await response.json()
+	console.log(ret)
+	return ret
 	// return response.json()
 }

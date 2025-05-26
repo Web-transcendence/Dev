@@ -1,9 +1,9 @@
-import {getAvatar} from './user.js'
-import {loadPart} from './insert.js'
-import {sseConnection} from './serverSentEvent.js'
-import {joinTournament, quitTournaments} from './tournaments.js'
-import {displayNotification} from './notificationHandler.js'
-import {setupModalListeners} from './modal.js'
+import { getAvatar } from './user.js'
+import { loadPart } from './insert.js'
+import { sseConnection } from './serverSentEvent.js'
+import { joinTournament, quitTournaments } from './tournaments.js'
+import { displayNotification } from './notificationHandler.js'
+import { setupModalListeners } from './modal.js'
 
 declare global {
 	interface Window { // For Google authenticator
@@ -59,13 +59,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 })
 
 tsParticles.load('tsparticles', {
-	fullScreen: {enable: false},
+	fullScreen: { enable: false },
 	particles: {
-		number: {value: 100},
-		size: {value: 6},
-		move: {enable: true, speed: 1},
-		opacity: {value: 0.5},
-		color: {value: '#ffffff'},
+		number: { value: 100 },
+		size: { value: 6 },
+		move: { enable: true, speed: 1 },
+		opacity: { value: 0.5 },
+		color: { value: '#ffffff' },
 	},
 	background: {
 		color: '#000000',
@@ -129,7 +129,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({credential: credit.credential}),
+			body: JSON.stringify({ credential: credit.credential }),
 		})
 		if (!response.ok)
 			console.error('Error: From UserManager returned an error')
@@ -169,6 +169,7 @@ export async function navigate(path: string, event?: MouseEvent): Promise<void> 
 	console.log('pushState :', path)
 	const idT = sessionStorage.getItem('idTournaments')
 	if (idT && path != '/lobby') {
+		console.error('fck')
 		displayNotification(`You left the Tournament`)
 		sessionStorage.removeItem('idTournaments')
 		sessionStorage.removeItem('nameTournaments')
