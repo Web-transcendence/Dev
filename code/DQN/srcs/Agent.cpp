@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 12:57:08 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/26 10:08:06 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,7 @@ void	Agent::trainQMatrix( void ) {
 				*(*std::max_element(this->_QMatrix[this->_env->getUIntState(xp.nextState)].begin(), \
 					this->_QMatrix[this->_env->getUIntState(xp.nextState)].end())));
 			this->_env->_state = xp.nextState;
-			this->_goalTraining += xp.reward;
+			this->_goalTraining++;
 			this->_env->_done = xp.done;
 			if (this->_env->_done == true)
 				break ;

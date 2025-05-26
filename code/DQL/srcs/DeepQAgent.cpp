@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 12:47:33 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/03 18:23:26 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/26 07:23:01 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,17 +35,6 @@ DeepQAgent::~DeepQAgent( void ) {
 	return ;
 }
 
-void displayProgress(int current, int max) {
-    int width = 20; // Number of total bar characters
-    int progress = (current * width) / max; // Filled portion
-
-    std::cout << "\r" << (current * 100) / max << "% [";
-    for (int i = 0; i < width; i++) {
-        std::cout << (i < progress ? '#' : '.');
-    }
-    std::cout << "]" << std::flush;
-}
-
 void	DeepQAgent::trainQMatrix( void ) {
 	double exploRate = this->_explorationRate;
 	this->_goalTraining = 0;
@@ -66,9 +55,8 @@ void	DeepQAgent::trainQMatrix( void ) {
 		}
 		if (exploRate - this->_explorationDecay > 0.001)
 			exploRate -=  this->_explorationDecay;
-		displayProgress(i, this->_maxEpTraining);
+		Network::displayProgress(i, this->_maxEpTraining);
 	}
-	std::cout << std::endl << "QMatrix trained" << std::endl;
 }
 
 void	DeepQAgent::trainQNet( void )  {
@@ -106,7 +94,7 @@ void	DeepQAgent::trainQNet( void )  {
 		}
 		if (exploRate - this->_explorationDecay > 0.0001)
 			exploRate -= this->_explorationDecay;
-		displayProgress(iEp, this->_maxEpTraining);
+		Network::displayProgress(iEp, this->_maxEpTraining);
 	}
 	this->printQNet();
 	this->printQMatrix();
@@ -127,9 +115,8 @@ void	DeepQAgent::trainQNetFromQMatrix( void ) {
  			training.input.clear();
 			training.expectedOutput.clear();
 		}
-		displayProgress(i, this->_maxEpTraining);
+		Network::displayProgress(i, this->_maxEpTraining);
 	}
-	std::cout << std::endl << "QNet trained" << std::endl;
 	return ;
 }
 

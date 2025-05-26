@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 11:24:02 by thibaud           #+#    #+#             */
-/*   Updated: 2025/04/07 12:55:40 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/26 10:04:06 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ public:
     ~Network( void );
     
     void                    SDG(t_tuple* trainingData, double const eta);
-    void                    SDG(std::vector<t_tuple*>& trainingData, int const epoch, int const miniBatchSize, double const eta, std::vector<t_tuple*>* test_data);
     std::vector<double>*	feedForward(std::vector<double> const & input);
     
     static void             displayProgress(int current, int max);
@@ -32,10 +31,8 @@ public:
     void                    printNetworkToJson(std::string const & outputFile);
 
 private:
-    void    updateMiniBatch(std::vector<t_tuple*>& miniBatch, double const eta);
     void    backprop(std::vector<double>& input, std::vector<double>& expectedOutput);
 
-    int     evaluate(std::vector<t_tuple*>& test_data);
     void    myShuffle(std::vector<t_tuple*>& myVector);
     void    updateWeight(double const eta, double const miniBatchSize);
     void    updateNabla_w( void );

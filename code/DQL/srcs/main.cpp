@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 15:36:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/03/30 01:23:38 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/26 07:23:56 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,9 @@ int main( void ) {
 	myAgent.genQNet();
 	std::cout << std::endl << "=== TRAINING ===" << std::endl;
 	myAgent.trainQMatrix();
+	std::cout << "QMatrix trained" << std::endl;
 	myAgent.trainQNet();
+	std::cout << "QNet trained" << std::endl;
 	std::cout << std::endl << "=== TESTING ===" << std::endl;
 	myAgent.testQMatrix();
 	myAgent.testQNet();

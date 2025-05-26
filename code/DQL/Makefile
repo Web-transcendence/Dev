@@ -6,7 +6,7 @@
 #    By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:21:22 by thibaud           #+#    #+#              #
-#    Updated: 2025/04/03 21:07:30 by thibaud          ###   ########.fr        #
+#    Updated: 2025/05/26 07:14:13 by thibaud          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,7 @@ OBJS		= $(SRCS:%.cpp=$(OBJS_DIR)%.o)
 DEPS		= $(SRCS:%.cpp=$(DEPS_DIR)%.d)
 
 CC		= c++
-CFLAGS	= -Wall -Wextra -Werror -g3 -I $(HEADER)
+CFLAGS	= -Wall -Wextra -Werror -g3 -I$(HEADER)
 DFLAGS	= -MMD -MP -MT $@ -MF $(DEPS_DIR)$*.d
 RM		= rm -rf
 
