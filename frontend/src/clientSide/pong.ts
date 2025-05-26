@@ -288,6 +288,22 @@ export function Pong(mode: string, room?: number) {
         }
     }
 
+    function oppAfkScreen() {
+        ctx.fillStyle = "#364153";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#101828";
+        ctx.fillRect(15 * ratio(), 15 * ratio(), canvas.width - 30 * ratio(), canvas.height - 30 * ratio());
+        ctx.fillStyle = "#fcc800";
+        fSize = Math.round(84 * ratio());
+        ctx.font = `${fSize}px 'Press Start 2P'`;
+        ctx.textAlign = "center"
+        ctx.fillText("Pong Game", canvas.width * 0.5, canvas.height * 0.5);
+        fSize = Math.round(30 * ratio());
+        ctx.font = `${fSize}px 'Press Start 2P'`;
+        ctx.fillText("Opponment is AFK", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio()));
+        ctx.fillText("you can leave now", canvas.width * 0.5, canvas.height * 0.5 + (100 * ratio()));
+    }
+
     function mainLoop() {
         drawBg();
         drawBall();
@@ -325,6 +341,9 @@ export function Pong(mode: string, room?: number) {
                 break;
             case 3:
                 specEndScreen();
+                break;
+            case 4:
+                oppAfkScreen();
                 break;
             default:
                 break;
@@ -365,6 +384,9 @@ export function Pong(mode: string, room?: number) {
                 case "Disconnected":
                     if (game.state !== 2)
                         game.state = 2.5;
+                    break;
+                case "AFK":
+                    game.state = 4;
                     break;
                 case "gameEnd":
                     game.state = 3;

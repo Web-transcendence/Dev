@@ -171,7 +171,7 @@ export async function startInviteMatch(userId: number, opponent: number) {
     const roomId = generateRoom();
 
     await fetchNotifyUser([opponent], `invitationPong`, {roomId: roomId, id: userId});
-    await roomWatcher(300, roomId, 0, userId);
+    await roomWatcher(10, roomId, 0, userId);
     return (roomId);
 }
 
@@ -186,7 +186,7 @@ async function roomWatcher(timer: number, roomId: number, clock: number, playerA
             if (room.type === "tournament")
                 await fetchPlayerWin(room.players[0].dbId); // Inform the tournament service that remaining player won by forfeit
             room.players.forEach(player => {
-                player.ws.send(JSON.stringify({ type: "Disconnected" }));
+                player.ws.send(JSON.stringify({ type: "AFK" }));
                 player.ws.close();
             });
         } else { // Case where no player joined the room (i.e. double loss)
