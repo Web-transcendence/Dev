@@ -48,7 +48,7 @@ app.get('/authJWT', (req: FastifyRequest, res: FastifyReply) => {
     authentificate(req, res);
     if (!req.headers.id)
         return res.status(401).send({ message: "Unauthorized - No token provided" });
-    return res.status(200).send({message: "Authentication successfull"});
+    return res.status(200).send({message: "Authentication successfull", id: req.headers.id});
 })
 
 app.register(fastifyStatic, {

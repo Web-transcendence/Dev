@@ -2,6 +2,14 @@ import {displayNotification} from "./notificationHandler.js";
 import {fetchUserInformation, UserData} from "./user.js";
 import {navigate} from "./front.js";
 
+interface ChartData {
+    wins: number;
+    losses: number;
+    mmr: number;
+    canvasId: string;
+    mmrElementId: string;
+}
+
 export type MatchResult = {
     id: number;
     playerA_id: number;
@@ -46,7 +54,7 @@ function addMatchEntry(game: string, opponent: string, opponentAvatar: string, s
     list.appendChild(clone);
 }
 
-async function displayCombinedMatchHistory(matches: { match: MatchResult, game: string }[], id: number) {
+async function displayCombinedMatchHistory(matches: { match: MatchResult, game: string }[], id: number, data: ChartData[]) {
     for (const { match, game } of matches) {
         let opponent: UserData[] = [];
         const oppId = match.playerA_id === id ? match.playerB_id : match.playerA_id;
@@ -63,6 +71,14 @@ async function displayCombinedMatchHistory(matches: { match: MatchResult, game: 
         }
         const result: string = (id === match.winner_id) ? 'VICTORY' : 'DEFEAT';
         const scoreUser: number[] = match.playerA_id === id ? [match.scoreA, match.scoreB] : [match.scoreB, match.scoreA];
+        const idGame: number = 'match-server' == game ? 0 : 1;
+        if (id === match.winner_id) {
+            data[idGame].wins += 1;
+            data[idGame].mmr += 27;
+        } else {
+            data[idGame].losses += 1;
+            data[idGame].mmr -= 15;
+        }
         addMatchEntry(game, opponent[0].nickName, opponent[0].avatar, scoreUser[0], scoreUser[1], result, match.match_time);
     }
 }
@@ -90,6 +106,7 @@ export async function getGameHistory (game: string): Promise<MatchResult[] | und
 }
 
 export async function printMatchHistory() {
+    // const id =
     const id = sessionStorage.getItem('id');
     if (!id) {
         await navigate('/home')
@@ -105,6 +122,32 @@ export async function printMatchHistory() {
     (tdMH || []).forEach(match => combined.push({ match, game: 'Tower-Defense' }));
     combined.sort((a, b) => new Date(b.match.match_time).getTime() - new Date(a.match.match_time).getTime());
 
-    await displayCombinedMatchHistory(combined, idNum);
+    const data: ChartData[] = [
+        {
+            wins: 0,
+            losses: 0,
+            mmr: 0,
+            canvasId: "donutChartPong",
+            mmrElementId: "mmrPong"
+        },
+        {
+            wins: 0,
+            losses: 0,
+            mmr: 0,
+            canvasId: "donutChartTd",
+            mmrElementId: "mmrTd"
+        }
+    ];
+    await displayCombinedMatchHistory(combined, idNum, data);
+    drawChart(data)
 }
 
+
+function drawChart(data: ChartData[]) {
+    const winRateTd = document.getElementById('winRateTd')
+    if (winRateTd && data[0].wins + data[0].losses == 0) winRateTd.innerText = 'N/A'
+    else if (winRateTd) winRateTd.innerText = 'Win Rate - ' + ((data[0].wins / (data[0].wins + data[0].losses)) * 100).toFixed(2) + '%';
+    const winRatePong = document.getElementById('winRatePong')
+    if (winRatePong && data[0].wins + data[0].losses == 0) winRatePong.innerText = 'N/A'
+    else if (winRatePong) winRatePong.innerText = 'Win Rate - ' + ((data[0].wins / (data[0].wins + data[0].losses)) * 100).toFixed(2) + '%';
+}

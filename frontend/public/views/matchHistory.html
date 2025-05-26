@@ -6,18 +6,29 @@
     <!-- Cadre 1 - Jeu principal -->
     <div class="bg-gray-800 p-4 rounded-xl shadow-md flex flex-col items-center">
       <h3 class="text-yellow-400 text-lg font-bold mb-2">Pong</h3>
+
       <div class="relative w-40 h-40">
         <canvas id="donutChartPong"></canvas>
-        <div class="absolute inset-0 flex items-center justify-center text-white text-3xl font-bold" id="mmrMain">N/A</div>
+
+        <div class="absolute inset-0 flex flex-col items-center justify-center space-y-2">
+          <div>
+            <span class="text-white text-xl font-bold" id="winRatePong">Win Rate : N/A</span>
+          </div>
+          <div>
+            <div class="text-white text-xl font-bold" id="mmrPong">MMR : N/A</div>
+          </div>
+        </div>
       </div>
     </div>
+
 
     <!-- Cadre 2 - Tower-Defense -->
     <div class="bg-gray-800 p-4 rounded-xl shadow-md flex flex-col items-center">
       <h3 class="text-yellow-400 text-lg font-bold mb-2">Tower Defense</h3>
       <div class="relative w-40 h-40">
         <canvas id="donutChartTd"></canvas>
-        <div class="absolute inset-0 flex items-center justify-center text-white text-3xl font-bold" id="mmrTD">N/A</div>
+        <span class="absolute inset-0 flex items-center justify-center text-white text-xl font-bold" id="winRateTd"></span>
+        <div class="absolute inset-0 flex items-center justify-center text-white text-xl font-bold" id="mmrTd">N/A</div>
       </div>
     </div>
   </div>
