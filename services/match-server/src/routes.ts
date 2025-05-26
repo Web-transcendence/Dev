@@ -1,5 +1,5 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { fetchIdByNickName } from './utils.js'
+import {FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
+import {fetchIdByNickName, fetchNotifyUser} from "./utils.js";
 import {
     generateId,
     initSchema,
@@ -9,12 +9,20 @@ import {
     Player,
     readySchema,
     resetInput,
-} from './api.js'
-import { getMatchHistory, MatchResult } from './database.js'
-import { soloMode } from './solo.js'
-import { generateRoom, joinRoom, leaveRoom, startInviteMatch, startTournamentMatch } from './netcode.js'
-import { z } from 'zod'
-import { changeRoomSpec, joinRoomSpec, leaveRoomSpec } from './spectator.js'
+} from "./api.js";
+import {getMatchHistory, MatchResult} from "./database.js"
+import {soloMode} from "./solo.js";
+import {
+    generateRoom,
+    joinRoom,
+    leaveRoom, matchMaking, matchMakingUp, removeWaitingPlayer,
+    startInviteMatch,
+    startTournamentMatch,
+    waitingList,
+    waitingPlayer
+} from "./netcode.js";
+import {z} from "zod";
+import {changeRoomSpec, joinRoomSpec, leaveRoomSpec} from "./spectator.js";
 
 const internalVerification = async (req, res) => {
 	if (req.headers.authorization !== INTERNAL_PASSWORD)
@@ -22,85 +30,109 @@ const internalVerification = async (req, res) => {
 }
 
 export default async function pongRoutes(fastify: FastifyInstance) {
-	fastify.get('/ws', { websocket: true }, (socket, req) => {
-		console.log('Client connected')
-		const userId = generateId()
-		const player = new Player(userId, socket)
-		let init = false
-		let room = -1
-		let solo: boolean
-		let mode = 'local'
-		socket.on('message', async (message) => {
-			const msg = JSON.parse(message.toString())
-			if (!init && msg.type === 'socketInit') {
-				const { data, success, error } = initSchema.safeParse(JSON.parse(message.toString()))
-				if (!success || !data) {
-					console.error(error)
-					return
-				}
-				player.name = data.nick
-				player.paddle.name = data.nick
-				if (player.name === 'AI') {
-					player.frequency = 1000
-					player.dbId = -2
-					console.log("IA player init");
-				}
-				try {
-					if (!player.name.includes('guest'))
-						player.dbId = await fetchIdByNickName(data.nick)
-				} catch (error) {
-					console.log(error)
-				}
-				if (data.room)
-					room = msg.room
-				init = true
-			} else if (msg.type === 'input') {
-				const { data, success, error } = inputSchema.safeParse(JSON.parse(message.toString()))
-				if (!success || !data) {
-					console.error(error)
-					return
-				}
-				if (mode === 'local' && (data.key === 'w' || data.key === 's')) {
-					resetInput(player.input, 'left')
-					inputHandler(data.key, data.state, player.input)
-				} else if (mode === 'local' && (data.key === 'arrowUp' || data.key === 'arrowDown')) {
-					resetInput(player.input, 'right')
-					inputHandler(data.key, data.state, player.input)
-				} else if (mode === 'spec' && data.state === 'down')
-					changeRoomSpec(player)
-				else {
-					resetInput(player.input, 'all')
-					inputHandler(data.key, data.state, player.input)
-				}
-			} else if (init && msg.type === 'ready') {
-				const { data, success, error } = readySchema.safeParse(JSON.parse(message.toString()))
-				if (!success || !data) {
-					console.error(error)
-					return
-				}
-				console.log("player ready");
-				mode = data.mode
-				if (data.mode === 'remote')
-					joinRoom(player, room)
-				else if (data.mode === 'local') {
-					solo = true
-					soloMode(player, solo)
-				} else if (data.mode === 'spec') {
-					joinRoomSpec(player, room)
-				}
-			}
-		})
-		socket.on('close', () => {
-			console.log(`id: ${userId}`)
-			if (mode === 'local')
-				solo = false
-			else if (mode === 'remote')
-				leaveRoom(userId)
-			else if (mode === 'spec')
-				leaveRoomSpec(userId)
-			console.log('Client disconnected')
-		})
-	})
+    fastify.get('/ws', { websocket: true }, (socket, req) => {
+        console.log("Client connected");
+        const userId = generateId();
+        const player = new Player(userId, socket);
+        let init = false;
+        let room = -1;
+        let solo: boolean;
+        let mode = "local";
+        socket.on("message", async (message) => {
+            const msg = JSON.parse(message.toString());
+            if (!init && msg.type === "socketInit") {
+                const {data, success, error} = initSchema.safeParse(JSON.parse(message.toString()));
+                if (!success || !data) {
+                    console.error(error);
+                    return ;
+                }
+                player.name = data.nick;
+                player.paddle.name = data.nick;
+                if (player.name === "AI") {
+                    player.frequency = 1000;
+                    player.dbId = -2;
+                }
+                try {
+                    player.dbId = await fetchIdByNickName(data.nick);
+                    if (data.room)
+                        room = msg.room;
+                    if (room === -1){
+                        player.mmr = await fetchMmrById(player.dbId);
+                        console.log("mmr:", player.mmr);
+                    }
+                } catch (error) {
+                    console.log(error);
+                    return ;
+                }
+                init = true;
+            } else if (msg.type === "input") {
+                const {data, success, error} = inputSchema.safeParse(JSON.parse(message.toString()));
+                if (!success || !data) {
+                    console.error(error);
+                    return ;
+                }
+                if (mode === "local" && (data.key === "w" || data.key === "s")) {
+                    resetInput(player.input, "left");
+                    inputHandler(data.key, data.state, player.input);
+                } else if (mode === "local" && (data.key === "ArrowUp" || data.key === "ArrowDown")) {
+                    resetInput(player.input, "right");
+                    inputHandler(data.key, data.state, player.input);
+                }
+                else if (mode === "spec" && data.state === "down")
+                    changeRoomSpec(player);
+                else {
+                    resetInput(player.input, "all");
+                    inputHandler(data.key, data.state, player.input);
+                }
+            } else if (init && msg.type === "ready") {
+                const {data, success, error} = readySchema.safeParse(JSON.parse(message.toString()));
+                if (!success || !data) {
+                    console.error(error);
+                    return ;
+                }
+                mode = data.mode;
+                switch (mode) {
+                    case "local":
+                        solo = true;
+                        soloMode(player, solo);
+                        break;
+                    case "remote":
+                        if (room === -1) {
+                            waitingList.push(new waitingPlayer(player));
+                            if (!matchMakingUp)
+                                matchMaking();
+                        }
+                        else
+                            joinRoom(player, room);
+                        break;
+                    case "spec":
+                        joinRoomSpec(player, room);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+        socket.on("close", () => {
+            console.log(`id: ${userId}`);
+            switch (mode) {
+                case "local":
+                    solo = false;
+                    break;
+                case "remote":
+                    if (room === -1)
+                        removeWaitingPlayer(player);
+                    leaveRoom(userId);
+                    break;
+                case "spec":
+                    leaveRoomSpec(userId);
+                    break;
+                default:
+                    break;
+            }
+            console.log("Client disconnected");
+        });
+    });
 
 	fastify.post('/generateRoom', async (req: FastifyRequest, res: FastifyReply) => {
 		const roomId = generateRoom()
@@ -171,7 +203,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
 	fastify.get('/vsAi', async (req: FastifyRequest, res: FastifyReply) => {
 		try {
 			const roomId = generateRoom()
-			
+
 			const response = await fetch(`http://ai-opponent:16016/createAI/${roomId}`, {
 				method: 'GET',
 				headers: {
@@ -182,7 +214,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
 			if (!response.ok) {
 				return res.status(400).send({ error: `can't create ai opponent` })
 			}
-			
+
 			return res.status(200).send({ roomId: roomId })
 		} catch (err) {
 			console.error(err)

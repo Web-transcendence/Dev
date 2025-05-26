@@ -1,7 +1,7 @@
 // Netcode
 import {
     Ball,
-    gameState,
+    gameState, generateId,
     hazardGenerator,
     INTERNAL_PASSWORD,
     moveBall,
@@ -12,9 +12,19 @@ import {
     timerCheck
 } from "./api.js";
 import {insertMatchResult} from "./database.js";
-import {fetchNotifyUser, fetchPlayerWin} from "./utils.js";
+import {fetchNotifyUser, fetchPlayerWin, updateMmr} from "./utils.js";
 
+export class waitingPlayer {
+    player: Player;
+    wait: number = 0;
+    constructor(player: Player) {
+        this.player = player;
+    }
+}
+
+export const waitingList: waitingPlayer[] = [];
 export let rooms: Room[] = [];
+export let matchMakingUp: boolean = false;
 
 export function checkId(id: number) {
     for (const room of rooms) {
@@ -61,6 +71,8 @@ export async function leaveRoom(userId: number) {
                 const winner = room.players[winnerIndex];
                 if (room.type === "tournament")
                     await fetchPlayerWin(winner.dbId);
+                if (room.type === "ranked")
+                    await updateMmr(playerA, playerB, winnerIndex);
                 console.log(`A: ${playerA.dbId} B: ${playerB.dbId} Windex: ${winnerIndex}`);
                 insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
                 room.ended = true;
@@ -80,38 +92,16 @@ export async function leaveRoom(userId: number) {
 }
 
 export function joinRoom(player: Player, roomId: number) {
-    let id: number = -1;
     let i : number = 0;
-    if (roomId !== -1) { // Joining a defined room (invite or tournaments)
-        for (; i < rooms.length; i++) {
-            if (rooms[i].id === roomId && rooms[i].players.length < 2) {
-                if (rooms[i].players.length === 0)
-                    player.paddle.x = 1200 - 30;
-                else
-                    player.paddle.x = 30;
-                rooms[i].players.push(player);
-                id = rooms[i].id;
-                console.log(player.paddle.name, "joined room", rooms[i].id);
-                break ;
-            }
-        }
-    } else { // Basic random matchmaking
-        for (; i < rooms.length; i++) {
-            if (rooms[i].id < 1000 && rooms[i].players.length < 2 && rooms[i].players.length === 1) {
+    for (; i < rooms.length; i++) {
+        if (rooms[i].id === roomId && rooms[i].players.length < 2) {
+            if (rooms[i].players.length === 0)
                 player.paddle.x = 1200 - 30;
-                rooms[i].players.push(player);
-                id = rooms[i].id;
-                console.log(player.paddle.name, "joined room", rooms[i].id);
-                break;
-            }
-        }
-        if (id === -1) {
-            player.paddle.x = 30;
-            let room = new Room(rooms.length);
-            room.players.push(player);
-            rooms.push(room);
-            console.log(player.paddle.name, "created and joined room", rooms[i].id);
-            return;
+            else
+                player.paddle.x = 30;
+            rooms[i].players.push(player);
+            console.log(player.paddle.name, "joined room", rooms[i].id);
+            break ;
         }
     }
     if (i === rooms.length || rooms[i].players.length !== 2)
@@ -181,24 +171,27 @@ export async function startInviteMatch(userId: number, opponent: number) {
     const roomId = generateRoom();
 
     await fetchNotifyUser([opponent], `invitationPong`, {roomId: roomId, id: userId});
+    await roomWatcher(300, roomId, 0, userId);
     return (roomId);
 }
 
-async function roomWatcher(roomId: number, clock: number, playerA_id: number) {
-    if (clock <= 60) // Time needed to consider the player afk
-        setTimeout(() => roomWatcher(roomId, clock + 1, playerA_id), 1000); // Check every second
+async function roomWatcher(timer: number, roomId: number, clock: number, playerA_id: number) {
+    if (clock <= timer) // Time needed to consider the player afk
+        setTimeout(() => roomWatcher(timer, roomId, clock + 1, playerA_id), 1000); // Check every second
     else {
         const room = rooms.find(room => room.id === roomId);
         if (!room || room.players.length >= 2)
             return;
         else if (room.players.length === 1) {
-            await fetchPlayerWin(room.players[0].dbId); // Inform the tournament service that remaining player won by forfeit
+            if (room.type === "tournament")
+                await fetchPlayerWin(room.players[0].dbId); // Inform the tournament service that remaining player won by forfeit
             room.players.forEach(player => {
-                player.ws.send(JSON.stringify({ type: "Disconnected" }));
+                player.ws.send(JSON.stringify({ type: "AFK" }));
                 player.ws.close();
             });
         } else { // Case where no player joined the room (i.e. double loss)
-            await fetchPlayerWin(playerA_id * -1);
+            if (room.type === "tournament")
+                await fetchPlayerWin(playerA_id * -1);
             const i = rooms.findIndex(room => room.id === roomId);
             rooms.splice(i, 1);
         }
@@ -208,5 +201,48 @@ async function roomWatcher(roomId: number, clock: number, playerA_id: number) {
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
     const roomId = generateRoom("tournament");
     await fetchNotifyUser([playerA_id, playerB_id], `invitationTournamentPong`, {roomId: roomId})
-    await roomWatcher(roomId, 0, playerA_id);
+    await roomWatcher(60, roomId, 0, playerA_id);
+}
+
+function mmrRange(wait: number) {
+    return (300 * Math.log2(1 + wait / 60));
+}
+
+function canMatch(seeker: waitingPlayer, target: waitingPlayer): boolean {
+    if (target.player.mmr < seeker.player.mmr - mmrRange(seeker.wait) || target.player.mmr > seeker.player.mmr + mmrRange(seeker.wait)) // Check if target mmr is in seeker's range
+        return false;
+    if (seeker.player.mmr < target.player.mmr - mmrRange(target.wait) || seeker.player.mmr > target.player.mmr + mmrRange(target.wait)) // Reverse check
+        return false;
+    return true; // Players can be matched !
+}
+
+export function removeWaitingPlayer(player: Player) {
+    const index = waitingList.findIndex(wp => wp.player === player);
+    if (index !== -1) {
+        waitingList.splice(index, 1);
+    }
+}
+
+export function matchMaking() {
+    console.log("Matchmaking service running");
+    matchMakingUp = true;
+    for (const seeker of waitingList) {
+        seeker.wait += 1;
+        for (const target of waitingList) {
+            if (seeker === target || !canMatch(seeker, target))
+                continue;
+            const roomId = generateRoom("ranked");
+            joinRoom(seeker.player, roomId);
+            joinRoom(target.player, roomId);
+            removeWaitingPlayer(seeker.player);
+            removeWaitingPlayer(target.player);
+            break;
+        }
+    }
+    if (waitingList.length !== 0)
+        setTimeout(() => matchMaking(), 1000);
+    else {
+        matchMakingUp = false;
+        console.log("Matchmaking service stopped");
+    }
 }
