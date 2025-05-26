@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/23 14:20:22 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/26 10:00:16 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,6 +215,8 @@ void	Client::resetEnv(nlohmann::json const & data) {
 	this->stateMutex.lock();
 	this->localPong.reset(ball, lPaddle, rPaddle);
 	this->stateMutex.unlock();
+	if (data["game"]["state"] == 2)
+		this->active.store(FINISHED);	
 }
 
 bool	Client::giveArrow(std::string const & key, nlohmann::json & j) {
