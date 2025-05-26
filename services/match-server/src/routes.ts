@@ -53,9 +53,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                     player.dbId = -2;
                 }
                 try {
-                    console.log("nickname:", data.nick);
                     player.dbId = await fetchIdByNickName(data.nick);
-                    console.log("dbId:", player.dbId);
                     if (data.room)
                         room = msg.room;
                     if (room === -1){

@@ -1,7 +1,7 @@
 import {INTERNAL_PASSWORD, Player} from "./api.js";
 
 export const fetchIdByNickName = async (nickName: string): Promise<number> => {
-    if (nickName.includes("guest") || nickName.includes("Player "))
+    if (nickName.includes(" "))
         return (-1);
     if (nickName === "AI")
         return (-2);

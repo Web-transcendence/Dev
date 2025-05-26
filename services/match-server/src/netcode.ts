@@ -171,24 +171,27 @@ export async function startInviteMatch(userId: number, opponent: number) {
     const roomId = generateRoom();
 
     await fetchNotifyUser([opponent], `invitationPong`, {roomId: roomId, id: userId});
+    await roomWatcher(300, roomId, 0, userId);
     return (roomId);
 }
 
-async function roomWatcher(roomId: number, clock: number, playerA_id: number) {
-    if (clock <= 60) // Time needed to consider the player afk
-        setTimeout(() => roomWatcher(roomId, clock + 1, playerA_id), 1000); // Check every second
+async function roomWatcher(timer: number, roomId: number, clock: number, playerA_id: number) {
+    if (clock <= timer) // Time needed to consider the player afk
+        setTimeout(() => roomWatcher(timer, roomId, clock + 1, playerA_id), 1000); // Check every second
     else {
         const room = rooms.find(room => room.id === roomId);
         if (!room || room.players.length >= 2)
             return;
         else if (room.players.length === 1) {
-            await fetchPlayerWin(room.players[0].dbId); // Inform the tournament service that remaining player won by forfeit
+            if (room.type === "tournament")
+                await fetchPlayerWin(room.players[0].dbId); // Inform the tournament service that remaining player won by forfeit
             room.players.forEach(player => {
                 player.ws.send(JSON.stringify({ type: "Disconnected" }));
                 player.ws.close();
             });
         } else { // Case where no player joined the room (i.e. double loss)
-            await fetchPlayerWin(playerA_id * -1);
+            if (room.type === "tournament")
+                await fetchPlayerWin(playerA_id * -1);
             const i = rooms.findIndex(room => room.id === roomId);
             rooms.splice(i, 1);
         }
@@ -198,7 +201,7 @@ async function roomWatcher(roomId: number, clock: number, playerA_id: number) {
 export async function startTournamentMatch(playerA_id: number, playerB_id: number) {
     const roomId = generateRoom("tournament");
     await fetchNotifyUser([playerA_id, playerB_id], `invitationTournamentPong`, {roomId: roomId})
-    await roomWatcher(roomId, 0, playerA_id);
+    await roomWatcher(60, roomId, 0, playerA_id);
 }
 
 function mmrRange(wait: number) {

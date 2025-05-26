@@ -93,7 +93,7 @@ export function Pong(mode: string, room?: number) {
     function getNick(): string {
         let nick = sessionStorage.getItem('nickName');
         if (!nick) {
-            nick = `guest${Math.floor(Math.random() * 10000)}`;
+            nick = `guest ${Math.floor(Math.random() * 10000)}`;
             sessionStorage.setItem('nickName', nick);
         }
         return (nick);
