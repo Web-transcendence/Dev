@@ -2,6 +2,11 @@ import {displayNotification} from "./notificationHandler.js";
 import {fetchUserInformation, UserData} from "./user.js";
 import {navigate} from "./front.js";
 
+interface ChartData {
+    wins: number;
+    losses: number;
+}
+
 export type MatchResult = {
     id: number;
     playerA_id: number;
@@ -46,7 +51,7 @@ function addMatchEntry(game: string, opponent: string, opponentAvatar: string, s
     list.appendChild(clone);
 }
 
-async function displayCombinedMatchHistory(matches: { match: MatchResult, game: string }[], id: number) {
+async function displayCombinedMatchHistory(matches: { match: MatchResult, game: string }[], id: number, data: ChartData[]) {
     for (const { match, game } of matches) {
         let opponent: UserData[] = [];
         const oppId = match.playerA_id === id ? match.playerB_id : match.playerA_id;
@@ -61,6 +66,16 @@ async function displayCombinedMatchHistory(matches: { match: MatchResult, game: 
                 avatar: '../images/login.png'
             }];
         }
+        if (game === 'Tower-Defense') {
+            if (id === match.winner_id) data[1].wins++
+            else data[1].losses++
+        }
+        else {
+            if (id === match.winner_id) data[0].wins++
+            else data[0].losses++
+        }
+
+
         const result: string = (id === match.winner_id) ? 'VICTORY' : 'DEFEAT';
         const scoreUser: number[] = match.playerA_id === id ? [match.scoreA, match.scoreB] : [match.scoreB, match.scoreA];
         addMatchEntry(game, opponent[0].nickName, opponent[0].avatar, scoreUser[0], scoreUser[1], result, match.match_time);
@@ -90,12 +105,9 @@ export async function getGameHistory (game: string): Promise<MatchResult[] | und
 }
 
 export async function printMatchHistory() {
-    const id = sessionStorage.getItem('id');
-    if (!id) {
-        await navigate('/home')
-        displayNotification('Could not find your match result', { type: "error" })
-        return;
-    }
+    const id = await getId()
+    console.log('id found is ', id)
+    if (!id) return;
     const pongMH: MatchResult[] | undefined = await getGameHistory('match-server');
     const tdMH: MatchResult[] | undefined = await getGameHistory('tower-defense');
     const idNum = Number(id)
@@ -105,6 +117,81 @@ export async function printMatchHistory() {
     (tdMH || []).forEach(match => combined.push({ match, game: 'Tower-Defense' }));
     combined.sort((a, b) => new Date(b.match.match_time).getTime() - new Date(a.match.match_time).getTime());
 
-    await displayCombinedMatchHistory(combined, idNum);
+    const data: ChartData[] = [
+        {
+            wins: 0,
+            losses: 0,
+        },
+        {
+            wins: 0,
+            losses: 0,
+        }
+    ];
+    await displayCombinedMatchHistory(combined, idNum, data);
+    console.log('DATA ', data)
+    console.log('DATA[0] ', data[0])
+    console.log('DATA[1] ', data[1])
+    await drawChart(data)
 }
 
+
+async function drawChart(data: ChartData[]) {
+    const winRatePong = document.getElementById('winRatePong')
+    if (winRatePong && data[0].wins + data[0].losses != 0) winRatePong.innerText = 'Win Rate - ' + ((data[0].wins / (data[0].wins + data[0].losses)) * 100).toFixed(2) + '%'
+    const winRateTd = document.getElementById('winRateTd')
+    if (winRateTd && data[1].wins + data[1].losses != 0) winRateTd.innerText = 'Win Rate - ' + ((data[1].wins / (data[1].wins + data[1].losses)) * 100).toFixed(2) + '%'
+
+    const mmrPong = document.getElementById('mmrPong')
+    const mmrTd = document.getElementById('mmrTd')
+    const log = await getMmrById()
+    console.log('MMR DATA LOG ', log)
+    if (!log) {
+        displayNotification(`Error can't find your mmr`)
+        await navigate('/home')
+        return
+    }
+    if (mmrPong) mmrPong.innerText = 'MMR - ' + log.pongMmr
+    if (mmrTd) mmrTd.innerText = 'MMR - ' + log.tdMmr
+
+}
+
+const getMmrById = async (): Promise<{ pongMmr: number, tdMmr: number } | undefined> => {
+    const token = sessionStorage.getItem('token')
+    try {
+
+    const response = await fetch(`/user-management/mmr`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': 'Bearer ' + token,
+        },
+    });
+    if(!response.ok) {
+        throw new Error(`this nickname doesn't exist`);
+    }
+    const {pongMmr, tdMmr} = await response.json() as {pongMmr: number, tdMmr: number};
+    return {pongMmr, tdMmr};
+    }
+    catch (error) {
+        console.log(error)
+        return undefined
+    }
+}
+
+export async function getId(): Promise<string | undefined> {
+    const token = sessionStorage.getItem('token')
+    const response = await fetch(`/authJWT`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': 'Bearer ' + token,
+        },
+    })
+    if (!response.ok) {
+        await navigate('/home')
+        displayNotification('Error no authorization', {type: "error"})
+        return undefined;
+    }
+    const {id} = await response.json()
+    return id
+}

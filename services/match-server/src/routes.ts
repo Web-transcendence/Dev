@@ -59,6 +59,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                     if (room === -1){
                         player.mmr = await fetchMmrById(player.dbId);
                         console.log("mmr:", player.mmr);
+                        console.log("mmrID:", player.dbId);
                     }
                 } catch (error) {
                     console.log(error);

@@ -8,11 +8,14 @@ const client = new OAuth2Client("562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.a
 export async function googleAuth(request: FastifyRequest, reply: FastifyReply):Promise<void> {
     const { credential } = request.body as { credential: string };
     try {
+        console.log('CRED', credential);
+
         const ticket = await client.verifyIdToken({
             idToken: credential,
             audience: "562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com",
         });
         const payload = ticket.getPayload();
+        console.log('PAYLAD :', payload)
         const userId = payload?.sub;
 
         if (!payload || !userId) {

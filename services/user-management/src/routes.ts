@@ -486,5 +486,27 @@ export default async function userRoutes(app: FastifyInstance) {
 			return res.status(500).send()
 		}
 	})
+
+	app.get('/mmr', (req: FastifyRequest, res: FastifyReply) => {
+		try {
+			const id = Number(req.headers.id)
+			if (!id)
+				throw new ServerError(`cannot parse id, which should not happen`, 500)
+
+			const user = new User(id)
+
+			const tdMmr = user.getTdMmr()
+			const pongMmr = user.getPongMmr()
+
+			return res.status(200).send({ pongMmr: pongMmr, tdMmr: tdMmr })
+		} catch (err) {
+			if (err instanceof MyError) {
+				console.error(err.message)
+				return res.status(err.code).send({ error: err.toSend })
+			}
+			console.error(err)
+			return res.status(500).send()
+		}
+	})
 }
 
