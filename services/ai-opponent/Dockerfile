@@ -8,10 +8,12 @@ USER app
 WORKDIR /app
 
 COPY --chown=app:app src/core core
+COPY --chown=app:app tools/binariesWrapper.sh binariesWrapper.sh
+
+RUN	chmod +x binariesWrapper.sh
 
 RUN	make -C core/AiServer
 RUN	make -C core/Client
 
-# CMD ["tail", "-f", "/dev/null"]
-
-CMD ./core/Client/myFactory "http://127.0.0.1:4443" && ./core/AiServer/myDQN
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["./binariesWrapper.sh"]

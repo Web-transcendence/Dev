@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:17:39 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/20 07:17:55 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/23 00:12:50 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,6 @@
 #include <string>
 #include <chrono>
 
-double	_1[sizeof(double)*16]; //place holder input
-
 AiServer::AiServer(std::string const & QNetConfigFile) : _QNet(Network(QNetConfigFile)) {
 	return ;
 }
@@ -32,8 +30,9 @@ AiServer::~AiServer( void ) {
 
 void	AiServer::start( void ) {
 	this->_myServer.set_access_channels(websocketpp::log::alevel::all);
-	this->_myServer.clear_access_channels(websocketpp::log::alevel::frame_payload);
-	
+	this->_myServer.clear_access_channels(websocketpp::log::alevel::all);
+	this->_myServer.clear_error_channels(websocketpp::log::elevel::all);
+
 	this->_myServer.set_message_handler([this](websocketpp::connection_hdl hdl, message_ptr msg) {this->on_message(hdl, msg);});
 	
 	this->_myServer.init_asio();
@@ -49,11 +48,12 @@ void	AiServer::start( void ) {
 }
 
 void	AiServer::on_message(websocketpp::connection_hdl hdl, message_ptr msg) {
-	memcpy(_1, msg->get_payload().c_str(), sizeof(double)*16);
-	auto	input = std::vector<double>(_1, _1+16);
+	double	_1[sizeof(double)*N_NEURON_INPUT];
+	memcpy(_1, msg->get_payload().c_str(), sizeof(double)*N_NEURON_INPUT);
+	auto	input = std::vector<double>(_1, _1+N_NEURON_INPUT);
 	auto	oQNet = this->_QNet.feedForward(input);
 	nlohmann::json	j;
-	j["source"] = "ai";
+	j["type"] = "ai";
 	j["data"] = oQNet;
 	this->_myServer.send(hdl, j.dump(), websocketpp::frame::opcode::text);
 	return ;

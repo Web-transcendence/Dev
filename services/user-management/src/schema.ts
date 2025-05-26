@@ -57,4 +57,8 @@ export const notifySchema = z.object({
 	data: z.any()
 })
 
+export const mmrSchema = z.object({
+	mmr: z.number()
+})
+
 export * from './schema.js'

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 15:33:52 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/13 12:51:22 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/22 14:14:42 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@ public:
 private:
 	Network( void ) {}
 	
-	std::vector<std::vector<std::vector<double>>>	_weights;
-	std::vector<std::vector<double>>				_biaises;
+	std::vector<std::vector<std::vector<double>>*>*	_weights;
+	std::vector<std::vector<double>*>*				_biaises;
 };
 
 #endif

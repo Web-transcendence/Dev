@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 16:55:07 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/20 08:30:06 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/23 14:21:34 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,9 @@
 
 #include "Client.class.hpp"
 
+#include <httplib.h>
 #include <csignal>
+
 
 std::atomic<bool>	shouldStop;
 
@@ -23,7 +25,7 @@ void	handling_SIGTERM(int) {
 	return ;
 }
 
-Factory::Factory(std::string const & serverWs) : _gameServerWs(serverWs) {
+Factory::Factory( void ) {
 	CROW_ROUTE(this->app, "/createAI/<int>")([this](int gameId){
 		nlohmann::json	j;
 
@@ -58,7 +60,7 @@ Factory::~Factory( void ) {
 	return ;
 }
 
-void	Factory::run(int const port) {
+void	Factory::run() {
 	std::thread	t([this](){
 		while (shouldStop.load() == false) {
 			std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -76,7 +78,7 @@ void	Factory::run(int const port) {
 		this->app.stop();
 	});
 	t.detach();
-	this->app.port(port).multithreaded().run();
+	this->app.port(FACTORY_SERVER_PORT).multithreaded().run();
 	return ;
 }
 
@@ -102,11 +104,10 @@ void	Factory::settlingMessage(unsigned int const sizePool) {
 }
 
 void	Factory::createGame(int const gameId) {
-	auto	c = std::make_shared<Client>(this->_gameServerWs ,gameId);
+	auto	c = std::make_shared<Client>(gameId);
 	if (this->_connectedClients[gameId])
 		throw DuplicateGameException();
 	this->_connectedClients[gameId] = c;
-	std::cout << "client created" << std::endl;
 	std::thread	t([c]() {c->run();});
 	t.detach();
 	return ;
@@ -116,7 +117,7 @@ void	Factory::deleteGame(int const gameId) {
 	auto	currentClient = this->_connectedClients.find(gameId);
 	if (currentClient == this->_connectedClients.end())
 		throw UnknownGameException();
-	if (!currentClient->second->getActive())
+	if (currentClient->second->getActive() == FINISHED)
 		this->_connectedClients.erase(currentClient);
 	return ;
 }

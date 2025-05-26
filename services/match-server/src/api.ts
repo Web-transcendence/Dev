@@ -4,7 +4,7 @@ import { WebSocket } from "ws";
 import { z } from "zod";
 import { insertMatchResult, getMatchHistory } from "./database.js";
 import pongRoutes from "./routes.js";
-import {fetchPlayerWin} from "./utils.js";
+import {fetchPlayerWin, updateMmr} from "./utils.js";
 
 export const inputSchema = z.object({ state: z.string(), key: z.string() });
 export const initSchema = z.object({ nick: z.string(), room: z.number() });
@@ -30,7 +30,7 @@ export class Ball {
         this.color = color;
     }
     toJSON() {
-        return {type: "Ball", x: this.x, y: this.y, speed: this.speed, ispeed: this.ispeed, radius: this.radius, color: this.color};
+        return {type: "Ball", x: this.x, y: this.y, angle: this.angle, speed: this.speed, ispeed: this.ispeed, radius: this.radius, color: this.color};
     }
 }
 
@@ -108,6 +108,7 @@ export class Room {
 export class Player {
     name: string = "Default";
     dbId: number = -1;
+    mmr: number = 1200;
     id: number;
     ws: WebSocket;
     frequency: number = 10;
@@ -177,7 +178,7 @@ export function resetInput(Input: keyInput, mode: string) {
     }
     if (mode === "left" || mode === "all") {
         Input.w = false;
-        Input.arrowUp = false;
+        Input.s = false;
     }
 }
 
@@ -203,6 +204,8 @@ export async function resetGame(ball: Ball, player1: Player, player2: Player, ga
         });
         if (room.type === "tournament")
             await fetchPlayerWin(winner === 0 ? player1.dbId : player2.dbId);
+        if (room.type === "ranked")
+            await updateMmr(player1, player2, winner);
         insertMatchResult(player1.dbId, player2.dbId, Number(player1.paddle.score), Number(player2.paddle.score), winner);
         room.ended = true;
         game.state = 2;

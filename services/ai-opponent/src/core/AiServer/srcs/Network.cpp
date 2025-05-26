@@ -27,27 +27,29 @@ Network::Network(std::string const & inFile) {
 	std::getline(ifs, dataStr, '\0');
 	ifs.close();
 	auto data = nlohmann::json::parse(dataStr)["Network"];
-	std::vector<unsigned int>	sizes(N_LAYER_HIDDEN + 2, N_NEURON_HIDDEN);
+	std::vector<unsigned int>	sizes(N_LAYER_HIDDEN + 2);
 	sizes.at(0) = N_NEURON_INPUT;
-	sizes.back() = N_NEURON_OUTPUT;
-	this->_weights = std::vector<std::vector<std::vector<double>>>(N_LAYER_HIDDEN + 1, std::vector<std::vector<double>>(1, std::vector<double>()));
-	this->_biaises = std::vector<std::vector<double>>(N_LAYER_HIDDEN + 1, std::vector<double>());
-	auto				it_wl = this->_weights.begin();
-	auto				it_bl = this->_biaises.begin();
+	for (unsigned int i = 1; i < N_LAYER_HIDDEN + 1; i++)
+		sizes.at(i) = N_NEURON_HIDDEN;
+	sizes.at(N_LAYER_HIDDEN + 1) = N_NEURON_OUTPUT;
+	this->_weights = new std::vector<std::vector<std::vector<double>>*>(N_LAYER_HIDDEN + 1);
+	this->_biaises = new std::vector<std::vector<double>*>(N_LAYER_HIDDEN + 1);
+	auto				it_wl = this->_weights->begin();
+	auto				it_bl = this->_biaises->begin();
 	unsigned int		whichLayer = 1;
 	unsigned int		countLayer = 0;
-	for (; it_wl != this->_weights.end(); it_wl++, it_bl++, whichLayer++, countLayer++) {
+	for (; it_wl != this->_weights->end(); it_wl++, it_bl++, whichLayer++, countLayer++) {
 		std::stringstream	ssLayer;
-		unsigned int		countNeuron = 0;
-		(*it_wl).resize(sizes.at(whichLayer));
-		(*it_bl).resize(sizes.at(whichLayer));
+		unsigned int	countNeuron = 0;
+		*it_wl = new std::vector<std::vector<double>>(sizes.at(whichLayer));
+		*it_bl = new std::vector<double>(sizes.at(whichLayer));
 		ssLayer << "Layer " << countLayer;
-		auto	it_wn = (*it_wl).begin();
-		auto	it_bn = (*it_bl).begin();
-		for (;it_wn != (*it_wl).end(); it_wn++, it_bn++, countNeuron++) {
+		auto	it_wn = (*it_wl)->begin();
+		auto	it_bn = (*it_bl)->begin();
+		for (;it_wn != (*it_wl)->end(); it_wn++, it_bn++, countNeuron++) {
 			std::stringstream	ssNeuron;
 			ssNeuron << "neuron " << countNeuron;
-			(*it_wn).resize(sizes.at(whichLayer - 1));
+			*it_wn = std::vector<double>(sizes.at(whichLayer - 1));
 			unsigned int	countWeight = 0;
 			for (auto it_ww = (*it_wn).begin(); it_ww != (*it_wn).end(); it_ww++, countWeight++) {
 				std::stringstream	w;
@@ -64,14 +66,14 @@ Network::Network(std::string const & inFile) {
 
 std::vector<double>	Network::feedForward(std::vector<double> const & input) {
 	std::vector<double>	layerOutput(input);
-	auto				it_b = this->_biaises.begin();
+	auto				it_b = this->_biaises->begin();
 
-	for (auto it_l = this->_weights.begin();it_l != this->_weights.end(); it_l++, it_b++) {
+	for (auto it_l = this->_weights->begin();it_l != this->_weights->end(); it_l++, it_b++) {
 		auto	in(layerOutput);
-		layerOutput.resize((*it_l).size());
+		layerOutput.resize((*it_l)->size());
 		auto	it_lo = layerOutput.begin();
-		auto	it_bn = (*it_b).begin();
-		for (auto it_n = (*it_l).begin(); it_n != (*it_l).end(); it_n++, it_bn++, it_lo++) {
+		auto	it_bn = (*it_b)->begin();
+		for (auto it_n = (*it_l)->begin(); it_n != (*it_l)->end(); it_n++, it_bn++, it_lo++) {
 			std::vector<double>	input(layerOutput);
 			*it_lo = Math::sigmoid(Math::dotProduct(in, *it_n) + *it_bn);
 		}

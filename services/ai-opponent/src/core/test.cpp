@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 16:09:55 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/20 10:01:59 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/22 13:13:50 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ std::vector<websocketpp::connection_hdl>	connected;
 void	sendToConnected(websocketpp::connection_hdl & hdl, server & myServ) {
 	nlohmann::json	j;
 			
-	j["source"] = "game";
 	j["type"] = "gameUpdate";
 	j["paddle1"]["x"] = 30.;
 	j["paddle1"]["y"] = HEIGHT / 2.;
