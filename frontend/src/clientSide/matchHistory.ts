@@ -56,16 +56,25 @@ async function displayCombinedMatchHistory(matches: { match: MatchResult, game: 
         let opponent: UserData[] = [];
         const oppId = match.playerA_id === id ? match.playerB_id : match.playerA_id;
 
-        if (oppId !== -1) {
+        if (oppId !== -1 && oppId !== -2 ) {
             opponent = await fetchUserInformation([oppId]);
-        } else {
+        }
+        else if (oppId == -1) {
             opponent = [{
                 id: -1,
                 online: true,
                 nickName: 'Guest',
-                avatar: '../images/login.png'
+                avatar: '../images/logout.png'
             }];
-        }
+            }
+        else {
+                opponent = [{
+                    id: -2,
+                    online: true,
+                    nickName: 'AI',
+                    avatar: '../images/AI.png'
+                }];
+            }
         if (game === 'Tower-Defense') {
             if (id === match.winner_id) data[1].wins++
             else data[1].losses++
@@ -127,10 +136,8 @@ export async function printMatchHistory() {
             losses: 0,
         }
     ];
-    await displayCombinedMatchHistory(combined, idNum, data);
-    console.log('DATA ', data)
-    console.log('DATA[0] ', data[0])
-    console.log('DATA[1] ', data[1])
+    console.log('TUCOMBINED ', combined);
+    await displayCombinedMatchHistory(combined, idNum, data)
     await drawChart(data)
 }
 
