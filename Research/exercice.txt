@@ -1,6 +1,6 @@
-Il a deux types de "neuronnes" pour le moment, les perceptrons et les sigmoids. Pour
+Il a deux types de "neurones" pour le moment, les perceptrons et les sigmoids. Pour
 comprendre la difference il faut s'interesser a ce que contiennent les dit neuronnes.
-Un neuronne contient un calcul, une somme plus exactement. Le but de cette somme est d'appliquer
+Un neurone contient une somme de produit auquel on vient. Le but de cette somme est d'appliquer
 un calcul a different input et de ressortir un output simple. Les inputs vont avoir un poids (w) et 
 a cette somme d input ponderee on va venir y ajouter un biais qui est l inverse d'un seuil.
 Et c'est donc ici que la difference entre nos neuronnes se fait. Le perceptron peut etre definit par
