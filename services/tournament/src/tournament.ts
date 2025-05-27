@@ -152,6 +152,7 @@ export class tournament {
 		if (!winner)
 			return
 		if (loser) {
+			console.log(`loser : ${loser}`)
 			this.actualParticipant = this.actualParticipant.map((participantId: number) => participantId === loser ? 0 : participantId)
 			await fetchNotifyUser([loser], 'loseTournament', {})
 		}

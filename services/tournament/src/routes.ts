@@ -145,6 +145,7 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 		}
 	})
 
+
 	app.get(`/userWin/:id`, { preHandler: internalVerification }, async (req: FastifyRequest, res: FastifyReply) => {
 		try {
 			const { id } = req.params as { id: string }

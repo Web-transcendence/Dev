@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	if (tournamentId)
 		await joinTournament(Number(tournamentId))
 	const path = sessionStorage.getItem('path')
-	if (path && !(!connected && path === '/profile'))
+	if (path && !(!connected && path === '/profile') && path !== '/pongTournament')
 		await loadPart(path)
 	else
 		await loadPart('/home')

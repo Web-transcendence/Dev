@@ -1,10 +1,11 @@
 import { activateBtn } from './button.js'
 import { tdStop } from './td.js'
 import { pongStop } from './pong.js'
-import {tdSpecStop} from "./tdspec.js";
+import { tdSpecStop } from './tdspec.js'
 
 export async function loadPart(page: string) {
 	try {
+		console.error('fck')
 		sessionStorage.setItem('path', page)
 		console.log('setItem path :', page)
 		await insertTag(`part${page}`)
