@@ -1,9 +1,8 @@
 // Netcode
 import {
     Ball,
-    gameState, generateId,
+    gameState,
     hazardGenerator,
-    INTERNAL_PASSWORD,
     moveBall,
     moveHazard,
     movePaddle,
@@ -29,9 +28,9 @@ export let matchMakingUp: boolean = false;
 export function checkId(id: number) {
     for (const room of rooms) {
         if (room.id === id)
-            return (false);
+            return false;
     }
-    return (true);
+    return true;
 }
 
 export function generateRoom(mode?: string) {
@@ -88,7 +87,7 @@ export async function leaveRoom(userId: number) {
     console.log("Player has not joined a room yet.");
 }
 
-export function joinRoom(player: Player, roomId: number) {
+export async function joinRoom(player: Player, roomId: number) {
     let i : number = 0;
     for (; i < rooms.length; i++) {
         if (rooms[i].id === roomId && rooms[i].players.length < 2) {
@@ -104,10 +103,10 @@ export function joinRoom(player: Player, roomId: number) {
     if (i === rooms.length || rooms[i].players.length !== 2)
         return ;
     console.log(`room ${rooms[i].id}'s game has started`);
-    roomLoop(rooms[i]);
+    await roomLoop(rooms[i]);
 }
 
-function roomLoop(room: Room) {
+async function roomLoop(room: Room) {
     const ball = new Ball (1200 / 2, 800 / 2, 0, 8, 12, "#fcc800");
     const game = new gameState();
     const freq1 = room.players[0].frequency;
@@ -156,7 +155,7 @@ function roomLoop(room: Room) {
             clearInterval(intervalId3);
     }, 10); //Send game info to spectators
     game.state = 1;
-    moveBall(ball, room.players[1], room.players[0], game, room);
+    await moveBall(ball, room.players[1], room.players[0], game, room);
     movePaddle(room.players[1].input, room.players[0].input, room.players[1].paddle, room.players[0].paddle, game);
     moveHazard(game, ball);
     hazardGenerator(game);
@@ -220,7 +219,7 @@ export function removeWaitingPlayer(player: Player) {
     }
 }
 
-export function matchMaking() {
+export async function matchMaking() {
     console.log("Matchmaking service running");
     matchMakingUp = true;
     for (const seeker of waitingList) {
@@ -229,8 +228,8 @@ export function matchMaking() {
             if (seeker === target || !canMatch(seeker, target))
                 continue;
             const roomId = generateRoom("ranked");
-            joinRoom(seeker.player, roomId);
-            joinRoom(target.player, roomId);
+            await joinRoom(seeker.player, roomId);
+            await joinRoom(target.player, roomId);
             removeWaitingPlayer(seeker.player);
             removeWaitingPlayer(target.player);
             break;

@@ -1,5 +1,5 @@
 import {FastifyInstance, FastifyReply, FastifyRequest} from "fastify";
-import {fetchIdByNickName, fetchMmrById, fetchNotifyUser} from "./utils.js";
+import {fetchIdByNickName, fetchMmrById} from "./utils.js";
 import {
     generateId,
     initSchema,
@@ -98,10 +98,10 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                         if (room === -1) {
                             waitingList.push(new waitingPlayer(player));
                             if (!matchMakingUp)
-                                matchMaking();
+                                await matchMaking();
                         }
                         else
-                            joinRoom(player, room);
+                            await joinRoom(player, room);
                         break;
                     case "spec":
                         joinRoomSpec(player, room);

@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import fastifyWebsocket from '@fastify/websocket';
 import { WebSocket } from "ws";
 import { z } from "zod";
-import { insertMatchResult, getMatchHistory } from "./database.js";
+import { insertMatchResult } from "./database.js";
 import pongRoutes from "./routes.js";
 import {fetchPlayerWin, updateMmr} from "./utils.js";
 
@@ -248,7 +248,7 @@ export function bounceAngle(ball: Ball, paddle: Paddle, side: string) {
     norAngle(ball);
 }
 
-export function moveBall(ball: Ball, player1: Player, player2: Player, game: gameState, room: Room) {
+export async function moveBall(ball: Ball, player1: Player, player2: Player, game: gameState, room: Room) {
     if (game.start) {
         let oldX = ball.x;
         let oldY = ball.y;
@@ -278,11 +278,11 @@ export function moveBall(ball: Ball, player1: Player, player2: Player, game: gam
         }
         if (ball.x > 1200) {
             player1.paddle.score = String(Number(player1.paddle.score) + 1);
-            resetGame(ball, player1, player2, game, room);
+            await resetGame(ball, player1, player2, game, room);
         }
         if (ball.x < 0) {
             player2.paddle.score = String(Number(player2.paddle.score) + 1);
-            resetGame(ball, player1, player2, game, room);
+            await resetGame(ball, player1, player2, game, room);
         }
         if (ball.y > 800) {
             ball.y = 800 - (ball.y - 800);

@@ -11,7 +11,6 @@ import {
     Player, resetHazard, resetInput,
     Timer, timerCheck
 } from "./api.js";
-import {rooms} from "./netcode.js";
 
 function resetGameSolo(ball: Ball, lPaddle: Paddle, rPaddle: Paddle, game: gameState, lInput: keyInput, rInput: keyInput) {
     game.start = false;
