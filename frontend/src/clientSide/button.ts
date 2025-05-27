@@ -122,7 +122,6 @@ function logoutBtn() {
 }
 
 function factor() {
-	console.log('factor have been called !')
 	document.getElementById('checkCode')?.addEventListener('click', async () => {
 		const input = document.getElementById('inputVerify') as HTMLInputElement | null
 		if (!input) {
@@ -204,7 +203,7 @@ async function matchHistory() {
 }
 
 function About() {
-	const img = document.getElementById('imgToknow') as HTMLImageElement | null
+	const img = document.getElementById('imgAbout') as HTMLImageElement | null
 	if (img) {
 		if (connected) {
 			const avatar = sessionStorage.getItem('avatar')

@@ -58,7 +58,6 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 			const span = item.querySelector('span')
 			if (span) {
 				span.id = `spanId-${id}`
-				console.log('logname', nickName)
 				span.innerText = nickName
 			}
 			const img = item.querySelector('img')
@@ -117,7 +116,6 @@ export async function launchTournament() {
 
 export async function fetchTournamentBrackets(tournamentId: number): Promise<{id1: number, id2:number }[] | undefined > {
 	const token = sessionStorage.getItem('token')
-    console.log('TOUR nbr id:', tournamentId)
 	const response = await fetch(`/tournament/logTournamentStep/${tournamentId}`, {
 		method: 'GET',
 		headers: {
@@ -131,7 +129,6 @@ export async function fetchTournamentBrackets(tournamentId: number): Promise<{id
 		displayNotification(error.error)
         return undefined
 	}
-    console.log('Success fetchTournamentBrackets')
     const ret = await response.json()
     console.log(ret)
     return ret

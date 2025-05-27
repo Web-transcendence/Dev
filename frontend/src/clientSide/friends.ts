@@ -51,6 +51,6 @@
                 }
             }
         } catch (err) {
-            console.error("Erreur dans friendList():", err);
+            console.error("Erreur dans friendList:", err);
         }
     }

@@ -17,7 +17,9 @@ declare const AOS: any
 export let connected = false
 
 window.addEventListener('popstate', async () => {
-	if ((window.location.pathname === '/connect' || window.location.pathname === '/login') && connected) {
+	if (!connected && window.location.pathname === '/profile' )
+		location.replace('/home')
+	else if ((window.location.pathname === '/connect' || window.location.pathname === '/login') && connected) {
 		history.replaceState(null, '', '/home')
 		await loadPart('/home')
 	} else
@@ -34,14 +36,12 @@ const unhauthorizePath = [
 document.addEventListener('DOMContentLoaded', async () => {
 	constantButton() // Constant button on the Single Page Application
 	setupModalListeners() // Setup global mobal
-	// animate slides on scroll
-	AOS.init({
+	AOS.init({ // animate slides on scroll
 		once: true,
 		duration: 800,
 	})
 	// Reconnect User
 	const token = sessionStorage.getItem('token')
-	console.log('token', token)
 	if (token && await checkForToken()) {
 		await getAvatar()
 		handleConnection(true)
@@ -120,8 +120,6 @@ export function handleConnection(input: boolean) {
 		document.getElementById('connect')?.classList.add('hidden')
 		document.getElementById('profile')?.classList.remove('hidden')
 	} else {
-
-		sessionStorage.clear()
 		sessionStorage.clear()
 		document.getElementById('connect')?.classList.remove('hidden')
 		document.getElementById('profile')?.classList.add('hidden')
@@ -166,7 +164,6 @@ export async function navigate(path: string, event?: MouseEvent): Promise<void> 
 	if (connected && path == '/connect')
 		path = '/profile'
 	history.pushState({}, '', path)
-	console.log('pushState :', path)
 	const idT = sessionStorage.getItem('idTournaments')
 	if (idT && path != '/lobby') {
 		displayNotification(`You left the Tournament`)
