@@ -13,7 +13,6 @@ const httpsOptions = {
         key: readFileSync(join(import.meta.dirname, '../../secure/key.pem')),      // Private key
         cert: readFileSync(join(import.meta.dirname, '../../secure/cert.pem'))     // Certificate
     },
-    logger: true
 };
 
 const SECRET_KEY = process.env.SECRET_KEY;

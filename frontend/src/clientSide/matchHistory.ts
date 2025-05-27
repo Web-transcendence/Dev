@@ -119,6 +119,8 @@ export async function printMatchHistory() {
     if (!id) return;
     const pongMH: MatchResult[] | undefined = await getGameHistory('match-server');
     const tdMH: MatchResult[] | undefined = await getGameHistory('tower-defense');
+    console.log('tdMH', tdMH);
+    console.log('pongMH', pongMH);
     const idNum = Number(id)
     const combined: { match: MatchResult, game: string }[] = [];
 
@@ -194,7 +196,7 @@ export async function getId(): Promise<string | undefined> {
     })
     if (!response.ok) {
         await navigate('/home')
-        displayNotification('Error no authorization', {type: "error"})
+        displayNotification('Please connect to have a match history.')
         return undefined;
     }
     const {id} = await response.json()

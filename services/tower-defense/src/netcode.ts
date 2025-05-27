@@ -34,7 +34,7 @@ export async function startInviteMatch(userId: number, opponent: number) {
     const roomId = generateRoom();
 
     await fetchNotifyUser([opponent], `invitationTowerDefense`, {roomId: roomId, id: userId});
-    await roomWatcher(300, roomId, 0, userId);
+    await roomWatcher(10, roomId, 0, userId); // change this value to change afk trigger time
     return (roomId);
 }
 
@@ -49,7 +49,7 @@ async function roomWatcher(timer: number, roomId: number, clock: number, playerA
             if (room.type === "tournament")
                 await fetchPlayerWin(room.players[0].dbId); // Inform the tournament service that remaining player won by forfeit
             room.players.forEach(player => {
-                player.ws.send(JSON.stringify({ type: "AFK" }));
+                player.ws.send(JSON.stringify({ class: "AFK" }));
                 player.ws.close();
             });
         } else { // Case where no player joined the room (i.e. double loss)
@@ -86,7 +86,7 @@ export function removeWaitingPlayer(player: Player) {
     }
 }
 
-export function matchMaking() {
+export async function matchMaking() {
     console.log("Matchmaking service running");
     matchMakingUp = true;
     for (const seeker of waitingList) {
@@ -95,8 +95,8 @@ export function matchMaking() {
             if (seeker === target || !canMatch(seeker, target))
                 continue;
             const roomId = generateRoom("ranked");
-            joinRoomTd(seeker.player, roomId);
-            joinRoomTd(target.player, roomId);
+            await joinRoomTd(seeker.player, roomId);
+            await joinRoomTd(target.player, roomId);
             removeWaitingPlayer(seeker.player);
             removeWaitingPlayer(target.player);
             break;
