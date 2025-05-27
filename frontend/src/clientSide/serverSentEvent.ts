@@ -216,7 +216,7 @@ const notifyInvitationPong = async ({roomId, id}: { roomId: number, id: number }
 	displayNotification('Invitation to play Pong', {
 		type: 'invitation',
 		onAccept: async () => {
-			await loadPart('/pongFriend')
+			await navigate('/pongFriend')
 			Pong('remote', roomId)
 			console.log('Accepted invite')
 		},

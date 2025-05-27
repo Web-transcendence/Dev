@@ -24,6 +24,13 @@ window.addEventListener('popstate', async () => {
 		await loadPart(window.location.pathname)
 })
 
+const unhauthorizePath = [
+	'/pongFriend',
+	'/towerFriend',
+	'/pongTournament',
+	'/towerTournament',
+]
+
 document.addEventListener('DOMContentLoaded', async () => {
 	constantButton() // Constant button on the Single Page Application
 	setupModalListeners() // Setup global mobal
@@ -51,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	if (tournamentId)
 		await joinTournament(Number(tournamentId))
 	const path = sessionStorage.getItem('path')
-	if (path && !(!connected && path === '/profile' || (path != '/pongTournament' && path != '/towerTournament')))
+	if (path && !(!connected && path === '/profile') && !unhauthorizePath.includes(path))
 		await loadPart(path)
 	else
 		await loadPart('/home')

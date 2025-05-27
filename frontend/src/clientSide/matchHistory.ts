@@ -84,7 +84,7 @@ async function displayCombinedMatchHistory(matches: { match: MatchResult, game: 
             else data[0].losses++
         }
 
-
+        if (!opponent[0].avatar) opponent[0].avatar = '../images/login.png';
         const result: string = (id === match.winner_id) ? 'VICTORY' : 'DEFEAT';
         const scoreUser: number[] = match.playerA_id === id ? [match.scoreA, match.scoreB] : [match.scoreB, match.scoreA];
         addMatchEntry(game, opponent[0].nickName, opponent[0].avatar, scoreUser[0], scoreUser[1], result, match.match_time);

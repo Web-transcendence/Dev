@@ -4,6 +4,7 @@ import {Pong} from "./pong.js";
 import {TowerDefense} from "./td.js";
 import {loadPart} from "./insert.js";
 import {fetchInvitation} from "./invitation.js";
+import {navigate} from './front.js'
 
 let currentInviteId: number | null = null;
 let currentNickname: string | null = null;
@@ -18,7 +19,7 @@ export function setupModalListeners() {
         if (currentInviteId !== null && currentNickname !== null) {
             const roomId = await fetchInvitation('match-server', currentInviteId);
             displayNotification(`Invitation sent to ${currentNickname} !`);
-            await loadPart('/pongFriend');
+            await navigate('/pongFriend');
             Pong('remote', roomId);
             closeModal();
         }
