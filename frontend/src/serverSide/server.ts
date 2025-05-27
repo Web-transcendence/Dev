@@ -13,6 +13,7 @@ const httpsOptions = {
         key: readFileSync(join(import.meta.dirname, '../../secure/key.pem')),      // Private key
         cert: readFileSync(join(import.meta.dirname, '../../secure/cert.pem'))     // Certificate
     },
+    logger: true
 };
 
 const SECRET_KEY = process.env.SECRET_KEY;
@@ -44,11 +45,11 @@ async function authentificate (req: FastifyRequest, reply: FastifyReply) {
     }
 }
 
-app.get('/authJWT', (req: FastifyRequest, res: FastifyReply) => {
-    authentificate(req, res);
+app.get('/authJWT', async (req: FastifyRequest, res: FastifyReply) => {
+    await authentificate(req, res);
     if (!req.headers.id)
-        return res.status(401).send({ message: "Unauthorized - No token provided" });
-    return res.status(200).send({message: "Authentication successfull"});
+        return res.status(401).send({message: "Unauthorized - No token provided"});
+    return res.status(200).send({message: "Authentication successfull", id: req.headers.id});
 })
 
 app.register(fastifyStatic, {

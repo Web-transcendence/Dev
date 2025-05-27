@@ -1,6 +1,7 @@
 import { navigate } from './front.js'
 import { fetchUserInformation, getTournamentList, UserData } from './user.js'
 import { displayNotification } from './notificationHandler.js'
+import { getId } from './matchHistory.js'
 
 export async function joinTournament(tournamentId: number) {
 	try {
@@ -41,7 +42,6 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 		return
 	}
 	let player = 0
-	const myId = Number(sessionStorage.getItem('id'))
 	const playerList = document.getElementById('playerList')
 	const playerTmp = document.getElementById('playerTemplate') as HTMLTemplateElement | null
 	const section = tournamentList.find(s => s.maxPlayer === nbrTournament)
@@ -119,67 +119,9 @@ export async function launchTournament() {
 	}
 }
 
-export async function getBrackets(nbrPlayer: number) {
-	const brackets = document.getElementById('brackets')
-	for (let nbr: number = nbrPlayer; nbr >= 2;) {
-		const playerListTmp = document.getElementById('playerListTemplate')
-		if (!brackets) {
-			displayNotification(`Error from html1`)
-			await navigate('/home')
-			return
-		}
-		if (!playerListTmp) {
-			displayNotification(`Error from html2`)
-			await navigate('/home')
-			return
-		}
-		const clone = playerListTmp.cloneNode(true) as HTMLElement | null
-		if (!clone) {
-			displayNotification(`Error from html3`)
-			await navigate('/home')
-			return
-		}
-		clone.id = `playerList-${nbr}`
-		brackets.appendChild(clone)
-		nbr = nbr / 2
-	}
-	const players = [
-		'Alice', 'Bob',
-		'Charlie', 'David',
-	]
-	for (const player of players) {
-		const playerList = document.getElementById(`playerList-${nbrPlayer}`)
-		const playerTmp = document.getElementById('playerTemplate')
-		if (!playerList || !playerTmp) {
-			displayNotification(`Error from html4`)
-			await navigate('/home')
-			return
-		}
-		const clone = playerList.cloneNode(true) as HTMLElement | null
-		if (!clone) {
-			displayNotification(`Error from html5`)
-			await navigate('/home')
-			return
-		}
-		const item = clone.querySelector('#player')
-		if (!item) {
-			displayNotification(`Error from html6`)
-			await navigate('/home')
-			return
-		}
-		item.innerHTML = player
-		item.id = player
-		playerList.appendChild(item)
-	}
-
-}
-
-export async function fetchTournamentBrackets(tournamentId: number): Promise<{
-	id1: number,
-	id2: number
-}[] | undefined> {
+export async function fetchTournamentBrackets(tournamentId: number): Promise<{id1: number, id2:number }[] | undefined > {
 	const token = sessionStorage.getItem('token')
-	console.log('TOUR nbr id:', tournamentId)
+    console.log('TOUR nbr id:', tournamentId)
 	const response = await fetch(`/tournament/logTournamentStep/${tournamentId}`, {
 		method: 'GET',
 		headers: {

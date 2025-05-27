@@ -1,6 +1,54 @@
 <section class="w-full max-w-6xl mx-auto p-4">
   <h2 class="text-center text-2xl md:text-3xl font-bold text-yellow-400 mb-6">Match History</h2>
 
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <!-- Carte 1 : Pong -->
+    <div class="bg-gray-800 p-4 rounded-xl shadow-md flex flex-col items-center">
+      <h3 class="text-yellow-400 text-2xl font-bold mb-2">Pong</h3>
+
+      <div class="relative w-40 h-40">
+        <canvas id="donutChartPong"></canvas>
+        <div class="absolute inset-0 flex flex-col items-center justify-center space-y-4">
+        <span id="winRatePong" class="text-white text-lg font-medium px-3 py-1 rounded-full whitespace-nowrap">
+          Win Rate: N/A
+        </span>
+          <span id="mmrPong" class="text-white text-lg font-medium px-3 py-1 rounded-full whitespace-nowrap">
+          MMR: N/A
+        </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carte 2 : Tower Defense -->
+    <div class="bg-gray-800 p-4 rounded-xl shadow-md flex flex-col items-center">
+      <h3 class="text-yellow-400 text-2xl font-bold mb-2">Tower Defense</h3>
+
+      <div class="relative w-40 h-40">
+        <canvas id="donutChartTd"></canvas>
+        <div class="absolute inset-0 flex flex-col items-center justify-center space-y-4">
+        <span id="winRateTd" class="text-white text-lg font-medium px-3 py-1 rounded-full whitespace-nowrap">
+          Win Rate: N/A
+        </span>
+          <span id="mmrTd" class="text-white text-lg font-medium px-3 py-1 rounded-full whitespace-nowrap">
+          MMR: N/A
+        </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- Cadre 2 - Tower-Defense -->
+<!--    <div class="bg-gray-800 p-4 rounded-xl shadow-md flex flex-col items-center">-->
+<!--      <h3 class="text-yellow-400 text-lg font-bold mb-2">Tower Defense</h3>-->
+<!--      <div class="relative w-40 h-40">-->
+<!--        <canvas id="donutChartTd"></canvas>-->
+<!--        <span class="absolute inset-0 flex items-center justify-center text-white text-xl font-bold" id="winRateTd">Win Rate : N/A</span>-->
+<!--        <div class="absolute inset-0 flex items-center justify-center text-white text-xl font-bold" id="mmrTd">MMR : N/A</div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+
   <!-- Légende -->
   <div class="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm text-gray-300 border-b border-gray-600 p-2 mb-2 text-center">
     <div>Game</div>

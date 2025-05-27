@@ -60,7 +60,6 @@ export function displayNotification(message: string, options?: {
         rejectBtn.onclick = async () => {
             if (options.onRefuse) options.onRefuse();
             hideNotification(0,  userData.id);
-            document.getElementById(`friendId-${userData.id}`)?.remove();
         };
     } else { // Default Green
         item.classList.remove("bg-red-600", "bg-blue-600");

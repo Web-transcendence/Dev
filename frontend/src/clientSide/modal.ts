@@ -18,7 +18,7 @@ export function setupModalListeners() {
         if (currentInviteId !== null && currentNickname !== null) {
             const roomId = await fetchInvitation('match-server', currentInviteId);
             displayNotification(`Invitation sent to ${currentNickname} !`);
-            await loadPart('/GameFriend');
+            await loadPart('/pongFriend');
             Pong('remote', roomId);
             closeModal();
         }
@@ -28,7 +28,7 @@ export function setupModalListeners() {
         if (currentInviteId !== null && currentNickname !== null) {
             const roomId = await fetchInvitation('tower-defense', currentInviteId);
             displayNotification(`Invitation sent to ${currentNickname} !`);
-            await loadPart('/GameFriend');
+            await loadPart('/towerFriend');
             TowerDefense(roomId);
             closeModal();
         }

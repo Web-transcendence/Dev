@@ -13,42 +13,20 @@ import { connection, disconnect } from './serverSentEvent.js'
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
 
+// language=SQL format=false
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client
     (
-        id
-        INTEGER
-        PRIMARY
-        KEY
-        AUTOINCREMENT,
-        nickName
-        TEXT
-        NOT
-        NULL,
-        email
-        UNIQUE
-        NOT
-        NULL
-        COLLATE
-        NOCASE,
-        password
-        TEXT
-        NOT
-        NULL,
-        google_id
-        INTEGER,
-        secret_key
-        TEXT
-        DEFAULT
-        NULL,
-        pictureProfile
-        TEXT
-        DEFAULT
-        NULL,
-        activated2fa
-        BOOLEAN
-        DEFAULT
-        NULL
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nickName TEXT NOT NULL,
+        email UNIQUE NOT NULL COLLATE NOCASE,
+        password TEXT NOT NULL,
+        google_id INTEGER,
+		secret_key TEXT DEFAULT NULL,
+        pictureProfile TEXT DEFAULT NULL,
+        activated2fa BOOLEAN DEFAULT NULL,
+        pongMmr INTEGER DEFAULT 1200,
+        tdMmr INTEGER DEFAULT 1200
     )
 `)
 
@@ -235,9 +213,8 @@ export class User {
 	}
 
 	getPictureProfile(): string {
-		const userData = Client_db.prepare(`SELECT pictureProfile
-                                            FROM Client
-                                            WHERE id = ?`).get(this.id) as { pictureProfile: string } | undefined
+		const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`)
+			.get(this.id) as { pictureProfile: string } | undefined
 		if (!userData)
 			throw new DataBaseError(`should not happen`, 'internal error system', 500)
 		if (!userData.pictureProfile)
@@ -252,7 +229,6 @@ export class User {
 			return res.status(409).send({ error: 'already connected by sse' })
 		connectedUsers.set(this.id, res)
 		await connection(this.id)
-		console.log(`open`)
 		const message: EventMessage = { event: 'ping' }
 		res.sse({ data: JSON.stringify(message) })
 		const interval = setInterval(() => {
@@ -261,7 +237,6 @@ export class User {
 		}, 15000)
 
 		req.raw.on('close', async () => {
-			console.log(`close`)
 			clearInterval(interval)
 			if (connectedUsers.has(this.id)) {
 				console.log('sse disconnected client = ' + this.id)
@@ -272,4 +247,29 @@ export class User {
 	}
 
 
+	getPongMmr(): number {
+		const { pongMmr } = Client_db.prepare(`SELECT pongMmr FROM Client WHERE id = ?`).get(this.id) as {
+			pongMmr: number
+		}
+		return pongMmr
+	}
+
+	getTdMmr() {
+		const { tdMmr } = Client_db.prepare(`SELECT tdMmr FROM Client WHERE id = ?`).get(this.id) as {
+			tdMmr: number
+		}
+		return tdMmr
+	}
+
+	updatePongMmr(mmr: number) {
+		if (!Client_db.prepare('UPDATE Client set pongMmr = ? where id = ?').run(mmr, this.id)) {
+			throw new DataBaseError(`db fail to update pongMmr`, `internal server error`)
+		}
+	}
+
+	updateTdMmr(mmr: number) {
+		if (!Client_db.prepare('UPDATE Client set tdMmr = ? where id = ?').run(mmr, this.id)) {
+			throw new DataBaseError(`db fail to update tdMmr`, `internal server error`)
+		}
+	}
 }

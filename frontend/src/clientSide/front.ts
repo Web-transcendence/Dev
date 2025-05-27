@@ -136,17 +136,10 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 		else {
 			const reply = await response.json()
 			if (reply.valid) {
-				if (reply.avatar)
-					sessionStorage.setItem('avatar', reply.avatar)
-				if (reply.token) {
-					console.log('VALID RESPONSE', reply.token)
-					sessionStorage.setItem('token', reply.token)
-				}
-				console.log('ID GOOGLE ', reply.id)
-				if (reply.id)
-					sessionStorage.setItem('id', reply.id)
-				if (reply.nickName)
-					sessionStorage.setItem('nickName', reply.nickName)
+				if (reply.avatar) sessionStorage.setItem('avatar', reply.avatar)
+				if (reply.token) sessionStorage.setItem('token', reply.token)
+				if (reply.id) sessionStorage.setItem('id', reply.id)
+				if (reply.nickName) sessionStorage.setItem('nickName', reply.nickName)
 				await navigate('/About')
 				await getAvatar()
 				await sseConnection()

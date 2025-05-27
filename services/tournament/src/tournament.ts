@@ -72,7 +72,7 @@ export class tournament {
 				this.alonePlayerId = 0
 			else {
 				const indexLoser = this.actualParticipant.indexOf(id)
-				await this.bracketWon(indexLoser % 2 == 0 ? indexLoser + 1 : indexLoser - 1)
+
 			}
 		} else {
 			await fetchNotifyUser(this.participantId, 'quitTournament', { id: id, maxPlayer: this.maxPlayer })
@@ -157,7 +157,7 @@ export class tournament {
 			await fetchNotifyUser([loser], 'loseTournament', {})
 		}
 
-		if (this.actualParticipant.length === 2 && this.alonePlayerId == 0)
+		if (this.actualParticipant.filter(participantId => participantId !== 0).length === 1 && this.alonePlayerId == 0)
 			winnerEvent = `winTournament`
 
 		await fetchNotifyUser([winner], winnerEvent, {})

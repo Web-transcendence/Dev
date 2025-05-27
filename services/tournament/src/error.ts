@@ -18,6 +18,7 @@ export class ServerError extends MyError {
     }
 }
 
+
 export class DataBaseError extends MyError {
     constructor(log: string, toSend: string, code: number) {
         super(`DataBase error: ${log}`, toSend, code);
