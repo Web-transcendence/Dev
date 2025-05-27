@@ -1,6 +1,5 @@
 import {joinRoomTd, Player, roomsTd, RoomTd} from "./api.js";
 import {fetchNotifyUser, fetchPlayerWin} from "./utils.js";
-import {getWinnerId} from "./database.js";
 
 export class waitingPlayer {
     player: Player;
