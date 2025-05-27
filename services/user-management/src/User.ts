@@ -13,7 +13,6 @@ import { connection, disconnect } from './serverSentEvent.js'
 export const Client_db = new Database('client.db')  // Importation correcte de sqlite
 
 
-// language=SQL format=false
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client
     (
@@ -263,13 +262,13 @@ export class User {
 
 	updatePongMmr(mmr: number) {
 		if (!Client_db.prepare('UPDATE Client set pongMmr = ? where id = ?').run(mmr, this.id)) {
-			throw new DataBaseError(`db fail to update pongMmr`, `internal server error`)
+			throw new DataBaseError(`db fail to update pongMmr`, `internal server error`, 500)
 		}
 	}
 
 	updateTdMmr(mmr: number) {
 		if (!Client_db.prepare('UPDATE Client set tdMmr = ? where id = ?').run(mmr, this.id)) {
-			throw new DataBaseError(`db fail to update tdMmr`, `internal server error`)
+			throw new DataBaseError(`db fail to update tdMmr`, `internal server error`, 500)
 		}
 	}
 }

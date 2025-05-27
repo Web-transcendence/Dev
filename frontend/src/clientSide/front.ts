@@ -1,9 +1,9 @@
-import {getAvatar} from './user.js'
-import {loadPart} from './insert.js'
-import {sseConnection} from './serverSentEvent.js'
-import {joinTournament, quitTournaments} from './tournaments.js'
-import {displayNotification} from './notificationHandler.js'
-import {setupModalListeners} from './modal.js'
+import { getAvatar } from './user.js'
+import { loadPart } from './insert.js'
+import { sseConnection } from './serverSentEvent.js'
+import { joinTournament, quitTournaments } from './tournaments.js'
+import { displayNotification } from './notificationHandler.js'
+import { setupModalListeners } from './modal.js'
 
 declare global {
 	interface Window { // For Google authenticator
@@ -17,7 +17,9 @@ declare const AOS: any
 export let connected = false
 
 window.addEventListener('popstate', async () => {
-	if ((window.location.pathname === '/connect' || window.location.pathname === '/login') && connected) {
+	if (!connected && window.location.pathname === '/profile' )
+		location.replace('/home')
+	else if ((window.location.pathname === '/connect' || window.location.pathname === '/login') && connected) {
 		history.replaceState(null, '', '/home')
 		await loadPart('/home')
 	} else
@@ -34,14 +36,12 @@ const unhauthorizePath = [
 document.addEventListener('DOMContentLoaded', async () => {
 	constantButton() // Constant button on the Single Page Application
 	setupModalListeners() // Setup global mobal
-	// animate slides on scroll
-	AOS.init({
+	AOS.init({ // animate slides on scroll
 		once: true,
 		duration: 800,
 	})
 	// Reconnect User
 	const token = sessionStorage.getItem('token')
-	console.log('token', token)
 	if (token && await checkForToken()) {
 		await getAvatar()
 		handleConnection(true)
@@ -66,13 +66,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 })
 
 tsParticles.load('tsparticles', {
-	fullScreen: {enable: false},
+	fullScreen: { enable: false },
 	particles: {
-		number: {value: 100},
-		size: {value: 6},
-		move: {enable: true, speed: 1},
-		opacity: {value: 0.5},
-		color: {value: '#ffffff'},
+		number: { value: 100 },
+		size: { value: 6 },
+		move: { enable: true, speed: 1 },
+		opacity: { value: 0.5 },
+		color: { value: '#ffffff' },
 	},
 	background: {
 		color: '#000000',
@@ -120,8 +120,6 @@ export function handleConnection(input: boolean) {
 		document.getElementById('connect')?.classList.add('hidden')
 		document.getElementById('profile')?.classList.remove('hidden')
 	} else {
-
-		sessionStorage.clear()
 		sessionStorage.clear()
 		document.getElementById('connect')?.classList.remove('hidden')
 		document.getElementById('profile')?.classList.add('hidden')
@@ -136,7 +134,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({credential: credit.credential}),
+			body: JSON.stringify({ credential: credit.credential }),
 		})
 		if (!response.ok)
 			console.error('Error: From UserManager returned an error')
@@ -149,6 +147,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 				if (reply.nickName) sessionStorage.setItem('nickName', reply.nickName)
 				await navigate('/About')
 				await getAvatar()
+				if (reply.nickName.includes('googleNickname')) displayNotification('Your name is set by default, you can change it in the profile section')
 				await sseConnection()
 			}
 		}
@@ -166,7 +165,6 @@ export async function navigate(path: string, event?: MouseEvent): Promise<void> 
 	if (connected && path == '/connect')
 		path = '/profile'
 	history.pushState({}, '', path)
-	console.log('pushState :', path)
 	const idT = sessionStorage.getItem('idTournaments')
 	if (idT && path != '/lobby') {
 		displayNotification(`You left the Tournament`)
