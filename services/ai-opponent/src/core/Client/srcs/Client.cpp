@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/23 14:20:22 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/27 07:47:51 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ void	Client::on_message_aiServer(nlohmann::json const & data) {
 }
 
 void	Client::on_message_gameServer(nlohmann::json const & data) {
-	if (data["type"] == "Disconnected") {
+	if (data["type"] == "Disconnected" || data["type"] == "AFK") {
 		this->active.store(FINISHED);
 	}
 	else if (data["type"] == "gameUpdate") {
@@ -215,6 +215,8 @@ void	Client::resetEnv(nlohmann::json const & data) {
 	this->stateMutex.lock();
 	this->localPong.reset(ball, lPaddle, rPaddle);
 	this->stateMutex.unlock();
+	if (data["game"]["state"] == 2)
+		this->active.store(FINISHED);	
 }
 
 bool	Client::giveArrow(std::string const & key, nlohmann::json & j) {

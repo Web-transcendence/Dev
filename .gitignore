@@ -6,7 +6,7 @@
 *.zip
 *.tar.gz
 *.rar
-
+.vs_code/
 
 .idea
 
