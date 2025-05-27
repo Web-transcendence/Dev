@@ -23,9 +23,7 @@ export default async function tdRoutes(fastify: FastifyInstance) {
     fastify.get('/getMatchHistory', async (req: FastifyRequest, res: FastifyReply) => {
         try {
             const id = Number(req.headers.id);
-            console.log('idfnewqieuw', id)
             const MatchResult: MatchResult[] = getMatchHistory(id);
-            console.log(id, MatchResult);
             return (res.status(200).send(MatchResult));
         } catch (error) {
             console.log(error);

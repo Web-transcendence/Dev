@@ -300,7 +300,7 @@ export function Pong(mode: string, room?: number) {
         ctx.fillText("Pong Game", canvas.width * 0.5, canvas.height * 0.5);
         fSize = Math.round(30 * ratio());
         ctx.font = `${fSize}px 'Press Start 2P'`;
-        ctx.fillText("Opponment is AFK", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio()));
+        ctx.fillText("Opponnent is AFK", canvas.width * 0.5, canvas.height * 0.5 + (60 * ratio()));
         ctx.fillText("you can leave now", canvas.width * 0.5, canvas.height * 0.5 + (100 * ratio()));
     }
 

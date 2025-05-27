@@ -229,7 +229,6 @@ export class User {
 			return res.status(409).send({ error: 'already connected by sse' })
 		connectedUsers.set(this.id, res)
 		await connection(this.id)
-		console.log(`open`)
 		const message: EventMessage = { event: 'ping' }
 		res.sse({ data: JSON.stringify(message) })
 		const interval = setInterval(() => {
@@ -238,7 +237,6 @@ export class User {
 		}, 15000)
 
 		req.raw.on('close', async () => {
-			console.log(`close`)
 			clearInterval(interval)
 			if (connectedUsers.has(this.id)) {
 				console.log('sse disconnected client = ' + this.id)
