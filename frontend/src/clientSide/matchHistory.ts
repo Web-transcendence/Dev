@@ -28,7 +28,7 @@ function addMatchEntry(game: string, opponent: string, opponentAvatar: string, s
     const clone = template.content.cloneNode(true) as HTMLElement;
     (clone.querySelector('#matchGame') as HTMLElement).textContent = game;
     (clone.querySelector('#matchOpponent') as HTMLElement).textContent = opponent;
-    (clone.querySelector('#opponentAvatar') as HTMLElement).textContent = opponentAvatar;
+    (clone.querySelector('#opponentAvatar') as HTMLImageElement).src = opponentAvatar;
     (clone.querySelector('#matchScore1') as HTMLElement).textContent = `${score1}`;
     (clone.querySelector('#matchScore2') as HTMLElement).textContent = `${score2}`;
     (clone.querySelector('#matchResult') as HTMLElement).textContent = result;
@@ -136,7 +136,6 @@ export async function printMatchHistory() {
             losses: 0,
         }
     ];
-    console.log('TUCOMBINED ', combined);
     await displayCombinedMatchHistory(combined, idNum, data)
     await drawChart(data)
 }
@@ -151,7 +150,6 @@ async function drawChart(data: ChartData[]) {
     const mmrPong = document.getElementById('mmrPong')
     const mmrTd = document.getElementById('mmrTd')
     const log = await getMmrById()
-    console.log('MMR DATA LOG ', log)
     if (!log) {
         displayNotification(`Error can't find your mmr`)
         await navigate('/home')
