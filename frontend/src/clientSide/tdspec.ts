@@ -65,7 +65,7 @@ export function TowerDefenseSpec(room?: number) {
         ctxTd.font = `${tile / 4.2}px 'Press Start 2P'`;
         if (gameTd.state === 0.5) {
             drawRawButton(canvasTd.width * 0.5, canvasTd.height * 0.9, canvasTd.width * 0.26, canvasTd.height * 0.1, "#b329d1");
-            ctxTd.fillText("Waiting for opponent", canvasTd.width * 0.5, canvasTd.height * 0.91, canvasTd.width * 0.22);
+            ctxTd.fillText("Waiting", canvasTd.width * 0.5, canvasTd.height * 0.91, canvasTd.width * 0.22);
             ctxTd.fillText(dots(), canvasTd.width * 0.5, canvasTd.height * 0.935);
         } else {
             drawRawButton(canvasTd.width * 0.5, canvasTd.height * 0.9, canvasTd.width * 0.26, canvasTd.height * 0.1, "#b329d1");
@@ -349,6 +349,20 @@ export function TowerDefenseSpec(room?: number) {
         ctxTd.fillText("Clic to spectate another game", canvasTd.width * 0.5, canvasTd.height * 0.6);
     }
 
+    function specEndScreen() {
+        ctxTd.drawImage(assetsTd.getImage(`map${nmap}`)!, 0, 0, canvasTd.width, canvasTd.height);
+        drawEnemies();
+        drawButtons();
+        drawTowers();
+        ctxTd.strokeStyle = "#0d0d0d";
+        ctxTd.lineWidth = tile * 0.2;
+        ctxTd.font = `${tile}px 'Press Start 2P'`;
+        ctxTd.textAlign = "center"
+        ctxTd.fillStyle = "#17b645";
+        ctxTd.strokeText(`${gameTd.winner} won!`, canvasTd.width * 0.5, canvasTd.height * 0.5);
+        ctxTd.fillText(`${gameTd.winner} won!`, canvasTd.width * 0.5, canvasTd.height * 0.5);
+    }
+
     // Loop
     function mainLoopTd() {
         switch (gameTd.state) {
@@ -362,6 +376,9 @@ export function TowerDefenseSpec(room?: number) {
             case 2:
             case 2.5:
                 drawEndScreen();
+                break;
+            case 3:
+                specEndScreen();
                 break;
             default:
                 break;
@@ -450,7 +467,7 @@ export function TowerDefenseSpec(room?: number) {
                 case "Id":
                     break;
                 case "gameEnd":
-                    gameTd.state = 2;
+                    gameTd.state = 3;
                     winner = data.winner;
                     break;
                 default:

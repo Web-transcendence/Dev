@@ -167,7 +167,7 @@ export async function startInviteMatch(userId: number, opponent: number) {
     const roomId = generateRoom();
 
     await fetchNotifyUser([opponent], `invitationPong`, {roomId: roomId, id: userId});
-    await roomWatcher(10, roomId, 0, userId);
+    await roomWatcher(300, roomId, 0, userId);
     return (roomId);
 }
 

@@ -604,12 +604,12 @@ export function TowerDefense(room?: number) {
         ctxTd.fillText("Slime Defender", canvasTd.width * 0.545, canvasTd.height * 0.25, canvasTd.width * 0.6);
         ctxTd.strokeStyle = "#0d0d0d";
         ctxTd.lineWidth = tile * 0.2;
-        ctxTd.font = `${tile}px 'Press Start 2P'`;
+        ctxTd.font = `${tile * 0.6}px 'Press Start 2P'`;
         ctxTd.textAlign = "center"
         ctxTd.fillStyle = "#17b645";
-        ctxTd.strokeText(`Opponnent is AFK`, canvasTd.width * 0.5, canvasTd.height * 0.5);
+        ctxTd.strokeText(`Opponnent is AFK`, canvasTd.width * 0.5, canvasTd.height * 0.5, canvasTd.width * 0.8);
         ctxTd.fillText(`Opponnent is AFK`, canvasTd.width * 0.5, canvasTd.height * 0.5);
-        ctxTd.font = `${tile * 0.7}px 'Press Start 2P'`;
+        ctxTd.font = `${tile * 0.45}px 'Press Start 2P'`;
         ctxTd.strokeText(`You can leave now`, canvasTd.width * 0.5, canvasTd.height * 0.6);
         ctxTd.fillText(`You can leave now`, canvasTd.width * 0.5, canvasTd.height * 0.6);
     }
@@ -629,9 +629,6 @@ export function TowerDefense(room?: number) {
                 drawEndScreen();
                 break;
             case 3:
-                specEndScreen();
-                break;
-            case 4:
                 oppAfkScreen();
                 break;
             default:
@@ -721,12 +718,8 @@ export function TowerDefense(room?: number) {
                 case "Id":
                     player1.id = data.id;
                     break;
-                case "gameEnd":
-                    gameTd.state = 3;
-                    gameTd.winner = data.winner;
-                    break;
                 case "AFK":
-                    gameTd.state = 4;
+                    gameTd.state = 3;
                     break;
                 default:
                     console.warn("Unknown type received:", data);
