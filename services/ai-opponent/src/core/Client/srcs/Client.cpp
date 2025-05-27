@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/26 10:00:16 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/27 07:47:51 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ void	Client::on_message_aiServer(nlohmann::json const & data) {
 }
 
 void	Client::on_message_gameServer(nlohmann::json const & data) {
-	if (data["type"] == "Disconnected") {
+	if (data["type"] == "Disconnected" || data["type"] == "AFK") {
 		this->active.store(FINISHED);
 	}
 	else if (data["type"] == "gameUpdate") {
