@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 11:19:32 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/22 14:35:49 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/27 10:37:01 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ namespace Debug {
 		return ;
 	}
 
-	void	displayState(std::vector<double> const & vec) {
+	void	displayState(std::vector<float> const & vec) {
 		std::cout << "\033[H"; // remet le curseur en haut à gauche
 		for (size_t i = 0; i < vec.size(); ++i) {
 			if (i % 30 == 0 && i != 0)

@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/27 07:47:51 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/27 13:55:51 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 
 Client::Client(int const gameId) :\
 		gameId(gameId),\
+		network(Network("weights.json")), \
 		factoryServer(FACTORY_SERVER_ADDRESS),\
 		allInput(std::array<std::string, 3>{UP, DOWN, NOTHING}),\
 		lastKey(NOTHING) {
@@ -36,13 +37,11 @@ Client::Client(int const gameId) :\
 	this->c.set_open_handler([this](websocketpp::connection_hdl hdl){this->on_open(hdl);});
 	this->c.set_close_handler([this](websocketpp::connection_hdl hdl){this->on_close(hdl);});
 	websocketpp::lib::error_code	ec;
-	this->aiServer = this->c.get_connection(AI_SERVER_ADDRESS, ec);
 	this->gameServer = this->c.get_connection(GAME_SERVER_ADDRESS, ec);
 	if (ec) {
 		std::cout << "Error: " << ec.message() << std::endl;
 		throw WsConnectionException();
 	}
-	this->c.connect(this->aiServer);
 	this->c.connect(this->gameServer);
 	return ;
 }
@@ -58,10 +57,6 @@ void	Client::on_fail(websocketpp::connection_hdl hdl) {
 		Debug::consoleLog("Game server connection failed", this->gameId, this->logMutex);
 		this->promiseGS.set_value(false);
 	}
-	else if (con.get()->get_uri()->str() == AI_SERVER_ADDRESS) {
-		Debug::consoleLog("AI server connection failed", this->gameId, this->logMutex);
-		this->promiseAI.set_value(false);
-	}
 }
 
 void	Client::on_open(websocketpp::connection_hdl hdl) {
@@ -70,10 +65,6 @@ void	Client::on_open(websocketpp::connection_hdl hdl) {
 	if (con.get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
 		Debug::consoleLog("Game server connection etablished", this->gameId, this->logMutex);
 		this->promiseGS.set_value(true);
-	}
-	else if (con.get()->get_uri()->str() == AI_SERVER_ADDRESS) {
-		Debug::consoleLog("AI server connection etablished", this->gameId, this->logMutex);
-		this->promiseAI.set_value(true);
 	}
 }
 
@@ -84,18 +75,10 @@ void	Client::on_close(websocketpp::connection_hdl hdl) {
 		if (this->active.load() == WAITING) this->promiseGS.set_value(false);
 		this->active.store(FINISHED);
 	}
-	else if (con.get()->get_uri()->str() == AI_SERVER_ADDRESS) {
-		Debug::consoleLog("AI server disconnected", this->gameId, this->logMutex);
-		this->active.store(FINISHED);
-	}
 }
 
 void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg) {
-	if (this->c.get_con_from_hdl(hdl).get()->get_uri()->str() == AI_SERVER_ADDRESS) {
-		auto	data = nlohmann::json::parse(msg->get_payload());
-		this->on_message_aiServer(data);
-	}
-	else if (this->c.get_con_from_hdl(hdl).get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
+	if (this->c.get_con_from_hdl(hdl).get()->get_uri()->str() == GAME_SERVER_ADDRESS) {
 		auto	data = nlohmann::json::parse(msg->get_payload());
 		this->on_message_gameServer(data);
 	}
@@ -106,20 +89,6 @@ void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg
 		ss << ": " << msg->get_payload();
 		Debug::consoleLog(ss.str(), this->gameId, this->logMutex);
 	}
-	return ;
-}
-
-void	Client::on_message_aiServer(nlohmann::json const & data) {
-	std::vector<double>	o(data["data"]);
-	
-	int const	key = std::distance(o.begin(), std::max_element(o.begin(), o.end()));
-	this->stateMutex.lock();
-	this->localPong.action(key);
-	this->stateMutex.unlock();
-	nlohmann::json	j;
-	j["type"] = "input";
-	bool const	send = this->giveArrow(this->allInput.at(key), j);
-	if (send == true) this->gameServer->send(j.dump());
 	return ;
 }
 
@@ -142,20 +111,18 @@ void	Client::on_message_gameServer(nlohmann::json const & data) {
 
 void	Client::run( void ) {
 	std::future<bool>	futureGS = this->promiseGS.get_future();
-	std::future<bool>	futureAI = this->promiseAI.get_future();
 
 	this->active.store(WAITING);
 	std::thread	t([this](){this->c.run();});
 	t.detach();
-	bool	successAI = futureAI.get();
 	bool	successGS = futureGS.get();
-	if (successGS && successAI) {
+	if (successGS) {
 		nlohmann::json	init;
 		init["type"] = "socketInit";
 		init["nick"] = "AI";
 		init["room"] = this->gameId;
 		this->gameServer->send(init.dump(), websocketpp::frame::opcode::text);
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		nlohmann::json	ready;
 		ready["type"] = "ready";
 		ready["mode"] = "remote";
@@ -180,7 +147,14 @@ void	Client::loop( void ) {
 		this->stateMutex.lock();
 		auto	input = this->localPong.getState();
 		this->stateMutex.unlock();
-		this->aiServer->send(input->data(), sizeof(double)*N_NEURON_INPUT);
+		auto o = this->network.feedForward(*input);
+		int	key= std::distance(o.begin(), std::max_element(o.begin(), o.end()));
+		this->stateMutex.lock();
+		this->localPong.action(key);
+		this->stateMutex.unlock();
+		nlohmann::json	j;
+		j["type"] = "input";
+		this->giveArrow(this->allInput.at(key), j);
 		if (!checkTime())
 			this->active.store(FINISHED);
 		std::this_thread::sleep_for(std::chrono::milliseconds(INPUT_TIMESTAMP));
@@ -189,7 +163,7 @@ void	Client::loop( void ) {
 }
 
 void	Client::resetEnv(nlohmann::json const & data) {
-	t_ball	ball(std::array<double, 6>{\
+	t_ball	ball(std::array<float, 6>{\
 		data["ball"]["x"],\
 		data["ball"]["y"],\
 		data["ball"]["angle"],\
@@ -197,14 +171,14 @@ void	Client::resetEnv(nlohmann::json const & data) {
 		data["ball"]["ispeed"],\
 		data["ball"]["radius"],
 	});
-	t_paddle rPaddle(std::array<double, 5>{\
+	t_paddle rPaddle(std::array<float, 5>{\
 		data["paddle2"]["x"],\
 		data["paddle2"]["y"],\
 		data["paddle2"]["width"],\
 		data["paddle2"]["height"],\
 		data["paddle2"]["speed"]
 	});
-	t_paddle lPaddle(std::array<double, 5>{\
+	t_paddle lPaddle(std::array<float, 5>{\
 		data["paddle1"]["x"],\
 		data["paddle1"]["y"],\
 		data["paddle1"]["width"],\
@@ -219,26 +193,26 @@ void	Client::resetEnv(nlohmann::json const & data) {
 		this->active.store(FINISHED);	
 }
 
-bool	Client::giveArrow(std::string const & key, nlohmann::json & j) {
-	bool	send = false;
-
+void	Client::giveArrow(std::string const & key, nlohmann::json & j) {
 	if (key != this->lastKey) {
-		j["key"] = lastKey;
-		j["state"] = RELEASE;
-		if (key != NOTHING) {	
+		if (this->lastKey != NOTHING) {
+			j["key"] = lastKey;
+			j["state"] = RELEASE;
 			this->gameServer->send(j.dump());
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		}
+		if (key != NOTHING) {
 			j["key"] = key;
 			j["state"] = PRESS;
+			this->gameServer->send(j.dump());
 		}
-		send = true;
+		this->lastKey = key;
 	}
-	this->lastKey = key;
-	return send;
 }
 
 bool	Client::checkTime( void ) {
 	auto	t2 = std::chrono::steady_clock::now();
-	auto	timeSpan = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - this->t1.load());
+	auto	timeSpan = std::chrono::duration_cast<std::chrono::duration<float>>(t2 - this->t1.load());
 	if (timeSpan.count() >= CLIENT_MAX_SPAN_STATE)
 		return false;
 	return true;

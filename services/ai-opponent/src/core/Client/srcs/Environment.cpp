@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/22 11:57:44 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/22 14:39:43 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/27 14:09:42 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@
 #include <cmath>
 
 Environment::Environment( void ) : \
-	ball(std::array<double, 6>{WIDTH/2,HEIGHT,2,0,10,10}), \
-	rPaddle(std::array<double, 5>{WIDTH-30,HEIGHT/2,20,200,10}), \
-	lPaddle(std::array<double, 5>{30,HEIGHT/2,20,200,10}) {
+	ball(std::array<float, 6>{WIDTH/2,HEIGHT,2,0,10,10}), \
+	rPaddle(std::array<float, 5>{WIDTH-30,HEIGHT/2,20,200,10}), \
+	lPaddle(std::array<float, 5>{30,HEIGHT/2,20,200,10}) {
     this->reset(this->ball, this->lPaddle, this->rPaddle);
 	return ;
 }
@@ -31,8 +31,8 @@ Environment::~Environment( void ) {}
 
 void	Environment::action(int action) {
     int const   timeStamp = 6;
-	auto		state = std::make_shared<std::vector<double>>(std::vector<double>(N_NEURON_INPUT));
-    double num = 0.16;
+	auto		state = std::make_shared<std::vector<float>>(std::vector<float>(N_INPUT));
+    float num = 0.16;
     for (int lap = 0; lap < timeStamp; lap++, num += 0.16) {
         this->moovePaddle(action);
         this->mooveBall();
@@ -66,19 +66,19 @@ void	Environment::moovePaddle(int const action) {
 }
 
 void	Environment::moovelPaddle( void ) {
-	double diff = ball.y - lPaddle.y;
+	float diff = ball.y - lPaddle.y;
 
-	double tolerance = 10.0;
+	float tolerance = 10.0;
 
     if (std::abs(diff) > tolerance) {
-		double direction = (diff > 0) ? 1.0 : -1.0;
+		float direction = (diff > 0) ? 1.0 : -1.0;
 		lPaddle.y += direction * lPaddle.s * 0.6;
 	}
 }
 
 void	Environment::mooveBall( void ) {
-	double	oldX = ball.x;
-    double	oldY = ball.y;
+	float	oldX = ball.x;
+    float	oldY = ball.y;
     int		collision = 0;
     ball.x += cos(ball.a) * ball.s;
     ball.y += sin(ball.a) * ball.s;
@@ -97,12 +97,17 @@ void	Environment::mooveBall( void ) {
         ball.x = oldX + cos(ball.a) * (sqrt(pow(ball.y - oldY, 2) + pow(ball.x - oldX, 2)));
         ball.y = oldY + sin(ball.a) * (sqrt(pow(ball.y - oldY, 2) + pow(ball.x - oldX, 2)));
     }
+    // if (ball.x > WIDTH) {
+    //     ball.x = WIDTH - (ball.x - WIDTH);
+    //     ball.a = M_PI - ball.a;
+    // } else if (ball.x < 0) {
+    //     ball.x = -ball.x;
+    //     ball.a = M_PI - ball.a;
+    // }
     if (ball.x > WIDTH) {
-        ball.x = WIDTH - (ball.x - WIDTH);
-        ball.a = M_PI - ball.a;
+        this->reset();
     } else if (ball.x < 0) {
-        ball.x = -ball.x;
-        ball.a = M_PI - ball.a;
+        this->reset();
     }
     if (ball.y > HEIGHT) {
         ball.y = HEIGHT - (ball.y - HEIGHT);
@@ -119,7 +124,7 @@ void	Environment::reset(t_ball const & ball, t_paddle const & lPaddle, t_paddle 
     memcpy(&this->ball, &ball, sizeof(t_ball));
     memcpy(&this->lPaddle, &lPaddle, sizeof(t_paddle));
     memcpy(&this->rPaddle, &rPaddle, sizeof(t_paddle));
-	auto		state = std::make_shared<std::vector<double>>(std::vector<double>(N_NEURON_INPUT));
+	auto		state = std::make_shared<std::vector<float>>(std::vector<float>(N_INPUT));
 	this->drawBall(*state, std::floor(this->ball.x/DS_R), std::floor(this->ball.y/DS_R), 1.0);
 	this->drawPaddle(*state, std::floor(this->rPaddle.x/DS_R), std::floor(this->rPaddle.y/DS_R), 200, 1.0);
 	this->drawPaddle(*state, std::floor(this->lPaddle.x/DS_R), std::floor(this->lPaddle.y/DS_R), 200, 1.0);
@@ -127,7 +132,14 @@ void	Environment::reset(t_ball const & ball, t_paddle const & lPaddle, t_paddle 
 	return ;
 }
 
-int		Environment::checkCollision(double oldX, double oldY) {
+void    Environment::reset( void ) {
+    t_ball      ball(std::array<float, 6>{WIDTH/2,HEIGHT/2,2,10,10,10});
+	t_paddle    rPaddle(std::array<float, 5>{WIDTH-30,HEIGHT/2,20,200,10});
+	t_paddle    lPaddle(std::array<float, 5>{30,HEIGHT/2,20,200,10});
+    this->reset(ball, lPaddle, rPaddle);
+}
+
+int		Environment::checkCollision(float oldX, float oldY) {
     int sign = 1;
     int posy = 0;
     if (ball.a > 0.5 * M_PI && ball.a < 1.5 * M_PI)
@@ -144,7 +156,7 @@ int		Environment::checkCollision(double oldX, double oldY) {
 }
 
 void	Environment::bounceAngle(t_paddle & paddle, std::string const & side) {
-    double const ratio = (ball.y - paddle.y) / (paddle.h / 2);
+    float const ratio = (ball.y - paddle.y) / (paddle.h / 2);
     ball.s = ball.is + 0.5 * ball.is * std::abs(ratio);
     ball.a = M_PI * 0.25 * ratio;
     if (side == "right")
@@ -163,12 +175,12 @@ void	Environment::norAngle( void ) {
 	return ;
 }
 
-std::shared_ptr<std::vector<double>>	Environment::getState( void ) {
+std::shared_ptr<std::vector<float>>	Environment::getState( void ) {
 	return	this->_state;
 }
 
 t_gState    Environment::getGameState( void ) {
-    return t_gState(std::array<double,6>{this->ball.x,\
+    return t_gState(std::array<float,6>{this->ball.x,\
                                 this->ball.y,\
                                 this->rPaddle.x,\
                                 this->rPaddle.y,\
@@ -176,15 +188,15 @@ t_gState    Environment::getGameState( void ) {
                                 this->lPaddle.y});
 }
 
-void	Environment::drawBall(std::vector<double> & s, int x, int y, double num) {
+void	Environment::drawBall(std::vector<float> & s, int x, int y, float num) {
 	int i = y * DOWN_SCALE_W + x;
 	
-	if (i < N_NEURON_INPUT && i >= 0)
+	if (i < N_INPUT && i >= 0)
 		s.at(i) = num;
 	return ;
 }
 
-void	Environment::drawPaddle(std::vector<double> & s, int x, int y, int sizePaddle, double num) {
+void	Environment::drawPaddle(std::vector<float> & s, int x, int y, int sizePaddle, float num) {
 	int	size = sizePaddle / DS_R;
 	int start = (y - (size / 2)) * DOWN_SCALE_W;
 	
@@ -203,9 +215,9 @@ int	Environment::randInt( void ) const {
 	return dist(gen);	
 }
 
-double	Environment::randDouble( void ) const {
+float	Environment::randfloat( void ) const {
 	static std::random_device 					rd;
     static std::mt19937 						gen(rd());  
-    static std::uniform_real_distribution<double>	dist(0., 1.);
+    static std::uniform_real_distribution<float>	dist(0., 1.);
 	return dist(gen);
 }
