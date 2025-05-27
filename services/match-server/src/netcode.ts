@@ -60,20 +60,17 @@ export async function leaveRoom(userId: number) {
         const room = rooms[i];
         const playerIndex = room.players.findIndex(player => player.id === userId);
         if (playerIndex !== -1) {
-            const player = room.players[playerIndex];
-            console.log(`player: ${player.name} with id: ${userId} left room ${room.id}`);
+            console.log(`player: ${room.players[playerIndex].name} with id: ${userId} left room ${room.id}`);
             if (room.players.length === 2 && Number(room.players[0].paddle.score) < 6 && Number(room.players[1].paddle.score) < 6) {
                 const [playerA, playerB] = room.players;
                 const scoreA = Number(playerA.paddle.score);
                 const scoreB = Number(playerB.paddle.score);
                 const winnerIndex = room.players.findIndex(player => player.id !== userId);
-                console.log(`winner: ${winnerIndex}`);
                 const winner = room.players[winnerIndex];
                 if (room.type === "tournament")
                     await fetchPlayerWin(winner.dbId);
                 if (room.type === "ranked")
                     await updateMmr(playerA, playerB, winnerIndex);
-                console.log(`A: ${playerA.dbId} B: ${playerB.dbId} Windex: ${winnerIndex}`);
                 insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
                 room.ended = true;
                 room.specs.forEach(spec => {
@@ -116,7 +113,7 @@ function roomLoop(room: Room) {
     const freq1 = room.players[0].frequency;
     const freq2 = room.players[1].frequency
     const intervalId1 = setInterval(() => {
-        if (room.players.length === 2) {
+        if (room && room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
                 paddle1: room.players[1].paddle,
@@ -129,7 +126,7 @@ function roomLoop(room: Room) {
             clearInterval(intervalId1);
     }, freq1); //Send game info to player 1
     const intervalId2 = setInterval(() => {
-        if (room.players.length === 2) {
+        if (room && room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
                 paddle1: room.players[1].paddle,
@@ -142,7 +139,7 @@ function roomLoop(room: Room) {
             clearInterval(intervalId2);
     }, freq2); //Send game info to player 2
     const intervalId3 = setInterval(() => {
-        if (room.players.length === 2) {
+        if (room && room.players.length === 2) {
             const payload = {
                 type: "gameUpdate",
                 paddle1: room.players[1].paddle,

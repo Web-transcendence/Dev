@@ -7,9 +7,10 @@ import * as fs from 'fs';
 import { fileURLToPath } from "url";
 import {clearInterval} from "node:timers";
 import {getMatchHistory, insertMatchResult} from "./database.js";
-import {fetchIdByNickName, fetchNotifyUser, fetchPlayerWin} from "./utils.js";
+import {fetchIdByNickName, fetchMmrById, fetchNotifyUser, fetchPlayerWin, updateMmr} from "./utils.js";
 import tdRoutes from "./routes.js";
 import {changeRoomSpec, joinRoomSpec, leaveRoomSpec} from "./spectator.js";
+import {matchMaking, matchMakingUp, removeWaitingPlayer, waitingList, waitingPlayer} from "./netcode.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,6 +79,7 @@ class Timer {
 export class Player {
     name: string;
     dbId: number = -1;
+    mmr: number = 1200;
     id: number;
     ws: WebSocket;
     hp: number = 3;
@@ -108,10 +110,8 @@ export class Player {
         this.bullets = this.bullets.filter(bullet => bullet.state);
     }
     spawnTower() {
-        if (this.mana < this.cost || this.board.length >= 20) {
-            console.log(`${this.name}: Mana insufficient or board full`);
+        if (this.mana < this.cost || this.board.length >= 20)
             return ;
-        }
         this.mana -= this.cost;
         this.cost += 10;
         let pos = -1;
@@ -124,7 +124,6 @@ export class Player {
         const newTower = this.deck[type].clone();
         newTower.startAttack(this, pos);
         this.board.push(new Board(pos, newTower));
-        console.log(`${this.name}: Tower ${this.deck[type].type} spawned at position ${pos}`);
     }
     upTowerRank(tower: number) {
         if (this.mana >= 100 * Math.pow(2, this.deck[tower].level) && this.deck[tower].level < 4) {
@@ -276,6 +275,9 @@ async function checkGameOver(player1: Player, player2: Player, game: Game, room:
         const winnerName = winner === 0 ? player1.name : player2.name;
         room.ended = true;
         insertMatchResult(player1.dbId, player2.dbId, player1.hp, player2.hp, winner);
+        if (room.type === "ranked") {
+            await updateMmr(player1, player2, winner);
+        }
         if (room.type === "tournament")
             await fetchPlayerWin(winner === 0 ? player1.dbId : player2.dbId);
         room.specs.forEach(spec => {
@@ -290,7 +292,6 @@ async function checkGameOver(player1: Player, player2: Player, game: Game, room:
             board.tower.stopAttack()
         });
         player2.bullets.splice(0, player2.bullets.length);
-        console.log(getMatchHistory(player1.dbId));
     }
 }
 
@@ -471,84 +472,74 @@ function checkRoom(room: RoomTd, intervalId: ReturnType<typeof setInterval>, gam
 
 async function leaveRoom(userId: number) {
     for (let i = 0 ; i < roomsTd.length; i++) {
-        for (let j = 0; j < roomsTd[i].players.length; j++) {
-            if (roomsTd[i].players[j].id === userId) {
-                if (roomsTd[i].players.length === 2 && roomsTd[i].players[0].hp > 0 && roomsTd[i].players[1].hp > 0) {
-                    roomsTd[i].ended = true;
-                    insertMatchResult(roomsTd[i].players[0].dbId, roomsTd[i].players[1].dbId, roomsTd[i].players[0].hp, roomsTd[i].players[1].hp, j === 0 ? 1 : 0);
-                    if (roomsTd[i].type === "tournament")
-                        await fetchPlayerWin(roomsTd[i].players[j === 0 ? 1 : 0].dbId);
-                    roomsTd[i].specs.forEach(spec => {
-                        spec.ws.send(JSON.stringify({ type: "gameEnd", winner: roomsTd[i].players[j === 0 ? 1 : 0].name }));
-                    });
-                }
-                console.log("player: ", roomsTd[i].players[j].name, " with id: ", userId, " left room ", roomsTd[i].id);
-                roomsTd[i].players.splice(j, 1);
-                if (roomsTd[i].players.length === 0)
-                    roomsTd.splice(i, 1);
-                return ;
+        const room = roomsTd[i];
+        const playerIndex = room.players.findIndex(player => player.id === userId);
+        if (playerIndex !== -1) {
+            console.log(`player: ${room.players[playerIndex].name} with id: ${userId} left room ${room.id}`);
+            if (room.players.length === 2 && room.players[0].hp > 0 && room.players[1].hp > 0) {
+                const [playerA, playerB] = room.players;
+                const scoreA = playerA.hp;
+                const scoreB = playerB.hp;
+                const winnerIndex = room.players.findIndex(player => player.id !== userId);
+                const winner = room.players[winnerIndex];
+                if (room.type === "tournament")
+                    await fetchPlayerWin(winner.dbId);
+                if (room.type === "ranked")
+                    await updateMmr(playerA, playerB, winnerIndex);
+                insertMatchResult(playerA.dbId, playerB.dbId, scoreA, scoreB, winnerIndex);
+                room.ended = true;
+                room.specs.forEach(spec => {
+                    spec.ws.send(JSON.stringify({ type: "gameEnd", winner: winner.name }));
+                });
             }
+            room.players.splice(playerIndex, 1);
+            if (room.players.length === 0) {
+                console.log(`room: ${room.id} has been cleaned.`);
+                roomsTd.splice(i, 1);
+            }
+            return ;
         }
     }
     console.log("Player has not joined a room yet.");
 }
 
-function joinRoomTd(player: Player, roomId: number) {
-    let id: number = -1;
+export function joinRoomTd(player: Player, roomId: number) {
     let i : number = 0;
-    if (roomId !== -1) { // Joining a defined room (invite or tournaments)
-        for (; i < roomsTd.length; i++) {
-            if (roomsTd[i].id === roomId && roomsTd[i].players.length < 2) {
-                roomsTd[i].players.push(player);
-                if (roomsTd[i].players.length === 2)
-                    break ;
-                else
-                    return ;
-            }
-        }
-    } else { // Basic random matchmaking
-        for (; i < roomsTd.length; i++) {
-            if (roomsTd[i].id < 1000 && roomsTd[i].players.length < 2 && roomsTd[i].players.length === 1) {
-                roomsTd[i].players.push(player);
-                id = roomsTd[i].id;
-                break;
-            }
-        }
-        if (id === -1) {
-            let room = new RoomTd(roomsTd.length);
-            room.players.push(player);
-            roomsTd.push(room);
-            return;
+    for (; i < roomsTd.length; i++) {
+        if (roomsTd[i].id === roomId && roomsTd[i].players.length < 2) {
+            roomsTd[i].players.push(player);
+            console.log(player.name, "joined room", roomsTd[i].id);
+            break;
         }
     }
-    if (i === roomsTd.length)
+    if (i === roomsTd.length || roomsTd[i].players.length !== 2)
         return ;
+    console.log(`room ${roomsTd[i].id}'s game has started`);
+    roomLoop(roomsTd[i]);
+}
+
+function roomLoop(room: RoomTd) {
     let game = new Game(new Timer(0, 4));
     const intervalId = setInterval(() => {
-        let i = roomsTd.findIndex(room => room.id === id);
-        if (i === -1) {
-            clearInterval(intervalId);
-            return;
-        }
-        const payload = {
-            class: 'gameUpdate',
-            player1: roomsTd[i].players[0],
-            player2: roomsTd[i].players[1],
-            game: game
-        };
-        if (roomsTd[i].players.length === 2) {
-            roomsTd[i].players[0].ws.send(JSON.stringify(payload));
-            roomsTd[i].players[1].ws.send(JSON.stringify(payload));
-            roomsTd[i].specs.forEach(spec => {
-            if (game.state < 2) {
-                spec.ws.send(JSON.stringify(payload));
-            }
+        if (room && room.players.length === 2) {
+            const payload = {
+                class: 'gameUpdate',
+                player1: room.players[0],
+                player2: room.players[1],
+                game: game
+            };
+            room.players[0].ws.send(JSON.stringify(payload));
+            room.players[1].ws.send(JSON.stringify(payload));
+            room.specs.forEach(spec => {
+                if (game.state < 2) {
+                    spec.ws.send(JSON.stringify(payload));
+                }
             });
         }
     }, 10);
     game.state = 1;
-    mainLoop(roomsTd[i].players[0], roomsTd[i].players[1], game, roomsTd[i]);
-    checkRoom(roomsTd[i], intervalId, game);
+    mainLoop(room.players[0], room.players[1], game, room);
+    checkRoom(room, intervalId, game);
 }
 
 export const INTERNAL_PASSWORD = process.env?.SECRET_KEY;
@@ -577,13 +568,14 @@ fastify.register(async function (fastify) {
                 }
                 player.name = data.nick;
                 try {
-                    if (!data.nick.includes("guest"))
-                        player.dbId = await fetchIdByNickName(data.nick);
+                    player.dbId = await fetchIdByNickName(data.nick);
+                    if (data.room)
+                        room = data.room;
+                    if (room === -1)
+                        player.mmr = await fetchMmrById(player.dbId);
                 } catch (error) {
                     console.log(error);
                 }
-                if (data.room)
-                    room = data.room;
                 init = true;
             } else if (init && msg.event === "click") {
                 const {data, success, error} = inputSchema.safeParse(msg);
@@ -623,7 +615,13 @@ fastify.register(async function (fastify) {
                     player.deck.push(allTowers[data.t3].clone());
                     player.deck.push(allTowers[data.t4].clone());
                     player.deck.push(allTowers[data.t5].clone());
-                    joinRoomTd(player, room);
+                    if (room !== -1)
+                        joinRoomTd(player, room);
+                    else {
+                        waitingList.push(new waitingPlayer(player));
+                        if (!matchMakingUp)
+                            matchMaking();
+                    }
                 } else
                     joinRoomSpec(player, room);
             }
@@ -632,8 +630,11 @@ fastify.register(async function (fastify) {
         socket.on("close", () => {
             if (mode != "spec")
                 leaveRoom(userId);
-            else
+            else {
+                if (room === -1)
+                    removeWaitingPlayer(player);
                 leaveRoomSpec(userId);
+            }
             console.log("Client disconnected");
         });
     });

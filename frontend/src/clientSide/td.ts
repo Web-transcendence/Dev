@@ -21,6 +21,7 @@ export class GameTd {
     start: boolean = false;
     state: number = 0;
     boss: boolean = false;
+    winner: string = "";
 }
 
 export class Enemy {
@@ -170,7 +171,7 @@ export function TowerDefense(room?: number) {
     function getNick(): string {
         let nick = sessionStorage.getItem('nickName');
         if (!nick) {
-            nick = `guest${Math.floor(Math.random() * 10000)}`;
+            nick = `Guest ${Math.floor(Math.random() * 10000)}`;
             sessionStorage.setItem('nickName', nick);
         }
         return (nick);
@@ -572,6 +573,47 @@ export function TowerDefense(room?: number) {
         }
     }
 
+    function specEndScreen() {
+        ctxTd.drawImage(assetsTd.getImage(`map${nmap}`)!, 0, 0, canvasTd.width, canvasTd.height);
+        drawEnemies();
+        drawButtons();
+        drawTowers();
+        ctxTd.strokeStyle = "#0d0d0d";
+        ctxTd.lineWidth = tile * 0.2;
+        ctxTd.font = `${tile}px 'Press Start 2P'`;
+        ctxTd.textAlign = "center"
+        ctxTd.fillStyle = "#17b645";
+        ctxTd.strokeText(`${gameTd.winner} won!`, canvasTd.width * 0.5, canvasTd.height * 0.5);
+        ctxTd.fillText(`${gameTd.winner} won!`, canvasTd.width * 0.5, canvasTd.height * 0.5);
+    }
+
+    function oppAfkScreen() {
+        // Background
+        ctxTd.drawImage(assetsTd.getImage("main")!, 0, 0, canvasTd.width, canvasTd.height);
+        // Title
+        ctxTd.drawImage(assetsTd.getAnImage("rslime")!, canvasTd.width * 0.1, canvasTd.height * 0.06, 170, 170);
+        ctxTd.drawImage(assetsTd.getAnImage("gslime")!, canvasTd.width * 0.18, canvasTd.height * 0.17, 80, 80);
+        ctxTd.drawImage(assetsTd.getAnImage("pslime")!, canvasTd.width * 0.11, canvasTd.height * 0.18, 80, 80);
+        assetsTd.frame += 0.75;
+        ctxTd.fillStyle = "#b329d1";
+        ctxTd.strokeStyle = "#0d0d0d";
+        ctxTd.lineWidth = tile / 4;
+        ctxTd.textAlign = "center";
+        ctxTd.font = "64px 'Press Start 2P'";
+        ctxTd.strokeText("Slime Defender", canvasTd.width * 0.545, canvasTd.height * 0.25, canvasTd.width * 0.6);
+        ctxTd.fillText("Slime Defender", canvasTd.width * 0.545, canvasTd.height * 0.25, canvasTd.width * 0.6);
+        ctxTd.strokeStyle = "#0d0d0d";
+        ctxTd.lineWidth = tile * 0.2;
+        ctxTd.font = `${tile}px 'Press Start 2P'`;
+        ctxTd.textAlign = "center"
+        ctxTd.fillStyle = "#17b645";
+        ctxTd.strokeText(`Opponnent is AFK`, canvasTd.width * 0.5, canvasTd.height * 0.5);
+        ctxTd.fillText(`Opponnent is AFK`, canvasTd.width * 0.5, canvasTd.height * 0.5);
+        ctxTd.font = `${tile * 0.7}px 'Press Start 2P'`;
+        ctxTd.strokeText(`You can leave now`, canvasTd.width * 0.5, canvasTd.height * 0.6);
+        ctxTd.fillText(`You can leave now`, canvasTd.width * 0.5, canvasTd.height * 0.6);
+    }
+
     // Loop
     function mainLoopTd() {
         switch (gameTd.state) {
@@ -585,6 +627,12 @@ export function TowerDefense(room?: number) {
             case 2:
             case 2.5:
                 drawEndScreen();
+                break;
+            case 3:
+                specEndScreen();
+                break;
+            case 4:
+                oppAfkScreen();
                 break;
             default:
                 break;
@@ -672,6 +720,13 @@ export function TowerDefense(room?: number) {
                     break;
                 case "Id":
                     player1.id = data.id;
+                    break;
+                case "gameEnd":
+                    gameTd.state = 3;
+                    gameTd.winner = data.winner;
+                    break;
+                case "AFK":
+                    gameTd.state = 4;
                     break;
                 default:
                     console.warn("Unknown type received:", data);

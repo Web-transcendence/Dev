@@ -211,7 +211,6 @@ export async function resetGame(ball: Ball, player1: Player, player2: Player, ga
         game.state = 2;
         game.score1 = player1.paddle.score;
         game.score2 = player2.paddle.score;
-        console.log(getMatchHistory(player1.dbId));
     }
     resetInput(player1.input, "all");
     resetInput(player2.input, "all");

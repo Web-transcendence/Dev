@@ -56,11 +56,8 @@ export default async function pongRoutes(fastify: FastifyInstance) {
                     player.dbId = await fetchIdByNickName(data.nick);
                     if (data.room)
                         room = msg.room;
-                    if (room === -1){
+                    if (room === -1)
                         player.mmr = await fetchMmrById(player.dbId);
-                        console.log("mmr:", player.mmr);
-                        console.log("mmrID:", player.dbId);
-                    }
                 } catch (error) {
                     console.log(error);
                     return ;
@@ -115,7 +112,6 @@ export default async function pongRoutes(fastify: FastifyInstance) {
             }
         });
         socket.on("close", () => {
-            console.log(`id: ${userId}`);
             switch (mode) {
                 case "local":
                     solo = false;
