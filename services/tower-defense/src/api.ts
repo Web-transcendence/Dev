@@ -274,6 +274,7 @@ async function checkGameOver(player1: Player, player2: Player, game: Game, room:
         const winner = player1.hp > player2.hp ? 0 : 1;
         const winnerName = winner === 0 ? player1.name : player2.name;
         room.ended = true;
+        console.log("Game on room ended", room.id);
         insertMatchResult(player1.dbId, player2.dbId, player1.hp, player2.hp, winner);
         if (room.type === "ranked") {
             await updateMmr(player1, player2, winner);
@@ -355,7 +356,7 @@ function bulletLoop(player1: Player, player2: Player) {
     player2.clearBullet();
 }
 
-function enemyLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
+async function enemyLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
     player1.enemies.forEach(enemy => {
         if (!enemy.stun)
             enemy.pos += enemy.speed * enemy.slow;
@@ -390,13 +391,13 @@ function enemyLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
         }
     });
     player2.clearDeadEnemies();
-    checkGameOver(player1, player2, game, room);
+    await checkGameOver(player1, player2, game, room);
 }
 
-function gameLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
+async function gameLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
     if (game.start) {
         if (game.timer.timeLeft !== 0) {
-            enemyLoop(player1, player2, game, room);
+            await enemyLoop(player1, player2, game, room);
             bulletLoop(player1, player2);
             game.boss = false;
         } else {
@@ -410,7 +411,7 @@ function gameLoop(player1: Player, player2: Player, game: Game, room: RoomTd) {
                 player1.enemies.push(new Enemy("kslime", 1000 + 100 * p1Board, 1, 2)); // Boss here
                 player2.enemies.push(new Enemy("kslime", 1000 + 100 * p2Board, 1, 2));
             }
-            enemyLoop(player1, player2, game, room);
+            await enemyLoop(player1, player2, game, room);
             bulletLoop(player1, player2);
             if (player1.enemies.length === 0 && player2.enemies.length === 0) {
                 game.level += 1;
@@ -444,11 +445,11 @@ function gameInit(player1: Player, player2: Player, game: Game) {
         setTimeout(() => gameInit(player1, player2, game), 100);
 }
 
-function mainLoop (player1: Player, player2: Player, game: Game, room: RoomTd) {
+async function mainLoop (player1: Player, player2: Player, game: Game, room: RoomTd) {
     if (game.state === 1) {
         game.timer.start();
         gameInit(player1, player2, game);
-        gameLoop(player1, player2, game, room);
+        await gameLoop(player1, player2, game, room);
         enemySpawner(player1, player2, game);
     }
     else
@@ -493,7 +494,7 @@ async function leaveRoom(userId: number) {
                 });
             }
             room.players.splice(playerIndex, 1);
-            if (room.players.length === 0) {
+            if (room.players.length === 0 && room.ended) {
                 console.log(`room: ${room.id} has been cleaned.`);
                 roomsTd.splice(i, 1);
             }
@@ -503,7 +504,7 @@ async function leaveRoom(userId: number) {
     console.log("Player has not joined a room yet.");
 }
 
-export function joinRoomTd(player: Player, roomId: number) {
+export async function joinRoomTd(player: Player, roomId: number) {
     let i : number = 0;
     for (; i < roomsTd.length; i++) {
         if (roomsTd[i].id === roomId && roomsTd[i].players.length < 2) {
@@ -515,10 +516,10 @@ export function joinRoomTd(player: Player, roomId: number) {
     if (i === roomsTd.length || roomsTd[i].players.length !== 2)
         return ;
     console.log(`room ${roomsTd[i].id}'s game has started`);
-    roomLoop(roomsTd[i]);
+    await roomLoop(roomsTd[i]);
 }
 
-function roomLoop(room: RoomTd) {
+async function roomLoop(room: RoomTd) {
     let game = new Game(new Timer(0, 4));
     const intervalId = setInterval(() => {
         if (room && room.players.length === 2) {
@@ -538,7 +539,7 @@ function roomLoop(room: RoomTd) {
         }
     }, 10);
     game.state = 1;
-    mainLoop(room.players[0], room.players[1], game, room);
+    await mainLoop(room.players[0], room.players[1], game, room);
     checkRoom(room, intervalId, game);
 }
 
@@ -616,11 +617,11 @@ fastify.register(async function (fastify) {
                     player.deck.push(allTowers[data.t4].clone());
                     player.deck.push(allTowers[data.t5].clone());
                     if (room !== -1)
-                        joinRoomTd(player, room);
+                        await joinRoomTd(player, room);
                     else {
                         waitingList.push(new waitingPlayer(player));
                         if (!matchMakingUp)
-                            matchMaking();
+                            await matchMaking();
                     }
                 } else
                     joinRoomSpec(player, room);
@@ -628,13 +629,13 @@ fastify.register(async function (fastify) {
         });
 
         socket.on("close", () => {
-            if (mode != "spec")
+            if (mode !== "spec") {
                 leaveRoom(userId);
-            else {
                 if (room === -1)
                     removeWaitingPlayer(player);
-                leaveRoomSpec(userId);
             }
+            else
+                leaveRoomSpec(userId);
             console.log("Client disconnected");
         });
     });

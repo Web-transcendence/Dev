@@ -61,7 +61,7 @@ export const pongAgainstAi = async ()=> {
 			return roomId
 		} catch(e) {
 			console.log(e);
-			displayNotification('Error from server', {type: 'error'})
+			displayNotification('Please connect to play VS A.I.')
 			await navigate('/home')
 		}
 }
