@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import { OAuth2Client } from 'google-auth-library'
 import { Client_db, User } from './User.js'
 import { DataBaseError } from './error.js'
+import { nickNameSchema } from './schema.js'
 
 const client = new OAuth2Client('562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com')
 
@@ -18,6 +19,9 @@ export async function googleAuth(request: FastifyRequest, reply: FastifyReply): 
 		if (!payload || !userId) {
 			throw new Error('Invalid payload from Google')
 		}
+		const zod_result = nickNameSchema.safeParse({ nickName: payload.given_name })
+		if (!zod_result)
+			payload.given_name = 'googleNickname'
 
 		if (Client_db.prepare('SELECT * FROM Client WHERE nickName = ?').get(payload.given_name)) {
 			let i: number = 1
