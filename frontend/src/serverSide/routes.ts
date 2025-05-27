@@ -28,14 +28,15 @@ export async function routes(fastify: FastifyInstance) {
 		'profile',
 		'home',
 		'towerRemote',
+		'towerFriend',
 		'towerMode',
 		'towerWatch',
-		'GameFriend',
+		'pongFriend',
 		'pongRemote',
 		'pongTournament',
 		'pongLocal',
 		'pongWatch',
-    "pongVsia",
+    	'pongVsia',
 		'pongMode',
 		'tournaments',
 		'lobby',
@@ -86,9 +87,7 @@ export async function routes(fastify: FastifyInstance) {
 		'loser.png',
 		'AI.png',
 	])
-	fastify.get('/images/:imageName', async (req: FastifyRequest<{
-		Params: { imageName: string }
-	}>, reply: FastifyReply) => {
+	fastify.get('/images/:imageName', async (req: FastifyRequest, reply: FastifyReply) => {
 		const {imageName} = req.params
 
 		if (!allowedImages.has(imageName)) {

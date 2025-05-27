@@ -34,7 +34,7 @@ export async function sseConnection() {
 		if (res.status === 100)
 			return
 		if (!res.ok) {
-			const error = res.json()
+			const error = await res.json()
 			console.log(error)
 			//notifyhandling
 			return
@@ -109,6 +109,7 @@ export const CreateFriendLi = async (id: number, key: string, tmpName: string) =
 
 const notifyNewFriend = async ({id}: { id: number }) => {
 	console.log(`this id ${id} have to be add in the friendlist`)
+	document.getElementById(`friendId-${id}`)?.remove()
 	await CreateFriendLi(id, 'acceptedList', 'acceptedTemplate')
 }
 
@@ -129,6 +130,7 @@ const notifyFriendInvitation = async ({id}: { id: number }) => {
 				document.getElementById(`friendId-${userData.id}`)?.remove()
 			}
 		},
+
 	}, userData)
 }
 
@@ -214,7 +216,7 @@ const notifyInvitationPong = async ({roomId, id}: { roomId: number, id: number }
 	displayNotification('Invitation to play Pong', {
 		type: 'invitation',
 		onAccept: async () => {
-			await loadPart('/GameFriend')
+			await loadPart('/pongFriend')
 			Pong('remote', roomId)
 			console.log('Accepted invite')
 		},
@@ -229,7 +231,7 @@ const notifyInvitationTowerDefense = async ({roomId, id}: { roomId: number, id: 
 	displayNotification('Invitation to Play Tower-Defense', {
 		type: 'invitation',
 		onAccept: async () => {
-			await loadPart('/GameFriend')
+			await loadPart('/towerFriend')
 			TowerDefense(roomId)
 			console.log('Accepted invite')
 		},

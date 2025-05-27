@@ -6,7 +6,7 @@ import { editProfile } from './editInfoProfile.js'
 import { displayNotification } from './notificationHandler.js'
 import { Pong } from './pong.js'
 import { displayTournaments, fetchTournamentBrackets, joinTournament, launchTournament } from './tournaments.js'
-import { printMatchHistory } from './matchHistory.js'
+import {getId, printMatchHistory} from './matchHistory.js'
 import { TowerDefenseSpec } from './tdspec.js'
 import { closeSSEConnection } from './serverSentEvent.js'
 import { pongAgainstAi } from './invitation.js'
@@ -234,7 +234,7 @@ async function Brackets() {
 			if (!userData) {
 
 			}
-
+			const myId = await getId()
 			const clone = template.content.cloneNode(true) as DocumentFragment;
 			const playerOneImg = clone.querySelector(".player-one-img") as HTMLImageElement | null;
 			const playerOne = clone.querySelector(".player-one") as HTMLElement | null;
@@ -246,19 +246,28 @@ async function Brackets() {
 				if (playerOneImg && userData[0].avatar) playerOneImg.src = userData[0].avatar
 				else if (playerOneImg) playerOneImg.src = '../images/login.png'
 				if (playerOneName) playerOneName.innerText = userData[0].nickName
+				if (playerOne && Number(myId) === userData[0].id) {
+					playerOne.classList.remove('bg-purple-600')
+					playerOne.classList.add('bg-yellow-600')
+				}
 			}
 			else {
 				if (playerOneImg) playerOneImg.remove()
 				if (playerOne) {
 					playerOne.classList.remove('bg-purple-600')
-					playerOne.classList.add('bg-gray-600')
+					playerOne.classList.add('bg-red-600')
 				}
 			}
 			if (userData[1]) {
 				if (playerTwoImg && userData[1].avatar) playerTwoImg.src = userData[1].avatar
 				else if (playerTwoImg) playerTwoImg.src = '../images/login.png'
 				if (playerTwoName) playerTwoName.innerText = userData[1].nickName
+				if (playerTwo && Number(myId) === userData[1].id) {
+					playerTwo.classList.remove('bg-purple-600')
+					playerTwo.classList.add('bg-yellow-600')
+				}
 			}
+
 			else {
 				if (playerTwoImg) playerTwoImg.src = '../images/loser.png'
 				if (playerTwoName) playerTwoName.innerText = 'Loser'
@@ -271,6 +280,6 @@ async function Brackets() {
 		}
 	} catch (error) {
 		console.log('Brackets Error: ', error)
-		displayNotification('Can\'t show phase of tournament', { type: 'error' })
+		displayNotification(`Can't show phase of tournament`, { type: 'error' })
 	}
 }

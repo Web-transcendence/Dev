@@ -28,7 +28,6 @@ export async function insertTag(url: string): Promise<void> {
 		throw Error('Page not found: element missing.')
 	const html = await res.text()
 	if (container.innerHTML.includes(html)) {
-		console.log('sortie 1')
 		return
 	}
 	document.getElementById('notFound')?.classList.add('hidden')
