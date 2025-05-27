@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 09:15:27 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/23 14:20:14 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/27 14:06:26 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,25 @@
 #define NOTHING "n"
 #define PRESS "down"
 #define RELEASE "release"
-#define N_LAYER_HIDDEN 1
-#define N_NEURON_INPUT 600
-#define N_NEURON_OUTPUT 3
-#define N_NEURON_HIDDEN 25
+
+#define L_HIDDEN 1
+#define	L_GLOBAL 3
+#define N_INPUT 600
+#define N_OUTPUT 3
+#define N_HIDDEN 25
+#define N_GLOBAL (N_INPUT + N_HIDDEN*(L_HIDDEN-1) + N_OUTPUT) 
+
+#define	WEIGHT_FIRST_HIDDEN (N_INPUT * N_HIDDEN)
+#define	WEIGHT_HIDDEN (N_HIDDEN * N_HIDDEN)
+#define	WEIGHT_OUTPUT (N_HIDDEN * N_OUTPUT)
+#define WEIGHT_GLOBAL (WEIGHT_FIRST_HIDDEN + WEIGHT_HIDDEN*(L_HIDDEN-1) + WEIGHT_OUTPUT)
+
+#define	BIAI_FIRST_HIDDEN N_INPUT
+#define	BIAI_HIDDEN N_HIDDEN
+#define	BIAI_OUTPUT N_OUTPUT
+#define BIAI_GLOBAL (BIAI_FIRST_HIDDEN + BIAI_HIDDEN*(L_HIDDEN-1) + BIAI_OUTPUT)
+
 #define N_RAW_STATE 6
-#define AI_SERVER_PORT 9090
-#define AI_SERVER_ADDRESS "ws://0.0.0.0:9090/"
 #define FACTORY_SERVER_PORT 16016
 #define FACTORY_SERVER_ADDRESS "http://0.0.0.0:16016"
 #define GAME_SERVER_ADDRESS "ws://match-server:4443/ws"

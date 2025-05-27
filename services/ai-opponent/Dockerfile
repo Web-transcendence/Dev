@@ -12,8 +12,7 @@ COPY --chown=app:app tools/binariesWrapper.sh binariesWrapper.sh
 
 RUN	chmod +x binariesWrapper.sh
 
-RUN	make -C core/AiServer
+# RUN	make -C core/AiServer
 RUN	make -C core/Client
 
-# ENTRYPOINT ["tail", "-f", "/dev/null"]
 ENTRYPOINT ["./binariesWrapper.sh"]
