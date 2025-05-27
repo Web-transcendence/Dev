@@ -1,41 +1,41 @@
 all: up
 
-up:
-	docker-compose -f sources/docker-compose.yml up --build
+generate-key:
+	./generate_key.sh
+up: generate-key
+	docker compose -f docker-compose.yml up --build
 
-detach:
-	docker-compose -f sources/docker-compose.yml build
+watch:
+	docker compose -f docker-compose.yml up --watch
 
-watch: detach
-	docker-compose -f sources/docker-compose.yml up --watch
-
-build:
-	docker-compose -f sources/docker-compose.yml build
+build: generate-key
+	echo "ssssss"
+	docker compose -f docker-compose.yml build
 
 down:
-	docker-compose -f sources/docker-compose.yml down
-
-start:
-	docker-compose -f sources/docker-compose.yml start
-
-stop:
-	docker-compose -f sources/docker-compose.yml stop
+	docker compose -f docker-compose.yml down
 
 logs:
-	docker-compose -f sources/docker-compose.yml logs --follow
+	docker compose -f docker-compose.yml logs --follow
 
 prune:
 	docker system prune --all --volumes --force
 
-mysql:
-	docker-compose -f sources/docker-compose.yml exec mariadb mysql
-
 clean:
-	docker-compose -f sources/docker-compose.yml down --volumes --rmi all
+	@test -f .env || touch .env
+	docker compose -f docker-compose.yml down --volumes --rmi all
+	@rm -f .env
+
 
 fclean: clean
-#	Use docker run to remove data because of permissions
 	docker run -it --rm -v $(HOME)/data:/data busybox sh -c "rm -rf /data/*"
+
+re: fclean up
+
+full: fclean build watch
+
+bw: build watch
+
 
 help:
 	@echo "Makefile for Docker Compose"

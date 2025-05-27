@@ -6,15 +6,15 @@
 
 ◦ Minor module: Use a framework or a toolkit to build the frontend.🟩
 
-◦ Minor module: Use a database for the backend.
-🟩
+◦ Minor module: Use a database for the backend.🟩
+
 ~~◦ Major module: Store the score of a tournament in the Blockchain.~~
 ### • User Management
 
 ◦ Major module: Standard user management, authentication, users across tournaments.🟥
 
 
-??? 
+???
 ~~◦ Major module: Implementing a remote authentication.~~
 ???
 
@@ -30,10 +30,9 @@
 ◦ Minor module: Game Customization Options.🟪
 
 
-??? 
-
+???
 ◦ Major module: Live chat.
-??? 
+???
 
 
 ### • AI-Algo
@@ -48,7 +47,7 @@
 
 ~~◦ Minor module: GDPR Compliance Options with User Anonymization, Local Data Management, and Account Deletion.~~
 
-~~◦ Major module: Implement Two-Factor Authentication (2FA) and JWT.~~🟩
+◦ Major module: Implement Two-Factor Authentication (2FA) and JWT.🟩
 
 ### • Devops
 
@@ -75,7 +74,7 @@
 
 ### • Server-Side Pong
 
-??? 
+???
 ◦ Major module: Replacing Basic Pong with Server-Side Pong and Implementing an API.
 ??? ⬛🟪
 
@@ -83,20 +82,28 @@
 ~~◦ Major module: Enabling Pong Gameplay via CLI against Web Users with API Integration.~~
 
 ## Proccessus
-  First Steps
+First Steps
 Mise en place de la structure des dossiers et des docker puis du docker compose.
-  Proxy
-Connexion par un proxy du site web, format html. 
-  
-  - Command pour rentrer dans un container
+Proxy
+Connexion par un proxy du site web, format html.
+
+- Command pour rentrer dans un container
 ```angular2html
 docker exec -it <name> sh
 ```
-RUN server without docker 
+RUN server without docker
 ```angular2html
 npm run dev
 ```
 
 ## Creation de Node.js
 Faire une base en ECMAScript Modules (ESM)
+
+## Information Google Sing-in
+
+Nom de votre client OAuth 2.0: ClientWebOauth
+
+ID Client: 562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com
+
+Code Secret Client :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
 

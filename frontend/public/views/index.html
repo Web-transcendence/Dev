@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcendence</title>
+    <link rel="shortcut icon" type="image/x-icon" href="../images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="/static/output.css" rel="stylesheet">
+      <!-- AOS animation library -->
+      <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+      <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  </head>
+
+  <body class="text-white min-h-screen flex flex-col" style="font-family: 'Press Start 2P', cursive;">
+  <div id="tsparticles"></div>
+  <div id="app" class="flex-1 mt-15">
+
+      <nav class="fixed top-0 z-20 left-0 p-4 mb-50 flex justify-between items-center w-full bg-transparent">
+
+          <div class="flex items-center add-blur">
+              <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
+                  <img src="../images/favicon.png" alt="Logo" class="h-10 w-10 rounded-full">
+                  <p class="text-center text-xl hidden lg:block"> TABG. </p>
+              </button>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 text-center space-x-8 items-center add-blur">
+              <button id="pongMode" class="btn-line">Pong</button>
+              <button id="towerDefense" class="btn-line">Tower-Defense</button>
+              <button id="tournaments" class="btn-line">Tournaments</button>
+              <button id="matchHistory" class="btn-line">Match History</button>
+          </div>
+
+          <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">
+              <div class="relative group">
+                  <img id="avatar" src="../images/logout.png" alt="Avatar" class="bg-red-500 relative h-10 w-10 rounded-full z-50">
+                  <button id="profile" class="hidden btn-slide">
+                      Profil
+                  </button>
+                  <button id="connect" class="btn-slide">
+                      Connect
+                  </button>
+              </div>
+          </div>
+      </nav>
+      <div id="notFound" class="hidden flex text-white font-mono items-center justify-center min-h-screen">
+          <div class="text-center space-y-6">
+              <span class="block text-9xl text-red-600">404 - NOT FOUND</span>
+              <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
+          </div>
+      </div>
+
+      <div id="content" class="h-full w-full items-center flex flex-col flex-grow justify-center mt-8 rounded-lg shadow-lg *:w-full">
+
+      </div>
+
+  </div>
+
+  <ul id="notificationList" class="fixed top-20 right-0 flex flex-col items-end space-y-4 z-50"></ul>
+
+  <template id="notificationBanner">
+      <li class="notifyList transform translate-x-full p-4 max-w-[400] rounded-l-lg shadow-lg  text-white flex flex-col gap-2 transition-transform duration-500 ease-in-out">
+          <span id="notificationMessage" class="text-nowrap truncate"></span>
+          <span id="nameInvite" class="truncate w-full text-wrap"></span>
+          <div class="flex gap-2 *:w-full w-full">
+              <button id="notificationActionAccept"
+                      class="text-white px-3 py-1 rounded-lg hidden bg-green-600 hover:bg-green-700 transition hover:scale-105">
+                  Accept
+              </button>
+              <button id="notificationActionReject"
+                      class="text-white px-3 py-1 rounded-lg hidden bg-red-600 hover:bg-red-700 transition hover:scale-105">
+                  Reject
+              </button>
+          </div>
+      </li>
+  </template>
+
+  <div id="myModal"
+       class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-0 items-center justify-center">
+      <div id="modalContent"
+           class="opacity-0 translate-y-full transition-all duration-500 transform
+                bg-gray-700 text-white text-2xl p-8 relative w-[90%] max-w-3xl rounded-xl flex flex-col gap-6 shadow-lg">
+          <button id="closeModalBtn"
+                  class="absolute top-4 right-4 text-xl hover:scale-110 transition">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   class="w-5 h-5 opacity-25 hover:opacity-100 transition-opacity duration-200"
+                   fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+          </button>
+
+          <div id="nameFriend" class="text-center tracking-wide"></div>
+
+          <div class="flex justify-center gap-10">
+              <button id="invitePong"
+                      class="bg-red-600 text-white px-6 py-3 rounded-full hover:bg-red-700 hover:scale-105 transition duration-300 ease-in-out">
+                  Pong
+              </button>
+              <button id="inviteTowerDefense"
+                      class="bg-red-600 text-white px-6 py-3 rounded-full hover:bg-red-700 hover:scale-105 transition duration-300 ease-in-out">
+                  Tower Defense
+              </button>
+          </div>
+      </div>
+  </div>
+
+  <footer class="bg-transparent text-white text-center rounded-t-lg p-4 flex justify-between items-center">
+      <img id="bottom-img" src="../images/favicon.png" alt="Logo" class="h-10 w-10 rounded-full">
+      <div class="flex space-x-8 items-center">
+          <span id="bottom-text" class="text-lg font-bold"></span>
+          <button id="About" class="btn-line">About</button>
+      </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+  <script type="module" src="/static/dist/front.js"></script>
+
+  </body>
+</html>
