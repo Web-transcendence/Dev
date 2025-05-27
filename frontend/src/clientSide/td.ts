@@ -361,32 +361,36 @@ export function TowerDefense(room?: number) {
 
     function drawEnemies() {
         player1.enemies.forEach(enemy => {
-            if (enemy.pos < 480)
+            if (enemy.hp > 0) {
+                if (enemy.pos < 480)
                 ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, enemyPosx(enemy.pos, 1) - tile * 0.5, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
-            else {
-                ctxTd.save();
-                ctxTd.scale(-1, 1);
-                ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, -1 * (enemyPosx(enemy.pos, 1) - tile * 0.5) - 70, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
-                ctxTd.restore();
+                else {
+                    ctxTd.save();
+                    ctxTd.scale(-1, 1);
+                    ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, -1 * (enemyPosx(enemy.pos, 1) - tile * 0.5) - 70, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
+                    ctxTd.restore();
+                }
+                ctxTd.fillStyle = "#eaeaea";
+                ctxTd.font = "16px 'Press Start 2P'";
+                ctxTd.textAlign = "center";
+                ctxTd.fillText(enemy.hp.toString(), enemyPosx(enemy.pos, 1), enemyPosy(enemy.pos) + 28);
             }
-            ctxTd.fillStyle = "#eaeaea";
-            ctxTd.font = "16px 'Press Start 2P'";
-            ctxTd.textAlign = "center";
-            ctxTd.fillText(enemy.hp.toString(), enemyPosx(enemy.pos, 1), enemyPosy(enemy.pos) + 28);
         });
         player2.enemies.forEach(enemy => {
-            if (enemy.pos >= 480)
-                ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, enemyPosx(enemy.pos, 2) - tile * 0.5, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
-            else {
-                ctxTd.save();
-                ctxTd.scale(-1, 1);
-                ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, -1 * (enemyPosx(enemy.pos, 2) - tile * 0.5) - 70, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
-                ctxTd.restore();
+            if (enemy.hp > 0) {
+                if (enemy.pos >= 480)
+                    ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, enemyPosx(enemy.pos, 2) - tile * 0.5, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
+                else {
+                    ctxTd.save();
+                    ctxTd.scale(-1, 1);
+                    ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, -1 * (enemyPosx(enemy.pos, 2) - tile * 0.5) - 70, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
+                    ctxTd.restore();
+                }
+                ctxTd.fillStyle = "#eaeaea";
+                ctxTd.font = "16px 'Press Start 2P'";
+                ctxTd.textAlign = "center";
+                ctxTd.fillText(enemy.hp.toString(), enemyPosx(enemy.pos, 2), enemyPosy(enemy.pos) + 28);
             }
-            ctxTd.fillStyle = "#eaeaea";
-            ctxTd.font = "16px 'Press Start 2P'";
-            ctxTd.textAlign = "center";
-            ctxTd.fillText(enemy.hp.toString(), enemyPosx(enemy.pos, 2), enemyPosy(enemy.pos) + 28);
         });
         assetsTd.frame += 1;
     }
@@ -571,20 +575,6 @@ export function TowerDefense(room?: number) {
             ctxTd.strokeText("Draw!", canvasTd.width * 0.5, canvasTd.height * 0.5);
             ctxTd.fillText("Draw!", canvasTd.width * 0.5, canvasTd.height * 0.5);
         }
-    }
-
-    function specEndScreen() {
-        ctxTd.drawImage(assetsTd.getImage(`map${nmap}`)!, 0, 0, canvasTd.width, canvasTd.height);
-        drawEnemies();
-        drawButtons();
-        drawTowers();
-        ctxTd.strokeStyle = "#0d0d0d";
-        ctxTd.lineWidth = tile * 0.2;
-        ctxTd.font = `${tile}px 'Press Start 2P'`;
-        ctxTd.textAlign = "center"
-        ctxTd.fillStyle = "#17b645";
-        ctxTd.strokeText(`${gameTd.winner} won!`, canvasTd.width * 0.5, canvasTd.height * 0.5);
-        ctxTd.fillText(`${gameTd.winner} won!`, canvasTd.width * 0.5, canvasTd.height * 0.5);
     }
 
     function oppAfkScreen() {

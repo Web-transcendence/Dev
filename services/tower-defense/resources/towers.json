@@ -1,12 +1,12 @@
 [
   { "type": "red", "speed": 10, "damages" : 12, "area": 100, "effect": "none" },
   { "type": "blue", "speed": 8, "damages" : 10, "area": 100, "effect": "slow" },
-  { "type": "green", "speed": 10, "damages" : 18, "area": 0, "effect": "none" },
-  { "type": "yellow", "speed": 12, "damages" : 8, "area": 0, "effect": "none" },
-  { "type": "white", "speed": 6, "damages" : 20, "area": 0, "effect": "stun" },
-  { "type": "black", "speed":  14, "damages": 14, "area": 0, "effect": "none" },
-  { "type": "orange", "speed":  14, "damages": 14, "area": 0, "effect": "none" },
-  { "type": "pink", "speed":  14, "damages": 14, "area": 0, "effect": "none" },
-  { "type": "violet", "speed":  14, "damages": 14, "area": 0, "effect": "none" },
-  { "type": "ygreen", "speed":  14, "damages": 14, "area": 0, "effect": "none" }
+  { "type": "green", "speed": 10, "damages" : 24, "area": 0, "effect": "none" },
+  { "type": "yellow", "speed": 14, "damages" : 20, "area": 0, "effect": "none" },
+  { "type": "white", "speed": 6, "damages" : 26, "area": 0, "effect": "stun" },
+  { "type": "black", "speed": 14, "damages": 16, "area": 0, "effect": "slow" },
+  { "type": "orange", "speed": 30, "damages": 11, "area": 0, "effect": "none" },
+  { "type": "pink", "speed": 7, "damages": 25, "area": 100, "effect": "none" },
+  { "type": "violet", "speed": 6, "damages": 16, "area": 100, "effect": "stun" },
+  { "type": "ygreen", "speed": 8, "damages": 46, "area": 0, "effect": "none" }
 ]
