@@ -1,9 +1,9 @@
-import {getAvatar} from './user.js'
-import {loadPart} from './insert.js'
-import {sseConnection} from './serverSentEvent.js'
-import {joinTournament, quitTournaments} from './tournaments.js'
-import {displayNotification} from './notificationHandler.js'
-import {setupModalListeners} from './modal.js'
+import { getAvatar } from './user.js'
+import { loadPart } from './insert.js'
+import { sseConnection } from './serverSentEvent.js'
+import { joinTournament, quitTournaments } from './tournaments.js'
+import { displayNotification } from './notificationHandler.js'
+import { setupModalListeners } from './modal.js'
 
 declare global {
 	interface Window { // For Google authenticator
@@ -66,13 +66,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 })
 
 tsParticles.load('tsparticles', {
-	fullScreen: {enable: false},
+	fullScreen: { enable: false },
 	particles: {
-		number: {value: 100},
-		size: {value: 6},
-		move: {enable: true, speed: 1},
-		opacity: {value: 0.5},
-		color: {value: '#ffffff'},
+		number: { value: 100 },
+		size: { value: 6 },
+		move: { enable: true, speed: 1 },
+		opacity: { value: 0.5 },
+		color: { value: '#ffffff' },
 	},
 	background: {
 		color: '#000000',
@@ -134,7 +134,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({credential: credit.credential}),
+			body: JSON.stringify({ credential: credit.credential }),
 		})
 		if (!response.ok)
 			console.error('Error: From UserManager returned an error')
@@ -147,6 +147,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 				if (reply.nickName) sessionStorage.setItem('nickName', reply.nickName)
 				await navigate('/About')
 				await getAvatar()
+				if (reply.nickName.includes('googleNickname')) displayNotification('Your name is set by default, you can change it in the profile section')
 				await sseConnection()
 			}
 		}

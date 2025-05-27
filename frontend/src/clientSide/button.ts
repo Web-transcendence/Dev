@@ -6,7 +6,7 @@ import { editProfile } from './editInfoProfile.js'
 import { displayNotification } from './notificationHandler.js'
 import { Pong } from './pong.js'
 import { displayTournaments, fetchTournamentBrackets, joinTournament, launchTournament } from './tournaments.js'
-import {getId, printMatchHistory} from './matchHistory.js'
+import { getId, printMatchHistory } from './matchHistory.js'
 import { TowerDefenseSpec } from './tdspec.js'
 import { closeSSEConnection } from './serverSentEvent.js'
 import { pongAgainstAi } from './invitation.js'
@@ -217,8 +217,8 @@ async function Brackets() {
 	try {
 		const idTournament = sessionStorage.getItem('idTournaments')
 		if (!idTournament) throw new Error('No ID Tournament found!')
-		const bracketsData = await fetchTournamentBrackets(Number(idTournament));
-		if (!bracketsData) throw new Error("No brackets data");
+		const bracketsData = await fetchTournamentBrackets(Number(idTournament))
+		if (!bracketsData) throw new Error('No brackets data')
 
 		const template = document.getElementById('bracketsTmp') as HTMLTemplateElement | null
 		const list = document.getElementById('playerList') as HTMLUListElement | null
@@ -229,18 +229,18 @@ async function Brackets() {
 			const playerId: number[] = []
 			if (bracket.id1 !== 0) playerId.push(bracket.id1)
 			if (bracket.id2 !== 0) playerId.push(bracket.id2)
-			const userData = await fetchUserInformation(playerId);
+			const userData = await fetchUserInformation(playerId)
 			if (!userData) {
 
 			}
 			const myId = await getId()
-			const clone = template.content.cloneNode(true) as DocumentFragment;
-			const playerOneImg = clone.querySelector(".player-one-img") as HTMLImageElement | null;
-			const playerOne = clone.querySelector(".player-one") as HTMLElement | null;
-			const playerOneName = clone.querySelector(".player-one-name") as HTMLElement | null;
-			const playerTwoImg = clone.querySelector(".player-two-img") as HTMLImageElement | null;
-			const playerTwo = clone.querySelector(".player-two") as HTMLElement | null;
-			const playerTwoName = clone.querySelector(".player-two-name") as HTMLElement | null;
+			const clone = template.content.cloneNode(true) as DocumentFragment
+			const playerOneImg = clone.querySelector('.player-one-img') as HTMLImageElement | null
+			const playerOne = clone.querySelector('.player-one') as HTMLElement | null
+			const playerOneName = clone.querySelector('.player-one-name') as HTMLElement | null
+			const playerTwoImg = clone.querySelector('.player-two-img') as HTMLImageElement | null
+			const playerTwo = clone.querySelector('.player-two') as HTMLElement | null
+			const playerTwoName = clone.querySelector('.player-two-name') as HTMLElement | null
 			if (userData[0]) {
 				if (playerOneImg && userData[0].avatar) playerOneImg.src = userData[0].avatar
 				else if (playerOneImg) playerOneImg.src = '../images/login.png'
@@ -249,8 +249,7 @@ async function Brackets() {
 					playerOne.classList.remove('bg-purple-600')
 					playerOne.classList.add('bg-yellow-600')
 				}
-			}
-			else {
+			} else {
 				if (playerOneImg) playerOneImg.remove()
 				if (playerOne) {
 					playerOne.classList.remove('bg-purple-600')
@@ -265,9 +264,7 @@ async function Brackets() {
 					playerTwo.classList.remove('bg-purple-600')
 					playerTwo.classList.add('bg-yellow-600')
 				}
-			}
-
-			else {
+			} else {
 				if (playerTwoImg) playerTwoImg.src = '../images/loser.png'
 				if (playerTwoName) playerTwoName.innerText = 'Loser'
 				if (playerTwo) {
@@ -275,7 +272,7 @@ async function Brackets() {
 					playerTwo.classList.add('bg-gray-600')
 				}
 			}
-			list.appendChild(clone);
+			list.appendChild(clone)
 		}
 	} catch (error) {
 		console.log('Brackets Error: ', error)

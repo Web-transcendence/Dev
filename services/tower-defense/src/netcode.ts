@@ -33,7 +33,7 @@ export async function startInviteMatch(userId: number, opponent: number) {
     const roomId = generateRoom();
 
     await fetchNotifyUser([opponent], `invitationTowerDefense`, {roomId: roomId, id: userId});
-    await roomWatcher(10, roomId, 0, userId); // change this value to change afk trigger time
+    await roomWatcher(300, roomId, 0, userId); // change this value to change afk trigger time
     return (roomId);
 }
 
