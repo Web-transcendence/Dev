@@ -1,7 +1,6 @@
 import { getAvatar } from './user.js'
 import { loadPart } from './insert.js'
 import { sseConnection } from './serverSentEvent.js'
-import { joinTournament, quitTournaments } from './tournaments.js'
 import { displayNotification } from './notificationHandler.js'
 import { setupModalListeners } from './modal.js'
 
@@ -15,6 +14,7 @@ declare const tsParticles: any
 declare const AOS: any
 
 export let connected = false
+export let path: string | null = null
 
 window.addEventListener('popstate', async () => {
 	if (!connected && window.location.pathname === '/profile' )
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 		else
 			document.getElementById('connect')?.click()
 	})
-	const path = sessionStorage.getItem('path')
+	path = sessionStorage.getItem('path')
 	if (path && !(!connected && path === '/profile') && !unhauthorizePath.includes(path))
 		await loadPart(path)
 	else
@@ -106,8 +106,20 @@ function constantButton() {
 	document.getElementById('home')?.addEventListener('click', async (event: MouseEvent) => navigate('/home', event))
 	document.getElementById('pongMode')?.addEventListener('click', (event: MouseEvent) => navigate('/pongMode', event))
 	document.getElementById('towerDefense')?.addEventListener('click', (event: MouseEvent) => navigate('/towerMode', event))
-	document.getElementById('tournaments')?.addEventListener('click', (event: MouseEvent) => navigate('/tournaments', event))
-	document.getElementById('matchHistory')?.addEventListener('click', (event: MouseEvent) => navigate('/matchHistory', event))
+	document.getElementById('tournaments')?.addEventListener('click', async (event: MouseEvent) => {
+		if (!connected) {
+			displayNotification('You need to be connected to access this page')
+			await navigate('/connect', event)
+		}
+		else await navigate('/tournaments', event)
+	})
+	document.getElementById('matchHistory')?.addEventListener('click', async (event: MouseEvent) => {
+		if (!connected) {
+			displayNotification('You need to be connected to access this page')
+			await navigate('/connect', event)
+		}
+		else await navigate('/matchHistory', event)
+	})
 	// Footer
 	document.getElementById('About')?.addEventListener('click', (event: MouseEvent) => navigate('/About', event))
 }
@@ -153,14 +165,16 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 	}
 }
 
-export async function navigate(path: string, event?: MouseEvent): Promise<void> {
+export async function navigate(newPath: string, event?: MouseEvent): Promise<void> {
 	if (event) event.preventDefault()
 
+	if (path === newPath) return
+	path = newPath
 	handleConnection(await checkForToken())
-	if (!connected && path == '/profile')
-		path = '/connect'
-	if (connected && path == '/connect')
-		path = '/profile'
-	history.pushState({}, '', path)
-	await loadPart(path)
+	if (!connected && newPath == '/profile')
+		newPath = '/connect'
+	if (connected && newPath == '/connect')
+		newPath = '/profile'
+	history.pushState({}, '', newPath)
+	await loadPart(newPath)
 }

@@ -1,6 +1,7 @@
 import { navigate } from './front.js'
 import { fetchUserInformation, getTournamentList, UserData } from './user.js'
 import { displayNotification } from './notificationHandler.js'
+import { path } from './front.js'
 
 export async function joinTournament(tournamentId: number) {
 	try {
@@ -24,7 +25,6 @@ export async function joinTournament(tournamentId: number) {
 }
 
 export async function displayTournaments(nbrTournament: number, nameTournament: string) {
-	console.log('DISPLAY TOURNAMENTS')
 	const name = document.getElementById('nameTournament')
 	if (name) name.innerText = nameTournament
 	const tournamentList: {
@@ -36,13 +36,22 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 	console.log('TournamentList', tournamentList)
 	let player = 0
 	const playerList = document.getElementById('playerList')
+	if (!playerList) return
 	playerList.innerHTML = ''
+	console.log('Cleared playerList, current length:', playerList.querySelectorAll('li').length)
+
 	const playerTmp = document.getElementById('playerTemplate') as HTMLTemplateElement | null
 	const section = tournamentList.find(s => s.maxPlayer === nbrTournament)
 	if (section && playerList && playerTmp) {
+		console.log('Number of participants:', section?.participants.length)
+		console.log('Player list children before appending:', playerList.children.length)
 		if (section.status === 'started') {
 			console.log('TOUR HAVE STARTED')
-			await navigate('/brackets')
+			if (path != '/brackets') {
+				console.log('redirect to brackets')
+				await navigate('/brackets')
+			}
+			console.log('no redirection to brackets')
 			return
 		}
 		const userData: UserData[] = await fetchUserInformation(section.participants)

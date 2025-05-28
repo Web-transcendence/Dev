@@ -1,7 +1,7 @@
 import { addFriend, fetchUserInformation, removeFriend, UserData } from './user.js'
 import {Pong, pongStop} from './pong.js'
 import { displayNotification, hideNotification } from './notificationHandler.js'
-import { navigate } from './front.js'
+import { navigate, path } from './front.js'
 import { loadPart } from './insert.js'
 import { openModal } from './modal.js'
 import {tdStop, TowerDefense} from './td.js'
@@ -256,6 +256,8 @@ const loseTournament = async ({ id }: { id: number }) => {
 
 
 const notifyInvitationTournamentPong = async ({ roomId }: { roomId: number }) => {
+	console.log('IS CTUEAP :', path)
+	if (path == '/lobby') await navigate('/brackets')
 	displayNotification('Invitation to Play Pong', {
 		type: 'invitation',
 		onAccept: async () => {
