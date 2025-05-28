@@ -109,7 +109,7 @@ export async function getGameHistory (game: string): Promise<MatchResult[] | und
         }
         return await response.json()
     } catch (error) {
-        console.error(error)
+        return undefined
     }
 }
 
@@ -118,6 +118,7 @@ export async function printMatchHistory() {
     if (!id) return;
     const pongMH: MatchResult[] | undefined = await getGameHistory('match-server');
     const tdMH: MatchResult[] | undefined = await getGameHistory('tower-defense');
+    if (!pongMH && !tdMH) return
     const idNum = Number(id)
     const combined: { match: MatchResult, game: string }[] = [];
 
