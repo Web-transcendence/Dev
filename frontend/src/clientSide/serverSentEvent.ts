@@ -1,11 +1,10 @@
 import { addFriend, fetchUserInformation, removeFriend, UserData } from './user.js'
-import { Pong } from './pong.js'
+import {Pong, pongStop} from './pong.js'
 import { displayNotification, hideNotification } from './notificationHandler.js'
 import { navigate } from './front.js'
 import { loadPart } from './insert.js'
 import { openModal } from './modal.js'
-import { TowerDefense } from './td.js'
-import {displayTournaments} from './tournaments'
+import {tdStop, TowerDefense} from './td.js'
 
 let abortController: AbortController | null = null
 
@@ -239,14 +238,12 @@ const notifyInvitationTowerDefense = async ({ roomId, id }: { roomId: number, id
 }
 
 const winBracket = async ({ id }: { id: number }) => {
-	displayNotification('You win the game the tournament continue !')
-	console.log('You win the game the tournament continue !')
+	displayNotification('You win the game, the tournament continue !')
 	await loadPart('/brackets')
 }
 
 const winTournament = async () => {
 	displayNotification(`Congratulations, you win the tournament !!!`)
-	console.log(`Congratulations, you win the tournament !!!`)
 	sessionStorage.removeItem('idTournaments')
 	sessionStorage.removeItem('nameTournaments')
 	await loadPart('/home')
@@ -267,6 +264,8 @@ const notifyInvitationTournamentPong = async ({ roomId }: { roomId: number }) =>
 	displayNotification('Invitation to Play Pong', {
 		type: 'invitation',
 		onAccept: async () => {
+			tdStop()
+			pongStop()
 			console.log('RoomId', roomId)
 			await loadPart('/pongTournament')
 			Pong('remote', roomId)
