@@ -60,8 +60,14 @@ export function displayNotification(message: string, options?: {
         };
         rejectBtn.onclick = async () => {
             if (options.onRefuse) options.onRefuse();
-            if (userData) hideNotification(0,  userData.id);
-            else hideNotification(0, idNotifyTournament);
+            if (userData) {
+                hideNotification(0, userData.id)
+                document.getElementById(`friendId-${userData.id}`)?.remove()
+            }
+            else {
+                hideNotification(0, idNotifyTournament)
+                document.getElementById(`idTournament-${idNotifyTournament}`)?.remove()
+            }
         };
     } else { // Default Green
         item.classList.remove("bg-red-600", "bg-blue-600");
@@ -79,8 +85,6 @@ export function displayNotification(message: string, options?: {
         item.classList.remove("translate-x-full");
         item.classList.add("translate-x-0");
     });
-    console.log('End of item notification');
-
     requestAnimationFrame(() => {
         if (options?.type !== "invitation") {
             setTimeout(() => {
@@ -88,6 +92,13 @@ export function displayNotification(message: string, options?: {
                 item.classList.add("translate-x-full");
                 setTimeout(() => item.remove(), 500);
             }, 5000);
+        }
+        else {
+            setTimeout(() => {
+                item.classList.remove("translate-x-0");
+                item.classList.add("translate-x-full");
+                setTimeout(() => item.remove(), 500);
+            }, 55000);
         }
     });
 
