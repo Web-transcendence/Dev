@@ -5,6 +5,7 @@ import { navigate } from './front.js'
 import { loadPart } from './insert.js'
 import { openModal } from './modal.js'
 import { TowerDefense } from './td.js'
+import {displayTournaments} from './tournaments'
 
 let abortController: AbortController | null = null
 
@@ -51,11 +52,12 @@ export async function sseConnection() {
 			if (done) break
 			if (value.startsWith('retry: ')) continue
 			const parse = parseSSEMessage(value)
+			console.log(parse.event)
 			if (parse.event in mapEvent)
 				mapEvent[parse.event](JSON.parse(parse.stringData))
 		}
-	} catch (err: any) {
-		if (err.name === 'AbortError')
+	} catch (err) {
+		if (err instanceof DOMException && err.name === 'AbortError')
 			console.log('sse connection aborted')
 		else
 			console.error(err)
@@ -166,7 +168,7 @@ const notifyJoinTournament = async ({ id, maxPlayer }: { id: number, maxPlayer: 
 	const playerTmp = document.getElementById('playerTemplate') as HTMLTemplateElement | null
 	const [{ nickName, avatar }]: UserData[] = await fetchUserInformation([id])
 	if (!playerList || !playerTmp) {
-		displayNotification(`Error Can't find Tournaments`)
+		displayNotification(`Error can't find Tournaments`)
 		await navigate('/home')
 		return
 	}
@@ -229,6 +231,8 @@ const notifyInvitationPong = async ({ roomId, id }: { roomId: number, id: number
 }
 
 const notifyInvitationTowerDefense = async ({ roomId, id }: { roomId: number, id: number }) => {
+	const path = sessionStorage.getItem('path')
+	if ('/lobby' == path) await navigate(`/brackets`)
 	const [userData] = await fetchUserInformation([id])
 	displayNotification('Invitation to Play Tower-Defense', {
 		type: 'invitation',
@@ -267,9 +271,19 @@ const loseTournament = async ({ id }: { id: number }) => {
 
 
 const notifyInvitationTournamentPong = async ({ roomId }: { roomId: number }) => {
-	console.log('RoomId', roomId)
-	await loadPart('/pongTournament')
-	Pong('remote', roomId)
+	console.log('uuuu')
+	displayNotification('Invitation to Play Pong', {
+		type: 'invitation',
+		onAccept: async () => {
+			console.log('RoomId', roomId)
+			await loadPart('/pongTournament')
+			Pong('remote', roomId)
+		},
+		onRefuse: async () => {
+			console.log('Close invite because refused')
+			displayNotification('You have lost the tournament because you refused to play.')
+		},
+	})
 }
 
 const mapEvent: { [key: string]: (data: any) => void } = {

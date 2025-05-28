@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 09:46:47 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/23 14:14:43 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/27 12:53:00 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <websocketpp/client.hpp>
 
 #include "Environment.class.hpp"
+#include "Network.class.hpp"
 #include "httplib.h"
 #include "json.hpp"
 
@@ -57,7 +58,7 @@ private:
 	
 	void	loop( void );
 	
-	bool	giveArrow(std::string const & key, nlohmann::json & j);
+	void	giveArrow(std::string const & key, nlohmann::json & j);
 
 	bool	checkTime( void );
 
@@ -65,7 +66,8 @@ private:
 
 	client	c;
 
-	server_ptr	aiServer;
+	Network	network;
+
 	server_ptr	gameServer;
 	
 	Environment	localPong;
@@ -77,7 +79,6 @@ private:
 	std::atomic<t_state>	active;
 
 	std::promise<bool>	promiseGS;
-	std::promise<bool>	promiseAI;
 	std::promise<bool>	promiseGame;
 
 	std::atomic<std::chrono::steady_clock::time_point>	t1;

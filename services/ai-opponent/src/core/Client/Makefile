@@ -6,7 +6,7 @@
 #    By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/15 17:21:22 by thibaud           #+#    #+#              #
-#    Updated: 2025/05/13 12:22:44 by thibaud          ###   ########.fr        #
+#    Updated: 2025/05/27 10:48:09 by thibaud          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ THIRDPARTY	=	../third-party/
 SRCS_DIR	=	srcs/
 OBJS_DIR	=	.objs/
 DEPS_DIR	=	.deps/
-SRCS		=	main.cpp Factory.cpp Client.cpp Environment.cpp
+SRCS		=	main.cpp Factory.cpp Client.cpp Environment.cpp Network.cpp
 
 
 OBJS		= $(SRCS:%.cpp=$(OBJS_DIR)%.o)
