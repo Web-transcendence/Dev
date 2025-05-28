@@ -400,10 +400,9 @@ export function TowerDefenseSpec(room?: number) {
 
     // Main
     assetsTd.load().then(() => {
-        console.log("Toutes les images sont chargées!");
         mainLoopTd();
     }).catch(error => {
-        console.error("Erreur lors du chargement des assets: ", error);
+        console.error("Error: ", error);
     });
 
     // Communication with backend
@@ -450,7 +449,6 @@ export function TowerDefenseSpec(room?: number) {
         const socketTd = new WebSocket("tower-defense/ws");
         tdSpecConnect = true;
         socketTd.onopen = function () {
-            console.log("Connected to TD server");
             socketTd.send(JSON.stringify({event: "socketInit", nick: nick, room: room}));
         };
         socketTd.onmessage = function (event) {
@@ -513,7 +511,7 @@ export function TowerDefenseSpec(room?: number) {
         });
 
         socketTd.onclose = function () {
-            return (console.log("Disconnected from TD server"));
+            return ;
         };
         connectionCheck(socketTd);
     } catch (error) {

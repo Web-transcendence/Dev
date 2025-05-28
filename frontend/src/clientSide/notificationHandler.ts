@@ -105,7 +105,6 @@ export function displayNotification(message: string, options?: {
 }
 
 export function hideNotification(idNotify: number, idInvitation?: number, idNotifyTournament?: number) {
-    console.log("hide notification", idNotify);
     if (idNotifyTournament) {
         const item = document.getElementById(`idTournament-${idNotifyTournament}`);
         if (!item) return;

@@ -365,7 +365,6 @@ export function Pong(mode: string, room?: number) {
         const keyDownHandler = createKeyDownHandler(socket, game, mode);
         pongConnect = true;
         socket.onopen = function () {
-            console.log("Connected to Pong server");
             socket.send(JSON.stringify({type: "socketInit", nick: nick, room: room}));
         };
 
@@ -402,7 +401,7 @@ export function Pong(mode: string, room?: number) {
             window.removeEventListener("keyup", keyUpHandler);
             window.removeEventListener("keydown", keyDownHandler);
             window.removeEventListener("resize", resizeCanvas);
-            return (console.log("Disconnected from Pong server"));
+            return
         };
     } catch (error) {
         console.error("Unexpected error: ", error);

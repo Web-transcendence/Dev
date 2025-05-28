@@ -146,7 +146,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 			body: JSON.stringify({ credential: credit.credential }),
 		})
 		if (!response.ok)
-			console.error('Error: From UserManager returned an error')
+			console.error('Error: From Google UserManager')
 		else {
 			const reply = await response.json()
 			if (reply.valid) {

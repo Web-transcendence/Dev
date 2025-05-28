@@ -5,7 +5,6 @@ import {tdSpecStop} from "./tdspec.js";
 
 export async function loadPart(page: string) {
 	try {
-		console.log('go to part :', page)
 		await insertTag(`part${page}`)
 		stopGame(page)
 		activateBtn(page)

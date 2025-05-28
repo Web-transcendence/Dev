@@ -80,10 +80,7 @@ async function profileBtn() {
 		if (initFa) {
 			initFa.addEventListener('click', async () => {
 				const qrcode = await init2fa()
-				if (qrcode == undefined) {
-					console.log('ErrorDisplay: qrcode not found!')
-					return
-				}
+				if (qrcode == undefined) return
 				const insertQrcode = document.getElementById('insertQrcode')
 				if (insertQrcode) {
 					const img = document.createElement('img')
@@ -217,11 +214,9 @@ async function Brackets() {
 		if (!template || !list) throw new Error('Missing template or list')
 		for (const bracket of bracketsData) {
 			const playerId: number[] = []
-			console.log('bracket', bracket)
 			if (bracket.id1 !== 0) playerId.push(bracket.id1)
 			if (bracket.id2 !== 0) playerId.push(bracket.id2)
 			const userData = await fetchUserInformation(playerId)
-			console.log('userData', userData)
 			if (!userData) return
 			const myId = await getId()
 			const clone = template.content.cloneNode(true) as DocumentFragment
@@ -265,7 +260,6 @@ async function Brackets() {
 			list.appendChild(clone)
 		}
 	} catch (error) {
-		console.log('Brackets Error: ', error)
 		displayNotification(`Can't show phase of tournament`, { type: 'error' })
 	}
 }

@@ -125,5 +125,4 @@ export function closeModal() {
         modalContent.classList.remove("-translate-y-full");
         modalContent.classList.add("translate-y-full");
     }, 500);
-    console.log('closeModal FINISHED');
 }
