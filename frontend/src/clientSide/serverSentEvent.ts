@@ -167,16 +167,9 @@ const notifyJoinTournament = async ({ id, maxPlayer }: { id: number, maxPlayer: 
 	const playerList = document.getElementById('playerList')
 	const playerTmp = document.getElementById('playerTemplate') as HTMLTemplateElement | null
 	const [{ nickName, avatar }]: UserData[] = await fetchUserInformation([id])
-	if (!playerList || !playerTmp) {
-		displayNotification(`Error can't find Tournaments`)
-		await navigate('/home')
-		return
-	}
+	if (!playerList || !playerTmp) return
 	const clone = playerTmp.content.cloneNode(true) as HTMLElement | null
-	if (!clone) {
-		displayNotification('Error 1.2 occur, please refresh your page.')
-		return
-	}
+	if (!clone) return
 	const item = clone.querySelector('li')
 	if (!item) {
 		displayNotification('Error 2 occur, please refresh your page.')
