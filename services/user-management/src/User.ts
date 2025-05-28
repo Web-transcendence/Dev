@@ -10,22 +10,53 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import { connection, disconnect } from './serverSentEvent.js'
 
 
-export const Client_db = new Database('client.db')  // Importation correcte de sqlite
+export const Client_db = new Database('/app/db/client.db')  // Importation correcte de sqlite
 
 
 Client_db.exec(`
     CREATE TABLE IF NOT EXISTS Client
     (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nickName TEXT NOT NULL,
-        email UNIQUE NOT NULL COLLATE NOCASE,
-        password TEXT NOT NULL,
-        google_id INTEGER,
-		secret_key TEXT DEFAULT NULL,
-        pictureProfile TEXT DEFAULT NULL,
-        activated2fa BOOLEAN DEFAULT NULL,
-        pongMmr INTEGER DEFAULT 1200,
-        tdMmr INTEGER DEFAULT 1200
+        id
+        INTEGER
+        PRIMARY
+        KEY
+        AUTOINCREMENT,
+        nickName
+        TEXT
+        NOT
+        NULL,
+        email
+        UNIQUE
+        NOT
+        NULL
+        COLLATE
+        NOCASE,
+        password
+        TEXT
+        NOT
+        NULL,
+        google_id
+        INTEGER,
+        secret_key
+        TEXT
+        DEFAULT
+        NULL,
+        pictureProfile
+        TEXT
+        DEFAULT
+        NULL,
+        activated2fa
+        BOOLEAN
+        DEFAULT
+        NULL,
+        pongMmr
+        INTEGER
+        DEFAULT
+        1200,
+        tdMmr
+        INTEGER
+        DEFAULT
+        1200
     )
 `)
 
@@ -83,7 +114,7 @@ export class User {
 	}
 
 	static makeToken(id: number): string {
-		const token = jwt.sign({ id: id }, INTERNAL_PASSWORD, { expiresIn: '1h' })
+		const token = jwt.sign({ id: id }, INTERNAL_PASSWORD as string, { expiresIn: '1h' })
 		return (token)
 	}
 
@@ -212,7 +243,9 @@ export class User {
 	}
 
 	getPictureProfile(): string {
-		const userData = Client_db.prepare(`SELECT pictureProfile FROM Client WHERE id = ?`)
+		const userData = Client_db.prepare(`SELECT pictureProfile
+                                            FROM Client
+                                            WHERE id = ?`)
 			.get(this.id) as { pictureProfile: string } | undefined
 		if (!userData)
 			throw new DataBaseError(`should not happen`, 'internal error system', 500)
@@ -247,14 +280,18 @@ export class User {
 
 
 	getPongMmr(): number {
-		const { pongMmr } = Client_db.prepare(`SELECT pongMmr FROM Client WHERE id = ?`).get(this.id) as {
+		const { pongMmr } = Client_db.prepare(`SELECT pongMmr
+                                               FROM Client
+                                               WHERE id = ?`).get(this.id) as {
 			pongMmr: number
 		}
 		return pongMmr
 	}
 
 	getTdMmr() {
-		const { tdMmr } = Client_db.prepare(`SELECT tdMmr FROM Client WHERE id = ?`).get(this.id) as {
+		const { tdMmr } = Client_db.prepare(`SELECT tdMmr
+                                             FROM Client
+                                             WHERE id = ?`).get(this.id) as {
 			tdMmr: number
 		}
 		return tdMmr

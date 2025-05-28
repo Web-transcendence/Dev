@@ -5,7 +5,7 @@ import { ConflictError, InputError, MyError, ServerError, UnauthorizedError } fr
 import { authUser } from './utils.js'
 
 
-const internalVerification = async (req, res) => {
+const internalVerification = async (req: FastifyRequest) => {
 	if (req.headers.authorization !== INTERNAL_PASSWORD)
 		throw new UnauthorizedError(`bad internal password to access to this url: ${req.url}`, `internal server error`)
 }
@@ -181,11 +181,4 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 			return res.status(500).send()
 		}
 	})
-
-	app.get(`/test`, async (req: FastifyRequest, res: FastifyReply) => {
-		console.log(tournamentSessions.get(4)?.sessionData())
-
-		return res.status(200).send()
-	})
-
 }

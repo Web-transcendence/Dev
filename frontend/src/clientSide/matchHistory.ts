@@ -160,8 +160,8 @@ async function drawChart(data: ChartData[]) {
 }
 
 const getMmrById = async (): Promise<{ pongMmr: number, tdMmr: number } | undefined> => {
-    const token = sessionStorage.getItem('token')
-    try {
+	const token = sessionStorage.getItem('token')
+	try {
 
     const response = await fetch(`/user-management/mmr`, {
         method: 'GET',

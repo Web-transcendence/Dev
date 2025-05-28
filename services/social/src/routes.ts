@@ -6,7 +6,7 @@ import { addFriend, checkFriend, getFriendList, removeFriend } from './friend.js
 import { authUser } from './utils.js'
 import { INTERNAL_PASSWORD } from './api.js'
 
-const internalVerification = async (req, res) => {
+const internalVerification = async (req: FastifyRequest) => {
 	if (req.headers.authorization !== INTERNAL_PASSWORD)
 		throw new UnauthorizedError(`bad internal password to access to this url: ${req.url}`, `internal server error`)
 }

@@ -47,7 +47,7 @@ export function setupModalListeners() {
 export async function openModal(nickname: string, id: number): Promise<void> {
     const modal = document.getElementById("myModal") as HTMLDivElement;
     const modalContent = document.getElementById("modalContent") as HTMLDivElement;
-    const nameFriend = document.getElementById("nameFriend") as HTMLSpanElement;
+    const nameFriend = document.getElementById("nameFriend") as HTMLDivElement;
 
     if (!modal || !modalContent || !nameFriend) {
         displayNotification('Missing HTML — refresh page');
@@ -57,7 +57,7 @@ export async function openModal(nickname: string, id: number): Promise<void> {
     currentNickname = nickname;
     currentInviteId = id;
 
-    nameFriend.innerText = `Which game do you want to play with ${nickname}?`;
+    nameFriend.innerHTML = `Which game do you want to play with ${nickname}?`;
 
     modal.classList.remove("hidden");
     modal.classList.add("flex");
@@ -69,44 +69,6 @@ export async function openModal(nickname: string, id: number): Promise<void> {
         modal.classList.add("backdrop-blur-sm");
     });
 }
-
-// export async function openModal(nickname: string, id: number): Promise<void> {
-//     const modal = document.getElementById("myModal") as HTMLDivElement | undefined;
-//     const modalContent = document.getElementById("modalContent") as HTMLDivElement | undefined;
-//     const nameFriend = document.getElementById("nameFriend") as HTMLDivElement | undefined;
-//     if (!modal || !nameFriend || !modalContent) {
-//         displayNotification('Missing Html refresh page')
-//         return ;
-//     }
-//     modal.classList.remove("hidden");
-//     modal.classList.add("flex");
-//     window.requestAnimationFrame(() => {
-//         modalContent.classList.remove("opacity-0", "translate-y-full", "-translate-y-full");
-//         modalContent.classList.add("opacity-100", "translate-y-0");
-//         modal.classList.remove("backdrop-blur-0");
-//         modal.classList.add("backdrop-blur-sm");
-//     });
-//
-//     nameFriend.innerHTML = `Which game you want to play with ${nickname} ?`;
-//     document.getElementById('invitePong')?.addEventListener("click", async () => {
-//         const roomId = await fetchInvitation('match-server', id);
-//         displayNotification(`Invitation send to ${nickname} !`)
-//         await loadPart('/GameFriend')
-//         Pong('remote', roomId)
-//     });
-//     document.getElementById('inviteTowerDefense')?.addEventListener("click", async () => {
-//         const roomId = await fetchInvitation('tower-defense', id);
-//         displayNotification(`Invitation send to ${nickname} !`)
-//         await loadPart('/GameFriend')
-//         TowerDefense(roomId)
-//     });
-//     modal.addEventListener("click", () => {
-//         closeModal()
-//     });
-//     document.getElementById("closeModalBtn")?.addEventListener("click", () => {
-//         closeModal()
-//     });
-// }
 
 export function closeModal() {
     const modal = document.getElementById("myModal");
