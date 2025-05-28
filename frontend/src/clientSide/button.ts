@@ -224,7 +224,7 @@ async function Brackets() {
 
 		const template = document.getElementById('bracketsTmp') as HTMLTemplateElement | null
 		const list = document.getElementById('playerList') as HTMLUListElement | null
-
+		list.innerHTML = ''
 		if (!template || !list) throw new Error('Missing template or list')
 
 		for (const bracket of bracketsData) {

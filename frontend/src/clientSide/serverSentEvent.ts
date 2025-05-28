@@ -231,8 +231,6 @@ const notifyInvitationPong = async ({ roomId, id }: { roomId: number, id: number
 }
 
 const notifyInvitationTowerDefense = async ({ roomId, id }: { roomId: number, id: number }) => {
-	const path = sessionStorage.getItem('path')
-	if ('/lobby' == path) await navigate(`/brackets`)
 	const [userData] = await fetchUserInformation([id])
 	displayNotification('Invitation to Play Tower-Defense', {
 		type: 'invitation',
@@ -271,7 +269,8 @@ const loseTournament = async ({ id }: { id: number }) => {
 
 
 const notifyInvitationTournamentPong = async ({ roomId }: { roomId: number }) => {
-	console.log('uuuu')
+	const path = sessionStorage.getItem('path')
+	if ('/lobby' == path) await navigate(`/brackets`)
 	displayNotification('Invitation to Play Pong', {
 		type: 'invitation',
 		onAccept: async () => {
