@@ -80,10 +80,7 @@ async function profileBtn() {
 		if (initFa) {
 			initFa.addEventListener('click', async () => {
 				const qrcode = await init2fa()
-				if (qrcode == undefined) {
-					console.log('ErrorDisplay: qrcode not found!')
-					return
-				}
+				if (qrcode == undefined) return
 				const insertQrcode = document.getElementById('insertQrcode')
 				if (insertQrcode) {
 					const img = document.createElement('img')
@@ -137,7 +134,13 @@ function pongMode() {
 	document.getElementById('pongRemote')?.addEventListener('click', (event: MouseEvent) => navigate('/pongRemote', event))
 	document.getElementById('pongLocal')?.addEventListener('click', (event: MouseEvent) => navigate('/pongLocal', event))
 	document.getElementById('pongWatch')?.addEventListener('click', (event: MouseEvent) => navigate('/pongWatch', event))
-	document.getElementById('pongVsia')?.addEventListener('click', (event: MouseEvent) => navigate('/pongVsia', event))
+	document.getElementById('pongVsia')?.addEventListener('click', async (event: MouseEvent) => {
+		if (!connected) {
+			displayNotification('You need to be connected to access this page')
+			await navigate('/connect', event)
+		}
+		else await navigate('/pongVsia', event)
+	})
 }
 
 function towerMode() {
@@ -166,37 +169,21 @@ function towerWatch() {
 	TowerDefenseSpec()
 }
 
+
 function tournaments() {
-	const tournaments: { id: number, name: string } [] = [
-		{ id: 4, name: 'Junior' },
-		{ id: 8, name: 'Contender' },
-		{ id: 16, name: 'Major' },
-		{ id: 32, name: 'Worlds' }]
-	for (const parse of tournaments)
-		document.getElementById(`${parse.id}`)
-			?.addEventListener('click', async (event) => {
-				sessionStorage.setItem('idTournaments', JSON.stringify(parse.id))
-				sessionStorage.setItem('nameTournaments', parse.name)
-				await navigate('/lobby', event)
-			})
+	document.getElementById('4')?.addEventListener('click', (event) => navigate('/lobby', event));
 }
 
+
 async function lobby() {
-	const id = sessionStorage.getItem('idTournaments')
-	const name = sessionStorage.getItem('nameTournaments')
-	if (!id || !name) {
-		displayNotification('Please connect to an account.')
-		await navigate('/home')
-		return
-	}
-	await displayTournaments(Number(id), name)
+	await displayTournaments(4, 'Junior')
 	document.getElementById('joinBtn')?.addEventListener('click', async () => {
-		await joinTournament(Number(id))
-		await displayTournaments(Number(id), name)
+		await joinTournament(4)
+		await displayTournaments(4, 'Junior')
 	})
 	document.getElementById('leaveBtn')?.addEventListener('click', async () => {
-		await quitTournaments(Number(id))
-		await displayTournaments(Number(id), name)
+		await quitTournaments(4)
+		await displayTournaments(4, 'Junior')
 	})
 }
 
@@ -217,24 +204,20 @@ function About() {
 
 async function Brackets() {
 	try {
-		const idTournament = sessionStorage.getItem('idTournaments')
-		if (!idTournament) throw new Error('No ID Tournament found!')
-		const bracketsData = await fetchTournamentBrackets(Number(idTournament))
+		const bracketsData = await fetchTournamentBrackets(4)
 		if (!bracketsData) throw new Error('No brackets data')
 
 		const template = document.getElementById('bracketsTmp') as HTMLTemplateElement | null
 		const list = document.getElementById('playerList') as HTMLUListElement | null
+		if (!list) return
 		list.innerHTML = ''
 		if (!template || !list) throw new Error('Missing template or list')
-
 		for (const bracket of bracketsData) {
 			const playerId: number[] = []
 			if (bracket.id1 !== 0) playerId.push(bracket.id1)
 			if (bracket.id2 !== 0) playerId.push(bracket.id2)
 			const userData = await fetchUserInformation(playerId)
-			if (!userData) {
-
-			}
+			if (!userData) return
 			const myId = await getId()
 			const clone = template.content.cloneNode(true) as DocumentFragment
 			const playerOneImg = clone.querySelector('.player-one-img') as HTMLImageElement | null
@@ -277,7 +260,6 @@ async function Brackets() {
 			list.appendChild(clone)
 		}
 	} catch (error) {
-		console.log('Brackets Error: ', error)
 		displayNotification(`Can't show phase of tournament`, { type: 'error' })
 	}
 }

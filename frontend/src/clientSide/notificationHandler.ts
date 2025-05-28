@@ -104,20 +104,25 @@ export function displayNotification(message: string, options?: {
 
 }
 
-export function hideNotification(idNotify: number, idInvitation?: number) {
-    console.log("hide notification", idNotify);
-    if (idInvitation) {
+export function hideNotification(idNotify: number, idInvitation?: number, idNotifyTournament?: number) {
+    if (idNotifyTournament) {
+        const item = document.getElementById(`idTournament-${idNotifyTournament}`);
+        if (!item) return;
+        item.classList.remove("translate-x-0");
+        item.classList.add("translate-x-full");
+        setTimeout(() => item.remove(), 500);
+        return ;
+    }
+    else if (idInvitation) {
         const item = document.getElementById(`${idInvitation}-idFriend`);
-        if (!item)
-            return;
+        if (!item) return;
         item.classList.remove("translate-x-0");
         item.classList.add("translate-x-full");
         setTimeout(() => item.remove(), 500);
         return ;
     }
     const item = document.getElementById(`idNotif-${idNotify}`);
-    if (!item)
-        return;
+    if (!item) return;
     item.classList.remove("translate-x-0");
     item.classList.add("translate-x-full");
     setTimeout(() => item.remove(), 500);

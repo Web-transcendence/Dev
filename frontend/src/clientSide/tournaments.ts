@@ -1,6 +1,7 @@
 import { navigate } from './front.js'
 import { fetchUserInformation, getTournamentList, UserData } from './user.js'
 import { displayNotification } from './notificationHandler.js'
+import { path } from './front.js'
 
 export async function joinTournament(tournamentId: number) {
 	try {
@@ -32,15 +33,16 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 		status: string
 	}[] | undefined = await getTournamentList()
 	if (!tournamentList) return
-	console.log('TournamentList', tournamentList)
 	let player = 0
 	const playerList = document.getElementById('playerList')
+	if (!playerList) return
 	playerList.innerHTML = ''
+
 	const playerTmp = document.getElementById('playerTemplate') as HTMLTemplateElement | null
 	const section = tournamentList.find(s => s.maxPlayer === nbrTournament)
 	if (section && playerList && playerTmp) {
 		if (section.status === 'started') {
-			await navigate('/brackets')
+			if (path != '/brackets') await navigate('/brackets')
 			return
 		}
 		const userData: UserData[] = await fetchUserInformation(section.participants)
@@ -81,7 +83,6 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 
 export async function quitTournaments(idTournament: number) {
 	const token = sessionStorage.getItem('token')
-	console.log(idTournament)
 	const response = await fetch(`/tournament/quit/${idTournament}`, {
 		method: 'GET',
 		headers: {
@@ -94,26 +95,6 @@ export async function quitTournaments(idTournament: number) {
 		console.error(error.error)
 		displayNotification(error.error, { type: 'error' })
 	} else displayNotification('You have left a tournament!')
-}
-
-export async function launchTournament() {
-	try {
-		const token = sessionStorage.getItem('token')
-		const response = await fetch(`/tournament/launch`, {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				'authorization': 'Bearer ' + token,
-			},
-		})
-		if (!response.ok) {
-			const error = await response.json()
-			console.error(error.error)
-			console.log(error)
-		}
-	} catch (error) {
-		console.error(error)
-	}
 }
 
 export async function fetchTournamentBrackets(tournamentId: number): Promise<{
@@ -135,7 +116,5 @@ export async function fetchTournamentBrackets(tournamentId: number): Promise<{
 		return undefined
 	}
 	const ret = await response.json()
-	console.log(ret)
 	return ret
-	// return response.json()
 }

@@ -5,8 +5,6 @@ import {tdSpecStop} from "./tdspec.js";
 
 export async function loadPart(page: string) {
 	try {
-		sessionStorage.setItem('path', page)
-		console.log('setItem path :', page)
 		await insertTag(`part${page}`)
 		stopGame(page)
 		activateBtn(page)
