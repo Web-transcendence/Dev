@@ -61,7 +61,6 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 
 	app.get('/quit/:id', async (req: FastifyRequest, res: FastifyReply) => {
 		try {
-			console.log(`zod_rsxsxssssssssssssesult.data.tournamentId`)
 			const id: number = Number(req.headers.id)
 			if (!id)
 				throw new ServerError(`cannot parse id, which should not happen`, 500)

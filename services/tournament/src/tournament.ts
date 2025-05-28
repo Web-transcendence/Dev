@@ -81,6 +81,12 @@ export class tournament {
 			this.alonePlayerId = 0
 		}
 
+		if (this.actualParticipant.length === 1) {
+			await fetchNotifyUser([this.actualParticipant[0]], 'winTournament', {})
+			this.cleanTournament()
+			return
+		}
+
 		let i = 0
 
 		for (; i < this.actualParticipant.length - 1; i += 2) {
@@ -136,7 +142,7 @@ export class tournament {
 		if (!loser || !winner)
 			throw new ServerError(`internal server error, it doesn't happen`, 500)
 
-		if (this.actualParticipant.length === 2 && this.alonePlayerId == 0)
+		if ((this.actualParticipant.length === 2 || this.actualParticipant.filter(id => id !== 0).length == 0) && this.alonePlayerId == 0)
 			winnerEvent = `winTournament`
 
 		await fetchNotifyUser([loser], 'loseTournament', {})
