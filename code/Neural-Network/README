@@ -1,0 +1,58 @@
+NEURAL NETWORK (NN):
+
+Il a deux types de "neurones" pour le moment, les perceptrons et les sigmoids. Pour
+comprendre la difference il faut s'interesser a ce que contiennent les dit neuronnes.
+Un neurone contient une somme de produit auquel on vient. Le but de cette somme est d'appliquer
+un calcul a different input et de ressortir un output simple. Les inputs vont avoir un poids (w) et 
+a cette somme d input ponderee on va venir y ajouter un biais qui est l inverse d'un seuil.
+Le resultat de cela est le fire d'un neurone qui sera soit une partie de l'input final, soit
+une fraction de l'input de la layer suivante.
+Et c'est donc ici que la difference entre nos neurones se fait. Le perceptron peut etre definit
+
+Ces deux options sont des fonctions d'activation (il en existe theoriquement une quasi infinite mais les
+plus utilisees sont ReLu, LeakyReLu, Sigmoid, Tahn, Step...), elles viennent s'appliquer sur le resultat
+du neuron afin de map son output differement en fonction de la problematique traitee par le reseau.
+
+exemple de step:
+output =    | 0 si sum(wj.xj) + b <= 0 
+            | 1 si sum(wj.x) + b > 0
+exemple de sigmoid:
+output = 1 / (1 + e^-z) sachant que z = sum(wj.xj) + b
+
+Pour terminer sur ces fonctions il faut bien comprendre que pour l'apprentissage la derive de la fonction
+est utilisee et que si celle ci est trop proche de 0 ca le rendra impossible.
+
+L'apprentissage d'un NN est la partie la plus importante mais aussi la plus complexe.
+Afin de bien comprendre cela il faut d'abord savoir de quoi on parle, un Neural Network est
+un nuage de neurones disposes en layer, dans l'idee un NN peut fonctionner avec deux layers,
+une input composee de 0 neurone car elle ne contient que les valeurs d'input et une d'output
+contenant N neurons ou N est une valeur arbitraire en fonction du context. En pratique notre
+reseau aura toujours au moins 3 layers. La 3eme est entre l'input et l'output et est definit
+comme l'hidden layer contenant X neurons ou X est aussi une valeur arbitraire. Il faut bien 
+comprendre que augmenter X aura un effet conciderable sur le temps de training, tout comme
+ajouter des layers supplementaires mais cela permet aussi d'apporter de la precision a celui ci.
+En effet, dans un probleme ou il a 4 neurones d'entree et 3 neurones de sortie et que ceux ci
+n'ont dans l'idee pas de relations specifiques.
+Par exemple pour le probleme des handwrittens digits l'input est la couleur d un pixel et
+l'ouput est une liste de dix nombres dont la position du plus grand donne la reponse du NN.
+Dans l'idee il est complique d imaginer une logique la dedans, or on peut dire par qu'un cinq
+est compose d'un trait horizontal, d'un trait vertical et d'un arc de cercle. Le but ca va etre
+de diviser nos nombres en patern et donc pouvoir dire que globalement il existe dans les nombres
+de 0 a 9 une vingtaine de patern ce qui va nous permettre d'ajouter une etape a notre reseau. On
+se retrouve donc avec un NN de 784 inputs (correspondant a tous les pixels de notre image), 30 neurones
+pour la layer hidden (correspondant aux differents paterns constituant un nombre) et enfin 10 outputs
+neurones. On a donc ici ajoute une etape dans notre reconnaissance ce qui va permettre de conciderablement
+ameliorer les resultats.
+
+L'algorithme ci-joint permet de reconnaitre des handwrittens digits 9fois sur 10 une fois entraine.
+Le dataset provient d'un projet MNIST.
+Dans un premier temps on recupere la valeur de chaque pixel pour une image (ici dans un vecteur) et
+on le met en duo avec un label (le resultat attendu). Lors du training on va utiliser des batchs comme
+ca le NN peut s'entrainer plusieurs fois sur les memes inputs sans probleme. 
+L'idee global c est donc de creer des batchs de taille B contenant des inputs et leurs expected outputs,
+utiliser la backpropagations pour recuperer des deltas entre les outputs de chaque neurones et les expected
+puis mettre a jour nos bias et weights. Je vais pas detailler ici principe de backpropagations car ca
+serait un peu trop long mais il existe beaucoup de bonnes ressources a ce sujet
+(https://github.com/mnielsen/neural-networks-and-deep-learning ressource sur lequel j ai base mon projet).
+
+

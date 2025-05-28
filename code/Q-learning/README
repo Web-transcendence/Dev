@@ -1,0 +1,59 @@
+Q-LEARNING :
+
+L'algorithme de Q-learning appartient a la famille des algos de reinforcement learning (branche du machine learning).
+Celui-ci est relativement simple et sert dans des cas triviaux. Le Q-learning se base sur une experience apportant soit
+une reward, celle-ci peut-etre nulle, positive ou negative en fonction du contexte et du but final. Cette experience ne
+vient pas d'un dataset, ce qui simplifie grandement l'entrainement par rapport a un NN.
+
+Dans l'idee le Q-Learning contient une Q-Matrix en memoire. Cette Q-Matrix fait X par Y pour X le nombre de state de
+l'environment et Y le nombre d'actions par state. Cet algo va donc avoir besoin d'un environment qui genere un nouveau
+state a chaque fois qu'on lui applique une action, on peut ensuite dire que si l'action est positive la reward le sera, ect..
+On va venir stocker la reward obtenue dans la case de l'action du state qui a permis de l'obtenir.
+Par exemple on va prendre l'environment du Frozen Lake en 4x4:
+    'S'FFF		S est le start
+    HFFH		G le Goal
+    FHFF		F l'espace sur lequel on peut se deplacer
+    FHFG		H l'espace ou on tombe
+
+Il va donc falloir rejoindre G depuis S en evitant les H. G apporte une reward de 1 et termine la partie. H termine la partie
+sant apporter une reward et se deplacer n'apporte pas de reward non plus mais la partie continue.
+La QMatrix a l'initialisation ressemble donc a cela:
+
+             |Up    |Down  |Right |Left
+    State 00:|0     |0     |0     |0
+    State 01:|0     |0     |0     |0
+    State...
+	State 15:|0     |0     |0     |0
+
+Au cour du training le tableau va se remplir de QValue qui est egal a la reward obtenue en fin de parcours
+lorsque l'action a ete prise au state correspondant. On va donc toujours dire a notre agent de regarder les QValues
+associees a son state actuel T et de faire l'action qui contient la plus importante (car c'est en faisant
+celle-ci qu'il obtiendra la reward in-fine). Or comme on peut le voir a l'init tous ces valeurs sont nulles donc il ne
+peut pas choisir. Pour cela lors du training il va avoir deux phases, la premiere laissant sa place petit a
+petit a la suivante. On commence donc par une phase d'exploration qui consiste a juste prendre des decisions
+de manieres aleatoires. Cette phase est associee a une valeur d'exploration EXPLO[0;1] qu'on va venir decrementer d'une 
+valeur X (souvent EXPLO / nombre d episodes de training), EXPLO est la part de decision qu on prend aleatoirement.
+Si une decision n'est pas prise aleatoirement c'est qu'on se base sur nos QValues. Plus les episodes de training
+avance plus on fait confiance a notre matrice.
+
+Exemple d'une QMatrix apres l'apprentissage (elle n'est pas forcement liee a l exemple du dessus  ):
+== QMATRIX PRINT ==                             
+Stage 00:[0.175568;0.227449;0.227449;0.175568;]  
+Stage 01:[0.227449;0.294661;0;0.175568;]         
+Stage 02:[0;0;0;0;]                                
+Stage 03:[0;0;0;0;]                                
+Stage 04:[0.175568;0.294661;0.294661;0.227449;]     
+Stage 05:[0.227449;0.381734;0.381734;0.227449;]     
+Stage 06:[0;0;0.494539;0.294661;]                   
+Stage 07:[0;0.640677;0.494539;0.381734;]            
+Stage 08:[0.227449;0.381734;0.381734;0.294661;]     
+Stage 09:[0.294661;0.494539;0;0.294661;]         
+Stage 10:[0;0;0;0;]                              
+Stage 11:[0.494539;0.83;0.640677;0;]               
+Stage 12:[0.294661;0.381734;0.494539;0.381734;]   
+Stage 13:[0.381734;0.494539;0.640677;0.381734;]   
+Stage 14:[0;0.640677;0.83;0.494539;]                         
+Stage 15:[0;0;0;0;]                             
+
+Comme pour le NN je ne vais pas expliciter ici la maniere donc il ajuste ces Qvalues pour des raisons
+de temps. 

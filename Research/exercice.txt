@@ -1,0 +1,303 @@
+Il a deux types de "neurones" pour le moment, les perceptrons et les sigmoids. Pour
+comprendre la difference il faut s'interesser a ce que contiennent les dit neuronnes.
+Un neurone contient une somme de produit auquel on vient. Le but de cette somme est d'appliquer
+un calcul a different input et de ressortir un output simple. Les inputs vont avoir un poids (w) et 
+a cette somme d input ponderee on va venir y ajouter un biais qui est l inverse d'un seuil.
+Et c'est donc ici que la difference entre nos neuronnes se fait. Le perceptron peut etre definit par
+output =    | 0 si sum(wj.xj) + b <= 0 
+            | 1 si sum(wj.x) + b > 0
+alors que le sigmoid:
+output = 1 / (1 + e^-z) sachant que z = sum(wj.xj) + b
+
+Ex1:
+Montrons que le comportement du network ne change pas si nous multiplions les weights ainsi que les biais d'un perceptron:
+
+output =    | 0 si w.x + b <= 0 
+            | 1 si w.x + b > 0
+
+si nous multiplions le tout:
+
+output =    | 0 si cw.x + cb <= 0
+            | 1 si cw.x + cb > 0 
+Sachant que w.x + b = (cw.x + cb) / c et que 0 / c = 0 alors le comportement du network reste inchange.
+
+Ex2:
+meme chose mais pour un sigmoid:
+
+output = sig(z) = 1 / (1 + e^-z) soit 1 / (1 + e^-(w.x + b)) pour sig(w.x + b)
+
+Sachant que w.x + b != 0
+Si w.x + b > 0 alors output de sig(w.x + b) = 1
+Si w.x + b < 0 alors output sig(w.x + b) = 0
+Alors si on a sig(cw.x + cb) sachant que c->inf alors meme regle que precedement,
+Si cw.x + cb > 0 alors output de sig(cw.x + cb) -> 1
+Si cw.x + cb < 0 alors output sig(cw.x + cb) -> 0
+Puisque tous les sigmoids d un reseau appliquent cette regle alors le comportement du network reste inchange
+mnt dans le cas ou w.x + b = 0 alors cw.x + cb = 0 aussi et peu importe si c->inf sig(cw.x + cb) = 0.5 donc le comportement d un perceptron ne sera jamais atteint peu importe la valeur de c.
+
+Quadratic Cost Function ->
+C(w,b)≡(1/2n)∑x(∥y(x)−a∥2).
+w = all weights
+b = all biaises
+n = number of inputs
+a = vector of outputs
+x = all inputs
+y(x) = vector of expected output for an input x
+
+La Quadratic Cost Function ou MSE(Mean Squerred Error) est une fonction qui calcule l'erreur
+de notre algo en comparant ses outputs par rapport a ceux attendus. Donc plus a sera proche
+de y(x) plus C(w,b) tendra vers 0 la ou a l'inverse il tendra vers 1.
+
+Ex3: Ici le but de l'exercice va etre de calculer les weights et biaises pour que notre
+le output layer ne comporte plus que 4 output neurons. 
+D'apres l'ecriture binaire des chiffres on sait que le premier output neuron (on ecrit ici de droite a gauche 1 = 0001)
+va output 1 lorsque l input est 8 ou 9 et le reste du temps ca sera 0. Donc on sait que le weight pour l input de 8 et 9
+est de 1 et 0 pour les autres chiffres. Tel que w(0,0,0,0,0,0,0,0,1,1).x avec x vecteur des outputs de la layer precedente.
+Sachant que la precision des outputs de la layer d avant est de >= 0.99 lors de l activation et <= 0.01 le reste du temps.
+Donc on sait que :  0.99 <= σ(w.x + b) pour 8 et 9, et σ(w.x + b) <= 0.01 pour les autres.
+Plus simplement on cherche b afin que σ(b) ~ 0 et σ(1 + b) ~ 1;
+Donc on peut set b = -0.5 puisqu il remplit les deux conditions,
+On se rappelle que on cherche w tel que:
+    0.99 <= σ(w(0.99 + b)) et σ(w(0.02 + b)) <= 0.01
+
+Plus globalement on peut dire qu on a une precision α = 0.01 donc 
+    | 1 - α <= σ(w(1 - α + b))
+    | σ(w(2α + b)) <= α
+
+Donc d apres la definition au dessus d un sigmoid σ cela nous donne:
+    | w >= (ln((1-α)/α))/(1-α+b)
+    | w >= -(ln((1-α)/α))/(2α+b)
+
+    | w >= 9.38
+    | w >= 9.58
+
+Maintenant on va generaliser tout ca pour, pas besoin de conclure pour cet unique neuron.
+Un neuron prendra l output de n <= 10 neurons de la layer precedente donc on a :
+    1 - α <= w.x <= 1 + (n - 1)α s'il doit s activer et 0 <= w.x <= nα pour les autres
+
+Donc nos conditions deviennent:
+    | 1 - α <=  σ(w(1-α+b))
+    | σ(w(nα+b)) <= α
+
+avec nα < 0.5 et donc nα + b < 0
+    | w >= (ln((1-α)/α))/(1-α+b)
+    | w >= -(ln((1-α)/α))/(nα+b)
+
+donc pour chaque neuron avec n <= 10
+    | w >= 9.38
+    | w >= 11.49
+
+donc globalement w >= 12
+
+On aura donc un vecteur final remplit de 0 et de 12, on peut dont en deduire que maintenant b = -6
+pusque pour passer de 1 a 12 on a applique un facteur 12 au weight alors on fait pareil pour le biais.
+
+Neuron 1: w=12(0,0,0,0,0,0,0,0,1,1); b=−6
+Neuron 2: w=12(0,0,0,0,1,1,1,1,0,0); b=−6
+Neuron 3: w=12(0,0,1,1,0,0,1,1,0,0); b=−6
+Neuron 4: w=12(0,1,0,1,0,1,0,1,0,1); b=−6
+
+Ex4:
+Ex5:
+
+CODE EXPLAINATION:
+
+backprop(x,y) -> x c'est les inputs et y les outputs attendus. Ca peut etre un vector ou un nombre.
+
+nabla_b = [np.zeros(b.shape) for b in self.biases] -> le but va etre de shape nabla_b comme le vector de biases.
+nabla_w = [np.zeros(w.shape) for w in self.weights] -> Pareil pour weights
+
+Apres avoir developpe un algo de training simple pour reconnaitre des handwritten digits, la question de l'implementation se pose
+par rapport au pong. Il semble que le modele utilise pour les nombres est loin d'etre le plus optimise pour une IA de jeu.
+Il va dont falloir trouver une alternative. Celle ci s'appelle le deep Q learning ou Q learning en fonction du degres de 
+complexite. Le deep Q learning utilise un autre network pour creer des inputs a un network target alors que le second prend 
+directement des inputs fixs. Dans tous les cas ce type d algo a un entrainement bien different du precedent puisque
+desormais l algo cherche a collecter un maximum de reward.
+
+Implementation of a Q-learning algorithm based in C++ in the folder Q-learning;
+The Q-learning is a machine learning algorithm taking part in the renforcement learning subregion.
+It is way differente from deep learning but it's very interesting. To give a quick explaination the algo can be
+devided in two section: The agent and the environment. The agent can interact with the environment to discover it
+and earn some potential reward. In my implementation the environment is 4x4 map with a start (S) top left and a goal (G) bottom right.
+There is some frozen ice (F) that the agent can walk on, and some hole (H) where it could fall. 
+
+Exemple:
+    'S'FFF
+    HFFH
+    FHFF
+    FHFG
+
+Now we have to create a QMatrix for each state (in our case the emplacement of our agent) and depending of our possible actions. In this exemple
+there is 4 actions (up, down, right, left). So our QMatrix is going to store our QValue for each pair {state:action};
+
+Exemple:
+            |Up    |Down  |Right |Left
+    State 0:|0     |0     |0     |0
+    State 1:|0     |0     |0     |0
+    State...
+
+The Qvalue is the average got reward at the end of a lap for each action took at a state. If the QValue is 0 that signify that the lap will stop here
+if the action is taken (like the agent fall in to a hole). The purpose of our training is to define all the Qvalues so at the end the agent should just
+select the highest value per state to have the best pathing to the goal.
+
+Le passage de Qlearning a Deep Qlearning n'a pas dutout ete simple, l'approche du debut a ete d utilise naivement le neural network implementé précédement.
+Malheureusement rien ne fonctionnait, soit les Qvalues explosaient, soit tout tendait vers 0 ou en négatif. Une piste d'amelioration a ete de passer la
+fonction d'activation de sigmoid vers reLu puis leakyReLu, mais toujous les memes problèmes. A ce moment il est compliqué de savoir si le problèmes provient du
+NN ou de l'agent, si c'est un mauvais paramétrage ou si c'est un bug. L'approche de débug a donc été de train l'agent en Qlearning puis de train mon reseau avec
+une QMatrix deja complete pour voir s'il arrivait à la répliquer. Dans le cas où il n'y arrive pas le problème vient de mon NN, s'il y arrive le problème vient
+de l'agent.
+
+=== TRAINING ===
+99% [###################.]
+QMatrix trained
+99% [###################.]
+QNet trained
+
+=== TESTING ===
+== QMatrix TEST ==
+=========== =========== =========== =========== =========== =========== === END ===
+'S'FFF      SFFF        SFFF        SFFF        SFFF        SFFF        SFFF
+FHHH        'F'HHH      FHHH        FHHH        FHHH        FHHH        FHHH
+FFFF        FFFF        'F'FFF      F'F'FF      FF'F'F      FFF'F'      FFFF
+FFHG        FFHG        FFHG        FFHG        FFHG        FFHG        FFH'G'
+
+== QNET TEST ==
+=========== ==========
+'S'FFF      ...
+FHHH
+FFFF
+FFHG
+
+Le QNET n'a pas bougé du start et a donc une QMatrix qui n'a rien à voir avec celle de base.
+Dans l'investigation je decide de rechanger ma fonction d'activation en fonction sigmoid et d'ajuster
+mes hyperparametres: Aucun résultat.
+Par contre j'ai doublé le nombre de neurons sur la hidden layer en passant de 10 à 25 et là on a quelque chose
+de beaucoup beaucoup mieux puisque l'output prend la bonne direction, il est pas parfait mais utilisable.
+
+== QMATRIX PRINT ==                                 == QNET PRINT ==             
+Stage 0:[0.175568;0.227449;0.227449;0.175568;]  |   Stage :[0.174778;0.226761;0.226667;0.174341;]   
+Stage 1:[0.227449;0.294661;0;0.175568;]         |   Stage :[0.226902;0.294474;0.0124059;0.174463;]   
+Stage 2:[0;0;0;0;]                              |   Stage :[0.0108453;0.0142061;0.0127237;0.0154973;]   
+Stage 3:[0;0;0;0;]                              |   Stage :[0.0126188;0.0140058;0.0125415;0.0144115;]   
+Stage 4:[0.175568;0.294661;0.294661;0.227449;]  |   Stage :[0.174659;0.294308;0.294321;0.227041;]   
+Stage 5:[0.227449;0.381734;0.381734;0.227449;]  |   Stage :[0.226937;0.381542;0.381405;0.226874;]   
+Stage 6:[0;0;0.494539;0.294661;]                |   Stage :[0.01077;0.013672;0.494154;0.294053;]   
+Stage 7:[0;0.640677;0.494539;0.381734;]         |   Stage :[0.014343;0.639941;0.493787;0.381223;]   
+Stage 8:[0.227449;0.381734;0.381734;0.294661;]  |   Stage :[0.226799;0.381255;0.381262;0.294087;]   
+Stage 9:[0.294661;0.494539;0;0.294661;]         |   Stage :[0.294305;0.494546;0.0142642;0.294253;]   
+Stage 10:[0;0;0;0;]                             |   Stage :[0.0101867;0.0121218;0.0110794;0.0135048;]   
+Stage 11:[0.494539;0.83;0.640677;0;]            |   Stage :[0.493749;0.828946;0.640315;0.0155336;]   
+Stage 12:[0.294661;0.381734;0.494539;0.381734;] |   Stage :[0.294142;0.381381;0.494256;0.381598;]   
+Stage 13:[0.381734;0.494539;0.640677;0.381734;] |   Stage :[0.381474;0.494364;0.640479;0.381578;]   
+Stage 14:[0;0.640677;0.83;0.494539;]            |   Stage :[0.0144255;0.640126;0.829136;0.494051;]              
+Stage 15:[0;0;0;0;]                             |   Stage :[0.00859477;0.0122772;0.0115655;0.013055;]
+
+Je vais continuer l'ajustement en mettant deux hidden layers ou en montant le nombre de neurones dans les dit
+layers ou en ajustant les hyperparametres.
+Augmenter le nombre de layers augmente grandement le temps de training et dans ce cas n'ameliore pas grandement
+l'output, en tout cas pas suffisament pour que cela soit rentable par rapport au temps de training.
+Doubler le nombre d'épisodes de training augmente linéairement le temps mais le résultat est beaucoup mieux:
+
+Sigmoid->
+== QMATRIX PRINT ==                                == QNET PRINT ==
+Stage 0:[0.175568;0.227449;0.227449;0.175568;]  |   Stage :[0.17536;0.227118;0.227164;0.175187;]
+Stage 1:[0.227449;0.294661;0;0.175568;]         |   Stage :[0.227204;0.294281;0.00938033;0.174953;]
+Stage 2:[0;0;0;0;]                              |   Stage :[0.00676294;0.00589958;0.00470355;0.00588309;]
+Stage 3:[0.381734;0.494539;0.381734;0;]         |   Stage :[0.381547;0.494312;0.381438;0.00999566;]
+Stage 4:[0.175568;0.294661;0.294661;0.227449;]  |   Stage :[0.175394;0.294391;0.294475;0.227144;]
+Stage 5:[0.227449;0.381734;0;0.227449;]         |   Stage :[0.227211;0.381404;0.00910994;0.227018;]
+Stage 6:[0;0;0;0;]                              |   Stage :[0.00705997;0.00619347;0.00523256;0.00600208;]
+Stage 7:[0.381734;0.640677;0.494539;0;]         |   Stage :[0.38151;0.640452;0.494294;0.0100483;]
+Stage 8:[0.227449;0;0.381734;0.294661;]         |   Stage :[0.227069;0.00731659;0.381556;0.294534;]
+Stage 9:[0.294661;0;0.494539;0.294661;]         |   Stage :[0.294373;0.00782601;0.494426;0.294541;]
+Stage 10:[0;0;0.640677;0.381734;]               |   Stage :[0.0096711;0.00703944;0.640562;0.381265;]
+Stage 11:[0.494539;0.83;0.640677;0.494539;]     |   Stage :[0.494442;0.829786;0.640552;0.494407;]
+Stage 12:[0;0;0;0;]                             |   Stage :[0.00496642;0.00424668;0.00490137;0.00700651;]
+Stage 13:[0;0;0;0;]                             |   Stage :[0.00686377;0.00633059;0.00524241;0.00636774;]
+Stage 14:[0;0;0;0;]                             |   Stage :[0.00589238;0.00582695;0.00539554;0.00641726;]
+Stage 15:[0;0;0;0;]                             |   Stage :[0.00597867;0.00615911;0.00531417;0.00704465;]
+
+leakyRelu->
+== QMATRIX PRINT ==                               == QNET PRINT ==                                 
+Stage 0:[0.175568;0.227449;0.227449;0.175568;]  |  Stage 0:[0.175567;0.227475;0.227458;0.175574;] 
+Stage 1:[0.227449;0;0.294661;0.175568;]         |  Stage 1:[0.227452;-0.000305927;0.294667;0.175572;] 
+Stage 2:[0.294661;0.381734;0.227449;0.227449;]  |  Stage 2:[0.294649;0.381751;0.227461;0.227449;] 
+Stage 3:[0.227449;0;0.227449;0.294661;]         |  Stage 3:[0.227454;-0.00141238;0.227448;0.294667;] 
+Stage 4:[0.175568;0.294661;0;0.227449;]         |  Stage 4:[0.175556;0.294685;1.60346e-05;0.227454;] 
+Stage 5:[0;0;0;0;]                              |  Stage 5:[-0.00103266;-0.00393853;-0.00173526;-0.000589719;] 
+Stage 6:[0.294661;0.494539;0;0;]                |  Stage 6:[0.294669;0.494522;-0.00186211;-0.000874553;] 
+Stage 7:[0;0;0;0;]                              |  Stage 7:[-0.000535429;-0.0017476;-0.000826771;1.05206e-05;] 
+Stage 8:[0.227449;0;0.381734;0.294661;]         |  Stage 8:[0.227453;-0.000524044;0.381726;0.294659;] 
+Stage 9:[0;0;0.494539;0.294661;]                |  Stage 9:[1.02875e-05;-0.00106612;0.494532;0.294654;] 
+Stage 10:[0.381734;0;0.640677;0.381734;]        |  Stage 10:[0.381728;7.28252e-06;0.640683;0.381736;] 
+Stage 11:[0;0.83;0.640677;0.494539;]            |  Stage 11:[4.35925e-06;0.83;0.640673;0.494539;] 
+Stage 12:[0;0;0;0;]                             |  Stage 12:[-0.000357001;-4.22569e-05;3.35403e-06;-3.5494e-06;] 
+Stage 13:[0;0;0;0;]                             |  Stage 13:[9.95121e-06;-0.00131012;-0.00025965;-0.000187553;] 
+Stage 14:[0;0;0;0;]                             |  Stage 14:[-0.000273896;2.42333e-05;1.46759e-05;-5.44259e-05;] 
+Stage 15:[0;0;0;0;]                             |  Stage 15:[-3.13004e-05;-0.000296792;-0.00101181;-0.000589724;] 
+
+Comme on voit la fonction leakyReLu a des résultats un peu meilleurs mais certaine valeur étant négative j'ai peur
+que cela impact le training. 
+
+Cette période de test m'a permis de definir l'architecture de mon réseau:
+    16 inputs, 25 hidden neurons pour 1 layer, 4 outputs
+    40 000      épisodes de training
+    0,05        d'eta
+    leakyReLu   activation function
+
+Le reseau fonctionne, il n'est pas toujours tres precis et on peut y observer des manquements mais il fonctionne suffisament
+pour ne pas assimiler ces reussites a du hasard. Toutefois comme tous les dql il rencontre un probleme de Qvalue trop
+importante ce qui ammene a des choix pas toujours optimises mais surtout dans le notre a un echec. Pour regler ce 
+probleme bien connu, le Deep Q network a ete theorise afin de regler ce probleme de surestimation et donc d'imprecision.
+Je vais tout de meme mener des tests afin de savoir si la valeur d initialisation des weights et biaises ont un quelconque 
+impact.
+Le test va etre de lancer vingts fois le probleme avec ume map realisable. 10 fois avec des valeurs aleatoires suivant une 
+distribution normal entre parmi [0.0; 1 / sqrt(nb de neurons dans la layer precedente)] et 10 fois initialise a 0.0.
+
+0.0 -> 0/10
+
+random -> 2/10
+
+De ce que je remarque le reseau essaye quoi qu il arrive d'aller a droite en premier ce qui est tres genant dans mon cas puisque
+s'il fait ca et qu'il y a un H a cote c'est un echec directement. Cela fausse completement l'echantillon. Pour terminer je vais juste
+set mes weights a 0.0 mais laisser le bais entre 0 et 0.01 je trouve que c'est le meilleur compromis puisqu'avec cette technique j'obtient
+un score de 5/10. Un plafond autour de 50% est un resultat logique pour un dql sans xp replay.
+
+Je vais donc passer directement au developpement d'un DQN avec exp replay pour l'implementation de mon pong. Je vais aussi mettre un systeme de reward scaling,
+une recompense unique (+1 lorsque le point est marque) genereait l exploration et pourrait donner une ia qui ne test pas grand chose en jeu.
+Je vais donc partir sur des bases simples : +1 lorsque le point est marque, -0.5 lorsque le point est concede, +0.05 lorsque la balle est recuperee.
+Le but est de favoriser l agressivite sans pour autant que cela soit trop rentable. Elle va devoir ne pas etre trop passive.
+
+Apres de nombreux tests j'ai donc developpe un DQN sur le probleme du frozenlake. Le probleme est simple mais l algo pour le resoudre est lui complique.
+J'ai fait cette etape intermediaire pour me faire la main et m'assurer que mq logique etait la bonne avant de passer au pong. Le DQN est interessant et 
+bien pense, il est complique a comprendre mais pas tellement a realise par rapport au NN. Cela m'a pris du temps parce que j avais l xp replay a ajouter aussi.
+L'exp replay c est un buffer d experience passee qui vont venir train notre network a chaque actions de l'episode de training ce qui decuple le nombre d entrainement.
+Pour mon probleme ici je store dans chaque experience, le state, l action, le next state, la reward de celui ci et si l episode est done ou pas (ici si le goal a ete
+reach ou si on est tombe dans un hole). Mais l xp replay n'est qu un ajout par rapport a mon DQL mais c est pas le plus interessant ici puisqu il aurait pu etre ajoute
+avant. Le DQN ajoute un second NN appelle target network qui va venir sauvegarder le reseau principal a un instant T afin de venir reduire la variance de celui-ci.
+Je m'explique, que le reseau fire un bon ou un mauvais input il va quand meme se mettre a jour ce qui peut ralentir le process voir l emmener sur une fausse piste. le tnet
+va sauvegarder le reseau apres un episode concretisant (une suite de reponse satisfaisante) et venir fire des outputs afin de guider la suite du training. Il sert un peu 
+de tuteur en quelque sorte. Pour un DQN on calcule la Qvalue(st, at) de la facon suivante :
+    Qvalue(st, at) = Reward(t+1) + discount * (Tvalue(nextState, maxTvalue(nextState)))
+On vient dans un premier temps recuperer la reward decoulant de la nextState qu on va sommer avec le produit du discount (l importance apportee aux rewards futures) et de la 
+Qvalue du nextState pour une action a, pour a soit l action avec la qvalue maximale dans les Qvalues fired par Tnet.
+
+
+
+On passe au pong maintenant !
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
