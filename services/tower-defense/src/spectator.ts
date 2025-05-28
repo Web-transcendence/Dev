@@ -4,7 +4,7 @@ import {Player, roomsTd} from "./api.js";
 export function joinRoomSpec(player: Player, roomId: number) {
     if (roomId !== -1) { // Joining a defined room (invite or tournaments)
         for (const room of roomsTd) {
-            if (room.id === roomId) {
+            if (room.id === roomId && !room.ended) {
                 room.specs.push(player);
                 console.log(player.name, "joined room", room.id, "as spectator");
                 return ;

@@ -15,7 +15,7 @@ import {soloMode} from "./solo.js";
 import {
     generateRoom,
     joinRoom,
-    leaveRoom, matchMaking, matchMakingUp, removeWaitingPlayer,
+    leaveRoom, matchMaking, matchMakingUp, removeWaitingPlayer, rooms,
     startInviteMatch,
     startTournamentMatch,
     waitingList,
@@ -24,7 +24,7 @@ import {
 import {z} from "zod";
 import {changeRoomSpec, joinRoomSpec, leaveRoomSpec} from "./spectator.js";
 
-const internalVerification = async (req, res) => {
+const internalVerification = async (req: FastifyRequest) => {
 	if (req.headers.authorization !== INTERNAL_PASSWORD)
 		throw new Error(`only server can reach this endpoint`)
 }
@@ -181,7 +181,6 @@ export default async function pongRoutes(fastify: FastifyInstance) {
 
 	fastify.post('/tournamentGame', { preHandler: internalVerification }, async (req: FastifyRequest, res: FastifyReply) => {
 		try {
-
 			const ids = z.object({
 				id1: z.number(),
 				id2: z.number()
@@ -218,5 +217,18 @@ export default async function pongRoutes(fastify: FastifyInstance) {
 			return res.status(400).send({error: err})
 		}
 	})
+
+    fastify.get('/tournamentRooms', async (req: FastifyRequest, res: FastifyReply) => {
+        try {
+            const roomIds: number[] = rooms
+                .filter(room => room.type === "tournament" && !room.ended)
+                .map(room => room.id);
+
+            return res.status(200).send(roomIds);
+        } catch (err) {
+            console.error(err);
+            return res.status(400).send({error: err});
+        }
+    });
 
 }

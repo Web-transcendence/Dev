@@ -4,7 +4,7 @@ import {rooms} from "./netcode.js";
 export function joinRoomSpec(player: Player, roomId: number) {
     if (roomId !== -1) { // Joining a defined room (invite or tournaments)
         for (const room of rooms) {
-            if (room.id === roomId) {
+            if (room.id === roomId && !room.ended) {
                 room.specs.push(player);
                 console.log(player.paddle.name, "joined room", room.id, "as spectator");
                 return ;
@@ -13,7 +13,7 @@ export function joinRoomSpec(player: Player, roomId: number) {
     }
     // Basic random matchmaking
     for (let room of rooms) {
-        if (room.players.length === 2 && !room.ended) {
+        if (room.players.length === 2 && room.type !== "tournament" && !room.ended) {
             room.specs.push(player);
             console.log(player.paddle.name, "joined room", room.id, "as spectator");
             return ;
@@ -36,16 +36,32 @@ export function leaveRoomSpec(userId: number) {
         }
     }
     console.log("Player has not joined a room yet.");
+    return (-1);
 }
 
 export function changeRoomSpec(player: Player) {
     const roomId = leaveRoomSpec(player.id);
-    for (const room of rooms) {
-        if (room.id !== roomId && room.players.length === 2 && !room.ended) {
-            room.specs.push(player);
-            console.log(player.paddle.name, "joined room", room.id, "as spectator");
-            return ;
+    if (roomId === -1)
+        joinRoomSpec(player, -1);
+    const roomIndex = rooms.findIndex(room => room.id === roomId);
+    const tournament = rooms[roomIndex].type === "tournament";
+    if (tournament) {
+        for (const room of rooms) {
+            if (room.id !== roomId && room.type === "tournament" && !room.ended) {
+                room.specs.push(player);
+                console.log(player.paddle.name, "joined room", room.id, "as spectator");
+                return;
+            }
         }
+        joinRoomSpec(player, roomId);
+    } else {
+        for (const room of rooms) {
+            if (room.id !== roomId && room.players.length === 2 && !room.ended) {
+                room.specs.push(player);
+                console.log(player.paddle.name, "joined room", room.id, "as spectator");
+                return;
+            }
+        }
+        joinRoomSpec(player, -1);
     }
-    joinRoomSpec(player, -1);
 }
