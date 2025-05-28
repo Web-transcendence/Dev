@@ -14,9 +14,6 @@ build: generate-key
 down:
 	docker compose -f docker-compose.yml down
 
-logs:
-	docker compose -f docker-compose.yml logs --follow
-
 prune:
 	docker system prune --all --volumes --force
 

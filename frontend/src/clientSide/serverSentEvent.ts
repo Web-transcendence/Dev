@@ -1,10 +1,10 @@
 import { addFriend, fetchUserInformation, removeFriend, UserData } from './user.js'
-import {Pong, pongStop} from './pong.js'
+import { Pong, pongStop } from './pong.js'
 import { displayNotification, hideNotification } from './notificationHandler.js'
 import { navigate, path } from './front.js'
 import { loadPart } from './insert.js'
 import { openModal } from './modal.js'
-import {tdStop, TowerDefense} from './td.js'
+import { tdStop, TowerDefense } from './td.js'
 
 let abortController: AbortController | null = null
 
@@ -21,9 +21,9 @@ const parseSSEMessage = (raw: string): { event: string, stringData: string } => 
 
 export async function sseConnection() {
 	try {
-		const tempController = new AbortController()
 		const token = sessionStorage.getItem('token')
 		if (!token) return
+		const tempController = new AbortController()
 		const res = await fetch(`/user-management/sse`, {
 			method: 'GET',
 			headers: {
