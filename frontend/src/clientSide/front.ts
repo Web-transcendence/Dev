@@ -65,8 +65,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 tsParticles.load('tsparticles', {
 	fullScreen: { enable: false },
 	particles: {
-		number: { value: 100 },
-		size: { value: 6 },
+		number: { value: 500 },
+		size: { value: 2 },
 		move: { enable: true, speed: 1 },
 		opacity: { value: 0.5 },
 		color: { value: '#ffffff' },
