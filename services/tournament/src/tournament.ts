@@ -200,19 +200,11 @@ export class tournament {
 
 		const nextBracketPlayer = this.actualParticipant.filter(id => id !== 0)
 
-		console.log(this.actualParticipant)
 		if (nextBracketPlayer.length === 1 && this.alonePlayerId == 0) {
 			await fetchNotifyUser([nextBracketPlayer[0]], `winTournament`, {})
 			this.cleanTournament()
-		} else if (nextBracketPlayer.length === 0) {
-			if (this.alonePlayerId != 0)
-				await fetchNotifyUser([this.alonePlayerId], `winTournament`, {})
+		} else if (nextBracketPlayer.length === 0)
 			this.cleanTournament()
-		} else if (nextBracketPlayer.length * 2 === this.actualParticipant.length) {
-			console.log(`bracket ended, start the next`)
-			this.actualParticipant = nextBracketPlayer
-			await this.bracketHandler()
-		}
 	}
 }
 
