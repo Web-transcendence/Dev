@@ -267,9 +267,18 @@ const loseTournament = async ({ id }: { id: number }) => {
 
 
 const notifyInvitationTournamentPong = async ({ roomId }: { roomId: number }) => {
-	console.log('RoomId', roomId)
-	await loadPart('/pongTournament')
-	Pong('remote', roomId)
+	displayNotification('Invitation to Play Pong', {
+		type: 'invitation',
+		onAccept: async () => {
+			console.log('RoomId', roomId)
+			await loadPart('/pongTournament')
+			Pong('remote', roomId)
+		},
+		onRefuse: async () => {
+			console.log('Close invite because refused')
+			displayNotification('You have lost the tournament because you refused to play.')
+		},
+	})
 }
 
 const mapEvent: { [key: string]: (data: any) => void } = {
