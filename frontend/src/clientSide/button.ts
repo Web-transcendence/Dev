@@ -225,16 +225,16 @@ async function Brackets() {
 		const template = document.getElementById('bracketsTmp') as HTMLTemplateElement | null
 		const list = document.getElementById('playerList') as HTMLUListElement | null
 		list.innerHTML = ''
+		console.log('LIST INNER')
 		if (!template || !list) throw new Error('Missing template or list')
-
 		for (const bracket of bracketsData) {
 			const playerId: number[] = []
+			console.log('bracket', bracket)
 			if (bracket.id1 !== 0) playerId.push(bracket.id1)
 			if (bracket.id2 !== 0) playerId.push(bracket.id2)
 			const userData = await fetchUserInformation(playerId)
-			if (!userData) {
-
-			}
+			console.log('userData', userData)
+			if (!userData) return
 			const myId = await getId()
 			const clone = template.content.cloneNode(true) as DocumentFragment
 			const playerOneImg = clone.querySelector('.player-one-img') as HTMLImageElement | null

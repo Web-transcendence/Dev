@@ -246,7 +246,6 @@ const winTournament = async () => {
 	displayNotification(`Congratulations, you win the tournament !!!`)
 	sessionStorage.removeItem('idTournaments')
 	sessionStorage.removeItem('nameTournaments')
-	await loadPart('/home')
 }
 
 const loseTournament = async ({ id }: { id: number }) => {
@@ -254,13 +253,10 @@ const loseTournament = async ({ id }: { id: number }) => {
 	console.log('You have lost the tournament :/')
 	sessionStorage.removeItem('idTournaments')
 	sessionStorage.removeItem('nameTournaments')
-	await loadPart('/home')
 }
 
 
 const notifyInvitationTournamentPong = async ({ roomId }: { roomId: number }) => {
-	const path = sessionStorage.getItem('path')
-	if ('/lobby' == path) await navigate(`/brackets`)
 	displayNotification('Invitation to Play Pong', {
 		type: 'invitation',
 		onAccept: async () => {

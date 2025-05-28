@@ -24,6 +24,7 @@ export async function joinTournament(tournamentId: number) {
 }
 
 export async function displayTournaments(nbrTournament: number, nameTournament: string) {
+	console.log('DISPLAY TOURNAMENTS')
 	const name = document.getElementById('nameTournament')
 	if (name) name.innerText = nameTournament
 	const tournamentList: {
@@ -40,10 +41,12 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 	const section = tournamentList.find(s => s.maxPlayer === nbrTournament)
 	if (section && playerList && playerTmp) {
 		if (section.status === 'started') {
+			console.log('TOUR HAVE STARTED')
 			await navigate('/brackets')
 			return
 		}
 		const userData: UserData[] = await fetchUserInformation(section.participants)
+		console.log('TournamentuserData', userData)
 		for (const { id, nickName, avatar } of userData) {
 			const clone = playerTmp.content.cloneNode(true) as HTMLElement | null
 			if (!clone) {
@@ -137,5 +140,4 @@ export async function fetchTournamentBrackets(tournamentId: number): Promise<{
 	const ret = await response.json()
 	console.log(ret)
 	return ret
-	// return response.json()
 }

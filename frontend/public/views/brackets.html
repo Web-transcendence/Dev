@@ -3,19 +3,21 @@
 
     <ul id="playerList"
         role="list"
-        class="p-2 space-y-4 w-1/2 flex-col items-center justify-center mx-auto">
+        class="p-2 space-y-4 w-2/3 flex-col items-center justify-center mx-auto">
     </ul>
 
     <template id="bracketsTmp">
         <li class="bracket-item p-2 flex items-center justify-between w-full text-lg rounded-full bg-gradient-to-r from-transparent via-yellow-500 to-transparent cursor-pointer">
-            <div class="player player-one p-2 m-2 flex items-center bg-purple-600 rounded-full w-1/2">
-                <img class="player-img m-4 h-15 w-15 rounded-full player-one-img" alt="">
-                <span class="player-name truncate player-one-name"></span>
+            <div class="player player-one p-2 m-2 flex flex-col items-center justify-center bg-purple-600 rounded-full w-1/2">
+                <img class="player-img h-16 w-16 rounded-full player-one-img" alt="">
+                <span class="player-name text-center player-one-name mt-2"></span>
             </div>
+
             <div class="text-6xl text-black mx-4 text-center w-1/4">VS</div>
-            <div class="player player-two p-2 m-2 flex items-center bg-purple-600 rounded-full w-1/2">
-                <img class="player-img m-4 h-15 w-15 rounded-full player-two-img" alt="">
-                <span class="player-name truncate player-two-name"></span>
+
+            <div class="player player-two p-2 m-2 flex flex-col items-center justify-center bg-purple-600 rounded-full w-1/2">
+                <img class="player-img h-16 w-16 rounded-full player-two-img" alt="">
+                <span class="player-name text-center player-two-name mt-2"></span>
             </div>
         </li>
     </template>
