@@ -52,11 +52,12 @@ export async function sseConnection() {
 			if (done) break
 			if (value.startsWith('retry: ')) continue
 			const parse = parseSSEMessage(value)
+			console.log(parse.event)
 			if (parse.event in mapEvent)
 				mapEvent[parse.event](JSON.parse(parse.stringData))
 		}
-	} catch (err: any) {
-		if (err.name === 'AbortError')
+	} catch (err) {
+		if (err instanceof DOMException && err.name === 'AbortError')
 			console.log('sse connection aborted')
 		else
 			console.error(err)
@@ -270,6 +271,7 @@ const loseTournament = async ({ id }: { id: number }) => {
 
 
 const notifyInvitationTournamentPong = async ({ roomId }: { roomId: number }) => {
+	console.log('uuuu')
 	displayNotification('Invitation to Play Pong', {
 		type: 'invitation',
 		onAccept: async () => {
