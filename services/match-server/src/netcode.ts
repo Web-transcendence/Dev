@@ -155,16 +155,16 @@ async function roomLoop(room: Room) {
 }
 
 export async function startInviteMatch(userId: number, opponent: number) {
-	const roomId = generateRoom()
+	const roomId = generateRoom();
 
-	await fetchNotifyUser([opponent], `invitationPong`, { roomId: roomId, id: userId })
-	await roomWatcher(300, roomId, 0, userId)
+	await fetchNotifyUser([opponent], `invitationPong`, { roomId: roomId, id: userId });
+	await roomWatcher(roomId, 0, userId);
 	return (roomId)
 }
 
-async function roomWatcher(timer: number, roomId: number, clock: number, playerA_id: number) {
-	if (clock <= timer) // Time needed to consider the player afk
-		setTimeout(() => roomWatcher(timer, roomId, clock + 1, playerA_id), 1000) // Check every second
+async function roomWatcher(roomId: number, clock: number, playerA_id: number) {
+	if (clock <= 60) // Time needed to consider the player afk
+		setTimeout(() => roomWatcher(roomId, clock + 1, playerA_id), 1000) // Check every second
 	else {
 		const room = rooms.find(room => room.id === roomId)
 		if (!room || room.players.length >= 2)
@@ -189,7 +189,7 @@ export async function startTournamentMatch(playerA_id: number, playerB_id: numbe
 	const roomId = generateRoom('tournament')
 	console.log('sss')
 	await fetchNotifyUser([playerA_id, playerB_id], `invitationTournamentPong`, { roomId: roomId })
-	await roomWatcher(60, roomId, 0, playerA_id)
+	await roomWatcher(roomId, 0, playerA_id)
 }
 
 function mmrRange(wait: number) {

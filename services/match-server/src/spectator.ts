@@ -13,7 +13,7 @@ export function joinRoomSpec(player: Player, roomId: number) {
     }
     // Basic random matchmaking
     for (let room of rooms) {
-        if (room.players.length === 2 && room.type !== "tournament" && !room.ended) {
+        if (room.players.length === 2 && !room.ended) {
             room.specs.push(player);
             console.log(player.paddle.name, "joined room", room.id, "as spectator");
             return ;
@@ -41,27 +41,12 @@ export function leaveRoomSpec(userId: number) {
 
 export function changeRoomSpec(player: Player) {
     const roomId = leaveRoomSpec(player.id);
-    if (roomId === -1)
-        joinRoomSpec(player, -1);
-    const roomIndex = rooms.findIndex(room => room.id === roomId);
-    const tournament = rooms[roomIndex].type === "tournament";
-    if (tournament) {
-        for (const room of rooms) {
-            if (room.id !== roomId && room.type === "tournament" && !room.ended) {
-                room.specs.push(player);
-                console.log(player.paddle.name, "joined room", room.id, "as spectator");
-                return;
-            }
+    for (const room of rooms) {
+        if (room.id !== roomId && room.players.length === 2 && !room.ended) {
+            room.specs.push(player);
+            console.log(player.paddle.name, "joined room", room.id, "as spectator");
+            return;
         }
-        joinRoomSpec(player, roomId);
-    } else {
-        for (const room of rooms) {
-            if (room.id !== roomId && room.players.length === 2 && !room.ended) {
-                room.specs.push(player);
-                console.log(player.paddle.name, "joined room", room.id, "as spectator");
-                return;
-            }
-        }
-        joinRoomSpec(player, -1);
     }
+    joinRoomSpec(player, -1);
 }
