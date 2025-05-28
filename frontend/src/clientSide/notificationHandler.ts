@@ -60,8 +60,14 @@ export function displayNotification(message: string, options?: {
         };
         rejectBtn.onclick = async () => {
             if (options.onRefuse) options.onRefuse();
-            if (userData) hideNotification(0,  userData.id);
-            else hideNotification(0, idNotifyTournament);
+            if (userData) {
+                hideNotification(0, userData.id)
+                document.getElementById(`friendId-${userData.id}`)?.remove()
+            }
+            else {
+                hideNotification(0, idNotifyTournament)
+                document.getElementById(`idTournament-${idNotifyTournament}`)?.remove()
+            }
         };
     } else { // Default Green
         item.classList.remove("bg-red-600", "bg-blue-600");

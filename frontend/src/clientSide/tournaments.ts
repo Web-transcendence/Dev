@@ -31,11 +31,7 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 		maxPlayer: number,
 		status: string
 	}[] | undefined = await getTournamentList()
-	if (!tournamentList) {
-		displayNotification(`Error Can't find Tournaments`)
-		await navigate('/home')
-		return
-	}
+	if (!tournamentList) return
 	console.log('TournamentList', tournamentList)
 	let player = 0
 	const playerList = document.getElementById('playerList')
