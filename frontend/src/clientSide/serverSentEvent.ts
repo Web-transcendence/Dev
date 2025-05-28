@@ -23,6 +23,7 @@ export async function sseConnection() {
 	try {
 		const tempController = new AbortController()
 		const token = sessionStorage.getItem('token')
+		if (!token) return
 		const res = await fetch(`/user-management/sse`, {
 			method: 'GET',
 			headers: {

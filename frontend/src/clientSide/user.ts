@@ -336,6 +336,7 @@ export async function setNickName(newNickName: string) {
 			displayNotification('Bad input', {type: 'error'})
 		} else {
 			displayNotification('New Nickname successfully set')
+			sessionStorage.setItem("nickName", newNickName);
 		}
 	} catch (error) {
 		console.error(error)

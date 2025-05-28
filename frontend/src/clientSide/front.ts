@@ -87,8 +87,6 @@ async function checkForToken(): Promise<boolean> {
 			},
 		})
 		if (!response.ok) {
-			const error = await response.json()
-			console.error(error)
 			return false
 		}
 		return true
