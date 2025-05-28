@@ -12,62 +12,32 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ./frontend/src/
-          target: /app/src/
-        - action: sync
-          path: ./frontend/public/
-          target: /app/public/
-          ignore:
-            - app/public/dist/*.js
-        - action: rebuild
-          path: ./frontend/*.json
-          target: app/
+
   user-management:
     container_name: user-management
     build:
       context: services/user-management/
     networks:
       - transcendence
-    ports:
-      - "5000:5000"         #DEV
     env_file:
       - .env
     environment:
       - SECRET_KEY=${SECRET_KEY:-""}
+    volumes:
+      - ./data/user-management:/app/db
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ./services/user-management/src/
-          target: /app/src/
-        - action: rebuild
-          path: ./services/user-management/package.json
-          target: /app/
 
-  match-server:
-    container_name: match-server
+  pong:
+    container_name: pong
     build:
-      context: services/match-server/
+      context: services/pong/
     networks:
       - transcendence
-    ports:
-      - "4443:4443"
     env_file:
       - .env
     environment:
       - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ./services/match-server/src/
-          target: /app/src/
-        - action: rebuild
-          path: ./services/match-server/package.json
-          target: /app/
 
   tower-defense:
     container_name: tower-defense
@@ -75,21 +45,11 @@ services:
       context: services/tower-defense/
     networks:
       - transcendence
-    ports:
-      - "2246:2246"
     env_file:
       - .env
     environment:
       - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ./services/tower-defense/src/
-          target: /app/src/
-        - action: rebuild
-          path: ./services/tower-defense/package.json
-          target: app/
 
   social:
     container_name: social
@@ -97,21 +57,11 @@ services:
       context: services/social/
     networks:
       - transcendence
-    ports:
-      - "6500:6500"
     env_file:
       - .env
     environment:
       - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ./services/social/src/
-          target: /app/src/
-        - action: rebuild
-          path: ./services/social/package.json
-          target: app/
 
   tournament:
     container_name: tournament
@@ -119,29 +69,19 @@ services:
       context: services/tournament/
     networks:
       - transcendence
-    ports:
-      - "7000:7000"
     env_file:
       - .env
     environment:
       - SECRET_KEY=${SECRET_KEY:-""}
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ./services/tournament/src/
-          target: /app/src/
-        - action: rebuild
-          path: ./services/tournament/package.json
-          target: app/
 
   ai-opponent:
-   container_name: ai-opponent
-   build:
-     context: services/ai-opponent/
-   networks:
-     - transcendence
-   restart: unless-stopped
+    container_name: ai-opponent
+    build:
+      context: services/ai-opponent/
+    networks:
+      - transcendence
+    restart: unless-stopped
 
 networks:
   transcendence:

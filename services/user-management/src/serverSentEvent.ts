@@ -14,7 +14,6 @@ export const notifyUser = (ids: number[], event: string, data: any): void => {
 	}
 }
 
-
 export const disconnect = async (id: number) => {
 	const friends = await fetchAcceptedFriends(id)
 	notifyUser(friends, 'disconnection', { id: id })

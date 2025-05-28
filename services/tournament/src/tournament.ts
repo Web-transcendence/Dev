@@ -4,7 +4,7 @@ import { fetchNotifyUser } from './utils.js'
 
 
 async function fetchMatch(id1: number, id2: number) {
-	const response = await fetch(`http://match-server:4443/tournamentGame`, {
+	await fetch(`http://pong:4443/tournamentGame`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -123,7 +123,6 @@ export class tournament {
 		console.log(`${id} win a bracket`)
 		let loser: number = 0
 		let winner: number = 0
-		let winnerEvent: string = `winBracket`
 		for (let i = 0; i < this.actualParticipant.length; i++) {
 			if (id === this.actualParticipant[i] && i % 2 === 0) {
 				loser = this.actualParticipant[i + 1]

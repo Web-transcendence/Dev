@@ -39,7 +39,7 @@
 #define N_RAW_STATE 6
 #define FACTORY_SERVER_PORT 16016
 #define FACTORY_SERVER_ADDRESS "http://0.0.0.0:16016"
-#define GAME_SERVER_ADDRESS "ws://match-server:4443/ws"
+#define GAME_SERVER_ADDRESS "ws://pong:4443/ws"
 #define CLIENT_INPUT_TIME_SPAN 100
 #define CLIENT_MAX_SPAN_STATE 3.0
 #define INPUT_TIMESTAMP 60

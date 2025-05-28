@@ -2,10 +2,9 @@
   "name": "trans_node_front",
   "type": "module",
   "scripts": {
-    "bw:front": "tsc -p tsconfig.front.json --watch",
-    "bw:back": "tsx watch src/serverSide/server.ts --tsconfig tsconfig.back.json",
-    "test": "tsc src/clientSide/front.ts && tsc src/clientSide/pong.ts && npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css && tsx watch src/api.ts",
-    "dev": "concurrently --kill-others \"npm run bw:front\" \"npm run bw:back\"  \"npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css --watch\" "
+    "bw:front": "tsc -p tsconfig.front.json",
+    "bw:back": "tsx src/serverSide/server.ts --tsconfig tsconfig.back.json",
+    "prod": "concurrently --kill-others \"npm run bw:front\" \"npm run bw:back\"  \"npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css\" "
   },
   "devDependencies": {
     "@types/node": "^22.13.5",

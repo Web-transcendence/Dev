@@ -1,14 +1,14 @@
 import Database from 'better-sqlite3'
 
-export const Td_Hist_db = new Database('/app/db/Td_hist.db')
+export const Pong_Hist_db = new Database('/app/db/pong_hist.db')
 
-Td_Hist_db.exec(`
+Pong_Hist_db.exec(`
     CREATE TABLE IF NOT EXISTS MatchResult
     (
         game
         INTEGER
         DEFAULT
-        1,
+        0,
         id
         INTEGER
         PRIMARY
@@ -64,14 +64,14 @@ export function insertMatchResult(
 		winner_id = playerA_id
 	else if (winner === 1)
 		winner_id = playerB_id
-	Td_Hist_db.prepare(`
+	Pong_Hist_db.prepare(`
         INSERT INTO MatchResult (playerA_id, playerB_id, scoreA, scoreB, winner_id)
         VALUES (?, ?, ?, ?, ?)
 	`).run(playerA_id, playerB_id, scoreA, scoreB, winner_id)
 }
 
 export function getMatchHistory(userId: number): MatchResult[] {
-	return Td_Hist_db.prepare(`
+	return Pong_Hist_db.prepare(`
         SELECT *
         FROM MatchResult
         WHERE playerA_id = ?
