@@ -4,7 +4,7 @@
   "scripts": {
     "bw:front": "tsc -p tsconfig.front.json",
     "bw:back": "tsx src/serverSide/server.ts --tsconfig tsconfig.back.json",
-    "prod": "concurrently --kill-others \"npm run bw:front\" \"npm run bw:back\"  \"npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css\" "
+    "prod": "concurrently \"npm run bw:front\" \"npm run bw:back\"  \"npx @tailwindcss/cli -i ./public/styles.css -o ./public/output.css --watch\" "
   },
   "devDependencies": {
     "@types/node": "^22.13.5",
