@@ -85,8 +85,6 @@ export function displayNotification(message: string, options?: {
         item.classList.remove("translate-x-full");
         item.classList.add("translate-x-0");
     });
-    console.log('End of item notification');
-
     requestAnimationFrame(() => {
         if (options?.type !== "invitation") {
             setTimeout(() => {
@@ -94,6 +92,13 @@ export function displayNotification(message: string, options?: {
                 item.classList.add("translate-x-full");
                 setTimeout(() => item.remove(), 500);
             }, 5000);
+        }
+        else {
+            setTimeout(() => {
+                item.classList.remove("translate-x-0");
+                item.classList.add("translate-x-full");
+                setTimeout(() => item.remove(), 500);
+            }, 55000);
         }
     });
 
