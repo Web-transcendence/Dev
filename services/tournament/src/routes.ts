@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { INTERNAL_PASSWORD, tournamentSessions } from './api.js'
 import * as Schema from './schema.js'
+import { tournamentIdSchema } from './schema.js'
 import { ConflictError, InputError, MyError, ServerError, UnauthorizedError } from './error.js'
 import { authUser } from './utils.js'
 
@@ -58,18 +59,28 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 		return res.status(200).send(tournamentList)
 	})
 
-	app.get('/quit', async (req: FastifyRequest, res: FastifyReply) => {
+	app.get('/quit/:id', async (req: FastifyRequest, res: FastifyReply) => {
 		try {
 			const id: number = Number(req.headers.id)
 			if (!id)
 				throw new ServerError(`cannot parse id, which should not happen`, 500)
 
+			const zod_result = tournamentIdSchema.safeParse(req.params)
+			if (!zod_result.success) {
+				const message = zod_result.error.issues[0]?.message || 'Invalid input'
+				throw new InputError(message, message)
+			}
+
 			await authUser(id)
-			for (const [tournamentId, tournament] of tournamentSessions)
-				if (tournament.hasParticipant(id)) {
-					console.log('quit tournament')
-					await tournament.quit(id)
-				}
+
+			const tournament = tournamentSessions.get(zod_result.data.tournamentId)
+			if (!tournament)
+				throw new InputError(`client try to quit a tournament who doesn't exist`, `this id of tournament doesn't exist`)
+
+			if (tournament.hasParticipant(id))
+				return res.status(409).send({ error: `you are not registered in this tournament` })
+
+			await tournament.quit(id)
 
 			return res.status(200).send()
 		} catch (err) {
