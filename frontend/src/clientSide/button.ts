@@ -207,16 +207,13 @@ function About() {
 
 async function Brackets() {
 	try {
-		const idTournament = sessionStorage.getItem('idTournaments')
-		if (!idTournament) throw new Error('No ID Tournament found!')
-		const bracketsData = await fetchTournamentBrackets(Number(idTournament))
+		const bracketsData = await fetchTournamentBrackets(4)
 		if (!bracketsData) throw new Error('No brackets data')
 
 		const template = document.getElementById('bracketsTmp') as HTMLTemplateElement | null
 		const list = document.getElementById('playerList') as HTMLUListElement | null
 		if (!list) return
 		list.innerHTML = ''
-		console.log('LIST INNER')
 		if (!template || !list) throw new Error('Missing template or list')
 		for (const bracket of bracketsData) {
 			const playerId: number[] = []
