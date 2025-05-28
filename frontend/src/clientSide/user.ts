@@ -64,10 +64,7 @@ export function login(button: HTMLElement): void {
 export async function profile() {
 	try {
 		const token = sessionStorage.getItem('token')
-		if (!token) {
-			console.error('token missing')
-			return
-		}
+		if (!token) return
 		const response = await fetch(`/user-management/privateProfile`, {
 			method: 'GET',
 			headers: {
@@ -101,10 +98,8 @@ export type UserData = {
 
 export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> => {
 	const token = sessionStorage.getItem('token')
-	if (!token)
-		throw new Error('token missing')
-	if (!ids)
-		throw new Error('ids missing')
+	if (!token) throw new Error('token missing')
+	if (!ids) throw new Error('ids missing')
 	const response = await fetch(`/user-management/userInformation`, {
 		method: 'POST',
 		headers: {
@@ -118,8 +113,8 @@ export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> =
 		return usersData
 	} else {
 		const error = await response.json()
-		console.log(error)
-		//notify error
+		console.error(error)
+		displayNotification(`Can't access your informations`)
 		throw error
 	}
 }
@@ -127,10 +122,7 @@ export const fetchUserInformation = async (ids: number[]): Promise<UserData[]> =
 export async function init2fa() {
 	try {
 		const token = sessionStorage.getItem('token')
-		if (!token) {
-			console.error('token missing')
-			return
-		}
+		if (!token) return
 		const response = await fetch(`/user-management/2faInit`, {
 			method: 'GET',
 			headers: {
@@ -166,7 +158,6 @@ export async function verify2fa(secret: string, message: string) {
 			displayNotification(message)
 		} else {
 			const errorData = await response.json()
-			console.error(errorData.error, errorData)
 			displayNotification('Bad code or outdated', {type: 'error'})
 		}
 	} catch (err) {
@@ -192,7 +183,6 @@ export async function addFriend(friendNickName: string) {
 		input.focus()
 		if (!response.ok) {
 			const error = await response.json()
-			console.error('ERROR addFriend', error.error)
 			displayNotification(error.error, {type: 'error'})
 			return false
 		}
@@ -262,7 +252,6 @@ const toBase64 = (file: any) => new Promise((resolve, reject) => {
 
 export async function setAvatar(target: HTMLInputElement) {
 	try {
-		console.log('files', target.files)
 		if (target.files && target.files[0]) {
 			const file: File = target.files[0]
 			const base64File: string = await toBase64(file) as string
@@ -323,31 +312,9 @@ export async function getAvatar() {
 		const img = await response.json()
 		if (img.url) {
 			avatarImg.src = img.url
-			console.log('avatar', avatarImg.src)
 			sessionStorage.setItem('avatar', avatarImg.src)
 		} else
 			avatarImg.src = '../images/login.png'
-
-	} catch (error) {
-		console.error(error)
-	}
-}
-
-export async function setPassword(newPassword: string) {
-	try {
-		const token = sessionStorage.getItem('token')
-		const response = await fetch(`/user-management/setPassword`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'authorization': 'Bearer ' + token,
-			},
-			body: JSON.stringify({password: newPassword}),
-		})
-		if (!response.ok) {
-			console.error('failed')
-		} else
-			console.log('success')
 
 	} catch (error) {
 		console.error(error)
@@ -366,11 +333,10 @@ export async function setNickName(newNickName: string) {
 			body: JSON.stringify({nickName: newNickName}),
 		})
 		if (!response.ok) {
-			console.error('failed')
 			displayNotification('Bad input', {type: 'error'})
 		} else {
-			console.log('success')
-			displayNotification('New Nickname')
+			displayNotification('New Nickname successfully set')
+			sessionStorage.setItem("nickName", newNickName);
 		}
 	} catch (error) {
 		console.error(error)
@@ -382,7 +348,7 @@ export const updateAvatar = (id: string, src: string) => {
 	if (img) {
 		img.src = src
 	} else {
-		console.warn(`Element with id '${id}' not found.`)
+		console.warn(`Element not found.`)
 	}
 }
 

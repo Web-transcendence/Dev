@@ -14,7 +14,7 @@ import {matchMaking, matchMakingUp, removeWaitingPlayer, waitingList, waitingPla
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({});
 const inputSchema = z.object({ player: z.number(), button: z.number() });
 const towerSchema = z.object({ mode: z.string(), t1: z.number(), t2: z.number(), t3: z.number(), t4: z.number(), t5: z.number() });
 const initSchema = z.object({ nick: z.string(), room: z.number() });
@@ -366,7 +366,7 @@ async function enemyLoop(player1: Player, player2: Player, game: Game, room: Roo
                 player1.mana += 10;
                 player2.addEnemy(enemyGenerator(game));
             } else
-                player1.mana += 100;
+                player1.mana += 500;
         }
         if (enemy.pos >= 1440 && enemy.alive) {
             player1.hp -= enemy.damages;
@@ -383,7 +383,7 @@ async function enemyLoop(player1: Player, player2: Player, game: Game, room: Roo
                 player2.mana += 10;
                 player1.addEnemy(enemyGenerator(game));
             } else
-                player2.mana += 100;
+                player2.mana += 500;
         }
         if (enemy.pos >= 1440 && enemy.alive) {
             player2.hp -= enemy.damages;
@@ -408,8 +408,8 @@ async function gameLoop(player1: Player, player2: Player, game: Game, room: Room
                 player1.bullets.splice(0, player1.bullets.length);
                 player2.enemies.splice(0, player2.enemies.length);
                 player2.bullets.splice(0, player2.bullets.length);
-                player1.enemies.push(new Enemy("kslime", 1000 + 100 * p1Board, 1, 2)); // Boss here
-                player2.enemies.push(new Enemy("kslime", 1000 + 100 * p2Board, 1, 2));
+                player1.enemies.push(new Enemy("kslime", 10000 + 100 * p1Board, 1, 2)); // Boss here
+                player2.enemies.push(new Enemy("kslime", 10000 + 100 * p2Board, 1, 2));
             }
             await enemyLoop(player1, player2, game, room);
             bulletLoop(player1, player2);

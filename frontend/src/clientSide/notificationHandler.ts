@@ -29,11 +29,8 @@ export function displayNotification(message: string, options?: {
     }
     if (item) {
         if (options?.type === "invitation") {
-            if (!userData) {
-                console.error("Notification elements missing");
-                return;
-            }
-            item.id = `${userData.id}-idFriend`
+            if (!userData) item.id = `idTournament-${idNotify}`
+            else item.id = `${userData.id}-idFriend`
         }
         else
             item.id = `idNotif-${idNotify}`
@@ -44,22 +41,33 @@ export function displayNotification(message: string, options?: {
         acceptBtn.classList.add("hidden");
         rejectBtn.classList.add("hidden");
     } else if (options?.type === "invitation") {
-        if (!userData) {
-            console.error("Notification elements missing");
-            return;
-        }
-        if (nameInvite) nameInvite.innerText = `From ${userData.nickName}`;
+        const idNotifyTournament = idNotify
+        if (nameInvite && userData) nameInvite.innerText = `From ${userData.nickName}`;
+        else if (nameInvite) nameInvite.innerText = `For the tournament`;
         item.classList.add("bg-gray-600");
         acceptBtn.classList.remove("hidden");
         rejectBtn.classList.remove("hidden");
         acceptBtn.onclick = async () => {
             if (options.onAccept) options.onAccept();
-            hideNotification(0, userData.id);
-            document.getElementById(`friendId-${userData.id}`)?.remove();
+            if (userData) {
+                hideNotification(0, userData.id);
+                document.getElementById(`friendId-${userData.id}`)?.remove();
+            }
+            else {
+                hideNotification(0, idNotifyTournament);
+                document.getElementById(`idTournament-${idNotifyTournament}`)?.remove();
+            }
         };
         rejectBtn.onclick = async () => {
             if (options.onRefuse) options.onRefuse();
-            hideNotification(0,  userData.id);
+            if (userData) {
+                hideNotification(0, userData.id)
+                document.getElementById(`friendId-${userData.id}`)?.remove()
+            }
+            else {
+                hideNotification(0, idNotifyTournament)
+                document.getElementById(`idTournament-${idNotifyTournament}`)?.remove()
+            }
         };
     } else { // Default Green
         item.classList.remove("bg-red-600", "bg-blue-600");
@@ -77,8 +85,6 @@ export function displayNotification(message: string, options?: {
         item.classList.remove("translate-x-full");
         item.classList.add("translate-x-0");
     });
-    console.log('End of item notification');
-
     requestAnimationFrame(() => {
         if (options?.type !== "invitation") {
             setTimeout(() => {
@@ -87,24 +93,36 @@ export function displayNotification(message: string, options?: {
                 setTimeout(() => item.remove(), 500);
             }, 5000);
         }
+        else {
+            setTimeout(() => {
+                item.classList.remove("translate-x-0");
+                item.classList.add("translate-x-full");
+                setTimeout(() => item.remove(), 500);
+            }, 55000);
+        }
     });
 
 }
 
-export function hideNotification(idNotify: number, idInvitation?: number) {
-    console.log("hide notification", idNotify);
-    if (idInvitation) {
+export function hideNotification(idNotify: number, idInvitation?: number, idNotifyTournament?: number) {
+    if (idNotifyTournament) {
+        const item = document.getElementById(`idTournament-${idNotifyTournament}`);
+        if (!item) return;
+        item.classList.remove("translate-x-0");
+        item.classList.add("translate-x-full");
+        setTimeout(() => item.remove(), 500);
+        return ;
+    }
+    else if (idInvitation) {
         const item = document.getElementById(`${idInvitation}-idFriend`);
-        if (!item)
-            return;
+        if (!item) return;
         item.classList.remove("translate-x-0");
         item.classList.add("translate-x-full");
         setTimeout(() => item.remove(), 500);
         return ;
     }
     const item = document.getElementById(`idNotif-${idNotify}`);
-    if (!item)
-        return;
+    if (!item) return;
     item.classList.remove("translate-x-0");
     item.classList.add("translate-x-full");
     setTimeout(() => item.remove(), 500);

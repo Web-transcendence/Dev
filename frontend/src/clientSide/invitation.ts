@@ -1,5 +1,5 @@
 import { displayNotification } from './notificationHandler.js'
-import {navigate} from './front.js'
+import { navigate } from './front.js'
 import { Pong } from './pong.js'
 
 export const fetchInvitation = async (game: string, id: number) => {
@@ -42,26 +42,27 @@ export const fetchRefuseInvitation = async (game: string, id: number) => {
 	return roomId
 }
 
-export const pongAgainstAi = async ()=> {
+export const pongAgainstAi = async () => {
 	const token = sessionStorage.getItem('token')
-		try {	const response = await fetch(`/match-server/vsAi`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-					'authorization': 'Bearer ' + token
-				}
-			})
-			if (!response.ok) {
-				throw new Error()
+	try {
+		const response = await fetch(`/pong/vsAi`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'authorization': 'Bearer ' + token
 			}
-			
-			const { roomId } = await response.json()
-			
-			Pong('remote', roomId);
-			return roomId
-		} catch(e) {
-			console.log(e);
-			displayNotification('Please connect to play VS A.I.')
-			await navigate('/home')
+		})
+		if (!response.ok) {
+			throw new Error()
 		}
+
+		const { roomId } = await response.json()
+
+		Pong('remote', roomId)
+		return roomId
+	} catch (e) {
+		console.log(e)
+		displayNotification('Please connect to play VS A.I.')
+		await navigate('/home')
+	}
 }

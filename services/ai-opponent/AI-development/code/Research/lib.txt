@@ -1,0 +1,40 @@
+https://nbviewer.org/github/nndl-solutions/NNDL-solutions/blob/master/notebooks/chap-1-using-neural-nets-to-recognize-handwritten-digits.ipynb
+https://www.ibm.com/fr-fr/topics/linear-regression
+https://www.ibm.com/fr-fr/topics/neural-networks
+https://introtodeeplearning.com/2020/index.html
+http://neuralnetworksanddeeplearning.com/
+http://neuralnetworksanddeeplearning.com/chap1.html
+https://github.com/mnielsen/neural-networks-and-deep-learning
+
+https://medium.com/@samina.amin/deep-q-learning-dqn-71c109586bae deep Q learning
+https://www.baeldung.com/cs/q-learning-vs-deep-q-learning-vs-deep-q-network
+https://www.baeldung.com/cs/epsilon-greedy-q-learning
+https://towardsdatascience.com/deep-q-learning-tutorial-mindqn-2a4c855abffc/
+
+http://incompleteideas.net/book/RLbook2020.pdf
+https://medium.com/@qempsil0914/zero-to-one-deep-q-learning-part1-basic-introduction-and-implementation-bb7602b55a2c
+https://medium.com/@qempsil0914/deep-q-learning-part2-double-deep-q-network-double-dqn-b8fc9212bbb2
+https://web.stanford.edu/class/psych209/Readings/MnihEtAlHassibis15NatureControlDeepRL.pdf
+
+CUDA:
+https://docs.nvidia.com/cuda/cuda-c-programming-guide/
+https://docs.nvidia.com/cuda/cuda-c-programming-guide/#cuda-enabled-gpus
+https://docs.nvidia.com/deeplearning/performance/dl-performance-matrix-multiplication/index.html#requirements-tc
+https://docs.nvidia.com/deeplearning/performance/dl-performance-gpu-background/index.html#gpu-arch__fig2
+https://docs.nvidia.com/deeplearning/performance/dl-performance-fully-connected/index.html#:~:text=As%20fully,twice%20the%20time%20to%20calculate
+
+https://salykova.github.iœo/sgemm-gpu
+	https://developer.nvidia.com/blog/easy-introduction-cuda-c-and-c/
+	https://developer.nvidia.com/blog/how-implement-performance-metrics-cuda-cc/
+	https://developer.nvidia.com/blog/how-access-global-memory-efficiently-cuda-c-kernels/
+	https://developer.nvidia.com/blog/how-query-device-properties-and-handle-errors-cuda-cc/
+	https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/
+	https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/
+	https://developer.nvidia.com/blog/how-access-global-memory-efficiently-cuda-c-kernels/
+
+	https://developer.nvidia.com/blog/using-shared-memory-cuda-cc/
+	https://developer.nvidia.com/blog/efficient-matrix-transpose-cuda-cc/
+	https://developer.nvidia.com/blog/finite-difference-methods-cuda-cc-part-1/
+	https://developer.nvidia.com/blog/finite-difference-methods-cuda-c-part-2/
+	
+	https://developer.nvidia.com/blog/cuda-pro-tip-increase-performance-with-vectorized-memory-access/

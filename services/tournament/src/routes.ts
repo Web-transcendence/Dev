@@ -5,7 +5,7 @@ import { ConflictError, InputError, MyError, ServerError, UnauthorizedError } fr
 import { authUser } from './utils.js'
 
 
-const internalVerification = async (req, res) => {
+const internalVerification = async (req: FastifyRequest) => {
 	if (req.headers.authorization !== INTERNAL_PASSWORD)
 		throw new UnauthorizedError(`bad internal password to access to this url: ${req.url}`, `internal server error`)
 }
@@ -58,18 +58,25 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 		return res.status(200).send(tournamentList)
 	})
 
-	app.get('/quit', async (req: FastifyRequest, res: FastifyReply) => {
+
+	app.get('/quit/:id', async (req: FastifyRequest, res: FastifyReply) => {
 		try {
 			const id: number = Number(req.headers.id)
 			if (!id)
 				throw new ServerError(`cannot parse id, which should not happen`, 500)
 
+			const params = req.params as { id: string }
+			const tournamentId = Number(params.id)
+
 			await authUser(id)
-			for (const [tournamentId, tournament] of tournamentSessions)
-				if (tournament.hasParticipant(id)) {
-					console.log('quit tournament')
-					await tournament.quit(id)
-				}
+			const tournament = tournamentSessions.get(tournamentId)
+			if (!tournament)
+				throw new InputError(`client try to quit a tournament who doesn't exist`, `this id of tournament doesn't exist`)
+
+			if (!tournament.hasParticipant(id))
+				return res.status(409).send({ error: `you are not registered in this tournament` })
+
+			await tournament.quit(id)
 
 			return res.status(200).send()
 		} catch (err) {
@@ -81,6 +88,7 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 			return res.status(500).send()
 		}
 	})
+
 
 	app.get('/launch', async (req: FastifyRequest, res: FastifyReply) => {
 		try {
@@ -173,11 +181,4 @@ export default async function tournamentRoutes(app: FastifyInstance) {
 			return res.status(500).send()
 		}
 	})
-
-	app.get(`/test`, async (req: FastifyRequest, res: FastifyReply) => {
-		console.log(tournamentSessions.get(4)?.sessionData())
-
-		return res.status(200).send()
-	})
-
 }

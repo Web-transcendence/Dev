@@ -7,7 +7,7 @@ import { connectedUsers } from './api.js'
 
 const client = new OAuth2Client('562995219569-0icrl4jh4ku3h312qmjm8ek57fqt7fp5.apps.googleusercontent.com')
 
-export async function googleAuth(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+export async function googleAuth(request: FastifyRequest, reply: FastifyReply) {
 	const { credential } = request.body as { credential: string }
 	try {
 		const ticket = await client.verifyIdToken({
@@ -25,7 +25,7 @@ export async function googleAuth(request: FastifyRequest, reply: FastifyReply): 
 			console.log('Email Already Register:', payload.email)
 		else {
 			const zod_result = nickNameSchema.safeParse({ nickName: payload.given_name })
-			if (!zod_result)
+			if (!zod_result.success)
 				payload.given_name = 'googleNickname'
 
 			if (Client_db.prepare('SELECT * FROM Client WHERE nickName = ?').get(payload.given_name)) {
@@ -35,8 +35,7 @@ export async function googleAuth(request: FastifyRequest, reply: FastifyReply): 
 					i++
 			}
 
-
-			const res = Client_db.prepare('INSERT INTO Client (nickName, email, password, google_id, pictureProfile) VALUES (?, ?, ?, ?, ?)')
+			Client_db.prepare('INSERT INTO Client (nickName, email, password, google_id, pictureProfile) VALUES (?, ?, ?, ?, ?)')
 				.run(payload.given_name, payload.email, 'NOTGIVEN', userId, payload.picture)
 		}
 
@@ -53,7 +52,13 @@ export async function googleAuth(request: FastifyRequest, reply: FastifyReply): 
 			throw new ConflictError('user try to connect on different sessions', 'you are already connected on an other session')
 
 		const token = User.makeToken(userData.id)
-		return reply.send({ token, valid: true, nickName: userData.nickName, avatar: userData.pictureProfile })
+
+		return reply.code(200).send({
+			token,
+			valid: true,
+			nickName: userData.nickName,
+			avatar: userData.pictureProfile
+		})
 	} catch (error) {
 		console.log('Error verifying Google token:', error)
 		reply.status(400).send({ valid: false, error: 'Invalid token' })

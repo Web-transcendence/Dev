@@ -3,19 +3,12 @@ import { invitationGameSchema, mmrSchema, nickNameSchema, passwordSchema } from 
 import sanitizeHtml from 'sanitize-html'
 import { User } from './User.js'
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { connectedUsers, INTERNAL_PASSWORD } from './api.js'
+import { INTERNAL_PASSWORD } from './api.js'
 import { InputError, MyError, ServerError, UnauthorizedError } from './error.js'
 import { notifyUser } from './serverSentEvent.js'
 
 
-export function logConnectedUser() {
-	const connected = []
-	for (const [id, user] of connectedUsers)
-		connected.push(id)
-	console.log(connected)
-}
-
-const internalVerification = async (req, res) => {
+const internalVerification = async (req: FastifyRequest) => {
 	if (req.headers.authorization !== INTERNAL_PASSWORD)
 		throw new UnauthorizedError(`bad internal password to access to this url: ${req.url}`, `internal server error`)
 }
@@ -79,7 +72,6 @@ export default async function userRoutes(app: FastifyInstance) {
 
 	app.get('/2faInit', async (req: FastifyRequest, res: FastifyReply) => {
 		try {
-			console.log(`2fa init`)
 			const id: number = Number(req.headers.id)
 			if (!id)
 				throw new ServerError(`cannot parse id, which should not happen`, 500)
@@ -99,7 +91,6 @@ export default async function userRoutes(app: FastifyInstance) {
 
 	app.post('/2faVerify', (req: FastifyRequest, res: FastifyReply) => {
 		try {
-			console.log(`2fa init`)
 			const zod_result = Schema.verifySchema.safeParse(req.body)
 			if (!zod_result.success) {
 				const message = zod_result.error.issues[0]?.message || 'Invalid input'
@@ -397,11 +388,10 @@ export default async function userRoutes(app: FastifyInstance) {
 	})
 
 
-	app.get('/pong/mmrById/:id', { preHandler: internalVerification }, (req: FastifyRequest<{
-		Params: { id: string }
-	}>, res: FastifyReply) => {
+	app.get('/pong/mmrById/:id', { preHandler: internalVerification }, (req: FastifyRequest, res: FastifyReply) => {
 		try {
-			const id = Number(req.params.id)
+			const params = req.params as { id: string }
+			const id = Number(params.id)
 
 			const user = new User(id)
 
@@ -418,11 +408,10 @@ export default async function userRoutes(app: FastifyInstance) {
 		}
 	})
 
-	app.get('/td/mmrById/:id', { preHandler: internalVerification }, (req: FastifyRequest<{
-		Params: { id: string }
-	}>, res: FastifyReply) => {
+	app.get('/td/mmrById/:id', { preHandler: internalVerification }, (req: FastifyRequest, res: FastifyReply) => {
 		try {
-			const id = Number(req.params.id)
+			const params = req.params as { id: string }
+			const id = Number(params.id)
 
 			const user = new User(id)
 
@@ -439,9 +428,10 @@ export default async function userRoutes(app: FastifyInstance) {
 		}
 	})
 
-	app.put(`/pong/mmrById/:id`, (req: FastifyRequest<{ Params: { id: string } }>, res: FastifyReply) => {
+	app.put(`/pong/mmrById/:id`, (req: FastifyRequest, res: FastifyReply) => {
 		try {
-			const id = Number(req.params.id)
+			const params = req.params as { id: string }
+			const id = Number(params.id)
 
 			const zod_result = mmrSchema.safeParse(req.body)
 			if (!zod_result.success) {
@@ -450,9 +440,9 @@ export default async function userRoutes(app: FastifyInstance) {
 			}
 			const user = new User(id)
 
-			const mmr = user.updatePongMmr(zod_result.data.mmr)
+			user.updatePongMmr(zod_result.data.mmr)
 
-			return res.status(200).send({ mmr: mmr })
+			return res.status(200).send()
 		} catch (err) {
 			if (err instanceof MyError) {
 				console.error(err.message)
@@ -463,9 +453,10 @@ export default async function userRoutes(app: FastifyInstance) {
 		}
 	})
 
-	app.put(`/td/mmrById/:id`, (req: FastifyRequest<{ Params: { id: string } }>, res: FastifyReply) => {
+	app.put(`/td/mmrById/:id`, (req: FastifyRequest, res: FastifyReply) => {
 		try {
-			const id = Number(req.params.id)
+			const params = req.params as { id: string }
+			const id = Number(params.id)
 
 			const zod_result = mmrSchema.safeParse(req.body)
 			if (!zod_result.success) {
@@ -474,9 +465,9 @@ export default async function userRoutes(app: FastifyInstance) {
 			}
 			const user = new User(id)
 
-			const mmr = user.updateTdMmr(zod_result.data.mmr)
+			user.updateTdMmr(zod_result.data.mmr)
 
-			return res.status(200).send({ mmr: mmr })
+			return res.status(200).send()
 		} catch (err) {
 			if (err instanceof MyError) {
 				console.error(err.message)

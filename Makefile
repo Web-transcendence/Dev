@@ -5,18 +5,14 @@ generate-key:
 up: generate-key
 	docker compose -f docker-compose.yml up --build
 
-watch:
-	docker compose -f docker-compose.yml up --watch
+continue:
+	docker compose -f docker-compose.yml up
 
 build: generate-key
-	echo "ssssss"
 	docker compose -f docker-compose.yml build
 
 down:
 	docker compose -f docker-compose.yml down
-
-logs:
-	docker compose -f docker-compose.yml logs --follow
 
 prune:
 	docker system prune --all --volumes --force
@@ -25,6 +21,7 @@ clean:
 	@test -f .env || touch .env
 	docker compose -f docker-compose.yml down --volumes --rmi all
 	@rm -f .env
+	@rm -rf data
 
 
 fclean: clean
@@ -32,7 +29,8 @@ fclean: clean
 
 re: fclean up
 
-full: fclean build watch
+full: fclean build
+
 
 bw: build watch
 

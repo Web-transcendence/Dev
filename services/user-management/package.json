@@ -3,8 +3,7 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "start": "tsx ./src/api.ts",
-    "dev": "tsx watch --include \"./src/*\" ./src/api.ts"
+    "prod": "tsx ./src/api.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

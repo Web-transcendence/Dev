@@ -182,32 +182,36 @@ export function TowerDefenseSpec(room?: number) {
 
     function drawEnemies() {
         player1.enemies.forEach(enemy => {
-            if (enemy.pos < 480)
-                ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, enemyPosx(enemy.pos, 1) - tile * 0.5, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
-            else {
-                ctxTd.save();
-                ctxTd.scale(-1, 1);
-                ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, -1 * (enemyPosx(enemy.pos, 1) - tile * 0.5) - 70, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
-                ctxTd.restore();
+            if (enemy.hp > 0) {
+                if (enemy.pos < 480)
+                    ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, enemyPosx(enemy.pos, 1) - tile * 0.5, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
+                else {
+                    ctxTd.save();
+                    ctxTd.scale(-1, 1);
+                    ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, -1 * (enemyPosx(enemy.pos, 1) - tile * 0.5) - 70, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
+                    ctxTd.restore();
+                }
+                ctxTd.fillStyle = "#eaeaea";
+                ctxTd.font = "16px 'Press Start 2P'";
+                ctxTd.textAlign = "center";
+                ctxTd.fillText(enemy.hp.toString(), enemyPosx(enemy.pos, 1), enemyPosy(enemy.pos) + 28);
             }
-            ctxTd.fillStyle = "#eaeaea";
-            ctxTd.font = "16px 'Press Start 2P'";
-            ctxTd.textAlign = "center";
-            ctxTd.fillText(enemy.hp.toString(), enemyPosx(enemy.pos, 1), enemyPosy(enemy.pos) + 28);
         });
         player2.enemies.forEach(enemy => {
-            if (enemy.pos >= 480)
-                ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, enemyPosx(enemy.pos, 2) - tile * 0.5, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
-            else {
-                ctxTd.save();
-                ctxTd.scale(-1, 1);
-                ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, -1 * (enemyPosx(enemy.pos, 2) - tile * 0.5) - 70, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
-                ctxTd.restore();
+            if (enemy.hp > 0) {
+                if (enemy.pos >= 480)
+                    ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, enemyPosx(enemy.pos, 2) - tile * 0.5, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
+                else {
+                    ctxTd.save();
+                    ctxTd.scale(-1, 1);
+                    ctxTd.drawImage(assetsTd.getAnImage(enemy.type)!, -1 * (enemyPosx(enemy.pos, 2) - tile * 0.5) - 70, enemyPosy(enemy.pos) - tile * 0.5, tile, tile);
+                    ctxTd.restore();
+                }
+                ctxTd.fillStyle = "#eaeaea";
+                ctxTd.font = "16px 'Press Start 2P'";
+                ctxTd.textAlign = "center";
+                ctxTd.fillText(enemy.hp.toString(), enemyPosx(enemy.pos, 2), enemyPosy(enemy.pos) + 28);
             }
-            ctxTd.fillStyle = "#eaeaea";
-            ctxTd.font = "16px 'Press Start 2P'";
-            ctxTd.textAlign = "center";
-            ctxTd.fillText(enemy.hp.toString(), enemyPosx(enemy.pos, 2), enemyPosy(enemy.pos) + 28);
         });
         assetsTd.frame += 1;
     }
@@ -396,10 +400,9 @@ export function TowerDefenseSpec(room?: number) {
 
     // Main
     assetsTd.load().then(() => {
-        console.log("Toutes les images sont chargées!");
         mainLoopTd();
     }).catch(error => {
-        console.error("Erreur lors du chargement des assets: ", error);
+        console.error("Error: ", error);
     });
 
     // Communication with backend
@@ -446,7 +449,6 @@ export function TowerDefenseSpec(room?: number) {
         const socketTd = new WebSocket("tower-defense/ws");
         tdSpecConnect = true;
         socketTd.onopen = function () {
-            console.log("Connected to TD server");
             socketTd.send(JSON.stringify({event: "socketInit", nick: nick, room: room}));
         };
         socketTd.onmessage = function (event) {
@@ -509,7 +511,7 @@ export function TowerDefenseSpec(room?: number) {
         });
 
         socketTd.onclose = function () {
-            return (console.log("Disconnected from TD server"));
+            return ;
         };
         connectionCheck(socketTd);
     } catch (error) {

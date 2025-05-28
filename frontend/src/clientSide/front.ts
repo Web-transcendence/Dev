@@ -1,7 +1,6 @@
 import { getAvatar } from './user.js'
 import { loadPart } from './insert.js'
 import { sseConnection } from './serverSentEvent.js'
-import { joinTournament, quitTournaments } from './tournaments.js'
 import { displayNotification } from './notificationHandler.js'
 import { setupModalListeners } from './modal.js'
 
@@ -15,6 +14,7 @@ declare const tsParticles: any
 declare const AOS: any
 
 export let connected = false
+export let path: string | null = null
 
 window.addEventListener('popstate', async () => {
 	if (!connected && window.location.pathname === '/profile' )
@@ -54,10 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 		else
 			document.getElementById('connect')?.click()
 	})
-	const tournamentId = sessionStorage.getItem('idTournaments')
-	if (tournamentId)
-		await joinTournament(Number(tournamentId))
-	const path = sessionStorage.getItem('path')
+	path = sessionStorage.getItem('path')
 	if (path && !(!connected && path === '/profile') && !unhauthorizePath.includes(path))
 		await loadPart(path)
 	else
@@ -68,8 +65,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 tsParticles.load('tsparticles', {
 	fullScreen: { enable: false },
 	particles: {
-		number: { value: 100 },
-		size: { value: 6 },
+		number: { value: 500 },
+		size: { value: 2 },
 		move: { enable: true, speed: 1 },
 		opacity: { value: 0.5 },
 		color: { value: '#ffffff' },
@@ -90,8 +87,6 @@ async function checkForToken(): Promise<boolean> {
 			},
 		})
 		if (!response.ok) {
-			const error = await response.json()
-			console.error(error)
 			return false
 		}
 		return true
@@ -109,8 +104,20 @@ function constantButton() {
 	document.getElementById('home')?.addEventListener('click', async (event: MouseEvent) => navigate('/home', event))
 	document.getElementById('pongMode')?.addEventListener('click', (event: MouseEvent) => navigate('/pongMode', event))
 	document.getElementById('towerDefense')?.addEventListener('click', (event: MouseEvent) => navigate('/towerMode', event))
-	document.getElementById('tournaments')?.addEventListener('click', (event: MouseEvent) => navigate('/tournaments', event))
-	document.getElementById('matchHistory')?.addEventListener('click', (event: MouseEvent) => navigate('/matchHistory', event))
+	document.getElementById('tournaments')?.addEventListener('click', async (event: MouseEvent) => {
+		if (!connected) {
+			displayNotification('You need to be connected to access this page')
+			await navigate('/connect', event)
+		}
+		else await navigate('/tournaments', event)
+	})
+	document.getElementById('matchHistory')?.addEventListener('click', async (event: MouseEvent) => {
+		if (!connected) {
+			displayNotification('You need to be connected to access this page')
+			await navigate('/connect', event)
+		}
+		else await navigate('/matchHistory', event)
+	})
 	// Footer
 	document.getElementById('About')?.addEventListener('click', (event: MouseEvent) => navigate('/About', event))
 }
@@ -137,7 +144,7 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 			body: JSON.stringify({ credential: credit.credential }),
 		})
 		if (!response.ok)
-			console.error('Error: From UserManager returned an error')
+			console.error('Error: From Google UserManager')
 		else {
 			const reply = await response.json()
 			if (reply.valid) {
@@ -156,21 +163,16 @@ window.CredentialResponse = async (credit: { credential: string }) => {
 	}
 }
 
-export async function navigate(path: string, event?: MouseEvent): Promise<void> {
+export async function navigate(newPath: string, event?: MouseEvent): Promise<void> {
 	if (event) event.preventDefault()
 
+	if (path === newPath) return
+	path = newPath
 	handleConnection(await checkForToken())
-	if (!connected && path == '/profile')
-		path = '/connect'
-	if (connected && path == '/connect')
-		path = '/profile'
-	history.pushState({}, '', path)
-	const idT = sessionStorage.getItem('idTournaments')
-	if (idT && path != '/lobby') {
-		displayNotification(`You left the Tournament`)
-		sessionStorage.removeItem('idTournaments')
-		sessionStorage.removeItem('nameTournaments')
-		await quitTournaments()
-	}
-	await loadPart(path)
+	if (!connected && newPath == '/profile')
+		newPath = '/connect'
+	if (connected && newPath == '/connect')
+		newPath = '/profile'
+	history.pushState({}, '', newPath)
+	await loadPart(newPath)
 }
