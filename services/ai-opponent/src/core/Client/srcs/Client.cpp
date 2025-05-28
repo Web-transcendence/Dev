@@ -6,7 +6,7 @@
 /*   By: thibaud <thibaud@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:55:53 by thibaud           #+#    #+#             */
-/*   Updated: 2025/05/27 13:55:51 by thibaud          ###   ########.fr       */
+/*   Updated: 2025/05/28 12:42:20 by thibaud          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,15 +93,15 @@ void	Client::on_message(websocketpp::connection_hdl hdl, client::message_ptr msg
 }
 
 void	Client::on_message_gameServer(nlohmann::json const & data) {
+	if (this->active.load() == WAITING) {
+		this->active.store(ON_GOING);
+		this->promiseGame.set_value(true);
+	}
 	if (data["type"] == "Disconnected" || data["type"] == "AFK") {
 		this->active.store(FINISHED);
 	}
 	else if (data["type"] == "gameUpdate") {
 		this->resetEnv(data);
-		if (this->active.load() == WAITING) {
-			this->active.store(ON_GOING);
-			this->promiseGame.set_value(true);
-		}
 	}
 	else
 		Debug::consoleLog("Unknow token in gameServer message", this->gameId, this->logMutex); 	

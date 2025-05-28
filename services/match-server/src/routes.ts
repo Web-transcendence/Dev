@@ -19,7 +19,8 @@ import {
     startInviteMatch,
     startTournamentMatch,
     waitingList,
-    waitingPlayer
+    waitingPlayer,
+    roomWatcher
 } from "./netcode.js";
 import {z} from "zod";
 import {changeRoomSpec, joinRoomSpec, leaveRoomSpec} from "./spectator.js";
@@ -199,7 +200,7 @@ export default async function pongRoutes(fastify: FastifyInstance) {
 	fastify.get('/vsAi', async (req: FastifyRequest, res: FastifyReply) => {
 		try {
 			const roomId = generateRoom()
-
+            await roomWatcher(roomId, 0, 0)
 			const response = await fetch(`http://ai-opponent:16016/createAI/${roomId}`, {
 				method: 'GET',
 				headers: {

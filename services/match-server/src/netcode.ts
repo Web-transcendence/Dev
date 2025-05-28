@@ -162,7 +162,7 @@ export async function startInviteMatch(userId: number, opponent: number) {
 	return (roomId)
 }
 
-async function roomWatcher(roomId: number, clock: number, playerA_id: number) {
+export async function roomWatcher(roomId: number, clock: number, playerA_id: number) {
 	if (clock <= 60) // Time needed to consider the player afk
 		setTimeout(() => roomWatcher(roomId, clock + 1, playerA_id), 1000) // Check every second
 	else {
@@ -179,9 +179,9 @@ async function roomWatcher(roomId: number, clock: number, playerA_id: number) {
 		} else { // Case where no player joined the room (i.e. double loss)
 			if (room.type === 'tournament')
 				await fetchPlayerWin(playerA_id * -1)
-			const i = rooms.findIndex(room => room.id === roomId)
-			rooms.splice(i, 1)
 		}
+		const i = rooms.findIndex(room => room.id === roomId)
+		rooms.splice(i, 1)
 	}
 }
 

@@ -14,7 +14,7 @@ import {matchMaking, matchMakingUp, removeWaitingPlayer, waitingList, waitingPla
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({});
 const inputSchema = z.object({ player: z.number(), button: z.number() });
 const towerSchema = z.object({ mode: z.string(), t1: z.number(), t2: z.number(), t3: z.number(), t4: z.number(), t5: z.number() });
 const initSchema = z.object({ nick: z.string(), room: z.number() });
