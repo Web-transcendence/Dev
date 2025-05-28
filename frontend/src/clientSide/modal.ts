@@ -47,7 +47,7 @@ export function setupModalListeners() {
 export async function openModal(nickname: string, id: number): Promise<void> {
     const modal = document.getElementById("myModal") as HTMLDivElement;
     const modalContent = document.getElementById("modalContent") as HTMLDivElement;
-    const nameFriend = document.getElementById("nameFriend") as HTMLDivElement;
+    const nameFriend = document.getElementById("nameFriend") as HTMLSpanElement;
 
     if (!modal || !modalContent || !nameFriend) {
         displayNotification('Missing HTML — refresh page');
@@ -57,7 +57,7 @@ export async function openModal(nickname: string, id: number): Promise<void> {
     currentNickname = nickname;
     currentInviteId = id;
 
-    nameFriend.innerHTML = `Which game do you want to play with ${nickname}?`;
+    nameFriend.innerText = `Which game do you want to play with ${nickname}?`;
 
     modal.classList.remove("hidden");
     modal.classList.add("flex");
