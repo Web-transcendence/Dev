@@ -166,7 +166,7 @@ const notifyJoinTournament = async ({ id, maxPlayer }: { id: number, maxPlayer: 
 	const playerTmp = document.getElementById('playerTemplate') as HTMLTemplateElement | null
 	const [{ nickName, avatar }]: UserData[] = await fetchUserInformation([id])
 	if (!playerList || !playerTmp) {
-		displayNotification(`Error Can't find Tournaments`)
+		displayNotification(`Error can't find Tournaments`)
 		await navigate('/home')
 		return
 	}

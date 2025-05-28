@@ -29,11 +29,8 @@ export function displayNotification(message: string, options?: {
     }
     if (item) {
         if (options?.type === "invitation") {
-            if (!userData) {
-                console.error("Notification elements missing");
-                return;
-            }
-            item.id = `${userData.id}-idFriend`
+            if (!userData) item.id = `idTournament-${idNotify}`
+            else item.id = `${userData.id}-idFriend`
         }
         else
             item.id = `idNotif-${idNotify}`
@@ -44,22 +41,27 @@ export function displayNotification(message: string, options?: {
         acceptBtn.classList.add("hidden");
         rejectBtn.classList.add("hidden");
     } else if (options?.type === "invitation") {
-        if (!userData) {
-            console.error("Notification elements missing");
-            return;
-        }
-        if (nameInvite) nameInvite.innerText = `From ${userData.nickName}`;
+        const idNotifyTournament = idNotify
+        if (nameInvite && userData) nameInvite.innerText = `From ${userData.nickName}`;
+        else if (nameInvite) nameInvite.innerText = `For the tournament`;
         item.classList.add("bg-gray-600");
         acceptBtn.classList.remove("hidden");
         rejectBtn.classList.remove("hidden");
         acceptBtn.onclick = async () => {
             if (options.onAccept) options.onAccept();
-            hideNotification(0, userData.id);
-            document.getElementById(`friendId-${userData.id}`)?.remove();
+            if (userData) {
+                hideNotification(0, userData.id);
+                document.getElementById(`friendId-${userData.id}`)?.remove();
+            }
+            else {
+                hideNotification(0, idNotifyTournament);
+                document.getElementById(`idTournament-${idNotifyTournament}`)?.remove();
+            }
         };
         rejectBtn.onclick = async () => {
             if (options.onRefuse) options.onRefuse();
-            hideNotification(0,  userData.id);
+            if (userData) hideNotification(0,  userData.id);
+            else hideNotification(0, idNotifyTournament);
         };
     } else { // Default Green
         item.classList.remove("bg-red-600", "bg-blue-600");

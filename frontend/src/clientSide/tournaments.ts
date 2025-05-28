@@ -45,6 +45,10 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 	const playerTmp = document.getElementById('playerTemplate') as HTMLTemplateElement | null
 	const section = tournamentList.find(s => s.maxPlayer === nbrTournament)
 	if (section && playerList && playerTmp) {
+		if (section.status === 'started') {
+			await navigate('/brackets')
+			return
+		}
 		const userData: UserData[] = await fetchUserInformation(section.participants)
 		for (const { id, nickName, avatar } of userData) {
 			const clone = playerTmp.content.cloneNode(true) as HTMLElement | null
