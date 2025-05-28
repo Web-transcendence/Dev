@@ -239,7 +239,6 @@ const notifyInvitationTowerDefense = async ({ roomId, id }: { roomId: number, id
 
 const winBracket = async ({ id }: { id: number }) => {
 	displayNotification('You win the game, the tournament continue !')
-	await loadPart('/brackets')
 }
 
 const winTournament = async () => {
