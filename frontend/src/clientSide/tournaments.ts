@@ -14,11 +14,12 @@ export async function joinTournament(tournamentId: number) {
 			},
 			body: JSON.stringify({ tournamentId })
 		})
-
 		if (!response.ok) {
 			const error = await response.json()
 			console.error(error.error)
+			displayNotification(error.error, {type: 'error'})
 		}
+		else displayNotification('You have joined a tournament!')
 	} catch (error) {
 		console.error(error)
 	}
@@ -37,8 +38,10 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 		await navigate('/home')
 		return
 	}
+	console.log('TournamentList', tournamentList)
 	let player = 0
 	const playerList = document.getElementById('playerList')
+	playerList.innerHTML = ''
 	const playerTmp = document.getElementById('playerTemplate') as HTMLTemplateElement | null
 	const section = tournamentList.find(s => s.maxPlayer === nbrTournament)
 	if (section && playerList && playerTmp) {
@@ -78,7 +81,7 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 	}
 }
 
-export async function quitTournaments() {
+export async function quitTournaments(idTournament: number) {
 	const token = sessionStorage.getItem('token')
 
 	const response = await fetch(`/tournament/quit`, {
@@ -91,7 +94,9 @@ export async function quitTournaments() {
 	if (!response.ok) {
 		const error = await response.json()
 		console.error(error.error)
+		displayNotification(error.error, {type: 'error'})
 	}
+	else displayNotification('You have left a tournament!')
 }
 
 export async function launchTournament() {

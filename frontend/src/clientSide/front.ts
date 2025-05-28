@@ -54,9 +54,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 		else
 			document.getElementById('connect')?.click()
 	})
-	const tournamentId = sessionStorage.getItem('idTournaments')
-	if (tournamentId)
-		await joinTournament(Number(tournamentId))
 	const path = sessionStorage.getItem('path')
 	if (path && !(!connected && path === '/profile') && !unhauthorizePath.includes(path))
 		await loadPart(path)
@@ -165,12 +162,5 @@ export async function navigate(path: string, event?: MouseEvent): Promise<void> 
 	if (connected && path == '/connect')
 		path = '/profile'
 	history.pushState({}, '', path)
-	const idT = sessionStorage.getItem('idTournaments')
-	if (idT && path != '/lobby') {
-		displayNotification(`You left the Tournament`)
-		sessionStorage.removeItem('idTournaments')
-		sessionStorage.removeItem('nameTournaments')
-		await quitTournaments()
-	}
 	await loadPart(path)
 }

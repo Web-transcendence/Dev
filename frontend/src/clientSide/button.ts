@@ -5,7 +5,7 @@ import { tdStop, TowerDefense } from './td.js'
 import { editProfile } from './editInfoProfile.js'
 import { displayNotification } from './notificationHandler.js'
 import { Pong } from './pong.js'
-import { displayTournaments, fetchTournamentBrackets, joinTournament, launchTournament } from './tournaments.js'
+import { displayTournaments, fetchTournamentBrackets, joinTournament, quitTournaments } from './tournaments.js'
 import { getId, printMatchHistory } from './matchHistory.js'
 import { TowerDefenseSpec } from './tdspec.js'
 import { closeSSEConnection } from './serverSentEvent.js'
@@ -177,7 +177,6 @@ function tournaments() {
 			?.addEventListener('click', async (event) => {
 				sessionStorage.setItem('idTournaments', JSON.stringify(parse.id))
 				sessionStorage.setItem('nameTournaments', parse.name)
-				await joinTournament(parse.id)
 				await navigate('/lobby', event)
 			})
 }
@@ -190,11 +189,14 @@ async function lobby() {
 		await navigate('/home')
 		return
 	}
-	const toIntId = Number.parseInt(id)
-	if (isNaN(toIntId)) displayNotification('Invalid tournament ID.')
-	await displayTournaments(toIntId, name)
-	document.getElementById('launchTournamentBtn')?.addEventListener('click', async () => {
-		await launchTournament()
+	await displayTournaments(Number(id), name)
+	document.getElementById('joinBtn')?.addEventListener('click', async () => {
+		await joinTournament(Number(id))
+		await displayTournaments(Number(id), name)
+	})
+	document.getElementById('leaveBtn')?.addEventListener('click', async () => {
+		await quitTournaments(Number(id))
+		await displayTournaments(Number(id), name)
 	})
 }
 
