@@ -1,7 +1,6 @@
 import { navigate } from './front.js'
 import { fetchUserInformation, getTournamentList, UserData } from './user.js'
 import { displayNotification } from './notificationHandler.js'
-import { getId } from './matchHistory.js'
 
 export async function joinTournament(tournamentId: number) {
 	try {

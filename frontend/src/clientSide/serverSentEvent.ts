@@ -5,6 +5,7 @@ import { navigate } from './front.js'
 import { loadPart } from './insert.js'
 import { openModal } from './modal.js'
 import { TowerDefense } from './td.js'
+import {displayTournaments} from './tournaments'
 
 let abortController: AbortController | null = null
 
@@ -229,6 +230,8 @@ const notifyInvitationPong = async ({ roomId, id }: { roomId: number, id: number
 }
 
 const notifyInvitationTowerDefense = async ({ roomId, id }: { roomId: number, id: number }) => {
+	const path = sessionStorage.getItem('path')
+	if ('/lobby' == path) await navigate(`/brackets`)
 	const [userData] = await fetchUserInformation([id])
 	displayNotification('Invitation to Play Tower-Defense', {
 		type: 'invitation',
