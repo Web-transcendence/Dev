@@ -73,7 +73,7 @@ class Assets {
 
 let pongConnect: boolean;
 
-export function Pong(mode: string, room?: number) {
+export async function Pong(mode: string, room?: number) {
     if (!room)
         room = -1;
     const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
@@ -352,7 +352,7 @@ export function Pong(mode: string, room?: number) {
             requestAnimationFrame(gameLoop);
     }
 
-    function connectionCheck(socket: WebSocket) {
+    async function connectionCheck(socket: WebSocket) {
         if (!pongConnect)
             socket.close();
         else
@@ -397,7 +397,7 @@ export function Pong(mode: string, room?: number) {
             }
         };
         gameLoop();
-        connectionCheck(socket);
+        await connectionCheck(socket);
         socket.onclose = function () {
             window.removeEventListener("keyup", keyUpHandler);
             window.removeEventListener("keydown", keyDownHandler);
