@@ -25,9 +25,11 @@ export async function googleAuth(request: FastifyRequest, reply: FastifyReply): 
 			console.log('Email Already Register:', payload.email)
 		else {
 			const zod_result = nickNameSchema.safeParse({ nickName: payload.given_name })
-			if (!zod_result)
+			if (!zod_result.success)
 				payload.given_name = 'googleNickname'
 
+			// console.log(`Given Name: ${payload.given_name} et ${zod}`)
+			
 			if (Client_db.prepare('SELECT * FROM Client WHERE nickName = ?').get(payload.given_name)) {
 				let i: number = 1
 				payload.given_name = payload.given_name + i.toString()
