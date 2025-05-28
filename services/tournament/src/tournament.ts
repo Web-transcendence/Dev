@@ -142,20 +142,24 @@ export class tournament {
 		if (!loser || !winner)
 			throw new ServerError(`internal server error, it doesn't happen`, 500)
 
-		if ((this.actualParticipant.length === 2 || this.actualParticipant.filter(id => id !== 0).length == 0) && this.alonePlayerId == 0)
-			winnerEvent = `winTournament`
-
 		await fetchNotifyUser([loser], 'loseTournament', {})
-		await fetchNotifyUser([winner], winnerEvent, {})
+		const nextBracketPlayer = this.actualParticipant.filter(id => id !== 0)
 
-		if (winnerEvent === 'winTournament') {
-			console.log(`tournament finished`)
+		console.log(this.actualParticipant)
+		if (nextBracketPlayer.length === 1 && this.alonePlayerId == 0) {
+			await fetchNotifyUser([winner], `winTournament`, {})
 			this.cleanTournament()
-		} else if (this.actualParticipant.filter(id => id !== 0).length * 2 === this.actualParticipant.length) {
+		} else if (nextBracketPlayer.length === 0) {
+			if (this.alonePlayerId != 0)
+				await fetchNotifyUser([this.alonePlayerId], `winTournament`, {})
+			this.cleanTournament()
+		} else if (nextBracketPlayer.length * 2 === this.actualParticipant.length) {
 			console.log(`bracket ended, start the next`)
-			this.actualParticipant = this.actualParticipant.filter(id => id !== 0)
+			await fetchNotifyUser([winner], `winBracket`, {})
+			this.actualParticipant = nextBracketPlayer
 			await this.bracketHandler()
-		}
+		} else
+			await fetchNotifyUser([winner], `winBracket`, {})
 	}
 
 	cleanTournament() {
@@ -194,16 +198,21 @@ export class tournament {
 			}
 		}
 
-		if (this.actualParticipant.length === 2) {
-			if (this.alonePlayerId !== 0)
-				await fetchNotifyUser([this.alonePlayerId], 'winTournament', {})
+		const nextBracketPlayer = this.actualParticipant.filter(id => id !== 0)
+
+		console.log(this.actualParticipant)
+		if (nextBracketPlayer.length === 1 && this.alonePlayerId == 0) {
+			await fetchNotifyUser([nextBracketPlayer[0]], `winTournament`, {})
 			this.cleanTournament()
-		} else {
-			this.actualParticipant = this.actualParticipant.filter(id => id !== 0)
+		} else if (nextBracketPlayer.length === 0) {
+			if (this.alonePlayerId != 0)
+				await fetchNotifyUser([this.alonePlayerId], `winTournament`, {})
+			this.cleanTournament()
+		} else if (nextBracketPlayer.length * 2 === this.actualParticipant.length) {
+			console.log(`bracket ended, start the next`)
+			this.actualParticipant = nextBracketPlayer
 			await this.bracketHandler()
 		}
-
-
 	}
 }
 
