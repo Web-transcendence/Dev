@@ -24,7 +24,7 @@ export const signUpSchema = z.object({
 	nickName: z.string().min(3, '3 character or more for the nickname')
 		.max(15, '15 character or less for the nickname')
 		.regex(/^[a-zA-Z0-9]+$/, 'only alphanumeric character accepted for the nickname'),
-	email: z.string().email('Invalid email format'),
+	email: z.string().email('Invalid email format').max(320, `320 character max for the email`),
 	password: z.string().min(6, '6 character or more for the password'),
 })
 

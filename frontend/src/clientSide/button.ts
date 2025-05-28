@@ -115,6 +115,8 @@ function logoutBtn() {
 	if (avatar) avatar.src = '../images/logout.png'
 	const nickName = document.getElementById('nickName') as HTMLSpanElement | null
 	if (nickName) nickName.textContent = ''
+	const notify = document.getElementById('notificationList')
+	if (notify) notify.innerHTML = ''
 	closeSSEConnection()
 }
 
@@ -138,8 +140,7 @@ function pongMode() {
 		if (!connected) {
 			displayNotification('You need to be connected to access this page')
 			await navigate('/connect', event)
-		}
-		else await navigate('/pongVsia', event)
+		} else await navigate('/pongVsia', event)
 	})
 }
 
@@ -171,7 +172,7 @@ function towerWatch() {
 
 
 function tournaments() {
-	document.getElementById('4')?.addEventListener('click', (event) => navigate('/lobby', event));
+	document.getElementById('4')?.addEventListener('click', (event) => navigate('/lobby', event))
 }
 
 

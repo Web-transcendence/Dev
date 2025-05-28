@@ -1,7 +1,6 @@
 import { displayNotification } from './notificationHandler.js'
 import { Pong } from './pong.js'
 import { TowerDefense } from './td.js'
-import { loadPart } from './insert.js'
 import { fetchInvitation } from './invitation.js'
 import { navigate } from './front.js'
 
@@ -28,7 +27,7 @@ export function setupModalListeners() {
 		if (currentInviteId !== null && currentNickname !== null) {
 			const roomId = await fetchInvitation('tower-defense', currentInviteId)
 			displayNotification(`Invitation sent to ${currentNickname} !`)
-			await loadPart('/towerFriend')
+			await navigate('/towerFriend')
 			TowerDefense(roomId)
 			closeModal()
 		}

@@ -202,7 +202,6 @@ export default async function userRoutes(app: FastifyInstance) {
 			if (!id)
 				throw new ServerError(`cannot parse id, which should not happen`, 500)
 
-
 			const user = new User(id)
 
 			user.updatePictureProfile(pictureURL)
