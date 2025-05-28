@@ -14,7 +14,6 @@ async function fetchMatch(id1: number, id2: number) {
 	})
 }
 
-
 export class tournament {
 
 	maxPlayer: number

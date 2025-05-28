@@ -1,7 +1,6 @@
 import { navigate } from './front.js'
 import { fetchUserInformation, getTournamentList, UserData } from './user.js'
 import { displayNotification } from './notificationHandler.js'
-import { getId } from './matchHistory.js'
 
 export async function joinTournament(tournamentId: number) {
 	try {
@@ -17,9 +16,8 @@ export async function joinTournament(tournamentId: number) {
 		if (!response.ok) {
 			const error = await response.json()
 			console.error(error.error)
-			displayNotification(error.error, {type: 'error'})
-		}
-		else displayNotification('You have joined a tournament!')
+			displayNotification(error.error, { type: 'error' })
+		} else displayNotification('You have joined a tournament!')
 	} catch (error) {
 		console.error(error)
 	}
@@ -83,8 +81,8 @@ export async function displayTournaments(nbrTournament: number, nameTournament: 
 
 export async function quitTournaments(idTournament: number) {
 	const token = sessionStorage.getItem('token')
-
-	const response = await fetch(`/tournament/quit`, {
+	console.log(idTournament)
+	const response = await fetch(`/tournament/quit/${idTournament}`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
@@ -94,9 +92,8 @@ export async function quitTournaments(idTournament: number) {
 	if (!response.ok) {
 		const error = await response.json()
 		console.error(error.error)
-		displayNotification(error.error, {type: 'error'})
-	}
-	else displayNotification('You have left a tournament!')
+		displayNotification(error.error, { type: 'error' })
+	} else displayNotification('You have left a tournament!')
 }
 
 export async function launchTournament() {
@@ -119,7 +116,10 @@ export async function launchTournament() {
 	}
 }
 
-export async function fetchTournamentBrackets(tournamentId: number): Promise<{id1: number, id2:number }[] | undefined > {
+export async function fetchTournamentBrackets(tournamentId: number): Promise<{
+	id1: number,
+	id2: number
+}[] | undefined> {
 	const token = sessionStorage.getItem('token')
 	const response = await fetch(`/tournament/logTournamentStep/${tournamentId}`, {
 		method: 'GET',
@@ -132,10 +132,10 @@ export async function fetchTournamentBrackets(tournamentId: number): Promise<{id
 		const error = await response.json()
 		console.error(error.error)
 		displayNotification(error.error)
-        return undefined
+		return undefined
 	}
-    const ret = await response.json()
-    console.log(ret)
-    return ret
+	const ret = await response.json()
+	console.log(ret)
+	return ret
 	// return response.json()
 }
