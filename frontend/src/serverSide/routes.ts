@@ -85,6 +85,15 @@ export async function routes(fastify: FastifyInstance) {
             reply.code(404).send("Fichier non trouvé");
         }
     });
+    fastify.get('/images/WebPage.png', function (req, reply) {
+        try {
+            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "WebPage.png");
+            const tag = readFileSync(frontPath);
+            reply.type('img/ico').send(tag)
+        } catch (error) {
+            reply.code(404).send("Fichier non trouvé");
+        }
+    });
     fastify.get('/images/BigLock.png', function (req, reply) {
         try {
             const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "BigLock.png");

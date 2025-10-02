@@ -1,51 +1,22 @@
-<div class="w-full place-items-stretch h-full [&_h2]:text-xl sm:[&_h2]:text-2xl md:[&_h2]:text-3xl [&_p]:text-sm sm:[&_p]:text-sm md:[&_p]:text-md lg:[&_p]:text-xl">
-    <!-- Hero Section -->
-    <section id="intro" class="box-home rounded-l-full right-0" data-aos="slide-left" data-aos-delay="300">
-        <h1 class="sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center text-transparent bg-gradient-to-r from-yellow-200 to-pink-400 bg-clip-text mb-4">ft_transcendence Project</h1>
-        <p class="text-center max-w-3xl mx-auto text-gray-400">
-            A full web platform project centered around the Pong game, featuring user management, microservices, and a modern interface. Built as part of 42 School's curriculum.
+<div class="w-full h-screen flex">
+    <!-- Colonne texte -->
+    <div class="w-1/2 h-full flex flex-col justify-center p-8 text-7xl">
+        <h1 class="font-bold mb-8">
+            Reconnectez avec vos magasins locaux.
+        </h1>
+        <p class="text-3xl m-4">Simple, Rapide et Gratuit</p>
+        <p class="text-xl">
+            La 1ʳᵉ plateforme pour trouver vos magasins locaux et leurs produits.
         </p>
-    </section>
-    <!-- Frontend Section -->
-    <section id="frontend" class="box-home rounded-r-full left-0 w-5/6" data-aos="slide-right" data-aos-delay="300" >
-        <div class="text-left">
-            <h2 class="font-bold text-purple-700 text-2xl mb-4">Frontend</h2>
-            <p class="text-gray-500 leading-relaxed">
-                The frontend is a Single Page Application developed in <strong>TypeScript</strong> using
-                <strong>Tailwind CSS</strong>. It manages user interaction, navigation, matchmaking, and the Pong game interface.
-            </p>
+
+        <div class="flex justify-center mt-16">
+            <button id="prospect"
+                    class="btn-primary text-5xl bg-fuchsia-400 p-8 rounded-full hover:bg-purple-400">
+                Rejoindre
+            </button>
         </div>
-        <div class="md:w-1/3 mt-6 md:mt-0 md:ml-6 flex justify-center">
-            <img src="../assets/docker_compose.png" alt="docker compose" class="w-32 h-32 rounded-full object-cover" />
-        </div>
+    </div>
 
-    </section>
-
-    <!-- Backend Section -->
-    <section id="backend" class="box-home rounded-l-full right-0"  data-aos="slide-left" data-aos-delay="300">
-        <h2 class="font-bold text-emerald-700 mb-4">Backend</h2>
-        <p class="text-wrap text-gray-400">
-            The backend is built with <strong>Node.js</strong> and the <strong>Fastify</strong> framework. A <strong>SQLite</strong> database stores user data, scores, and game records. The backend exposes a secure REST API consumed by the frontend.
-        </p>
-    </section>
-
-    <!-- Docker & Microservices Section -->
-    <section id="docker" class="box-home rounded-r-full left-0 w-5/6" data-aos="slide-right" data-aos-delay="300">
-        <h2 class="font-bold text-pink-700 mb-4">Docker & Microservices</h2>
-        <p class="text-wrap text-gray-400">
-            The project is fully containerized using <strong>Docker</strong>. Each component (frontend, backend, database) runs in its own container, orchestrated via <code>docker-compose</code>. This ensures isolation, scalability, and portability.
-        </p>
-    </section>
-
-    <!-- Modules Section -->
-    <section id="modules" class="box-home rounded-l-full right-0"  data-aos="slide-left" data-aos-delay="300">
-        <h2 class="font-bold text-sky-700">Implemented Modules</h2>
-        <ul class="list-disc text-wrap list-inside text-sm md:text-md lg:text-xl text-gray-400 space-y-2">
-            <li>Standard authentication with user profile management</li>
-            <li>Real-time multiplayer with matchmaking</li>
-            <li>User statistics and match history tracking</li>
-            <li>Integrated live chat between users</li>
-            <li>Security: JWT, HTTPS, XSS/SQLi protection</li>
-        </ul>
-    </section>
+    <div class="w-1/2 h-full bg-[url('../images/WebPage.png')] bg-cover bg-center">
+    </div>
 </div>

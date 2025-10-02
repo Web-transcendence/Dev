@@ -1,97 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
-  <head>
+<head>
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transcendence</title>
+    <title>Goto</title>
     <link rel="shortcut icon" type="image/x-icon" href="../images/favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+
     <link href="/static/output.css" rel="stylesheet">
-      <!-- AOS animation library -->
-      <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
-      <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-  </head>
+</head>
 
-  <body class="text-white min-h-screen flex flex-col" style="font-family: 'Press Start 2P', cursive;">
-  <div id="tsparticles"></div>
-  <div id="app" class="flex-1 mt-15">
+<body class="bg-fuchsia-50 text-black min-h-screen flex flex-col" style="font-family: 'Sansation', sans-serif;">
+<div id="app" class="flex-1 mt-15">
 
-      <nav class="fixed top-0 z-20 left-0 p-4 mb-50 flex justify-between items-center w-full bg-transparent">
+    <nav class="fixed top-0 z-20 left-0 p-4 mb-50 flex justify-between items-center w-full bg-transparent">
 
-          <div class="flex items-center add-blur">
-              <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
-                  <img src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
-                  <p class="text-center text-xl hidden lg:block"> TABG. </p>
-              </button>
-          </div>
+        <div class="flex items-center add-blur">
+            <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
+                <img src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
+            </button>
+        </div>
 
-          <div class="grid grid-cols-2 md:grid-cols-4 text-center space-x-8 items-center add-blur">
-              <button id="pongMode" class="btn-line">Pong</button>
-              <button id="towerDefense" class="btn-line">Tower-Defense</button>
-              <button id="tournaments" class="btn-line">Tournaments</button>
-              <button id="matchHistory" class="btn-line">Match History</button>
-          </div>
+        <div class="grid grid-cols-2 text-center space-x-8 items-center add-blur text-3xl">
+        <button id="about" class="btn-line text-black">À propos</button>
+        <button id="contact" class="btn-line text-black">Contactez Nous</button>
+        </div>
 
-          <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">
-              <div class="relative group">
-                  <img id="avatar" src="../images/logout.png" alt="Avatar" class="bg-pink-500 relative h-10 w-10 rounded-full z-50">
-                  <button id="profile" class="hidden btn-slide">
-                      Profil
-                  </button>
-                  <button id="connect" class="btn-slide">
-                      Connect
-                  </button>
-              </div>
-          </div>
-      </nav>
-      <div id="notFound" class="hidden flex text-white font-mono items-center justify-center min-h-screen">
-          <div class="text-center space-y-6">
-              <span class="block text-9xl text-red-600">404 - NOT FOUND</span>
-              <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
-          </div>
-      </div>
+        <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">
+            <div class="relative group">
+                <img id="avatar" src="../images/logout.png" alt="Avatar" class="bg-pink-500 relative h-10 w-10 rounded-full z-50">
+                <button id="profile" class="hidden btn-slide">
+                    Profil
+                </button>
+                <button id="connect" class="btn-slide">
+                    Connect
+                </button>
+            </div>
+        </div>
+    </nav>
+    <div id="notFound" class="hidden flex text-black font-mono items-center justify-center min-h-screen">
+        <div class="text-center space-y-6">
+            <span class="block text-9xl text-red-600">404 - NOT FOUND</span>
+            <p class="text-5xl leading-relaxed">Oops! This page does not exist.</p>
+        </div>
+    </div>
 
-      <div id="content" class="h-full w-full items-center flex flex-col flex-grow justify-center mt-8 rounded-lg shadow-lg *:w-full">
+    <div id="content" class="h-full w-full items-center flex flex-col flex-grow justify-center mt-8 rounded-lg *:w-full">
 
-      </div>
+    </div>
 
-  </div>
+</div>
 
-  <ul id="notificationList" class="fixed top-20 right-0 flex flex-col items-end space-y-4 z-50"></ul>
+<ul id="notificationList" class="fixed top-20 right-0 flex flex-col items-end space-y-4 z-50"></ul>
 
-  <template id="notificationBanner">
-      <li class="notifyList transform translate-x-full p-4 max-w-[400] rounded-l-lg shadow-lg  text-white flex flex-col gap-2 transition-transform duration-500 ease-in-out">
-          <span id="notificationMessage" class="text-nowrap truncate"></span>
-          <span id="nameInvite" class="truncate w-full text-wrap"></span>
-          <div class="flex gap-2 *:w-full w-full">
-              <button id="notificationActionAccept"
-                      class="text-white px-3 py-1 rounded-lg hidden bg-green-600 hover:bg-green-700 transition hover:scale-105">
-                  Accept
-              </button>
-              <button id="notificationActionReject"
-                      class="text-white px-3 py-1 rounded-lg hidden bg-red-600 hover:bg-red-700 transition hover:scale-105">
-                  Reject
-              </button>
-          </div>
-      </li>
-  </template>
+<template id="notificationBanner">
+    <li class="notifyList transform translate-x-full p-4 max-w-[400] rounded-l-lg shadow-lg text-black flex flex-col gap-2 transition-transform duration-500 ease-in-out">
+        <span id="notificationMessage" class="text-nowrap truncate"></span>
+        <span id="nameInvite" class="truncate w-full text-wrap"></span>
+        <div class="flex gap-2 *:w-full w-full">
+            <button id="notificationActionAccept"
+                    class="text-white px-3 py-1 rounded-lg hidden bg-green-600 hover:bg-green-700 transition hover:scale-105">
+                Accept
+            </button>
+            <button id="notificationActionReject"
+                    class="text-white px-3 py-1 rounded-lg hidden bg-red-600 hover:bg-red-700 transition hover:scale-105">
+                Reject
+            </button>
+        </div>
+    </li>
+</template>
 
+<footer class="bg-transparent text-black text-center rounded-t-lg p-4 flex justify-between items-center">
+    <img id="bottom-img" src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
+<!--    <div class="flex space-x-8 items-center">-->
+<!--        <span id="bottom-text" class="text-lg font-bold"></span>-->
+<!--        <button id="about" class="btn-line text-black">À propos</button>-->
+<!--        <button id="contact" class="btn-line text-black">Contactez Nous</button>-->
+<!--    </div>-->
+</footer>
 
+<script type="module" src="/static/dist/front.js"></script>
 
-
-  <footer class="bg-transparent text-white text-center rounded-t-lg p-4 flex justify-between items-center">
-      <img id="bottom-img" src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
-      <div class="flex space-x-8 items-center">
-          <span id="bottom-text" class="text-lg font-bold"></span>
-          <button id="about" class="btn-line">About Us</button>
-          <button id="contact" class="btn-line">Contact Us</button>
-      </div>
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
-  <script type="module" src="/static/dist/front.js"></script>
-
-  </body>
+</body>
 </html>

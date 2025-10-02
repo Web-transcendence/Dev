@@ -4,9 +4,6 @@ import {sseConnection} from "./serverSentEvent.js";
 import {joinTournament, quitTournaments, getBrackets} from "./tournaments.js";
 import {displayNotification} from "./notificationHandler.js";
 
-declare const tsParticles: any;
-declare const AOS: any;
-
 export let connected = false;
 
 window.addEventListener("popstate", (event) => {
@@ -21,10 +18,6 @@ window.addEventListener("popstate", (event) => {
 document.addEventListener("DOMContentLoaded", async () => {
     constantButton(); // Constant button on the Single Page Application
     // animate slides on scroll
-    AOS.init({
-        once: true,
-        duration: 800,
-    });
     // Reconnect User
     const token = sessionStorage.getItem("token");
     if (token && await checkForToken()) {
@@ -49,20 +42,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     else
         await loadPart("/home")
     await sseConnection()
-});
-
-tsParticles.load("tsparticles", {
-    fullScreen: { enable: false },
-    particles: {
-        number: { value: 100 },
-        size: { value: 6 },
-        move: { enable: true, speed: 1 },
-        opacity: { value: 0.5 },
-        color: { value: "#ffffff" },
-    },
-    background: {
-        color: "#000000"
-    }
 });
 
 async function checkForToken(): Promise<boolean>  {
