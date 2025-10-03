@@ -17,7 +17,6 @@ window.addEventListener("popstate", (event) => {
 
 document.addEventListener("DOMContentLoaded", async () => {
     constantButton(); // Constant button on the Single Page Application
-    // animate slides on scroll
     // Reconnect User
     const token = sessionStorage.getItem("token");
     if (token && await checkForToken()) {
@@ -67,19 +66,9 @@ async function checkForToken(): Promise<boolean>  {
 }
 
 function constantButton() {
-    //Duo Button
-    document.getElementById('connect')?.addEventListener("click", (event: MouseEvent) => navigate("/connect", event));
-    document.getElementById('profile')?.addEventListener("click", (event: MouseEvent) => navigate("/profile", event));
-    //navigation page
-    document.getElementById('home')?.addEventListener("click", async (event: MouseEvent) => {
-        await navigate("/brackets", event)
-        await getBrackets(4);
-    });
-    document.getElementById("pongMode")?.addEventListener("click", (event: MouseEvent) => navigate("/pongMode", event));
-    document.getElementById("towerDefense")?.addEventListener("click", (event: MouseEvent) => navigate("/towerMode", event));
-    document.getElementById("tournaments")?.addEventListener("click", (event: MouseEvent) => navigate("/tournaments", event));
-    document.getElementById("matchHistory")?.addEventListener("click", (event: MouseEvent) => navigate("/matchHistory", event));
-    // Footer
+   //navigation page
+    document.getElementById('home')?.addEventListener("click", async (event: MouseEvent) => navigate("/home", event));
+   // Footer
     document.getElementById("about")?.addEventListener("click", (event: MouseEvent) => navigate("/about", event));
     document.getElementById("contact")?.addEventListener("click", (event: MouseEvent) => navigate("/contact", event));
 }

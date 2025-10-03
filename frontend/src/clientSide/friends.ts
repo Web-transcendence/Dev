@@ -42,7 +42,7 @@
                             });
                         }
                         if (key === "acceptedIds") {
-                             clone.querySelector(".inviteFriend")?.addEventListener("click", async () => openModal(userData.nickName, userData.id));
+                             clone.querySelector(".inviteFriend")?.addEventListener("click", async () => openModal());
                             if (!userData.online)
                                 clone.querySelector(".inviteFriend")
                         }

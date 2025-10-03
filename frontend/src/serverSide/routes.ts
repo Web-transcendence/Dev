@@ -76,41 +76,31 @@ export async function routes(fastify: FastifyInstance) {
             reply.code(404).send("Fichier non trouvé");
         }
     });
-    fastify.get('/images/login.png', function (req, reply) {
-        try {
-            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "login.png");
-            const tag = readFileSync(frontPath);
-            reply.type('img/ico').send(tag)
-        } catch (error) {
-            reply.code(404).send("Fichier non trouvé");
-        }
-    });
-    fastify.get('/images/WebPage.png', function (req, reply) {
-        try {
-            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "WebPage.png");
-            const tag = readFileSync(frontPath);
-            reply.type('img/ico').send(tag)
-        } catch (error) {
-            reply.code(404).send("Fichier non trouvé");
-        }
-    });
-    fastify.get('/images/BigLock.png', function (req, reply) {
-        try {
-            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "BigLock.png");
-            const tag = readFileSync(frontPath);
-            reply.type('img/ico').send(tag)
-        } catch (error) {
-            reply.code(404).send("Fichier non trouvé");
-        }
-    });
-    fastify.get('/images/logout.png', function (req, reply) {
-        try {
-            const frontPath = join(import.meta.dirname, env.TRANS_IMG_PATH, "logout.png");
-            const tag = readFileSync(frontPath);
-            reply.type('img/ico').send(tag)
-        } catch (error) {
-            reply.code(404).send("Fichier non trouvé");
-        }
+    const pngImages = [
+        "login",
+        "logout",
+        "WebPage",
+        "BigLock",
+        "bag",
+        "DeliveryMan",
+        "Monitor",
+        "NoFees",
+        "Parteurs",
+        "shopWeb",
+    ];
+
+// Boucle sur chaque image pour créer la route
+    pngImages.forEach(name => {
+        fastify.get(`/images/${name}.png`, (req, reply) => {
+            try {
+                const fullPath = join(import.meta.dirname, env.TRANS_IMG_PATH, `${name}.png`);
+                const imageData = readFileSync(fullPath);
+
+                reply.type("image/png").send(imageData);
+            } catch (error) {
+                reply.code(404).send(`Image ${name}.png non trouvée`);
+            }
+        });
     });
     // Png For Pong
     fastify.get('/assets/pong/ballup.png', function (req, reply) {

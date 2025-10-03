@@ -9,6 +9,7 @@ import { Pong } from "./pong.js";
 import { displayTournaments, joinTournament, launchTournament} from "./tournaments.js";
 import { printMatchHistory } from "./matchHistory.js";
 import {TowerDefenseSpec} from "./tdspec.js";
+import {openModal} from "./modal.js";
 
 const mapButton : {[key: string] : () => void} = {
     "/connect" : connectBtn,
@@ -25,7 +26,11 @@ const mapButton : {[key: string] : () => void} = {
     "/towerWatch" : towerWatch,
     "/tournaments" : tournaments,
     "/lobby" : lobby,
-    "/matchHistory" : matchHistory
+    "/matchHistory" : matchHistory,
+    //GOTO
+    "/contact" : contact,
+    "/about" : about,
+    "/home" : home
 }
 
 export function activateBtn(page: string) {
@@ -191,4 +196,45 @@ async function lobby() {
 
 async function matchHistory() {
     await printMatchHistory();
+}
+
+async function contact() {
+    let ContactEmail: string | null = null;
+    let ContactMessage: string | null = null;
+    document.getElementById("contactBtn")?.addEventListener("click", (event: MouseEvent) => {
+        event.preventDefault();
+
+        const emailInput = document.getElementById("email") as HTMLInputElement | null;
+        const messageInput = document.getElementById("message") as HTMLTextAreaElement | null;
+
+        if (emailInput && messageInput) {
+            const email = emailInput.value.trim();
+            const message = messageInput.value.trim();
+
+            if (email && message) {
+                ContactEmail = email;
+                ContactMessage = message;
+                console.log("📩 Contact email:", ContactEmail);
+                console.log("💬 Contact message:", ContactMessage);
+                emailInput.value = "";
+                messageInput.value = "";
+            } else {
+                console.warn("Veuillez remplir l’email et le message.");
+                displayNotification("Merci de remplir tous les champs !");
+            }
+        }
+    });
+}
+
+
+async function about() {
+    document.getElementById("beginShop")?.addEventListener(
+        "click", (event: MouseEvent) => openModal());
+    document.getElementById("beginCustomer")?.addEventListener(
+        "click", (event: MouseEvent) => openModal());
+}
+
+async function home() {
+    document.getElementById("joinHome")?.addEventListener(
+        "click", (event: MouseEvent) => openModal());
 }

@@ -1,19 +1,19 @@
-
 import {displayNotification} from "./notificationHandler.js";
-import {Pong} from "./pong.js";
-import {TowerDefense} from "./td.js";
-import {loadPart} from "./insert.js";
-import {fetchInvitation} from "./invitation.js";
 
-export async function openModal(nickname: string, id: number): Promise<void> {
+export function openModal() {
     const modal = document.getElementById("myModal") as HTMLDivElement | undefined;
     const app = document.getElementById("app") as HTMLDivElement | undefined;
     const modalContent = document.getElementById("modalContent") as HTMLDivElement | undefined;
-    const nameFriend = document.getElementById("nameFriend") as HTMLDivElement | undefined;
-    if (!modal || !nameFriend || !app || !modalContent) {
-        displayNotification('Missing Html refresh page')
-        return ;
+    const submitBtn = document.getElementById("submitProspectEmail") as HTMLButtonElement | null;
+    const closeBtn = document.getElementById("closeModalBtn") as HTMLButtonElement | null;
+    const input = document.getElementById("emailProspect") as HTMLInputElement | null;
+
+    if (!modal || !app || !modalContent || !submitBtn || !closeBtn || !input) {
+        displayNotification('Missing Html refresh page');
+        return;
     }
+
+    // Affiche le modal
     modal.classList.remove("hidden");
     modal.classList.add("flex");
     window.requestAnimationFrame(() => {
@@ -23,25 +23,24 @@ export async function openModal(nickname: string, id: number): Promise<void> {
         modal.classList.add("backdrop-blur-sm");
     });
 
-    nameFriend.innerHTML = `Which game you want to play with ${nickname} ?`;
-    document.getElementById('invitePong')?.addEventListener("click", async () => {
-        const roomId = await fetchInvitation('match-server', id);
-        displayNotification('Invitation send to ${nickname} !')
-        await loadPart('/pongRemote')
-        Pong('remote', roomId)
-    });
-    document.getElementById('inviteTowerDefense')?.addEventListener("click", async () => {
-        const roomId = await fetchInvitation('tower-defense', id);
-        displayNotification('Invitation send to ${nickname} !')
-        await loadPart('/towerRemote')
-        TowerDefense(roomId)
-    });
-    modal.addEventListener("click", () => {
-        closeModal()
-    });
-    document.getElementById("closeModalBtn")?.addEventListener("click", () => {
-        closeModal()
-    });
+    // ⚡️ Assignation directe (empêche les doublons)
+    submitBtn.onclick = () => {
+        const ProspectEmail = input.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (emailRegex.test(ProspectEmail)) {
+            displayNotification(`Merci ! Nous avons enregistré votre email : ${ProspectEmail}`);
+            input.value = "";
+            closeModal();
+        } else {
+            displayNotification("❌ Veuillez entrer une adresse email valide.");
+        }
+    };
+
+    closeBtn.onclick = () => {
+        closeModal();
+    };
+
     app.appendChild(modal);
 }
 

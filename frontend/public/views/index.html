@@ -17,7 +17,7 @@
 <body class="bg-fuchsia-50 text-black min-h-screen flex flex-col" style="font-family: 'Sansation', sans-serif;">
 <div id="app" class="flex-1 mt-15">
 
-    <nav class="fixed top-0 z-20 left-0 p-4 mb-50 flex justify-between items-center w-full bg-transparent">
+    <nav class="fixed top-0 z-20 left-0 p-4 flex justify-between items-center w-full bg-transparent">
 
         <div class="flex items-center add-blur">
             <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
@@ -26,21 +26,21 @@
         </div>
 
         <div class="grid grid-cols-2 text-center space-x-8 items-center add-blur text-3xl">
-        <button id="about" class="btn-line text-black">À propos</button>
+        <button id="about" class="btn-line text-black">Comment ça marche ?</button>
         <button id="contact" class="btn-line text-black">Contactez Nous</button>
         </div>
 
-        <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">
-            <div class="relative group">
-                <img id="avatar" src="../images/logout.png" alt="Avatar" class="bg-pink-500 relative h-10 w-10 rounded-full z-50">
-                <button id="profile" class="hidden btn-slide">
-                    Profil
-                </button>
-                <button id="connect" class="btn-slide">
-                    Connect
-                </button>
-            </div>
-        </div>
+<!--        <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">-->
+<!--            <div class="relative group">-->
+<!--                <img id="avatar" src="../images/logout.png" alt="Avatar" class="bg-pink-500 relative h-10 w-10 rounded-full z-50">-->
+<!--                <button id="profile" class="hidden btn-slide">-->
+<!--                    Profil-->
+<!--                </button>-->
+<!--                <button id="connect" class="btn-slide">-->
+<!--                    Connect-->
+<!--                </button>-->
+<!--            </div>-->
+<!--        </div>-->
     </nav>
     <div id="notFound" class="hidden flex text-black font-mono items-center justify-center min-h-screen">
         <div class="text-center space-y-6">
@@ -49,7 +49,7 @@
         </div>
     </div>
 
-    <div id="content" class="h-full w-full items-center flex flex-col flex-grow justify-center mt-8 rounded-lg *:w-full">
+    <div id="content" class="h-full w-full items-center flex flex-col flex-grow justify-center min-h-screen rounded-lg *:w-full">
 
     </div>
 
@@ -58,7 +58,7 @@
 <ul id="notificationList" class="fixed top-20 right-0 flex flex-col items-end space-y-4 z-50"></ul>
 
 <template id="notificationBanner">
-    <li class="notifyList transform translate-x-full p-4 max-w-[400] rounded-l-lg shadow-lg text-black flex flex-col gap-2 transition-transform duration-500 ease-in-out">
+    <li class="notifyList transform translate-x-full text-xl p-4 max-w-[400] rounded-l-lg shadow-lg flex flex-col gap-2 transition-transform duration-500 ease-in-out">
         <span id="notificationMessage" class="text-nowrap truncate"></span>
         <span id="nameInvite" class="truncate w-full text-wrap"></span>
         <div class="flex gap-2 *:w-full w-full">
@@ -73,6 +73,43 @@
         </div>
     </li>
 </template>
+
+<div id="myModal"
+     class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-0 items-center justify-center">
+    <div id="modalContent"
+         class="opacity-0 translate-y-full transition-all duration-500 transform
+                bg-fuchsia-50 text-2xl p-8 relative w-[90%] max-w-3xl rounded-xl flex flex-col gap-6 shadow-lg">
+        <button id="closeModalBtn"
+                class="absolute top-4 right-4 text-xl hover:scale-110 transition">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="w-5 h-5 opacity-25 hover:opacity-100 transition-opacity duration-200"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <div class="text-center space-y-4">
+            <h1 class="text-7xl font-bold text-fuchsia-600">On vous note !</h1>
+            <p class="text-xl mx-auto">
+                La plateforme arrive bientôt ! Pour rester au courant laisser votre email, on vous contactera quand se sera prêt.
+            </p>
+        </div>
+
+        <div>
+            <label for="emailProspect" class="block text-xl font-medium text-gray-800 mb-2">Votre email*</label>
+            <input type="email" id="emailProspect" name="email" placeholder="exemple@email.com"
+                   class="w-full p-4 border border-gray-300 rounded-lg
+                       focus:ring-2 focus:ring-fuchsia-400 focus:outline-none " required>
+        </div>
+
+        <div class="text-center py-6 px-2">
+            <button id="submitProspectEmail" class="btn-primary text-3xl bg-fuchsia-600 p-4 rounded-full hover:bg-fuchsia-700">
+                Rejoindre !
+            </button>
+        </div>
+
+    </div>
+</div>
 
 <footer class="bg-transparent text-black text-center rounded-t-lg p-4 flex justify-between items-center">
     <img id="bottom-img" src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">

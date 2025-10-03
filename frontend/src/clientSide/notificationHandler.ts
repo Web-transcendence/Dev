@@ -49,7 +49,7 @@ export function displayNotification(message: string, options?: {
         };
     } else { // Default Green
         item.classList.remove("bg-red-600", "bg-blue-600");
-        item.classList.add("bg-green-800");
+        item.classList.add("bg-fuchsia-200");
         acceptBtn.classList.add("hidden");
     }
 

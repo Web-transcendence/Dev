@@ -76,7 +76,7 @@ export const CreateFriendLi = async (id: number, key: string, tmpName: string)=>
             clone.querySelector(".decline-btn")?.addEventListener("click", () => removeFriend(userData.nickName));
         }
         if (key === "acceptedList")
-            clone.querySelector(".inviteFriend")?.addEventListener("click", async () => openModal(userData.nickName, userData.id));
+            clone.querySelector(".inviteFriend")?.addEventListener("click", async () => openModal());
         list.appendChild(clone);
     }
 }
