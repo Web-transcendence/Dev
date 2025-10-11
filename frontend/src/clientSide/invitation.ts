@@ -2,7 +2,6 @@ import {displayNotification} from "./notificationHandler.js";
 
 export const fetchInvitation = async (game: string, id: number) => {
     const token = sessionStorage.getItem('token');
-    console.log(token)
     const response = await fetch(`${game}/invitationGame/${id}`, {
         method: 'GET',
         headers: {
@@ -12,7 +11,6 @@ export const fetchInvitation = async (game: string, id: number) => {
     });
     if (!response.ok) {
         const error = await response.json();
-        console.log(error.message);
         displayNotification(`Can't create game`, {type: "error"})
         return ;
     }
@@ -22,7 +20,6 @@ export const fetchInvitation = async (game: string, id: number) => {
 
 export const fetchRefuseInvitation = async (game: string, id: number) => {
     const token = sessionStorage.getItem('token');
-    console.log(token)
     const response = await fetch(`${game}/invitationGame/${id}`, {
         method: 'GET',
         headers: {
@@ -32,7 +29,6 @@ export const fetchRefuseInvitation = async (game: string, id: number) => {
     });
     if (!response.ok) {
         const error = await response.json();
-        console.log(error.message);
         displayNotification(`Can't create game`, {type: "error"})
         return ;
     }

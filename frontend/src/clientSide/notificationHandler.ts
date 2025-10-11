@@ -54,9 +54,7 @@ export function displayNotification(message: string, options?: {
     }
 
     const notifys = notificationList.querySelectorAll("li");
-    console.log('notifys', notifys);
     if (notifys && notifys.length >= 3) {
-        console.log("Notification to remove", notifys.length - 4);
         hideNotification(idNotify - 3);
     }
     idNotify++;
@@ -66,7 +64,6 @@ export function displayNotification(message: string, options?: {
         item.classList.remove("translate-x-full");
         item.classList.add("translate-x-0");
     });
-    console.log('End of item notification');
 
     requestAnimationFrame(() => {
         if (options?.type !== "invitation") {
@@ -81,10 +78,8 @@ export function displayNotification(message: string, options?: {
 }
 
 export function hideNotification(idNotify: number) {
-    console.log("hide notification", idNotify);
     const item = document.getElementById(`idNotif-${idNotify}`);
     if (!item) {
-        console.log('NOT FOUND BITA')
         return;
     }
     item.classList.remove("translate-x-0");

@@ -39,6 +39,7 @@ export async function routes(fastify: FastifyInstance) {
         "factor",
         "matchHistory",
         "brackets",
+        "shopDiscovery",
     ];
 
     // Route dynamique pour chaque page définie
@@ -87,6 +88,19 @@ export async function routes(fastify: FastifyInstance) {
         "NoFees",
         "Parteurs",
         "shopWeb",
+        "shopFront",
+        "heart",
+        "StoreScreen",
+        "ShopsScreen",
+        "ItemScreen",
+        "iPhoneFrameNo",
+        "logoFonceV2Nobg",
+        "logoFonceV2",
+        "logobwNobg",
+        "logobigbwNobg",
+        "MainPhonePage",
+        "habi",
+        "Vestimentaire",
     ];
 
 // Boucle sur chaque image pour créer la route

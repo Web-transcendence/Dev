@@ -7,7 +7,6 @@ import {displayNotification} from "./notificationHandler.js";
 export async function   loadPart(page: string) {
     try {
         sessionStorage.setItem('path', page);
-        console.log("setItem path :", page);
         await insertTag(`part${page}`);
         stopGame(page);
         activateBtn(page);
@@ -29,7 +28,6 @@ export async function insertTag(url: string): Promise<void>{
         throw Error("Page not found: element missing.");
     const html = await res.text();
     if (container.innerHTML.includes(html)) {
-        console.log("sortie 1")
         return;
     }
     document.getElementById('notFound')?.classList.add('hidden');

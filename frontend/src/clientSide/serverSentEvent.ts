@@ -31,12 +31,10 @@ export async function sseConnection() {
             return;
         if (!res.ok) {
             const error = res.json()
-            console.log(error)
             //notifyhandling
             return ;
         }
 
-        console.log('sse connection')
         const reader = res.body?.pipeThrough(new TextDecoderStream()).getReader() ?? null;
         while (reader) {
             const {value, done} = await reader.read();
@@ -52,7 +50,6 @@ export async function sseConnection() {
 }
 
 export const CreateFriendLi = async (id: number, key: string, tmpName: string)=> {
-    console.log(`this id ${id} have to be add in the friendlist`)
     document.getElementById(`friendId-${id}`)?.remove();
     const list = document.getElementById(key);
     const [userData] = await fetchUserInformation([id])
@@ -66,7 +63,6 @@ export const CreateFriendLi = async (id: number, key: string, tmpName: string)=>
         if (img && userData.avatar) img.src = userData.avatar;
         const name = clone.querySelector(".name");
         if (name) name.textContent = userData.nickName;
-        console.log('logOnline :', userData.online);
         if (userData.online && key === "acceptedList") {
             clone.querySelector(".online")?.classList.remove('hidden');
             clone.querySelector(".inviteFriend")?.classList.remove('hidden');

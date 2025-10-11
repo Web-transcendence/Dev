@@ -4,30 +4,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goto</title>
-    <link rel="shortcut icon" type="image/x-icon" href="../images/favicon.ico">
+    <title>Nearby</title>
+    <link rel="shortcut icon" type="image/x-icon" href="../images/logobigbwNobg.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
 
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
     <link href="/static/output.css" rel="stylesheet">
 </head>
 
-<body class="bg-fuchsia-50 text-black min-h-screen flex flex-col" style="font-family: 'Sansation', sans-serif;">
+<body class="text-black min-h-screen flex flex-col" style="font-family: 'Sansation', sans-serif;">
 <div id="app" class="flex-1 mt-15">
 
     <nav class="fixed top-0 z-20 left-0 p-4 flex justify-between items-center w-full bg-transparent">
 
         <div class="flex items-center add-blur">
             <button id="home" class="cursor-pointer flex items-center space-x-2 group focus:outline-none">
-                <img src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
+                <img src="../images/logoFonceV2Nobg.png" alt="Logo" class="h-20 w-20 rounded-full">
             </button>
         </div>
 
-        <div class="grid grid-cols-2 text-center space-x-8 items-center add-blur text-3xl">
-        <button id="about" class="btn-line text-black">Comment ça marche ?</button>
-        <button id="contact" class="btn-line text-black">Contactez Nous</button>
+        <div class="grid grid-cols-3 text-center space-x-8 items-center add-blur text-3xl">
+        <button id="about" class="btn-line text-black font-bold">Comment ça marche ?</button>
+        <button id="shopDiscovery" class="btn-line text-black font-bold">Vous avez une boutique ?</button>
+        <button id="contact" class="btn-line text-black font-bold">Contactez Nous</button>
         </div>
 
 <!--        <div id="profile-menu" class="relative flex items-center space-x-2 cursor-pointer group">-->
@@ -75,7 +79,8 @@
 </template>
 
 <div id="myModal"
-     class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-0 items-center justify-center">
+     class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-0 items-center justify-center
+            transition-all duration-500 ease-out">
     <div id="modalContent"
          class="opacity-0 translate-y-full transition-all duration-500 transform
                 bg-fuchsia-50 text-2xl p-8 relative w-[90%] max-w-3xl rounded-xl flex flex-col gap-6 shadow-lg">
@@ -95,15 +100,36 @@
             </p>
         </div>
 
+        <div class="relative w-full">
+            <span class="text-xl font-bold">Vous êtes intéressé pour...</span>
+            <button id="dropdownBtn"
+                    class="w-full p-4 bg-white border-none rounded-xl text-gray-500
+                     flex justify-between focus:outline-none focus:ring-2 focus:ring-fuchsia-800">
+                <span id="selectedOption">Sélectionnez…</span>
+                <svg class="w-5 h-5 text-fuchsia-700 transition-transform duration-300"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            <!-- Menu déroulant -->
+            <ul id="dropdownMenu"
+                class="absolute z-10 hidden w-full left-0 right-0 mt-1 bg-white border-2 border-none rounded-xl shadow-lg overflow-hidden">
+                <li class="cursor-pointer px-4 py-3 hover:bg-fuchsia-100 transition-colors" data-value="client">Découvrir la plateforme</li>
+                <li class="cursor-pointer px-4 py-3 hover:bg-fuchsia-100 transition-colors" data-value="boutique">Votre boutique</li>
+            </ul>
+        </div>
+
+
         <div>
-            <label for="emailProspect" class="block text-xl font-medium text-gray-800 mb-2">Votre email*</label>
+            <label for="emailProspect" class="block text-xl font-bold text-gray-800 mb-2">Votre email*</label>
             <input type="email" id="emailProspect" name="email" placeholder="exemple@email.com"
-                   class="w-full p-4 border border-gray-300 rounded-lg
-                       focus:ring-2 focus:ring-fuchsia-400 focus:outline-none " required>
+                   class="w-full p-4 rounded-xl border-none bg-white
+                   focus:ring-2 focus:ring-fuchsia-700 focus:outline-none" required>
         </div>
 
         <div class="text-center py-6 px-2">
-            <button id="submitProspectEmail" class="btn-primary text-3xl bg-fuchsia-600 p-4 rounded-full hover:bg-fuchsia-700">
+            <button id="submitProspectEmail" class="btn-primary text-3xl bg-fuchsia-700 p-4 rounded-full hover:bg-fuchsia-800">
                 Rejoindre !
             </button>
         </div>
@@ -111,13 +137,12 @@
     </div>
 </div>
 
-<footer class="bg-transparent text-black text-center rounded-t-lg p-4 flex justify-between items-center">
-    <img id="bottom-img" src="../images/favicon.ico" alt="Logo" class="h-10 w-10 rounded-full">
-<!--    <div class="flex space-x-8 items-center">-->
-<!--        <span id="bottom-text" class="text-lg font-bold"></span>-->
-<!--        <button id="about" class="btn-line text-black">À propos</button>-->
-<!--        <button id="contact" class="btn-line text-black">Contactez Nous</button>-->
-<!--    </div>-->
+<footer class="bg-linear-to-t from-fuchsia-100 to-white text-black text-center rounded-t-lg p-4 flex justify-between items-center">
+    <img id="bottom-img" src="../images/logoFonceV2Nobg.png" alt="Logo" class="h-10 w-10 rounded-full">
+    <div class="flex space-x-8 items-center">
+        <span id="bottom-text" class="text-lg font-bold"></span>
+        <button id="mentionsLegales" class="btn-line text-black">Mentions légales</button>
+    </div>
 </footer>
 
 <script type="module" src="/static/dist/front.js"></script>

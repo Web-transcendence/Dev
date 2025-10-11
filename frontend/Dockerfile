@@ -25,5 +25,8 @@ COPY --chown=app:app public/ public/
 
 
 RUN npm install
+RUN npm install @supabase/supabase-js
+RUN npm install @fastify/rate-limit
+
 
 CMD ["npm", "run", "dev"]

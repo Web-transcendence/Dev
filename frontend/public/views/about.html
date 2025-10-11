@@ -1,90 +1,70 @@
-<div class="w-full mt-38">
+<div class="w-full mt-28">
 
-        <div class="text-center space-y-4">
-            <h1 class="text-7xl font-bold text-fuchsia-600">Une nouvelle communauté</h1>
-            <p class="text-xl mx-auto">
-                Que vous soyez une boutique ou que vous cherchez vos magasins en ligne. Nous voulons vous proposer une solution.
-            </p>
-        </div>
 
-        <div class="space-y-6 mt-12 bg-white rounded-xl ">
-            <h2 class="text-5xl font-semibold text-center p-4">Profitez</h2>
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:space-x-6 space-y-4 sm:space-y-0">
+    <div class="relative w-full h-[80vh] overflow-hidden">
+        <div class="absolute inset-0 bg-[url('../images/Vestimentaire.png')] bg-cover bg-center mask-l-from-30% "></div>
 
-                <div class="flex-1 p-6 rounded-lg text-center">
-                    <div class="mx-auto mb-4 w-42 h-42 flex items-center justify-center">
-                        <img src="../images/shopWeb.png" alt="shopWeb" class="w-full h-full object-contain">
-                    </div>
-                    <div class="text-3xl mb-2 px-4 font-bold">1 - Découvrez</div>
-                    <p class="text-xl text-gray-600">Accédez aux produits et stocks de <strong>vos boutiques locales</strong>.</p>
-                </div>
-
-                <div class="flex-1 p-6 rounded-lg text-center">
-                    <div class="mx-auto mb-4 w-42 h-42 flex items-center justify-center">
-                        <img src="../images/bag.png" alt="Bag" class="w-full h-full object-contain">
-                    </div>
-                    <div class="text-3xl mb-2 px-4 font-bold">2 - Commandez</div>
-                    <p class="text-xl text-gray-600">Choisissez votre mode de livraison <strong>click & collect ou livraison à domicile</strong>.</p>
-                </div>
-
-                <div class="flex-1 p-6 rounded-lg text-center">
-                    <div class="mx-auto mb-4 w-42 h-42 flex items-center justify-center">
-                        <img src="../images/DeliveryMan.png" alt="Delivery" class="w-full h-full object-contain">
-                    </div>
-                    <div class="text-3xl mb-2 px-4 font-bold">3 - On arrive !</div>
-                    <p class="text-xl text-gray-600">Faites-vous livrez en <strong>moins d'une heure</strong>.</p>
-                </div>
-
+        <div class="relative z-10 grid grid-cols-2 gap-x-8 mt-40">
+            <div class="text-wrap max-w-2xl mx-auto">
+                <h1 class="text-7xl font-bold mb-15">Tout les magasins <br>dans votre main</h1>
+                <p class="text-2xl/10 max-w-lg">
+                    Votre nouvelle plateforme pour chercher, trouver et acheter localement en un instant.
+                    <br>Rejoignez la nouvelle communauté.
+                </p>
             </div>
-            <div class="text-center py-6 px-2">
-                <button id="beginCustomer" class="btn-primary shadow-xl text-3xl bg-fuchsia-600 p-4 rounded-full hover:bg-fuchsia-700">
-                    Découvrir
-                </button>
+
+            <div class="justify-center-item m-10 hidden">
+                <div class="p-4 rounded-lg m-auto bg-white/90 w-1/2 space-y-8 shadow-lg backdrop-blur">
+                    <label for="emailProspect" class="block text-xl font-medium text-gray-800 mb-4">
+                        On vous contacte quand la plateforme ouvre ?
+                    </label>
+                    <input type="email" id="emailProspect" name="email" placeholder="exemple@email.com"
+                           class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fuchsia-600 focus:outline-none" required>
+                    <div class="text-center py-2">
+                        <button id="submitProspectEmail"
+                                class="text-2xl text-white bg-fuchsia-700 p-4 rounded-full hover:bg-fuchsia-800">
+                            Rejoindre !
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <div class="space-y-6 mt-12 bg-white rounded-xl ">
-            <h2 class="text-5xl font-semibold text-center p-4">Devenez Partenaires</h2>
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:space-x-6 space-y-4 sm:space-y-0">
-
-                <div class="flex-1 p-6 rounded-lg text-center">
-                    <div class="mx-auto mb-4 w-42 h-42 flex items-center justify-center">
-                        <img src="../images/Parteurs.png" alt="Partneurs" class="w-full h-full object-contain">
-                    </div>
-                    <div class="text-3xl mb-2 font-bold">1 - Devenez Partenaires</div>
-                    <p class="text-xl text-gray-600">Rejoignez notre plateforme et gagnez en visibilité, <strong>sans frais d'inscriptions</strong>.</p>
-                </div>
-
-                <div class="flex-1 p-6 rounded-lg text-center">
-                    <div class="mx-auto mb-4 w-42 h-42 flex items-center justify-center">
-                        <img src="../images/NoFees.png" alt="NoFees" class="w-full h-full object-contain">
-                    </div>
-                    <div class="text-3xl mb-2 font-bold">2 - Simple et Rapide</div>
-                    <p class="text-xl text-gray-600">Poster vos produits en quelques clics et partagez leurs qualités.</p>
-                </div>
-
-                <div class="flex-1 p-6 rounded-lg text-center">
-                    <div class="mx-auto mb-4 w-42 h-42 flex items-center justify-center">
-                        <img src="../images/Monitor.png" alt="Monitor" class="w-full h-full object-contain">
-                    </div>
-                    <div class="text-3xl mb-2 font-bold">3 - Débloquez la livraison</div>
-                    <p class="text-xl text-gray-600">Profitez d'une logistique avancée, <strong>on s'occupe de la livraison</strong>.</p>
-                </div>
-
-            </div>
-            <div class="text-center py-6 px-2">
-                <button id="beginShop" class="btn-primary text-3xl bg-fuchsia-600 p-4 rounded-full hover:bg-fuchsia-700">
-                    Commencer
-                </button>
-            </div>
-        </div>
-
-<!--        <div class="text-center py-6 px-2">-->
-<!--            <button id="readMore" class="btn-primary text-3xl bg-fuchsia-600 p-4 rounded-full hover:bg-fuchsia-700">-->
-<!--                En savoir plus-->
-<!--            </button>-->
-<!--        </div>-->
     </div>
 
-</div>
+    <div class="space-y-6 mt-12 mx-30  bg-white rounded-xl ">
+        <h2 class="text-5xl font-semibold text-center p-4">Profitez d'un service complet</h2>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:space-x-6 space-y-4 sm:space-y-0">
+
+            <div class="flex-1 p-6 rounded-lg text-centrer text-wrap max-w-md">
+                <div class="mx-auto mb-4 w-42 h-42 flex items-center justify-center">
+                    <img src="../images/shopWeb.png" alt="shopWeb" class="w-full h-full object-contain">
+                </div>
+                <div class="text-3xl mb-2 px-4 font-bold">1 - Découvrez</div>
+                <p class="text-2xl text-gray-600">Accédez aux produits et stocks de <strong>vos boutiques locales</strong>
+                    gratuitement, sur la même applications.</p>
+            </div>
+
+            <div class="flex-1 p-6 rounded-lg text-centrer text-wrap max-w-md">
+                <div class="mx-auto mb-4 w-42 h-42 flex items-center justify-center">
+                    <img src="../images/bag.png" alt="Bag" class="w-full h-full object-contain">
+                </div>
+                <div class="text-3xl mb-2 px-4 font-bold">2 - Commandez</div>
+                <p class="text-2xl text-gray-600">Choisissez votre mode de livraison <strong>click & collect ou livraison à domicile</strong>.</p>
+            </div>
+
+            <div class="flex-1 p-6 rounded-lg text-centrer text-wrap max-w-md">
+                <div class="mx-auto mb-4 w-42 h-42 flex items-center justify-center">
+                    <img src="../images/DeliveryMan.png" alt="Delivery" class="w-full h-full object-contain">
+                </div>
+                <div class="text-3xl mb-2 px-4 font-bold">3 - On arrive !</div>
+                <p class="text-2xl text-gray-600">Faites-vous livrez en <strong>moins d'une heure</strong>.</p>
+            </div>
+
+        </div>
+        <div class="text-center py-6 px-2">
+            <button id="beginCustomer" class="btn-primary shadow-xl text-3xl bg-fuchsia-600 p-4 rounded-full hover:bg-fuchsia-700">
+                Découvrir
+            </button>
+        </div>
+    </div>
 </div>

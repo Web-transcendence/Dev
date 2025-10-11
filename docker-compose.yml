@@ -12,6 +12,9 @@ services:
       - .env
     environment:
       - SECRET_KEY=${SECRET_KEY:-""}
+      - SUPABASE_URL=https://yjhcivcuyvdvnvulezbm.supabase.co
+      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqaGNpdmN1eXZkdm52dWxlemJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMDEwODksImV4cCI6MjA3NTY3NzA4OX0.iLA7ecRqK444Q8jDPdpvVBvkyKqbD60AkO3a8uEJWoo
+
     restart: unless-stopped
     develop:
       watch:

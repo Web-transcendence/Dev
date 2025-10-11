@@ -1,22 +1,98 @@
-<div class="w-full h-screen flex">
-    <!-- Colonne texte -->
-    <div class="w-1/2 h-full flex flex-col justify-center p-8 text-7xl">
-        <h1 class="font-bold mb-8">
+<div class="w-full h-screen flex bg-linear-to-t from-white via-fuchsia-100 to-white">
+    <div class="w-1/2 h-full flex flex-col justify-center p-8 mx-8 space-y-8 ">
+        <h1 class="font-bold mb-8 text-7xl">
             Reconnectez avec vos magasins locaux.
         </h1>
-        <p class="text-3xl m-4">Simple, Rapide et Gratuit</p>
-        <p class="text-xl">
-            La 1ʳᵉ plateforme pour trouver vos magasins locaux et leurs produits.
-        </p>
+        <article class="text-wrap mx-auto max-w-lg space-y-4">
+            <p class="text-4xl">
+                Acheter local simplement
+            </p>
+            <p class="text-2xl">
+                La 1ʳᵉ plateforme pour trouver vos magasins locaux et leurs produits.
+            </p>
+        </article>
 
         <div class="flex justify-center mt-16">
             <button id="joinHome"
-                    class="btn-primary text-5xl bg-fuchsia-400 p-8 rounded-full hover:bg-purple-400">
+                    class="btn-primary text-3xl bg-fuchsia-700 p-8 rounded-full hover:bg-fuchsia-800">
                 Rejoindre
             </button>
         </div>
     </div>
 
-    <div class="w-1/2 h-full bg-[url('../images/WebPage.png')] bg-cover bg-center">
+    <div class="w-1/2 h-full bg-[url('../images/MainPhonePage.png')] bg-cover bg-center"
+                data-aos="fade-zoom-in" data-aos-offset="300"
+                data-aos-easing="ease-in-sine" data-aos-duration="600">
+    </div>
+</div>
+
+<!-- Section Proposition de Valeur -->
+<div class="w-full bg-white py-24 px-16 text-center">
+    <h2 class="text-5xl font-extrabold mb-12 text-gray-900">
+        Pourquoi utiliser notre plateforme ?
+    </h2>
+
+    <div class="grid grid-rows-3 gap-12 text-2xl place-content-around">
+        <div>
+            <h3 class="text-fuchsia-700 p-4 m-8 text-5xl">Découvrez les produits disponibles
+                <strong>proches de chez vous</strong></h3>
+            <div class="grid grid-cols-2 items-center">
+                <!-- Texte -->
+                <div class="p-8 py-10 bg-fuchsia-100 rounded-full">
+                    <p class="text-4xl/14 m-8">
+                        Trouvez les produits de vos magasins de votre ville en quelques clics,
+                        <strong>comparez, réservez ou commandez</strong> directement en ligne.
+                    </p>
+                </div>
+
+                <div class="flex justify-center" data-aos="flip-up" data-aos-delay="300" data-aos-duration="600">
+                    <div class="relative w-80 h-[600px]">
+                        <div class="absolute top-[8%] left-[7%] w-[86%] h-[84%]
+                                    overflow-y-scroll rounded-[2rem] no-scrollbar bg-white shadow-inner scroll-smooth ">
+                            <img src="../images/StoreScreen.png"
+                                    alt="Aperçu application Nearby"
+                                    class="w-full h-auto object-cover">
+                        </div>
+                        <img src="../images/iPhoneFrameNo.png"
+                                alt="Cadre du téléphone"
+                                class="absolute inset-0 w-full h-full object-contain
+                                pointer-events-none select-none">
+                    </div>
+                </div>
+            </div>
+            <div class="w-full h-2 bg-gray-800 rounded-full my-20 shadow-md">
+            </div>
+        </div>
+
+
+        <div>
+            <h3 class="text-fuchsia-700 m-8 text-5xl">Retrouvez
+                <strong>vos magasins locaux</strong> sur l'application.</h3>
+            <div class="grid grid-cols-2 items-center">
+                <div class="flex justify-center" data-aos="flip-up" data-aos-delay="300" data-aos-duration="600">
+                    <div class="relative w-80 h-[600px]">
+                        <!-- Conteneur scrollable -->
+                        <div class="absolute top-[8%] left-[7%] w-[86%] h-[84%]
+                                    overflow-y-scroll rounded-[2rem] no-scrollbar bg-white shadow-inner scroll-smooth ">
+                            <img
+                                    src="../images/ShopsScreen.png"
+                                    alt="Aperçu application Nearby"
+                                    class="w-full h-auto object-cover"
+                            >
+                        </div>
+                        <img src="../images/iPhoneFrameNo.png"
+                                alt="Cadre du téléphone"
+                                class="absolute inset-0 w-full h-full object-contain
+                                pointer-events-none select-none"
+                        >
+                    </div>
+                </div>
+                <div class="p-8 py-10 bg-fuchsia-100 rounded-full">
+                    <p class="text-4xl/14 m-8">
+                        Trouvez facilement des boutiques locales et des trésors cachés à deux pas de chez vous.
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

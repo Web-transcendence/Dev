@@ -1,12 +1,14 @@
 import Fastify, {FastifyReply, FastifyRequest} from "fastify";
 import httpProxy from '@fastify/http-proxy';
-// import cors from "@fastify/cors";
 import jwt, {JwtPayload} from 'jsonwebtoken';
 import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import fastifyStatic from "@fastify/static";
 import {env} from "./env";
 import {routes} from "./routes";
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
+import rateLimit from "@fastify/rate-limit";
 
 const httpsOptions = {
     https: {
@@ -18,12 +20,59 @@ const httpsOptions = {
 const SECRET_KEY = process.env.SECRET_KEY;
 
 const app = Fastify(httpsOptions);
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-// app.register(cors, {
-//     origin: "*",
-//     methods: ["GET", "POST", "PUT", "DELETE"]
-// })
+// GotoRegister
+await app.register(rateLimit, {
+    global: false,
+});
 
+const contactSchema = z.object({
+    email: z.string().email(),
+    type: z.string().min(1, "Le type ne peut pas être vide"),
+});
+
+app.post("/api/add-contact",{config: {rateLimit: {max: 5, timeWindow: "1 minute",},},}, async (request, reply) => {
+    const validation = contactSchema.safeParse(request.body);
+    if (!validation.success) {
+        return reply.status(400).send({ error: validation.error.errors[0].message });
+    }
+
+    const { email, type} = validation.data;
+
+    const { error } = await supabase.from("contacts").insert([{ email, type }]);
+
+    if (error) {
+        if (error.code === "23505") {
+            return reply.status(409).send({ error: "Cet email est déjà enregistré." });
+        }
+        return reply.status(500).send({ error: error.message });
+    }
+
+    return reply.send({ success: true });
+});
+
+const messageSchema = z.object({
+    email: z.string().email(),
+    message: z.string().min(1, "Le message ne peut pas être vide"),
+});
+
+app.post("/api/get-message", {config: {rateLimit: {max: 5, timeWindow: "1 minute",},},}, async (request, reply) => {
+        const validation = messageSchema.safeParse(request.body);
+        if (!validation.success) {
+            return reply.status(400).send({ error: validation.error.errors[0].message });
+        }
+
+        const { email, message} = validation.data;
+        const { error } = await supabase.from("messagerie").insert([{ email, message }]);
+
+        if (error) return reply.status(500).send({ error: error.message });
+        return reply.send({ success: true });
+    });
+
+// Transcendance
 async function authentificate (req: FastifyRequest, reply: FastifyReply) {
     if (req.url === "/user-management/login" || req.url === "/user-management/register" || req.url === "/user-management/auth/google" || req.url === "/user-management/2faVerify")
         return;
