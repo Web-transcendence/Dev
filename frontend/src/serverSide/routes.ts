@@ -19,27 +19,10 @@ export async function routes(fastify: FastifyInstance) {
     // ROAD OF TAG
     const htmlRoutes = [
         "about",
-        "connected",
-        "logout",
-        "login",
-        "register",
-        "connect",
         "contact",
-        "profile",
         "home",
-        "towerRemote",
-        "towerMode",
-        "towerWatch",
-        "pongRemote",
-        "pongLocal",
-        "pongWatch",
-        "pongMode",
-        "tournaments",
-        "lobby",
-        "factor",
-        "matchHistory",
-        "brackets",
         "shopDiscovery",
+        "mentionsLegales",
     ];
 
     // Route dynamique pour chaque page définie
@@ -78,10 +61,7 @@ export async function routes(fastify: FastifyInstance) {
         }
     });
     const pngImages = [
-        "login",
-        "logout",
         "WebPage",
-        "BigLock",
         "bag",
         "DeliveryMan",
         "Monitor",

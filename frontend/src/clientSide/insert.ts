@@ -1,14 +1,9 @@
 import {activateBtn} from "./button.js";
-import {tdStop} from "./td.js";
-import {pongStop} from "./pong.js";
-import {quitTournaments} from "./tournaments.js";
-import {displayNotification} from "./notificationHandler.js";
 
 export async function   loadPart(page: string) {
     try {
         sessionStorage.setItem('path', page);
         await insertTag(`part${page}`);
-        stopGame(page);
         activateBtn(page);
         activateGoogle(page);
     } catch (error) {
@@ -73,13 +68,4 @@ export function activateGoogle(page: string) {
         googlemeta.remove();
     if (googleID)
         googleID.remove();
-}
-
-export function stopGame(page: string): void {
-    if (page != "/towerRemote")
-        tdStop()
-    if (page != '/pongRemote')
-        pongStop()
-    if (page != '/pongLocal')
-        pongStop()
 }

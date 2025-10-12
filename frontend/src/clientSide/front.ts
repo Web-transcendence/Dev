@@ -26,6 +26,15 @@ function constantButton() {
         navigate("/contact", event));
     document.getElementById("shopDiscovery")?.addEventListener("click", (event: MouseEvent)=>
         navigate("/shopDiscovery", event));
+    // Footer
+    document.getElementById("mentionsLegales")?.addEventListener("click", (event: MouseEvent)=>
+        navigate("/mentionsLegales", event));
+    document.getElementById("PolitiqueConf")?.addEventListener("click", (event: MouseEvent)=>
+        navigate("/PolitiqueConf", event));
+    document.getElementById("CGU")?.addEventListener("click", (event: MouseEvent)=>
+        navigate("/CGU", event));
+    document.getElementById("mentionCopyright")?.addEventListener("click", (event: MouseEvent)=>
+        navigate("/mentionCopyright", event));
 }
 
 export async function navigate(path: string, event?: MouseEvent) {
