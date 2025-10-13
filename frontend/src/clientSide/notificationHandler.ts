@@ -1,12 +1,12 @@
-import {UserData} from "./user.js";
-
 let idNotify: number = 0;
 
+
+
 export function displayNotification(message: string, options?: {
-    type?: "error" | "invitation";
+    type?: "error";
     onAccept?: () => void;
     onRefuse?: () => void;
-}, userData?: UserData) {
+}) {
     const notificationList = document.getElementById("notificationList");
     const banner = document.getElementById("notificationBanner") as HTMLTemplateElement | null;
     if (!banner || !notificationList) {
@@ -29,24 +29,10 @@ export function displayNotification(message: string, options?: {
     }
     if (item) item.id = `idNotif-${idNotify}`
     messageSpan.textContent = message;
-    if (options?.type === "error") { // Red for error | Blue for invite
+    if (options?.type === "error") {
         item.classList.add("bg-red-600");
         acceptBtn.classList.add("hidden");
         rejectBtn.classList.add("hidden");
-    } else if (options?.type === "invitation") {
-        if (userData && nameInvite) nameInvite.innerText = `From ${userData.nickName}`;
-        const idOfInvite = idNotify;
-        item.classList.add("bg-gray-600");
-        acceptBtn.classList.remove("hidden");
-        rejectBtn.classList.remove("hidden");
-        acceptBtn.onclick = async () => {
-            if (options.onAccept) options.onAccept();
-            hideNotification(idOfInvite);
-        };
-        rejectBtn.onclick = async () => {
-            if (options.onRefuse) options.onRefuse();
-            hideNotification(idOfInvite);
-        };
     } else { // Default Green
         item.classList.remove("bg-red-600", "bg-blue-600");
         item.classList.add("bg-fuchsia-200");
